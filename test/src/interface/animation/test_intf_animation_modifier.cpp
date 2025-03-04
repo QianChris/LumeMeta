@@ -1,0 +1,575 @@
+/**
+ *  Copyright (C) 2023 Huawei Technologies Co, Ltd.
+ */
+#include <animation_test_base.h>
+#include <tester.h>
+#include <testing_objects.h>
+
+#include <gmock/gmock-matchers.h>
+#include <gtest/gtest.h>
+
+#include <meta/api/animation/animation.h>
+#include <meta/api/animation/modifiers/loop.h>
+#include <meta/api/animation/modifiers/reverse.h>
+#include <meta/api/animation/modifiers/speed.h>
+#include <meta/interface/property/construct_property.h>
+#include <meta/interface/property/property.h>
+
+#include "animation_test_base.h"
+#include "serialisation_utils.h"
+#include "test_utils.h"
+
+using namespace testing;
+
+META_BEGIN_NAMESPACE()
+
+namespace Test {
+
+class AnimationModifierTestBase;
+
+namespace {
+struct TestDefinition {
+    std::string name;
+    std::function<IAnimation::Ptr(AnimationModifierTestBase&)> constructor;
+    std::function<IAnimation::Ptr(AnimationModifierTestBase& test, IAnimation::Ptr)> transform = [](auto&, auto p) {
+        return p;
+    };
+};
+
+} // namespace
+
+class AnimationModifierTestBase : public AnimationTestBase,
+                                  public ::testing::WithParamInterface<std::tuple<TestDefinition, int>> {
+public:
+    void SetUp() override
+    {
+        AnimationTestBase::SetUp();
+    }
+
+    void TearDown() override
+    {
+        keepAliveProperties.clear();
+        AnimationTestBase::TearDown();
+    }
+
+    IAnimation::Ptr GetAnimation()
+    {
+        return std::get<0>(GetParam()).constructor(*this);
+    }
+
+    IAnimation::Ptr Transform(IAnimation::Ptr p)
+    {
+        return std::get<0>(GetParam()).transform(*this, p);
+    }
+
+    BASE_NS::vector<META_NS::IProperty::Ptr> keepAliveProperties;
+};
+
+TEST_F(AnimationModifierTestBase, ReverseImplicitAnimation)
+{
+    auto animation = META_NS::PropertyAnimation();
+    constexpr auto start = 10.0f;
+    constexpr auto to = 20.0f;
+
+    auto property = META_NS::ConstructProperty<float>("test", start);
+
+    animation.Property(property);
+    animation.Duration(META_NS::TimeSpan::Milliseconds(100));
+    animation.Modifier(META_NS::AnimationModifiers::Reverse());
+
+    property->SetValue(to);
+
+    EXPECT_TRUE(GetValue(animation.Running()));
+    animation.Step(GetTestClock());
+
+    bool finished = false;
+    animation.OnFinished()->AddHandler(MakeCallback<IOnChanged>([&] { finished = true; }));
+
+    StepAnimations({ animation }, 10, [&](uint32_t frame) {
+        auto progress = GetValue(animation.Progress());
+        EXPECT_EQ(progress, frame / 10.f) << "Frame: " << frame;
+
+        auto value = GetValue(property);
+        EXPECT_EQ(value, start + (1.f - progress) * (to - start)) << "Frame: " << frame;
+    });
+
+    EXPECT_FALSE(GetValue(animation.Running()));
+    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
+    EXPECT_TRUE(finished);
+}
+
+class LoopAnimationModifierTest : public AnimationModifierTestBase {
+public:
+    int GetLoopCount()
+    {
+        return std::get<1>(GetParam());
+    }
+};
+
+class SpeedAnimationModifierTest : public AnimationModifierTestBase {
+public:
+    float GetSpeedFactor()
+    {
+        return std::get<1>(GetParam()) / 10.f;
+    }
+};
+
+static void StartOrSetPropertyValue(IAnimation::Ptr anim)
+{
+    if (auto startable = interface_cast<IStartableAnimation>(anim)) {
+        startable->Start();
+    } else if (auto p = interface_cast<IPropertyAnimation>(anim)) {
+        Property<float> prop(p->Property()->GetValue().lock());
+        if (prop) {
+            prop->SetValue(20.0f);
+        }
+    }
+}
+
+class ReverseAnimationModifierTest : public AnimationModifierTestBase {
+public:
+    int GetFrameCount() const
+    {
+        return std::get<1>(GetParam());
+    }
+
+    BASE_NS::vector<BASE_NS::vector<float>> CollectFrames(const META_NS::IAnimation::Ptr& anim)
+    {
+        const auto frames = GetFrameCount();
+        const auto millisPerFrame = GetValue(anim->TotalDuration()).ToMilliseconds() / frames;
+        BASE_NS::vector<BASE_NS::vector<float>> propsValues(keepAliveProperties.size(), {});
+
+        auto recordFrame = [this](BASE_NS::vector<BASE_NS::vector<float>>& out) {
+            int i = 0;
+            for (const auto& prop : keepAliveProperties) {
+                out[i++].push_back(GetValue<float>(prop));
+            }
+        };
+
+        if (auto startable = interface_cast<IStartableAnimation>(anim)) {
+            startable->Restart();
+        }
+        anim->Step(GetTestClock());
+        recordFrame(propsValues);
+        StepAnimations(
+            { anim }, frames, millisPerFrame, [&propsValues, recordFrame](int frame) { recordFrame(propsValues); });
+
+        return propsValues;
+    }
+};
+
+std::string BuildTestName(const testing::TestParamInfo<LoopAnimationModifierTest::ParamType>& info)
+{
+    return std::get<0>(info.param).name + "Animation" + std::to_string(info.index);
+}
+
+IAnimation::Ptr CreateKeyFrameAnimation(AnimationModifierTestBase& test)
+{
+    KeyframeAnimation<float> animation;
+
+    auto start = 10.0f;
+    float to = 20.0f;
+
+    auto property = ConstructProperty<float>("test", 5.0f);
+    test.keepAliveProperties.push_back(property);
+
+    animation.From(start);
+    animation.To(to);
+    animation.Duration(TimeSpan::Milliseconds(1000));
+    animation.Property(property);
+
+    return animation;
+}
+
+IAnimation::Ptr CreatePropertyAnimation(AnimationModifierTestBase& test)
+{
+    auto animation = PropertyAnimation();
+    auto start = 10.0f;
+    float to = 20.0f;
+
+    auto property = ConstructProperty<float>("test", start);
+    test.keepAliveProperties.push_back(property);
+
+    animation.Property(property);
+    animation.Duration(TimeSpan::Milliseconds(1000));
+
+    // property->SetValue(to);
+
+    return animation;
+}
+
+IAnimation::Ptr CreateTrackAnimation(AnimationModifierTestBase& test)
+{
+    BASE_NS::vector<float> timestamps = { 0.1f, 0.3f, 0.8f, 1.f };
+    BASE_NS::vector<float> keyframes = { 50.0f, 100.0f, 170.0f, 190.0f };
+    const float initialValue = 10.0f;
+
+    auto property = ConstructProperty<float>("Prop", initialValue);
+    test.keepAliveProperties.push_back(property);
+
+    BASE_NS::array_view<float> kf = keyframes;
+
+    auto animation = TrackAnimation<float>()
+                         .Keyframes(keyframes)
+                         .Timestamps(timestamps)
+                         .Property(property)
+                         .Duration(TimeSpan::Milliseconds(1000));
+
+    return animation;
+}
+
+IAnimation::Ptr CreateParallelAnimation(AnimationModifierTestBase& test)
+{
+    auto anim1 = CreateKeyFrameAnimation(test);
+    auto anim2 = CreateTrackAnimation(test);
+
+    auto staggered = ParallelAnimation().Child(anim1).Child(anim2);
+
+    return staggered;
+}
+
+IAnimation::Ptr CreateSequentialAnimation(AnimationModifierTestBase& test)
+{
+    auto anim1 = CreateKeyFrameAnimation(test);
+    auto anim2 = CreateTrackAnimation(test);
+
+    auto staggered = SequentialAnimation().Child(anim1).Child(anim2);
+
+    return staggered;
+}
+
+IAnimation::Ptr Serialize(AnimationModifierTestBase& test, IAnimation::Ptr anim)
+{
+    TestSerialiser ser;
+
+    {
+        Object obj;
+        obj.Attach(interface_pointer_cast<IAttachment>(anim));
+
+        for (auto v : test.keepAliveProperties) {
+            obj.AddProperty(v);
+        }
+
+        ser.Export(obj);
+    }
+    test.keepAliveProperties.clear();
+
+    auto meta = ser.Import<IMetadata>();
+    for (auto& p : meta->GetProperties()) {
+        test.keepAliveProperties.push_back(p);
+    }
+    if (auto att = interface_pointer_cast<IAttach>(meta)) {
+        auto vec = att->GetAttachments<IAnimation>();
+        return vec.empty() ? nullptr : vec[0];
+    }
+    return nullptr;
+}
+
+TEST_P(ReverseAnimationModifierTest, ReversedAnimationIsPlayedBackward)
+{
+    using ::testing::FloatNear;
+    using ::testing::Pointwise;
+
+    auto anim = GetAnimation();
+    const auto forwardFrames = CollectFrames(anim);
+    {
+        auto reverse = AnimationModifiers::Reverse();
+        auto attach = interface_pointer_cast<IAttach>(anim);
+        attach->Attach(reverse);
+    }
+    anim = Transform(anim);
+    ASSERT_TRUE(anim);
+
+    const auto reverseFrames = CollectFrames(anim);
+
+    for (decltype(forwardFrames.size()) i = 0, end = forwardFrames.size(); i < end; ++i) {
+        EXPECT_THAT(
+            reverseFrames[i], Pointwise(FloatNear(0.001),
+                                  decltype(forwardFrames[i]) { forwardFrames[i].rbegin(), forwardFrames[i].rend() }))
+            << "i: " << i;
+    }
+}
+
+static IObject::Ptr GetAnimAttachment(IAnimation::Ptr anim)
+{
+    auto attach = interface_pointer_cast<IAttach>(anim);
+    auto vec = attach->GetAttachments<IAnimationModifier>();
+    return vec.empty() ? nullptr : interface_pointer_cast<IObject>(vec[0]);
+}
+
+TEST_P(LoopAnimationModifierTest, LoopCountModifiesDuration)
+{
+    auto anim = GetAnimation();
+    int loopCount = GetLoopCount();
+    auto originalDuration = GetValue(anim->TotalDuration());
+
+    {
+        auto loop = AnimationModifiers::Loop().LoopCount(loopCount);
+        auto attach = interface_pointer_cast<IAttach>(anim);
+        EXPECT_TRUE(attach->Attach(loop));
+    }
+
+    anim = Transform(anim);
+    ASSERT_TRUE(anim);
+    AnimationModifiers::Loop loop;
+    ASSERT_TRUE(loop.Initialize(GetAnimAttachment(anim)));
+
+    EXPECT_EQ(GetValue(anim->TotalDuration()), loopCount * originalDuration);
+    loop.LoopCount(loopCount * 2);
+    EXPECT_EQ(GetValue(anim->TotalDuration()), loopCount * 2 * originalDuration);
+    loop.LoopCount(loopCount);
+    EXPECT_EQ(GetValue(anim->TotalDuration()), loopCount * originalDuration);
+
+    loop.LoopCount(-1);
+    EXPECT_EQ(GetValue(anim->TotalDuration()), TimeSpan::Infinite());
+}
+
+TEST_P(LoopAnimationModifierTest, AnimationIsLoopingRegardlessOfSpeedModificator)
+{
+    static constexpr int64_t frameStepMs = 10;
+    static constexpr float speedFactor = 2.7;
+    const auto expectedLoops = GetLoopCount();
+    auto anim = GetAnimation();
+    const auto animPlayTime = (static_cast<float>(GetValue(anim->TotalDuration()).ToMilliseconds()) / speedFactor) *
+                              static_cast<float>(expectedLoops);
+    const auto animTotalFrames = static_cast<int64_t>(animPlayTime) / frameStepMs;
+
+    {
+        const auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
+        attach->Attach(META_NS::AnimationModifiers::Loop().LoopIndefinitely());
+        attach->Attach(META_NS::AnimationModifiers::Speed().SpeedFactor(speedFactor));
+    }
+    anim = Transform(anim);
+    ASSERT_TRUE(anim);
+
+    uint32_t actualLoops = 0;
+    auto previousProgress = GetValue(anim->Progress());
+    StartOrSetPropertyValue(anim);
+    StepAnimations({ anim }, animTotalFrames, frameStepMs, [&](uint32_t frame) {
+        actualLoops = actualLoops == 0 ? 1 : actualLoops;
+        const auto currentProgress = GetValue(anim->Progress());
+        if (previousProgress > currentProgress) {
+            ++actualLoops;
+        }
+        previousProgress = currentProgress;
+    });
+
+    EXPECT_EQ(actualLoops, expectedLoops);
+}
+
+TEST_P(LoopAnimationModifierTest, AnimationIslooping)
+{
+    auto anim = GetAnimation();
+    int loopCount = GetLoopCount();
+    auto originalDuration = GetValue(anim->TotalDuration());
+
+    // Don't test zero loopcount
+    if (loopCount == 0) {
+        return;
+    }
+
+    // round up
+    const int frames = (originalDuration.ToMilliseconds() + 9) / 10;
+    const int totalFrames = frames * loopCount;
+
+    EXPECT_TRUE(GetValue(anim->Valid()));
+    {
+        auto loop = META_NS::AnimationModifiers::Loop().LoopCount(loopCount);
+        auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
+        attach->Attach(loop);
+    }
+
+    anim = Transform(anim);
+    ASSERT_TRUE(anim);
+
+    EXPECT_TRUE(GetValue(anim->Valid()));
+
+    StartOrSetPropertyValue(anim);
+    anim->Step(GetTestClock());
+
+    EXPECT_TRUE(GetValue(anim->Valid()));
+    EXPECT_TRUE(GetValue(anim->Running()));
+
+    for (int i = 0; i < loopCount; ++i) {
+        const int frameOffset = i * 10;
+        EXPECT_TRUE(GetValue(anim->Running()));
+        auto previousProgress = 0.f;
+
+        StepAnimations({ anim }, frames, [&](int frame) {
+            frame = i * frames + frame;
+            auto progress = GetValue(anim->Progress());
+            if (i == (loopCount - 1) && frame == totalFrames) {
+                // Last frame
+                ASSERT_FALSE(GetValue(anim->Running())) << "Frame " << frame;
+            } else {
+                ASSERT_TRUE(GetValue(anim->Running())) << "Frame " << frame;
+                ASSERT_GT(progress, previousProgress) << "Frame " << frame;
+            }
+
+            previousProgress = progress;
+        });
+    }
+
+    ASSERT_FALSE(GetValue(anim->Running()));
+
+    // Animation is stopped, it should not advance any further
+    for (int i = 0; i < 10; ++i) {
+        IncrementClockTime(META_NS::TimeSpan::Milliseconds(10));
+        anim->Step(GetTestClock());
+
+        EXPECT_FALSE(GetValue(anim->Running()));
+        EXPECT_FLOAT_EQ(1.0f, GetValue(anim->Progress()));
+    }
+}
+
+TEST_P(LoopAnimationModifierTest, DuplicateProperties)
+{
+    auto animation = GetAnimation();
+    animation = Transform(animation);
+
+    auto meta = interface_pointer_cast<META_NS::IMetadata>(animation);
+
+    for (const auto& prop : meta->GetProperties()) {
+        for (const auto& rhs : meta->GetProperties()) {
+            if (prop == rhs) {
+                continue;
+            }
+
+            ASSERT_NE(prop->GetName(), rhs->GetName());
+        }
+    }
+}
+
+TEST_P(SpeedAnimationModifierTest, SpeedFactorModifiesDuration)
+{
+    auto anim = GetAnimation();
+    float speedFactor = GetSpeedFactor();
+    auto originalDuration = GetValue(anim->TotalDuration());
+    auto expectedDuration = originalDuration / BASE_NS::Math::abs(speedFactor);
+
+    {
+        auto speedModifier = META_NS::AnimationModifiers::Speed().SpeedFactor(speedFactor);
+        auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
+        ASSERT_NE(attach, nullptr);
+        attach->Attach(speedModifier);
+    }
+    anim = Transform(anim);
+    ASSERT_TRUE(anim);
+    META_NS::AnimationModifiers::Speed speedModifier;
+    ASSERT_TRUE(speedModifier.Initialize(GetAnimAttachment(anim)));
+
+    EXPECT_TRUE(GetValue(anim->Valid()));
+
+    EXPECT_EQ(GetValue(anim->TotalDuration()), expectedDuration);
+
+    // Change speed factor, total duration should follow
+    speedModifier.SpeedFactor(speedFactor * 2);
+    EXPECT_EQ(GetValue(anim->TotalDuration()).ToMilliseconds(), (expectedDuration / 2).ToMilliseconds());
+    speedModifier.SpeedFactor(speedFactor);
+    EXPECT_EQ(GetValue(anim->TotalDuration()), expectedDuration);
+
+    speedModifier.SpeedFactor(-speedFactor * 2);
+    EXPECT_EQ(GetValue(anim->TotalDuration()).ToMilliseconds(), (expectedDuration / 2).ToMilliseconds());
+    speedModifier.SpeedFactor(-speedFactor);
+    EXPECT_EQ(GetValue(anim->TotalDuration()), expectedDuration);
+
+    speedModifier.SpeedFactor(0);
+    EXPECT_EQ(GetValue(anim->TotalDuration()), TimeSpan::Infinite());
+}
+
+TEST_P(SpeedAnimationModifierTest, SpeedFactorAffectsPlayback)
+{
+    auto anim = GetAnimation();
+    const float speedFactor = GetSpeedFactor();
+    auto originalDuration = GetValue(anim->TotalDuration());
+    auto expectedDuration = originalDuration / BASE_NS::Math::abs(speedFactor);
+
+    {
+        auto speedModifier = META_NS::AnimationModifiers::Speed().SpeedFactor(speedFactor);
+
+        auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
+        ASSERT_NE(attach, nullptr);
+        attach->Attach(speedModifier);
+    }
+    anim = Transform(anim);
+    ASSERT_TRUE(anim);
+    META_NS::AnimationModifiers::Speed speedModifier;
+    ASSERT_TRUE(speedModifier.Initialize(GetAnimAttachment(anim)));
+
+    EXPECT_TRUE(GetValue(anim->Valid()));
+
+    StartOrSetPropertyValue(anim);
+
+    EXPECT_TRUE(GetValue(anim->Valid()));
+    EXPECT_TRUE(GetValue(anim->Running()));
+    anim->Step(GetTestClock());
+
+    if (speedFactor == 0.f) {
+        EXPECT_EQ(GetValue(anim->TotalDuration()), META_NS::TimeSpan::Infinite());
+        EXPECT_EQ(GetValue(anim->Progress()), 0);
+        return;
+    }
+    // Figure out how many milliseconds we must progress at each frame
+    // to cover the whole animation in 10 frames
+    int64_t millisPerFrame =
+        BASE_NS::Math::round(static_cast<float>(GetValue(anim->TotalDuration()).ToMilliseconds()) / 10.f);
+    EXPECT_EQ(millisPerFrame, (expectedDuration / 10).ToMilliseconds());
+
+    float previousProgress = GetValue(anim->Progress());
+    EXPECT_EQ(previousProgress, 0);
+
+    StepAnimations({ anim }, 10, millisPerFrame, [millisPerFrame, &anim, &previousProgress](int frame) {
+        float progress = GetValue(anim->Progress());
+        EXPECT_GT(progress, previousProgress);
+        EXPECT_NEAR(progress, frame / 10.f, 0.05);
+        previousProgress = progress;
+    });
+
+    // Animation is stopped, it should not advance any further
+    StepAnimations({ anim }, 10, millisPerFrame, [millisPerFrame, &anim, &previousProgress](int frame) {
+        EXPECT_FALSE(GetValue(anim->Running()));
+        EXPECT_FLOAT_EQ(1.0f, GetValue(anim->Progress()));
+    });
+}
+
+INSTANTIATE_TEST_SUITE_P(LoopAnimationModifierSuite, LoopAnimationModifierTest,
+    testing::Combine(
+        testing::Values(TestDefinition { "Keyframe", CreateKeyFrameAnimation },
+            TestDefinition { "Track", CreateTrackAnimation }, TestDefinition { "Parallel", CreateParallelAnimation },
+            TestDefinition { "Sequential", CreateSequentialAnimation },
+            TestDefinition { "Property", CreatePropertyAnimation },
+            TestDefinition { "KeyframeSerialize", CreateKeyFrameAnimation, Serialize },
+            TestDefinition { "TrackSerialize", CreateTrackAnimation, Serialize },
+            TestDefinition { "ParallelSerialize", CreateParallelAnimation, Serialize },
+            TestDefinition { "SequentialSerialize", CreateSequentialAnimation, Serialize },
+            TestDefinition { "PropertySerialize", CreatePropertyAnimation, Serialize }),
+        testing::Range(1, 10)),
+    BuildTestName);
+
+INSTANTIATE_TEST_SUITE_P(SpeedAnimationModifierSuite, SpeedAnimationModifierTest,
+    testing::Combine(
+        testing::Values(TestDefinition { "Keyframe", CreateKeyFrameAnimation },
+            TestDefinition { "Track", CreateTrackAnimation }, TestDefinition { "Parallel", CreateParallelAnimation },
+            TestDefinition { "Sequential", CreateSequentialAnimation },
+            TestDefinition { "Property", CreatePropertyAnimation },
+            TestDefinition { "KeyframeSerialize", CreateKeyFrameAnimation, Serialize },
+            TestDefinition { "TrackSerialize", CreateTrackAnimation, Serialize },
+            TestDefinition { "ParallelSerialize", CreateParallelAnimation, Serialize },
+            TestDefinition { "SequentialSerialize", CreateSequentialAnimation, Serialize },
+            TestDefinition { "PropertySerialize", CreatePropertyAnimation, Serialize }),
+        testing::Range(-20, 20, 5)),
+    BuildTestName);
+
+INSTANTIATE_TEST_SUITE_P(ReverseAnimationModifierSuite, ReverseAnimationModifierTest,
+    testing::Combine(
+        testing::Values(TestDefinition { "Keyframe", CreateKeyFrameAnimation },
+            TestDefinition { "Track", CreateTrackAnimation }, TestDefinition { "Parallel", CreateParallelAnimation },
+            TestDefinition { "KeyframeSerialize", CreateKeyFrameAnimation, Serialize },
+            TestDefinition { "TrackSerialize", CreateTrackAnimation, Serialize },
+            TestDefinition { "ParallelSerialize", CreateParallelAnimation, Serialize }),
+        testing::Range(10, 20, 10)),
+    BuildTestName);
+
+} // namespace Test
+
+META_END_NAMESPACE()

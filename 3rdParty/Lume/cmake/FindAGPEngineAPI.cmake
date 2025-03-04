@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.19)
+if (NOT TARGET AGPEngine::AGPEngineAPI)
+    if (ENGINE_API_CMAKE_HACK)
+        #this is an ugly hack.
+        if (EXISTS ${LUMEENGINE_PATH}/api/CMakeLists.txt)
+            message("WARNING UGLY HACK INCLUDING ENGINE API CMAKELISTS!")
+            add_subdirectory(${LUMEENGINE_PATH}/api/)
+        endif()
+    else()
+        find_package(securec REQUIRED)
+        find_package(AGPBaseAPI REQUIRED)
+
+        get_filename_component(root_path "${CMAKE_CURRENT_LIST_DIR}/../" ABSOLUTE)
+        set(CORE_ROOT_DIRECTORY ${root_path} CACHE PATH "Path to AGP Core" FORCE)
+        add_library(AGPEngine::AGPEngineAPI INTERFACE IMPORTED GLOBAL)
+        set_property(TARGET AGPEngine::AGPEngineAPI PROPERTY CXX_STANDARD 17)
+        target_compile_definitions(AGPEngine::AGPEngineAPI INTERFACE CORE_PERF_ENABLED=0)
+        target_include_directories(AGPEngine::AGPEngineAPI INTERFACE ${root_path}/api/)
+
+        if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+            target_include_directories(AGPEngine::AGPEngineAPI INTERFACE ${root_path}/api/platform/android)
+        elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+            target_include_directories(AGPEngine::AGPEngineAPI INTERFACE ${root_path}/api/platform/common)
+        else()
+            message(WARNING "Unknown system ${CMAKE_SYSTEM_NAME} using common")
+            target_include_directories(AGPEngine::AGPEngineAPI INTERFACE ${root_path}/api/platform/common)
+        endif()
+
+        if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../api/ecs.natvis")
+            target_sources(AGPEngine::AGPEngineAPI INTERFACE ${root_path}/api/ecs.natvis)
+        endif()
+
+        target_link_libraries(AGPEngine::AGPEngineAPI INTERFACE AGPBase::AGPBaseAPI securec::securec)
+
+        #would prefer explicit list, but this is fine for now.
+        #file(GLOB_RECURSE INTF_SOURCES LIST_DIRECTORIES false ${root_path}/api/*.h)
+        #target_sources(AGPEngine::AGPEngineAPI INTERFACE ${INTF_SOURCES})
+        #source_group(TREE ${root_path}/api/ PREFIX AGPEngine FILES ${INTF_SOURCES} )
+    endif()
+endif()
+set(AGPEngineAPI_FOUND true)

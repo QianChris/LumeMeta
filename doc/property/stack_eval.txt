@@ -1,0 +1,13 @@
+
+Stack Property Evaluation
+
+There are two separate occasions when the stack is evaluated. First is when value is 
+requested from the property (GetValue) and the second is when value is set for the property (SetValue).
+
+The property has two stacks, one for values and one for modifiers. When evaluated for GetValue, the top-most
+value is taken and then ran over the modifiers (from bottom to top order).
+
+When the SetValue is evaluated, the modifiers are ran over the given value (from top to bottom order) and then
+the altered value is set for top most value in stack that accepts it. The values in stack that do not accept
+the new value are removed (e.g. bind). If in the end the stack is empty, the value is cloned and placed into
+the value stack.
