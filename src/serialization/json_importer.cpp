@@ -1,0 +1,91 @@
+
+#include "json_importer.h"
+
+#include <core/io/intf_file_manager.h>
+
+#include <meta/api/util.h>
+
+#include "backend/json_input.h"
+#include "backend/json_output.h"
+#include "metav1_compat.h"
+
+META_BEGIN_NAMESPACE()
+namespace Serialization {
+
+JsonImporter::JsonImporter() : transformations_ { CreateShared<MetaMigrateV1>() } {}
+
+IObject::Ptr JsonImporter::Import(const ISerNode::ConstPtr& tree)
+{
+    return imp_.Import(tree);
+}
+
+ISerNode::Ptr JsonImporter::ImportAsTree(CORE_NS::IFile& input)
+{
+    ISerNode::Ptr tree;
+    BASE_NS::string data;
+    data.resize(input.GetLength());
+    if (input.Read(data.data(), data.size()) == data.size()) {
+        JsonInput json;
+        tree = json.Process(data);
+        if (tree) {
+            tree = Transform(tree, json.GetVersion());
+        }
+    }
+    return tree;
+}
+
+IObject::Ptr JsonImporter::Import(CORE_NS::IFile& input)
+{
+    if (auto tree = ImportAsTree(input)) {
+        return Import(tree);
+    }
+    return nullptr;
+}
+
+ISerNode::Ptr JsonImporter::Transform(ISerNode::Ptr tree, const Version& ver)
+{
+    bool transformed = false;
+    for (auto&& t : transformations_) {
+        if (ver < t->ApplyForLessThanVersion()) {
+            transformed = true;
+            tree = t->Process(tree);
+            if (!tree) {
+                CORE_LOG_E("Transforming serialisation tree failed (step: %s)", t->GetName().c_str());
+                return nullptr;
+            }
+        }
+    }
+#ifdef _DEBUG
+    // --- debug
+    if (transformed) {
+        JsonOutput backend;
+        auto json = backend.Process(tree);
+        if (json.empty()) {
+            CORE_LOG_E("Fail");
+            return nullptr;
+        }
+        auto f = CORE_NS::GetPluginRegister().GetFileManager().CreateFile("file://./rewrite.json");
+        f->Write(json.c_str(), json.size());
+    }
+    // ---
+#endif
+    return tree;
+}
+
+BASE_NS::vector<ISerTransformation::Ptr> JsonImporter::GetTransformations() const
+{
+    return transformations_;
+}
+
+void JsonImporter::SetTransformations(BASE_NS::vector<ISerTransformation::Ptr> t)
+{
+    transformations_ = BASE_NS::move(t);
+}
+
+BASE_NS::unordered_map<InstanceId, InstanceId> JsonImporter::GetInstanceIdMapping() const
+{
+    return imp_.GetInstanceIdMapping();
+}
+
+} // namespace Serialization
+META_END_NAMESPACE()

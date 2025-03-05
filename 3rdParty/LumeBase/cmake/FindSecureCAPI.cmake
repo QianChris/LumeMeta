@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.19)
+if (NOT TARGET securec::SecurecAPI)
+    get_filename_component(root_path "${CMAKE_CURRENT_LIST_DIR}/../" ABSOLUTE)
+
+    add_library(securec::SecurecAPI INTERFACE IMPORTED)
+    set_property(TARGET securec::SecurecAPI PROPERTY CXX_STANDARD 17)
+    #target_compile_definitions(securec::SecurecAPI INTERFACE SECUREC_ONLY_DECLARE_MEMSET=1)
+    target_include_directories(securec::SecurecAPI INTERFACE ${root_path}/securec/)
+endif()
+set(SecureCAPI_FOUND true)

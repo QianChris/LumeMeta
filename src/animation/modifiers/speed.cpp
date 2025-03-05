@@ -1,0 +1,35 @@
+#include "speed.h"
+
+META_BEGIN_NAMESPACE()
+
+namespace AnimationModifiers {
+
+bool SpeedImpl::Build(const IMetadata::Ptr& data)
+{
+    return speedFactorChanged_.Subscribe(
+        META_ACCESS_PROPERTY(SpeedFactor), interface_pointer_cast<IOnChanged>(META_ACCESS_EVENT(OnChanged).GetEvent()));
+}
+
+bool SpeedImpl::ProcessOnGetDuration(DurationData& duration) const
+{
+    auto speed = BASE_NS::Math::abs(META_ACCESS_PROPERTY_VALUE(SpeedFactor));
+    if (speed > 0.f) {
+        duration.duration = duration.duration / speed;
+    } else {
+        duration.duration = TimeSpan::Infinite();
+    }
+    return true;
+}
+bool SpeedImpl::ProcessOnStep(StepData& step) const
+{
+    auto speed = BASE_NS::Math::abs(META_ACCESS_PROPERTY_VALUE(SpeedFactor));
+    if (speed < 0) {
+        step.progress = 1.f - step.progress;
+        step.reverse = !step.reverse;
+    }
+    return true;
+}
+
+} // namespace AnimationModifiers
+
+META_END_NAMESPACE()

@@ -1,0 +1,11 @@
+/bin
+/api
+/build
+/build_android
+/plugins
+/securec
+/src
+/tools
+/ecshelper
+/prefab
+/cmake/cmake_tools.cmake
