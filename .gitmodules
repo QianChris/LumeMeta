@@ -1,0 +1,8 @@
+[submodule "submodules/LumeBase"]
+	path = submodules/LumeBase
+	url = ../LumeBase
+	branch = dev
+[submodule "submodules/LumeEngine"]
+	path = submodules/LumeEngine
+	url = ../LumeEngine
+	branch = dev
