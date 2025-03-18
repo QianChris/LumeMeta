@@ -98,6 +98,8 @@ class IEngineInternalValueAccess : public CORE_NS::IInterface {
 public:
     /// Create any of mapped property type for the core engine type
     virtual IAny::Ptr CreateAny(const CORE_NS::Property&) const = 0;
+    /// Create any of compatible type which can be serialised
+    virtual IAny::Ptr CreateSerializableAny() const = 0;
     /// Check if given core type is compatible with the type this access implements
     virtual bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const = 0;
     /// Synchronise value to given engine property

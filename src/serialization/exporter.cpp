@@ -30,6 +30,14 @@ void Exporter::SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceI
 {
     mapInstanceIds_ = BASE_NS::move(map);
 }
+void Exporter::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
+{
+    resources_ = BASE_NS::move(p);
+}
+void Exporter::SetUserContext(IObject::Ptr p)
+{
+    userContext_ = BASE_NS::move(p);
+}
 
 InstanceId Exporter::ConvertInstanceId(const InstanceId& id) const
 {
@@ -117,7 +125,10 @@ ReturnError Exporter::ExportObject(const IObject::ConstPtr& object, ISerNode::Pt
             ExportContext context(*this, object);
             err = ser->Export(context);
             if (err) {
-                res = CreateObjectNode(object, context.ExtractNode());
+                res = context.GetSubstitution();
+                if (!res) {
+                    res = CreateObjectNode(object, context.ExtractNode());
+                }
             }
         } else {
             res = AutoExportObject(object);
@@ -289,8 +300,11 @@ ReturnError Exporter::ExportAny(const IAny::ConstPtr& any, ISerNode::Ptr& res)
         ExportContext context(*this, interface_pointer_cast<IObject>(any));
         err = ser->Export(context);
         if (err) {
-            res =
-                ISerNode::Ptr(new ObjectNode(BASE_NS::string("Any"), {}, any->GetClassId(), {}, context.ExtractNode()));
+            res = context.GetSubstitution();
+            if (!res) {
+                res = ISerNode::Ptr(
+                    new ObjectNode(BASE_NS::string("Any"), {}, any->GetClassId(), {}, context.ExtractNode()));
+            }
         }
     } else {
         ISerNode::Ptr node;
@@ -428,6 +442,32 @@ BASE_NS::shared_ptr<MapNode> ExportContext::ExtractNode()
 ReturnError ExportContext::ExportToNode(const IAny& entity, ISerNode::Ptr& res)
 {
     return exporter_.ExportToNode(entity, res);
+}
+
+CORE_NS::IInterface* ExportContext::Context() const
+{
+    return exporter_.GetInterface(CORE_NS::IInterface::UID);
+}
+META_NS::IObject::Ptr ExportContext::UserContext() const
+{
+    return exporter_.GetUserContext();
+}
+ReturnError ExportContext::SubstituteThis(ISerNode::Ptr n)
+{
+    ReturnError res = GenericError::FAIL;
+    if (n) {
+        substNode_ = BASE_NS::move(n);
+        // do instance mapping
+        if (auto node = interface_cast<IObjectNode>(substNode_)) {
+            InstanceId iid;
+            if (auto i = interface_cast<IObjectInstance>(object_)) {
+                iid = exporter_.ConvertInstanceId(i->GetInstanceId());
+            }
+            node->SetInstanceId(iid);
+        }
+        res = GenericError::SUCCESS;
+    }
+    return res;
 }
 
 } // namespace Serialization

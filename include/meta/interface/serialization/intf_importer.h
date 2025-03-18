@@ -11,6 +11,7 @@
 #include <base/containers/unordered_map.h>
 #include <core/io/intf_file.h>
 #include <core/plugin/intf_interface.h>
+#include <core/resources/intf_resource_manager.h>
 
 #include <meta/base/interface_macros.h>
 #include <meta/base/namespace.h>
@@ -30,6 +31,14 @@ public:
      * (key is actual instance id, value is serialised)
      */
     virtual BASE_NS::unordered_map<InstanceId, InstanceId> GetInstanceIdMapping() const = 0;
+    /**
+     * Set resource manager for importing
+     */
+    virtual void SetResourceManager(CORE_NS::IResourceManager::Ptr) = 0;
+    /**
+     * Set User context object
+     */
+    virtual void SetUserContext(IObject::Ptr) = 0;
 };
 
 /// Interface to import objects from file

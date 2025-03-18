@@ -8,6 +8,7 @@
 #include <base/containers/vector.h>
 #include <core/io/intf_file.h>
 #include <core/log.h>
+#include <core/resources/intf_resource_manager.h>
 
 #include <meta/interface/intf_object.h>
 #include <meta/interface/serialization/intf_global_serialization_data.h>
@@ -62,11 +63,14 @@ struct TestSerialiser {
     BASE_NS::unordered_map<InstanceId, InstanceId> GetInstanceIdMapping() const;
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>);
 
+    void SetResourceManager(CORE_NS::IResourceManager::Ptr);
+
 private:
     MemFile data_;
     std::size_t writePos_ {};
     std::size_t readPos_ {};
     BASE_NS::unordered_map<InstanceId, InstanceId> mapping_;
+    CORE_NS::IResourceManager::Ptr resources_;
 };
 
 void WriteToFile(const BASE_NS::vector<char>&, BASE_NS::string_view file);

@@ -1,0 +1,141 @@
+# clang-tidy checks list:
+# https://releases.llvm.org/15.0.0/tools/clang/tools/extra/docs/clang-tidy/checks/list.html
+
+# Coding conventions:
+# http://3ms.huawei.com/km/blogs/details/6214217
+
+# Checks to introduce as errors in near future:
+# * cppcoreguidelines-prefer-member-initializer - Rule 7.1.1
+# * cppcoreguidelines-pro-type-member-init - Rule 7.1.1
+# * cppcoreguidelines-virtual-class-destructor - Rule 7.2.1
+# * google-explicit-constructor - Rule 7.1.2
+# * readability-function-size - Rule 8.1.1 & Rule 8.3.3
+# * cppcoreguidelines-avoid-magic-numbers  - Rule 9.1.2
+# * cppcoreguidelines-pro-type-cstyle-cast - Rule 9.3.1
+# * readability-make-member-function-const - Rule 9.6.2
+
+# Checks already introduced as errors:
+# * readability-identifier-naming - entire Rule 2 chapter
+# * readability-braces-around-statements - Rule 3.6.1 & Rule 3.7.1
+# * readability-isolate-declaration - Rule 3.10.1
+# * google-default-arguments - Rule 7.2.2
+# * modernize-deprecated-headers - Rule 9.5.2
+# * cppcoreguidelines-explicit-virtual-functions - Rule 10.1.1
+# * modernize-use-equals-delete - Rule 10.1.2
+# * modernize-use-nullptr - Rule 10.1.3
+# * modernize-use-using - Rule 10.1.4
+
+Checks: '
+bugprone-*,
+-bugprone-easily-swappable-parameters,
+-bugprone-macro-parentheses,
+performance-*,
+cppcoreguidelines-avoid-goto,
+cppcoreguidelines-explicit-virtual-functions,
+cppcoreguidelines-init-variables,
+cppcoreguidelines-narrowing-conversions,
+cppcoreguidelines-prefer-member-initializer,
+cppcoreguidelines-pro-type-cstyle-cast,
+cppcoreguidelines-pro-type-member-init,
+cppcoreguidelines-special-member-functions,
+google-default-arguments,
+google-explicit-constructor,
+modernize-avoid-bind,
+modernize-deprecated-headers,
+modernize-deprecated-ios-base-aliases,
+modernize-replace-random-shuffle,
+modernize-use-bool-literals,
+modernize-use-emplace,
+modernize-use-equals-default,
+modernize-use-equals-delete,
+modernize-use-nullptr,
+modernize-use-using,
+modernize-redundant-void-arg,
+readability-braces-around-statements,
+readability-container-contains,
+readability-container-size-empty,
+readability-delete-null-pointer,
+readability-duplicate-include,
+readability-else-after-return,
+readability-function-size,
+readability-identifier-naming,
+readability-inconsistent-declaration-parameter-name,
+readability-isolate-declaration,
+readability-make-member-function-const,
+readability-misleading-indentation,
+readability-simplify-boolean-expr
+'
+
+# -bugprone-narrowing-conversions - to do in separate MR in the future
+# -bugprone-unhandled-self-assignment - is not working properly
+# To make check as error we need to put it in "WarningsAsErrors" and also in "Checks"
+WarningsAsErrors: '
+bugprone-*,
+-bugprone-narrowing-conversions,
+-bugprone-unhandled-self-assignment,
+cppcoreguidelines-explicit-virtual-functions,
+cppcoreguidelines-avoid-goto,
+cppcoreguidelines-special-member-functions,
+google-default-arguments,
+modernize-avoid-bind,
+modernize-deprecated-headers,
+modernize-deprecated-ios-base-aliases,
+modernize-redundant-void-arg,
+modernize-replace-random-shuffle,
+modernize-use-bool-literals,
+modernize-use-emplace,
+modernize-use-equals-default,
+modernize-use-equals-delete,
+modernize-use-nullptr,
+modernize-use-using,
+readability-braces-around-statements,
+readability-container-contains,
+readability-container-size-empty,
+readability-delete-null-pointer,
+readability-identifier-naming,
+readability-inconsistent-declaration-parameter-name,
+readability-isolate-declaration,
+readability-misleading-indentation,
+readability-simplify-boolean-expr,
+readability-else-after-return
+'
+
+HeaderFilterRegex: '(benchmark|environment_setup|include|src)(\\|\/).*\.(h|hpp|hxx)$'
+AnalyzeTemporaryDtors: false
+InheritParentConfig: false
+FormatStyle: file
+
+CheckOptions:
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoredFloatingPointValues
+    value: '2.0'
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues
+    value: '2'
+  - key: readability-function-size.LineThreshold
+    value: 50
+  - key: readability-function-size.ParameterThreshold
+    value: 5
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: true
+
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  #  - key: readability-identifier-naming.TypeAliasCase
+  #    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: '_'
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: '_'
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: 'g_'
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE

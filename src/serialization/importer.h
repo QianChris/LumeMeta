@@ -14,6 +14,7 @@
 #include <meta/interface/intf_attach.h>
 #include <meta/interface/intf_container.h>
 #include <meta/interface/intf_metadata.h>
+#include <meta/interface/resource/intf_resource_consumer.h>
 #include <meta/interface/serialization/intf_import_context.h>
 #include <meta/interface/serialization/intf_importer.h>
 #include <meta/interface/serialization/intf_serializable.h>
@@ -24,7 +25,7 @@
 META_BEGIN_NAMESPACE()
 namespace Serialization {
 
-class Importer : public IntroduceInterfaces<BaseObject, IImporter, IImportFunctions> {
+class Importer : public IntroduceInterfaces<BaseObject, IImporter, IImportFunctions, IResourceConsumer> {
     META_OBJECT(Importer, ClassId::Importer, IntroduceInterfaces)
 public:
     Importer() : registry_(GetObjectRegistry()), globalData_(registry_.GetGlobalSerializationData()) {}
@@ -32,6 +33,8 @@ public:
 
     IObject::Ptr Import(const ISerNode::ConstPtr& tree) override;
     BASE_NS::unordered_map<InstanceId, InstanceId> GetInstanceIdMapping() const override;
+    void SetResourceManager(CORE_NS::IResourceManager::Ptr p) override;
+    void SetUserContext(IObject::Ptr) override;
 
     ReturnError ImportValue(const ISerNode::ConstPtr& n, IAny& entity);
     IAny::Ptr ImportAny(const ISerNode::ConstPtr& n);
@@ -39,6 +42,17 @@ public:
 
     ReturnError ImportFromNode(const ISerNode::ConstPtr&, IAny& entity) override;
     ReturnError AutoImportObject(const IMapNode& members, IObject::Ptr object);
+
+    void MapInstance(const InstanceId& iid, const IObject::ConstPtr& object);
+
+    CORE_NS::IResourceManager::Ptr GetResourceManager() const override
+    {
+        return resources_;
+    }
+    IObject::Ptr GetUserContext() const
+    {
+        return userContext_;
+    }
 
 private:
     InstanceId ConvertInstanceId(const InstanceId& id) const;
@@ -74,11 +88,16 @@ private:
         RefUri uri;
     };
     BASE_NS::vector<DeferredUriResolve> deferred_;
+    CORE_NS::IResourceManager::Ptr resources_;
+    IObject::Ptr userContext_;
 };
 
 class ImportContext : public IntroduceInterfaces<IImportContext> {
 public:
-    ImportContext(Importer& imp, IObject::Ptr p, IMapNode::ConstPtr node) : importer_(imp), object_(p), node_(node) {}
+    ImportContext(
+        Importer& imp, const BASE_NS::string& name, IObject::Ptr p, const InstanceId& id, IMapNode::ConstPtr node)
+        : importer_(imp), object_(BASE_NS::move(p)), iid_(id), node_(BASE_NS::move(node)), name_(name)
+    {}
 
     bool HasMember(BASE_NS::string_view name) const override;
     ReturnError Import(BASE_NS::string_view name, IAny& entity) override;
@@ -90,10 +109,23 @@ public:
 
     ReturnError ImportFromNode(const ISerNode::ConstPtr&, IAny& entity) override;
 
+    CORE_NS::IInterface* Context() const override;
+    IObject::Ptr UserContext() const override;
+    ReturnError SubstituteThis(IObject::Ptr) override;
+
+    BASE_NS::string GetName() const override;
+
+    IObject::Ptr GetObject() const
+    {
+        return object_;
+    }
+
 private:
     Importer& importer_;
     IObject::Ptr object_;
+    InstanceId iid_;
     IMapNode::ConstPtr node_;
+    BASE_NS::string name_;
 };
 
 } // namespace Serialization

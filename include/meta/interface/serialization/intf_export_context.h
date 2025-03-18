@@ -35,6 +35,12 @@ public:
     {
         return ExportToNode(static_cast<const IAny&>(Any<BASE_NS::remove_const_t<Type>>(value)), out);
     }
+    template<typename Type>
+    ISerNode::Ptr ExportValueToNode(const Type& value)
+    {
+        ISerNode::Ptr node;
+        return ExportValueToNode(value, node) ? node : nullptr;
+    }
 };
 
 /// Interface that used to export objects inside object's export function
@@ -62,6 +68,13 @@ public:
     {
         return Export(name, static_cast<const IAny&>(ArrayAny<Type>(value)));
     }
+
+    /// Get the context in which we are exporting, this is the IExporter typically
+    virtual CORE_NS::IInterface* Context() const = 0;
+    /// Get user set context object
+    virtual META_NS::IObject::Ptr UserContext() const = 0;
+    /// Substitute serialisation of the current object with given node (all exports for this object are discarded)
+    virtual ReturnError SubstituteThis(ISerNode::Ptr) = 0;
 };
 
 META_INTERFACE_TYPE(META_NS::IExportContext)

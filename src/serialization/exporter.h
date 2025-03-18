@@ -14,6 +14,7 @@
 #include <meta/interface/intf_container.h>
 #include <meta/interface/intf_metadata.h>
 #include <meta/interface/intf_object_registry.h>
+#include <meta/interface/resource/intf_resource_consumer.h>
 #include <meta/interface/serialization/intf_export_context.h>
 #include <meta/interface/serialization/intf_exporter.h>
 #include <meta/interface/serialization/intf_global_serialization_data.h>
@@ -27,7 +28,7 @@ namespace Serialization {
 constexpr Version VERSION { 2, 0 };
 constexpr Version EXPORTER_VERSION { 1, 0 };
 
-class Exporter : public IntroduceInterfaces<BaseObject, IExporter, IExportFunctions> {
+class Exporter : public IntroduceInterfaces<BaseObject, IExporter, IExportFunctions, IResourceConsumer> {
     META_OBJECT(Exporter, ClassId::Exporter, IntroduceInterfaces)
 public:
     Exporter() : registry_(GetObjectRegistry()), globalData_(registry_.GetGlobalSerializationData()) {}
@@ -35,6 +36,8 @@ public:
 
     ISerNode::Ptr Export(const IObject::ConstPtr& object) override;
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>) override;
+    void SetResourceManager(CORE_NS::IResourceManager::Ptr p) override;
+    void SetUserContext(IObject::Ptr) override;
 
     ReturnError ExportValue(const IAny& entity, ISerNode::Ptr&);
     ReturnError ExportAny(const IAny::ConstPtr& any, ISerNode::Ptr&);
@@ -42,6 +45,17 @@ public:
 
     ReturnError ExportToNode(const IAny& entity, ISerNode::Ptr&) override;
     ReturnError AutoExportObjectMembers(const IObject::ConstPtr& object, BASE_NS::vector<NamedNode>& members);
+
+    InstanceId ConvertInstanceId(const InstanceId& id) const;
+
+    CORE_NS::IResourceManager::Ptr GetResourceManager() const override
+    {
+        return resources_;
+    }
+    META_NS::IObject::Ptr GetUserContext() const
+    {
+        return userContext_;
+    }
 
 private:
     struct DeferredWeakPtrResolve {
@@ -51,7 +65,6 @@ private:
 
     bool ShouldSerialize(const IObject::ConstPtr& object) const;
     bool ShouldSerialize(const IAny& any) const;
-    InstanceId ConvertInstanceId(const InstanceId& id) const;
     bool MarkExported(const IObject::ConstPtr& object);
     bool HasBeenExported(const InstanceId& id) const;
 
@@ -74,11 +87,13 @@ private:
     BASE_NS::unordered_map<InstanceId, IObject::ConstWeakPtr> exported_;
     BASE_NS::unordered_map<InstanceId, InstanceId> mapInstanceIds_;
     BASE_NS::vector<DeferredWeakPtrResolve> deferred_;
+    CORE_NS::IResourceManager::Ptr resources_;
+    IObject::Ptr userContext_;
 };
 
 class ExportContext : public IntroduceInterfaces<IExportContext> {
 public:
-    ExportContext(Exporter& exp, const IObject::ConstPtr& p) : exporter_(exp), object_(p) {}
+    ExportContext(Exporter& exp, IObject::ConstPtr p) : exporter_(exp), object_(BASE_NS::move(p)) {}
 
     BASE_NS::shared_ptr<MapNode> ExtractNode();
 
@@ -89,10 +104,20 @@ public:
 
     ReturnError ExportToNode(const IAny& entity, ISerNode::Ptr&) override;
 
+    CORE_NS::IInterface* Context() const override;
+    META_NS::IObject::Ptr UserContext() const override;
+    ReturnError SubstituteThis(ISerNode::Ptr) override;
+
+    ISerNode::Ptr GetSubstitution() const
+    {
+        return substNode_;
+    }
+
 private:
     Exporter& exporter_;
     IObject::ConstPtr object_;
     BASE_NS::vector<NamedNode> elements_;
+    ISerNode::Ptr substNode_;
 };
 
 } // namespace Serialization

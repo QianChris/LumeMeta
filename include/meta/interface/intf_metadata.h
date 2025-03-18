@@ -35,6 +35,7 @@ struct MetadataInfo {
     TypeId interfaceId;
     bool readOnly {};
     TypeId propertyType;
+    const StaticMetadata* data {};
 
     bool IsValid() const
     {

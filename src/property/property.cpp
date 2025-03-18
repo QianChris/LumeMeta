@@ -72,8 +72,9 @@ void PropertyBase::InvokeOnChanged(
 }
 void PropertyBase::CallOnChanged(bool forcePending) const
 {
-    pendingInvoke_ = forcePending || locked_ != 0;
-    if (!pendingInvoke_) {
+    bool pending = forcePending || locked_ != 0;
+    SetPendingInvoke(pending);
+    if (!pending) {
         InvokeOnChanged(onChanged_, owner_);
     }
 }
@@ -86,9 +87,9 @@ void PropertyBase::Unlock() const
 {
     BASE_NS::shared_ptr<OnChangedEvent> invoke;
     IOwner::WeakPtr owner {};
-    if (--locked_ == 0 && pendingInvoke_) {
+    if (--locked_ == 0 && HasPendingInvoke()) {
         invoke = onChanged_;
-        pendingInvoke_ = false;
+        SetPendingInvoke(false);
         owner = owner_;
     }
     mutex_.unlock();

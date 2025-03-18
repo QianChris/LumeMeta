@@ -4,5 +4,5 @@
 	branch = dev
 [submodule "submodules/LumeEngine"]
 	path = submodules/LumeEngine
-	url = ../LumeEngine
+	url = ../LumeEngine.git
 	branch = dev

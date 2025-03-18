@@ -12,6 +12,7 @@
 
 #include <meta/ext/engine/core_any.h>
 #include <meta/ext/engine/core_enum_any.h>
+#include <meta/interface/detail/any.h>
 #include <meta/interface/engine/intf_engine_value.h>
 #include <meta/interface/interface_helpers.h>
 
@@ -60,6 +61,15 @@ public:
             return Internal::ConstructCoreAny<AccessType, Type>(p);
         }
     }
+    IAny::Ptr CreateSerializableAny() const override
+    {
+        if constexpr (Internal::IsArray<AccessType>::VALUE) {
+            using ItemType = typename Internal::IsArray<AccessType>::ItemType;
+            return IAny::Ptr(new ArrayAnyType<ItemType> {});
+        } else {
+            return IAny::Ptr(new AnyType<AccessType> {});
+        }
+    }
     bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const override
     {
         return MetaType<Type>::coreType == type;
@@ -89,6 +99,10 @@ public:
     IAny::Ptr CreateAny(const CORE_NS::Property& p) const override
     {
         return Internal::ConstructCoreAny<InternalType>(p);
+    }
+    IAny::Ptr CreateSerializableAny() const override
+    {
+        return IAny::Ptr(new ArrayAnyType<Type> {});
     }
     bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const override
     {

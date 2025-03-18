@@ -670,6 +670,19 @@ TEST(PropertyTest, UnlockedOnChanged)
     p->SetValue(Any<int>(1));
 }
 
+TEST(PropertyTest, IsDefault)
+{
+    auto prop = ConstructProperty<int>("test", 1);
+    EXPECT_TRUE(prop->IsDefaultValue());
+    EXPECT_EQ(prop->GetValue(), 1);
+    prop->SetValue(2);
+    EXPECT_FALSE(prop->IsDefaultValue());
+    EXPECT_EQ(prop->GetValue(), 2);
+    prop->ResetValue();
+    EXPECT_TRUE(prop->IsDefaultValue());
+    EXPECT_EQ(prop->GetValue(), 1);
+}
+
 } // namespace Test
 
 META_END_NAMESPACE()

@@ -87,5 +87,15 @@ BASE_NS::unordered_map<InstanceId, InstanceId> JsonImporter::GetInstanceIdMappin
     return imp_.GetInstanceIdMapping();
 }
 
+void JsonImporter::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
+{
+    imp_.SetResourceManager(BASE_NS::move(p));
+}
+
+void JsonImporter::SetUserContext(IObject::Ptr p)
+{
+    imp_.SetUserContext(BASE_NS::move(p));
+}
+
 } // namespace Serialization
 META_END_NAMESPACE()

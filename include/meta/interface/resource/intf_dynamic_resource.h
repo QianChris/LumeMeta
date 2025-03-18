@@ -19,6 +19,11 @@ public:
      * @brief Resource changed
      */
     META_EVENT(META_NS::IOnChanged, OnResourceChanged)
+};
+
+class IReloadableResource : public IDynamicResource {
+    META_INTERFACE(IDynamicResource, IReloadableResource, "924efc47-63a8-4a25-ab7d-bacacf27eee0")
+public:
     /**
      * @brief Manually refresh the resource. May lead to OnResourceChanged being invoked.
      */

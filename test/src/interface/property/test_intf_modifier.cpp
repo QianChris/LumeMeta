@@ -160,10 +160,14 @@ TEST(ModifierTest, StickyValidator)
     EXPECT_TRUE(p->SetValue(2));
     EXPECT_EQ(p->GetValue(), 2);
 
+    EXPECT_FALSE(p->IsDefaultValue());
+
     p->ResetValue();
     EXPECT_EQ(p->GetValue(), 0);
     EXPECT_FALSE(p->SetValue(1));
     EXPECT_EQ(p->GetValue(), 0);
+
+    EXPECT_TRUE(p->IsDefaultValue());
 
     auto mods = stack->GetModifiers(BASE_NS::vector<TypeId>({ IModifier::UID }), false);
     EXPECT_EQ(mods.size(), 1);

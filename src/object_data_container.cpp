@@ -127,6 +127,7 @@ MetadataInfo ObjectDataContainer::GetMetadata(MetadataType type, BASE_NS::string
                     info.propertyType = GetMetaPropertyType(*p);
                     info.readOnly = p->flags & static_cast<uint8_t>(Internal::PropertyFlag::READONLY);
                 }
+                info.data = p;
                 return info;
             }
         }

@@ -21,6 +21,7 @@ enum GenericError : int16_t {
     INCOMPATIBLE_TYPES = -3,
     NOT_FOUND = -4,
     RECURSIVE_CALL = -5,
+    NOT_SUPPORTED = -6
 };
 
 /**

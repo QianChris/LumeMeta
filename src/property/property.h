@@ -59,11 +59,29 @@ protected:
     void CallOnChanged(bool forcePending) const;
     void InvokeOnChanged(const BASE_NS::shared_ptr<OnChangedEvent>& onChanged, const IOwner::WeakPtr& owner) const;
 
+    bool HasPendingInvoke() const
+    {
+        return states_ & 0x01;
+    }
+    void SetPendingInvoke(bool v) const
+    {
+        states_ = (states_ & ~0x01) | uint32_t(v);
+    }
+
+    bool HasDefaultValueFlag() const
+    {
+        return states_ & 0x02;
+    }
+    void SetDefaultValueFlag(bool v)
+    {
+        states_ = (states_ & ~0x02) | (uint32_t(v) << 1);
+    }
+
 protected:
     // this has to be recursive because of the usage pattern
     mutable std::recursive_mutex mutex_;
-    mutable size_t locked_ {};
-    mutable bool pendingInvoke_ {};
+    mutable uint32_t locked_ {};
+    mutable uint32_t states_ { 0b10 };
     const BASE_NS::string name_;
     IOwner::WeakPtr owner_;
     IProperty::WeakPtr self_;

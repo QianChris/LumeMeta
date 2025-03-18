@@ -60,6 +60,7 @@ set(test_sources
     src/interface/property/test_property.cpp
     src/interface/serialization/test_intf_serializable.cpp
     src/interface/serialization/test_property_serialization.cpp
+    src/interface/serialization/test_resource_serialization.cpp
     src/interface/serialization/test_ser_compatibility.cpp
     src/interface/serialization/test_serialization.cpp
     src/interface/test_intf_any.cpp

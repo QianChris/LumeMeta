@@ -20,6 +20,8 @@ public:
     ReturnError Export(CORE_NS::IFile& output, const IObject::ConstPtr& object) override;
     ISerNode::Ptr Export(const IObject::ConstPtr& object) override;
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>) override;
+    void SetResourceManager(CORE_NS::IResourceManager::Ptr) override;
+    void SetUserContext(IObject::Ptr) override;
 
 private:
     Exporter exp_;

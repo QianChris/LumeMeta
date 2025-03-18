@@ -126,11 +126,14 @@ AnyReturnValue StackProperty::SetValue(const IAny& value)
         if (res) {
             res = SetValueToStack(v);
         }
+        if (res) {
+            SetDefaultValueFlag(false);
+        }
     }
 
     evaluating_ = false;
-    if (pendingInvoke_ && !locked_) {
-        pendingInvoke_ = false;
+    if (HasPendingInvoke() && !locked_) {
+        SetPendingInvoke(false);
         InvokeOnChanged(onChanged_, owner_);
     }
     return res;
@@ -362,6 +365,7 @@ bool StackProperty::ProcessResetables(Vec& vec)
     for (int i = int(vec.size()) - 1; i >= 0; --i) {
         ResetResult res = ResetResult::RESET_REMOVE_ME;
         if (auto rable = interface_cast<IStackResetable>(vec[i])) {
+            InterfaceSharedLock lock { rable };
             res = rable->ProcessOnReset(*defaultValue_);
         }
         if (res & RESET_REMOVE_ME) {
@@ -375,12 +379,13 @@ bool StackProperty::ProcessResetables(Vec& vec)
 }
 void StackProperty::ResetValue()
 {
-    if (ProcessResetables(modifiers_)) {
-        ProcessResetables(values_);
-    }
+    ProcessResetables(modifiers_);
+    ProcessResetables(values_);
+
     // reset the currentValue_ and internal value so we don't accidentally keep any shared_ptrs alive
     currentValue_ = defaultValue_->Clone(false);
     SetInternalValue(*currentValue_);
+    SetDefaultValueFlag(true);
     NotifyChange();
 }
 void StackProperty::RemoveAll()
@@ -390,6 +395,7 @@ void StackProperty::RemoveAll()
     // reset the currentValue_ and internal value so we don't accidentally keep any shared_ptrs alive
     currentValue_ = defaultValue_->Clone(false);
     SetInternalValue(*currentValue_);
+    SetDefaultValueFlag(true);
     NotifyChange();
 }
 ReturnError StackProperty::Export(IExportContext& c) const
@@ -405,6 +411,7 @@ ReturnError StackProperty::Import(IImportContext& c)
     Serializer ser(c);
     ser& NamedValue("defaultValue", defaultValue_) & NamedValue("values", values) & NamedValue("modifiers", modifiers);
     if (ser) {
+        bool def = true;
         if (!defaultValue_) {
             return GenericError::FAIL;
         }
@@ -421,6 +428,7 @@ ReturnError StackProperty::Import(IImportContext& c)
                     i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
                 }
                 values_.push_back(BASE_NS::move(v));
+                def = false;
             }
         }
         for (auto&& i : modifiers) {
@@ -431,13 +439,14 @@ ReturnError StackProperty::Import(IImportContext& c)
                 modifiers_.push_back(BASE_NS::move(v));
             }
         }
+        SetDefaultValueFlag(def);
     }
     return ser;
 }
 
 bool StackProperty::IsDefaultValue() const
 {
-    return values_.empty();
+    return HasDefaultValueFlag();
 }
 
 } // namespace Internal

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(META_VISUAL_STUDIO_TIDY  "Create hackish targets to run clang-tidy steps in visual studio" OFF)
-option(META_SUBMODULE_ENABLED "USe MetaObject as submodule" OFF)
+option(META_SUBMODULE_ENABLED "Use LumeMeta as submodule" OFF)
 if(DEFINED ENV{LUME_PACKAGE_CACHE})
     set(PACKAGE_CACHE_PATH $ENV{LUME_PACKAGE_CACHE} CACHE PATH "Path to lume package cache")
 else()
@@ -488,6 +488,10 @@ target_sources(MetaObject PRIVATE
     src/system_clock.cpp
     src/task_queue.h
     src/threaded_task_queue.cpp
+    src/resource/file_resource_manager.h
+    src/resource/file_resource_manager.cpp
+    src/resource/object_resource.h
+    src/resource/object_resource.cpp
     )
 
 set_source_files_properties(src/register_default_props.cpp PROPERTIES COMPILE_FLAGS $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/bigobj>)

@@ -30,6 +30,14 @@ void JsonExporter::SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, Insta
 {
     exp_.SetInstanceIdMapping(BASE_NS::move(map));
 }
+void JsonExporter::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
+{
+    exp_.SetResourceManager(BASE_NS::move(p));
+}
+void JsonExporter::SetUserContext(IObject::Ptr p)
+{
+    exp_.SetUserContext(BASE_NS::move(p));
+}
 
 } // namespace Serialization
 META_END_NAMESPACE()

@@ -136,6 +136,7 @@ inline BASE_NS::vector<MetadataInfo> GetAllStaticMetadataInClass(const StaticObj
                 info.propertyType = GetMetaPropertyType(p);
                 info.readOnly = p.flags & static_cast<uint8_t>(Internal::PropertyFlag::READONLY);
             }
+            info.data = &p;
             result.push_back(info);
         }
     }

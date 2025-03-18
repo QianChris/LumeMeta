@@ -1,0 +1,9 @@
+/build
+/build_android
+/build_win
+/build_vs2022
+/build_vs2017
+/build_clang
+/vc_build
+/clang_build
+/bin

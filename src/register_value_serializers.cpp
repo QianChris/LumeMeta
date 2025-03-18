@@ -2,6 +2,7 @@
 #include <base/math/quaternion.h>
 #include <base/math/vector.h>
 
+#include <meta/base/ids.h>
 #include <meta/base/meta_types.h>
 #include <meta/base/namespace.h>
 #include <meta/base/time_span.h>
@@ -75,19 +76,28 @@ void RegisterValueSerializers(IObjectRegistry& registry)
     RegisterSerializer<BASE_NS::Math::Mat3X3>(data, matExport, matImport);
     RegisterSerializer<BASE_NS::Math::Mat4X4>(data, matExport, matImport);
 
+    auto idExport = [](IExportFunctions& f, const auto& v) {
+        return f.ExportToNode(Any<BASE_NS::string>(v.ToString()));
+    };
+    auto idImport = [](IImportFunctions& f, const ISerNode::ConstPtr& node, auto& out) {
+        Any<BASE_NS::string> any;
+        if (f.ImportFromNode(node, any)) {
+            out = BASE_NS::StringToUid(any.InternalGetValue());
+            return true;
+        }
+        return false;
+    };
+
+    RegisterSerializer<TypeId>(data, idExport, idImport);
+    RegisterSerializer<ObjectId>(data, idExport, idImport);
+    RegisterSerializer<InstanceId>(data, idExport, idImport);
+
     RegisterSerializer<BASE_NS::Uid>(
         data,
         [](IExportFunctions& f, const auto& v) {
             return f.ExportToNode(Any<BASE_NS::string>(BASE_NS::to_string(v).c_str()));
         },
-        [](IImportFunctions& f, const ISerNode::ConstPtr& node, auto& out) {
-            Any<BASE_NS::string> any;
-            if (f.ImportFromNode(node, any)) {
-                out = BASE_NS::StringToUid(any.InternalGetValue());
-                return true;
-            }
-            return false;
-        });
+        idImport);
 
     RegisterSerializer<TimeSpan>(
         data, [](IExportFunctions& f, const auto& v) { return f.ExportToNode(Any<int64_t>(v.ToMicroseconds())); },

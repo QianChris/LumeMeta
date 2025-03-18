@@ -5,16 +5,15 @@
 cmake_minimum_required(VERSION 3.19)
 
 include(../unpack.cmake)
-
 #
 # googletest
 #
 
 # Decompress the library archive to the build dir if not already done.
 Unpack(
-    "${CMAKE_CURRENT_LIST_DIR}/googletest-1.15.2.tar.gz"
+    "${CMAKE_CURRENT_LIST_DIR}/googletest-release-1.12.0.tar.gz"
     "${CORE_UNPACKED_LIB_DIR}"
-    "googletest-1.15.2"
+    "googletest-release-1.12.0"
     googletest.unpacked.dir
 )
 

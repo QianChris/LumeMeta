@@ -276,6 +276,17 @@ public:                                                                         
         [] { return META_NS::ConstructAnyHelper<type>({}); }, nullptr,                                         \
         uint8_t(uint8_t(META_NS::Internal::StaticMetaFlag::FORWARD) |                                          \
                 META_NS::GetPropertySMDFlags(&intf::Property##name, 0)) },
+
+#define META_STATIC_FORWARDED_ARRAY_PROPERTY_DATA(intf, type, name)                                            \
+    { META_NS::MetadataType::PROPERTY, intf::INTERFACE_INFO, #name,                                            \
+        [](const BASE_NS::shared_ptr<META_NS::IOwner>& owner, const META_NS::StaticMetadata&) {                \
+            auto i = interface_cast<intf>(owner);                                                              \
+            auto p = interface_pointer_cast<::CORE_NS::IInterface>(i ? i->Property##name() : nullptr);         \
+            return BASE_NS::shared_ptr<::CORE_NS::IInterface>(p, const_cast<::CORE_NS::IInterface*>(p.get())); \
+        },                                                                                                     \
+        [] { return META_NS::ConstructArrayAnyHelper<type>({}); }, nullptr,                                    \
+        uint8_t(uint8_t(META_NS::Internal::StaticMetaFlag::FORWARD) |                                          \
+                META_NS::GetPropertySMDFlags(&intf::Property##name, 0)) },
 //---
 
 #define META_STATIC_EVENT_DATA(intf, type, name) \

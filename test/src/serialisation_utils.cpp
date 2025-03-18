@@ -83,6 +83,7 @@ bool TestSerialiser::Export(const IObject::Ptr& object)
     data_.Seek(writePos_);
     auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter);
     exporter->SetInstanceIdMapping(mapping_);
+    exporter->SetResourceManager(resources_);
     bool ret = exporter->Export(data_, object);
     writePos_ = data_.GetPosition();
     return ret;
@@ -98,6 +99,7 @@ IObject::Ptr TestSerialiser::Import()
 {
     data_.Seek(readPos_);
     auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter);
+    importer->SetResourceManager(resources_);
     IObject::Ptr result = importer->Import(data_);
     readPos_ = data_.GetPosition();
     mapping_ = importer->GetInstanceIdMapping();
@@ -135,6 +137,10 @@ BASE_NS::unordered_map<InstanceId, InstanceId> TestSerialiser::GetInstanceIdMapp
 void TestSerialiser::SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId> map)
 {
     mapping_ = BASE_NS::move(map);
+}
+void TestSerialiser::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
+{
+    resources_ = BASE_NS::move(p);
 }
 
 void WriteToFile(const BASE_NS::vector<char>& vec, BASE_NS::string_view file)

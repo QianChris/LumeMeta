@@ -10,7 +10,7 @@ if "%2"=="" (
     exit /b -1
 )
 
-set PACKAGE_NAME=MetaObject
+set PACKAGE_NAME=LumeMeta
 set SRC_PATH=%~f1
 set PACKAGE_CACHE_PATH=%~f2
 if "%SRC_PATH:~-1%"=="\" set "SRC_PATH=%SRC_PATH:~0,-1%"

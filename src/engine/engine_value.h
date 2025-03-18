@@ -11,6 +11,7 @@
 #include <meta/interface/intf_lockable.h>
 #include <meta/interface/intf_notify_on_change.h>
 #include <meta/interface/property/intf_stack_resetable.h>
+#include <meta/interface/serialization/intf_serializable.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -19,8 +20,10 @@ namespace Internal {
 META_REGISTER_CLASS(EngineValue, "a8a9c80f-3501-48da-b552-f1f323ee399b", ObjectCategoryBits::NO_CATEGORY)
 
 class EngineValue : public IntroduceInterfaces<MinimalObject, IEngineValue, INotifyOnChange, ILockable, IStackResetable,
-                        IEngineValueInternal> {
+                        IEngineValueInternal, ISerializable> {
     META_IMPLEMENT_OBJECT_TYPE_INTERFACE(ClassId::EngineValue)
+    using Super = IntroduceInterfaces;
+
 public:
     EngineValue(BASE_NS::string name, IEngineInternalValueAccess::ConstPtr access, const EnginePropertyParams& p);
 
@@ -41,6 +44,9 @@ public:
     ResetResult ProcessOnReset(const IAny& defaultValue) override;
 
     BASE_NS::shared_ptr<IEvent> EventOnChanged(MetadataQuery) const override;
+
+    ReturnError Export(IExportContext&) const override;
+    ReturnError Import(IImportContext&) override;
 
 private:
     IEngineInternalValueAccess::ConstPtr GetInternalAccess() const override

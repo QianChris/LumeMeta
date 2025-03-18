@@ -75,6 +75,15 @@ public:
         }
         return r;
     }
+
+    /// Get the context in which we are importing, this is the IImporter typically
+    virtual CORE_NS::IInterface* Context() const = 0;
+    /// Get user set context object
+    virtual IObject::Ptr UserContext() const = 0;
+    /// Substitute the result of de-serialisation of the current object with given object
+    virtual ReturnError SubstituteThis(IObject::Ptr) = 0;
+    /// Get the entity name
+    virtual BASE_NS::string GetName() const = 0;
 };
 
 META_END_NAMESPACE()

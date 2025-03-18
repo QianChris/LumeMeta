@@ -27,6 +27,8 @@ public:
     void SetTransformations(BASE_NS::vector<ISerTransformation::Ptr>) override;
 
     BASE_NS::unordered_map<InstanceId, InstanceId> GetInstanceIdMapping() const override;
+    void SetResourceManager(CORE_NS::IResourceManager::Ptr) override;
+    void SetUserContext(IObject::Ptr) override;
 
 private:
     ISerNode::Ptr Transform(ISerNode::Ptr tree, const Version& ver);
