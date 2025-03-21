@@ -253,35 +253,26 @@ target_link_libraries(MetaObjectAPI INTERFACE MetaObjectBase)
 add_library(MetaObjectHighLevelAPI INTERFACE)
 add_library(MetaObject::HighLevelAPI ALIAS MetaObjectHighLevelAPI)
 target_sources(MetaObjectHighLevelAPI PUBLIC
-    include/meta/api/animation/animation.h
-    include/meta/api/animation/modifiers/loop.h
-    include/meta/api/animation/modifiers/reverse.h
-    include/meta/api/animation/modifiers/speed.h
+    include/meta/api/animation.h
     include/meta/api/array_util.h
     include/meta/api/call_context.h
     include/meta/api/compatible_value_util.h
     include/meta/api/connector.h
-    include/meta/api/container/container_observer.h
     include/meta/api/container/find_cache.h
     include/meta/api/container/find_containers.h
-    include/meta/api/container/object_hierarchy_observer.h
-    include/meta/api/content_object.h
-    include/meta/api/curves/cubic_bezier_easing_curve.h
-    include/meta/api/curves/easing_curve.h
+    include/meta/api/container/observer.h
+    include/meta/api/curves.h
     include/meta/api/deferred_callback.h
     include/meta/api/engine/util.h
     include/meta/api/event_handler.h
     include/meta/api/function.h
     include/meta/api/future.h
-    include/meta/api/internal/animation_api.h
-    include/meta/api/internal/animation_modifier_api.h
     include/meta/api/internal/breadth_first_iteration.h
     include/meta/api/internal/depth_first_iteration.h
     include/meta/api/internal/iteration.h
     include/meta/api/internal/iteration_types.h
-    include/meta/api/internal/object_api.h
+    include/meta/api/interface_object.h
     include/meta/api/iteration.h
-    include/meta/api/loaders/json_content_loader.h
     include/meta/api/locking.h
     include/meta/api/make_callback.h
     include/meta/api/model/container_data_model.h

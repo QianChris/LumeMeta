@@ -4,8 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/container/container_observer.h>
-#include <meta/api/make_callback.h>
+#include <meta/api/container/observer.h>
 #include <meta/base/ref_uri.h>
 
 #include "test_utils.h"
@@ -23,7 +22,7 @@ class UnitTest_ContainerObserverTest : public ::testing::Test {
     {
         container_ = interface_pointer_cast<IContainer>(CreateTestContainer("Base"));
         ASSERT_NE(container_, nullptr);
-        ASSERT_NE(observer_.GetIObject(), nullptr);
+        ASSERT_NE(observer_.GetPtr(), nullptr);
         container_->Add(CreateTestType<IObject>("Object1_1"));
         container_->Add(CreateTestType<IObject>("SameNameDifferentUid"));
         container_->Add(CreateTestType<IObject>("ObjectDupe"));
@@ -49,7 +48,7 @@ class UnitTest_ContainerObserverTest : public ::testing::Test {
     void TearDown() override
     {
         container_.reset();
-        observer_.ResetIObject();
+        observer_ = {};
     }
 
 protected:
@@ -73,7 +72,7 @@ protected:
     IContainer::Ptr container_;
     IContainer::Ptr container1_1_;
     IContainer::Ptr container2_1_;
-    META_NS::ContainerObserver observer_;
+    META_NS::ContainerObserver observer_ { CreateInstance(ClassId::ContainerObserver) };
 };
 
 TEST_F(UnitTest_ContainerObserverTest, AddDirectChild)

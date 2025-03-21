@@ -23,6 +23,8 @@
 
 META_BEGIN_NAMESPACE()
 
+namespace Internal {
+
 class ObjectHierarchyObserver;
 
 class ObjectChangeListener final {
@@ -68,7 +70,7 @@ private:
 };
 
 class ObjectHierarchyObserver final : public IntroduceInterfaces<MetaObject, IObjectHierarchyObserver, IAttachment> {
-    META_OBJECT(ObjectHierarchyObserver, ClassId::ObjectHierarchyObserver, IntroduceInterfaces)
+    META_OBJECT(ObjectHierarchyObserver, META_NS::ClassId::ObjectHierarchyObserver, IntroduceInterfaces)
 public:
     void HierarchyChanged(const HierarchyChangedInfo& info, ObjectChangeListener* listener);
 
@@ -130,6 +132,8 @@ private:
     BASE_NS::vector<ImmediateChild> immediateChildren_;
     mutable std::shared_mutex mutex_;
 };
+
+} // namespace Internal
 
 META_END_NAMESPACE()
 

@@ -21,8 +21,9 @@ META_BEGIN_NAMESPACE()
 
 namespace AnimationModifiers {
 
-class Loop final : public IntroduceInterfaces<AnimationModifierFwd, AnimationModifiers::ILoop, INotifyOnChange> {
-    META_OBJECT(Loop, META_NS::ClassId::LoopAnimationModifier, IntroduceInterfaces, ClassId::Object)
+class LoopModifier final
+    : public IntroduceInterfaces<AnimationModifierFwd, AnimationModifiers::ILoop, INotifyOnChange> {
+    META_OBJECT(LoopModifier, META_NS::ClassId::LoopAnimationModifier, IntroduceInterfaces, ClassId::Object)
 public: // ILifecycle
     bool Build(const IMetadata::Ptr& data) override;
 

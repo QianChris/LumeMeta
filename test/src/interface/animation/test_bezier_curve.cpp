@@ -10,8 +10,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
-#include <meta/api/curves/cubic_bezier_easing_curve.h>
+#include <meta/api/animation.h>
+#include <meta/api/curves.h>
 #include <meta/base/namespace.h>
 
 using namespace testing;
@@ -35,11 +35,15 @@ protected:
     void SetControlPoints()
     {
         // Set control points to create a steeply rising curve
+        BASE_NS::Math::Vec2 cp1 = { 1.f, 0.f };
+        BASE_NS::Math::Vec2 cp2 = { 0.0f, 1.f };
         bezier_.ControlPoint1({ 1.f, 0.f }).ControlPoint2({ 0.0f, 1.f });
+        ASSERT_EQ(META_NS::GetValue(bezier_.ControlPoint1()), cp1);
+        ASSERT_EQ(META_NS::GetValue(bezier_.ControlPoint2()), cp2);
     }
 
     META_NS::ICurve1D* curve_ {};
-    META_NS::Curves::Easing::CubicBezierEasingCurve bezier_;
+    META_NS::Curves::CubicBezier bezier_ { META_NS::Curves::CubicBezier::CreateInstance() };
 
     static constexpr float epsilon_ = 0.001f;
     static constexpr auto frames_ = 20;
@@ -82,8 +86,8 @@ TEST_F(BezierCurveTest, BezierAnimation)
 
     // Check that if we assign a bezier to an animation, the animated value follows the bezier as expected.
     auto property = META_NS::ConstructProperty<float>("Prop", 0.f);
-    auto animation =
-        META_NS::KeyframeAnimation<float>().Duration(1_s).Property(property).From(start).To(end).Curve(bezier_);
+    auto animation = META_NS::KeyframeAnimation<float>::CreateInstance();
+    animation.From(start).To(end).Property(property).Duration(1_s).Curve(bezier_);
 
     animation.Start();
     StepAnimations({ animation }, frames_, frameMs, [&](uint32_t frame) {

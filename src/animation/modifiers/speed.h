@@ -22,8 +22,9 @@ META_BEGIN_NAMESPACE()
 
 namespace AnimationModifiers {
 
-class SpeedImpl final : public IntroduceInterfaces<AnimationModifierFwd, AnimationModifiers::ISpeed, INotifyOnChange> {
-    META_OBJECT(SpeedImpl, META_NS::ClassId::SpeedAnimationModifier, IntroduceInterfaces, ClassId::Object)
+class SpeedModifier final
+    : public IntroduceInterfaces<AnimationModifierFwd, AnimationModifiers::ISpeed, INotifyOnChange> {
+    META_OBJECT(SpeedModifier, META_NS::ClassId::SpeedAnimationModifier, IntroduceInterfaces, ClassId::Object)
 public:
     bool Build(const IMetadata::Ptr& data) override;
 

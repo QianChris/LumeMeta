@@ -4,8 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/container/object_hierarchy_observer.h>
-#include <meta/api/content_object.h>
+#include <meta/api/container/observer.h>
 #include <meta/api/make_callback.h>
 #include <meta/base/ref_uri.h>
 
@@ -103,7 +102,7 @@ class UnitTest_ObjectHierarchyObserverTest : public ::testing::Test {
     {
         container_ = interface_pointer_cast<IContainer>(CreateTestContainer("Base"));
         ASSERT_NE(container_, nullptr);
-        ASSERT_NE(observer_.GetIObject(), nullptr);
+        ASSERT_NE(observer_.GetPtr(), nullptr);
         container_->Add(CreateTestType<IObject>("Object1_1"));
         container_->Add(CreateTestType<IObject>("SameNameDifferentUid"));
         container_->Add(CreateTestType<IObject>("ObjectDupe"));
@@ -117,13 +116,13 @@ class UnitTest_ObjectHierarchyObserverTest : public ::testing::Test {
         container2_1_->Add(contentObject_);
         container1_1_->Add(interface_pointer_cast<IObject>(container2_1_));
 
-        observer_.Target(interface_pointer_cast<IObject>(container_))
-            .OnHierarchyChanged([this](const HierarchyChangedInfo& info) { OnHierarchyChanged(info); });
+        observer_.SetTarget(interface_pointer_cast<IObject>(container_));
+        observer_.OnHierarchyChanged([this](const HierarchyChangedInfo& info) { OnHierarchyChanged(info); });
     }
     void TearDown() override
     {
         container_.reset();
-        observer_.ResetIObject();
+        observer_ = ObjectHierarchyObserver {};
     }
 
 public:
@@ -215,8 +214,8 @@ protected:
     IContainer::Ptr container_;
     IContainer::Ptr container1_1_;
     IContainer::Ptr container2_1_;
-    META_NS::ContentObject contentObject_;
-    META_NS::ObjectHierarchyObserver observer_;
+    META_NS::ContentObject contentObject_ { CreateInstance(META_NS::ClassId::ContentObject) };
+    META_NS::ObjectHierarchyObserver observer_ { CreateInstance(META_NS::ClassId::ObjectHierarchyObserver) };
 };
 
 TEST_F(UnitTest_ObjectHierarchyObserverTest, AddDirectChild)
@@ -331,7 +330,7 @@ TEST_F(UnitTest_ObjectHierarchyObserverTest, Attachment)
     auto test1 = interface_cast<ITestAttachment>(attachment1);
     ASSERT_TRUE(test1);
     {
-        contentObject_.Attach(attachment1);
+        AttachmentContainer(contentObject_).Attach(attachment1);
         ExpectedCallCount expected;
         expected.ExpectAddAttachments();
         VerifyCalls(expected);
@@ -341,7 +340,7 @@ TEST_F(UnitTest_ObjectHierarchyObserverTest, Attachment)
     }
     ResetCalls();
     {
-        contentObject_.Detach(attachment1);
+        AttachmentContainer(contentObject_).Detach(attachment1);
         ExpectedCallCount expected;
         expected.ExpectRemoveAttachments();
         VerifyCalls(expected);
@@ -416,10 +415,10 @@ TEST(ObjectHierarchyObserverTest, Properties)
     auto att = interface_cast<IAttach>(obj);
     ASSERT_TRUE(att);
 
-    ObjectHierarchyObserver obs;
+    ObjectHierarchyObserver obs(CreateInstance(ClassId::ObjectHierarchyObserver));
     HierarchyChangedInfo info;
 
-    obs.Target(interface_pointer_cast<IObject>(att->GetAttachmentContainer(true)),
+    obs.SetTarget(interface_pointer_cast<IObject>(att->GetAttachmentContainer(true)),
         HierarchyChangeModeValue(HierarchyChangeMode::NOTIFY_CONTAINER) | HierarchyChangeMode::NOTIFY_OBJECT);
     obs.OnHierarchyChanged([&info](const HierarchyChangedInfo& i) { info = i; });
 
@@ -435,7 +434,7 @@ TEST(ObjectHierarchyObserverTest, Properties)
 
 TEST(ObjectHierarchyObserverTest, GetAll)
 {
-    ObjectHierarchyObserver obs;
+    ObjectHierarchyObserver obs(CreateInstance(ClassId::ObjectHierarchyObserver));
     EXPECT_THAT(obs.GetAllObserved(), IsEmpty());
 
     auto containerObject = interface_pointer_cast<IObject>(CreateTestContainer("Container"));
@@ -444,7 +443,7 @@ TEST(ObjectHierarchyObserverTest, GetAll)
     auto container = interface_pointer_cast<IContainer>(containerObject);
     container->Add(childObject);
 
-    EXPECT_TRUE(obs.Target(containerObject));
+    obs.SetTarget(containerObject);
     EXPECT_THAT(obs.GetAllObserved(), UnorderedElementsAre(containerObject, childObject));
     EXPECT_THAT(obs.GetAllObserved<IContainer>(), UnorderedElementsAre(container));
 
@@ -455,7 +454,7 @@ TEST(ObjectHierarchyObserverTest, GetAll)
 TEST(ObjectHierarchyObserverTest, Remove)
 {
     BASE_NS::vector<IObject::Ptr> removed;
-    ObjectHierarchyObserver obs;
+    ObjectHierarchyObserver obs(CreateInstance(ClassId::ObjectHierarchyObserver));
     auto callCount = 0;
 
     obs.OnHierarchyChanged([&removed, &callCount](const HierarchyChangedInfo& info) {
@@ -473,7 +472,7 @@ TEST(ObjectHierarchyObserverTest, Remove)
         auto childContainer = interface_pointer_cast<IContainer>(childContainerObject);
         EXPECT_TRUE(container->Add(childContainerObject));
         EXPECT_TRUE(childContainer->Add(childObject));
-        EXPECT_TRUE(obs.Target(containerObject));
+        obs.SetTarget(containerObject);
         EXPECT_THAT(obs.GetAllObserved(), UnorderedElementsAre(containerObject, childContainerObject, childObject));
 
         container->RemoveAll();
@@ -486,7 +485,7 @@ TEST(ObjectHierarchyObserverTest, Remove)
 TEST(ObjectHierarchyObserverTest, DestroyEvents)
 {
     BASE_NS::vector<IObject::Ptr> removed;
-    ObjectHierarchyObserver obs;
+    ObjectHierarchyObserver obs(CreateInstance(ClassId::ObjectHierarchyObserver));
     auto callCount = 0;
     auto removingCallCount = 0;
 
@@ -504,7 +503,7 @@ TEST(ObjectHierarchyObserverTest, DestroyEvents)
         EXPECT_TRUE(container->Add(childObject3));
         EXPECT_TRUE(container->Insert(1, childObject4));
         EXPECT_TRUE(childContainer->Add(childObject));
-        EXPECT_TRUE(obs.Target(containerObject));
+        obs.SetTarget(containerObject);
         EXPECT_THAT(obs.GetAllObserved(), UnorderedElementsAre(containerObject, childContainerObject, childObject,
                                               childObject4, childObject2, childObject3));
         container->Remove(childObject3);
@@ -533,7 +532,7 @@ TEST(ObjectHierarchyObserverTest, DestroyEvents)
 TEST(ObjectHierarchyObserverTest, DestroyEventsContent)
 {
     BASE_NS::vector<IObject::Ptr> removed;
-    ObjectHierarchyObserver obs;
+    ObjectHierarchyObserver obs(CreateInstance(ClassId::ObjectHierarchyObserver));
     auto callCount = 0;
 
     obs.OnHierarchyChanged([&removed, &callCount](const HierarchyChangedInfo& info) {
@@ -550,7 +549,7 @@ TEST(ObjectHierarchyObserverTest, DestroyEventsContent)
     {
         auto content = interface_pointer_cast<IContent>(contentObject);
         EXPECT_TRUE(content->SetContent(childObject));
-        EXPECT_TRUE(obs.Target(contentObject));
+        obs.SetTarget(contentObject);
         EXPECT_THAT(obs.GetAllObserved(), UnorderedElementsAre(contentObject, childObject));
     }
 
@@ -563,9 +562,10 @@ TEST(ObjectHierarchyObserverTest, DoNotSerialise)
 {
     TestSerialiser ser;
     {
-        ObjectHierarchyObserver obs;
+        ObjectHierarchyObserver obs(CreateInstance(META_NS::ClassId::ObjectHierarchyObserver));
         auto containerObject = interface_pointer_cast<IObject>(CreateTestContainer("Container"));
-        EXPECT_TRUE(obs.Target(containerObject));
+        obs.SetTarget(containerObject);
+        auto all = obs.GetAllObserved();
         EXPECT_THAT(obs.GetAllObserved(), UnorderedElementsAre(containerObject));
         auto i = interface_cast<IAttach>(containerObject);
         ASSERT_TRUE(i);

@@ -18,6 +18,8 @@
 
 META_BEGIN_NAMESPACE()
 
+namespace Internal {
+
 class ContainerChangeListener final {
 public:
     META_NO_COPY(ContainerChangeListener)
@@ -68,6 +70,8 @@ private:
 
     BASE_NS::vector<Subscription> subscriptions_;
 };
+
+} // namespace Internal
 
 META_END_NAMESPACE()
 

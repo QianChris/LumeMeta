@@ -183,7 +183,7 @@ TEST(CaptureBindTest, MakeCallable)
         },
         count));
 
-    c->Add(Object {});
+    c->Add(CreateInstance(ClassId::Object));
     EXPECT_EQ(*count, 1);
 }
 
@@ -206,7 +206,7 @@ class TestAttachment : public META_NS::AttachmentFwd {
 TEST(CaptureBindTest, IObject)
 {
     RegisterObjectType<TestAttachment>();
-    IObject::Ptr obj = Object {}.GetIObject();
+    IObject::Ptr obj = CreateInstance(META_NS::ClassId::Object);
     auto func = Capture(
         [](IObject::Ptr p) {
             if (auto a = interface_cast<IAttach>(p)) {

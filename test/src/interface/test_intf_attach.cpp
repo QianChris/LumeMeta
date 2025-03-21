@@ -9,10 +9,7 @@
 #include <meta/api/object.h>
 #include <meta/api/util.h>
 #include <meta/ext/attachment/attachment.h>
-#include <meta/interface/builtin_objects.h>
 #include <meta/interface/intf_attachment_container.h>
-#include <meta/interface/intf_named.h>
-#include <meta/interface/intf_object.h>
 
 #include "serialisation_utils.h"
 
@@ -125,7 +122,7 @@ protected:
         ASSERT_NE(attachment2_, nullptr);
 
         dataContextProperty_ = META_NS::ConstructProperty<float>(DataContextPropertyName, 0);
-        dataContext_.AddProperty(dataContextProperty_);
+        Metadata(dataContext_).AddProperty(dataContextProperty_);
         dataContextProperty_->SetValue(42.f);
     }
     void TearDown() override
@@ -144,13 +141,13 @@ protected:
     META_NS::IAttachment::Ptr attachment3_;
     IMyAttachment::Ptr myAttachment_;
 
-    META_NS::Object dataContext_;
+    META_NS::Object dataContext_ { CreateInstance(META_NS::ClassId::Object) };
     META_NS::Property<float> dataContextProperty_;
 };
 
 TEST_F(UnitTest_AttachTest, AttachDetach)
 {
-    META_NS::Object object;
+    META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
     auto attach = interface_pointer_cast<META_NS::IAttach>(object);
     ASSERT_NE(attach, nullptr);
     EXPECT_EQ(myAttachment_->GetAttachCount(), 0);
@@ -158,8 +155,8 @@ TEST_F(UnitTest_AttachTest, AttachDetach)
 
     // Should increase attachCount by 1
     EXPECT_TRUE(attach->Attach(attachment_));
-    EXPECT_EQ(attachment_->AttachedTo()->GetValue().lock(), object);
-    EXPECT_EQ(attachment_->DataContext()->GetValue().lock(), object);
+    EXPECT_EQ(attachment_->AttachedTo()->GetValue().lock(), object.GetPtr<META_NS::IAttach>());
+    EXPECT_EQ(attachment_->DataContext()->GetValue().lock(), object.GetPtr());
 
     EXPECT_EQ(myAttachment_->GetAttachCount(), 1);
     EXPECT_EQ(myAttachment_->GetDetachCount(), 0);
@@ -191,7 +188,7 @@ TEST_F(UnitTest_AttachTest, AttachDetach)
 
 TEST_F(UnitTest_AttachTest, GetAttachmentsTemplate)
 {
-    META_NS::Object object;
+    META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
     EXPECT_TRUE(object.Attach(attachment_));
     EXPECT_TRUE(object.Attach(attachment2_));
 
@@ -206,7 +203,7 @@ TEST_F(UnitTest_AttachTest, GetAttachmentsTemplate)
 
 TEST_F(UnitTest_AttachTest, GetAttachments)
 {
-    META_NS::Object object;
+    META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
     EXPECT_TRUE(object.Attach(attachment_));
     EXPECT_TRUE(object.Attach(attachment2_));
 
@@ -248,7 +245,7 @@ TEST_F(UnitTest_AttachTest, GetAttachments)
 
 TEST_F(UnitTest_AttachTest, DataContext)
 {
-    META_NS::Object object;
+    META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
 
     ASSERT_EQ(GetValue<float>(myAttachment_->Value()), 0);
     // Attach using our custom data context, the attachment
@@ -263,12 +260,13 @@ TEST_F(UnitTest_AttachTest, DataContext)
 
 TEST_F(UnitTest_AttachTest, ObjectAttachment)
 {
-    META_NS::Object object;
+    META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
     auto attach = interface_pointer_cast<META_NS::IAttach>(object);
     ASSERT_NE(attach, nullptr);
 
     ASSERT_FALSE(attach->HasAttachments());
-    META_NS::Object attachment; // Attachment which does not implement IAttachment, should still be able to attach
+    META_NS::Object attachment(CreateInstance(
+        META_NS::ClassId::Object)); // Attachment which does not implement IAttachment, should still be able to attach
     ASSERT_TRUE(attach->Attach(attachment));
 
     ASSERT_TRUE(attach->HasAttachments());
@@ -284,9 +282,9 @@ TEST_F(UnitTest_AttachTest, ObjectAttachment)
 
     auto attachContainer = attach->GetAttachmentContainer();
 
-    EXPECT_TRUE(META_NS::ContainsObject(attachContainer, attachment.GetIObject()));
+    EXPECT_TRUE(META_NS::ContainsObject(attachContainer, attachment.GetPtr()));
     EXPECT_TRUE(META_NS::ContainsObject(attachContainer, myAttachment_));
-    EXPECT_FALSE(META_NS::ContainsObject(attachContainer, object.GetIObject()));
+    EXPECT_FALSE(META_NS::ContainsObject(attachContainer, object.GetPtr()));
 
     ASSERT_TRUE(attach->Detach(attachment));
     ASSERT_TRUE(attach->Detach(myAttachment_));
@@ -297,7 +295,7 @@ TEST_F(UnitTest_AttachTest, ObjectAttachment)
 
 TEST_F(UnitTest_AttachTest, ContainerAttachDetach)
 {
-    META_NS::Object object;
+    META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
     auto attach = interface_pointer_cast<META_NS::IAttach>(object);
     ASSERT_NE(attach, nullptr);
     EXPECT_EQ(myAttachment_->GetAttachCount(), 0);
@@ -305,7 +303,7 @@ TEST_F(UnitTest_AttachTest, ContainerAttachDetach)
     EXPECT_FALSE(attach->HasAttachments());
     EXPECT_TRUE(attach->GetAttachmentContainer(true));
 
-    EXPECT_TRUE(object.Attach(attachment_));
+    EXPECT_TRUE(AttachmentContainer(object).Attach(attachment_));
 
     auto container = interface_pointer_cast<META_NS::IContainer>(attach->GetAttachmentContainer());
     auto attachContainer = interface_pointer_cast<META_NS::IAttachmentContainer>(container);
@@ -327,9 +325,9 @@ TEST_F(UnitTest_AttachTest, ContainerAttachDetach)
     ASSERT_NE(att3, nullptr);
 
     EXPECT_TRUE(container->Add(attachment2));
-    EXPECT_EQ(attachment2->AttachedTo()->GetValue().lock(), object);
+    EXPECT_EQ(attachment2->AttachedTo()->GetValue().lock(), object.GetPtr<META_NS::IAttach>());
     EXPECT_TRUE(attachContainer->Attach(attachment3));
-    EXPECT_EQ(attachment3->AttachedTo()->GetValue().lock(), object);
+    EXPECT_EQ(attachment3->AttachedTo()->GetValue().lock(), object.GetPtr<META_NS::IAttach>());
 
     EXPECT_EQ(container->GetSize(), 3);
     EXPECT_TRUE(attach->HasAttachments());
@@ -360,7 +358,7 @@ TEST_F(UnitTest_AttachTest, ContainerAttachDetach)
 
 TEST_F(UnitTest_AttachTest, ContainerInsert)
 {
-    META_NS::Object object;
+    META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
     auto attach = interface_pointer_cast<META_NS::IAttach>(object);
     ASSERT_NE(attach, nullptr);
     auto container = attach->GetAttachmentContainer(true);
@@ -370,7 +368,7 @@ TEST_F(UnitTest_AttachTest, ContainerInsert)
     auto att2 = interface_cast<IMyAttachment>(attachment2);
     ASSERT_NE(att2, nullptr);
 
-    EXPECT_TRUE(object.Attach(attachment_));
+    EXPECT_TRUE(AttachmentContainer(object).Attach(attachment_));
     EXPECT_TRUE(container->Insert(0, attachment2));
 
     auto attachments = attach->GetAttachments<IAttachment>();
@@ -378,16 +376,16 @@ TEST_F(UnitTest_AttachTest, ContainerInsert)
 
     EXPECT_EQ(myAttachment_->GetAttachCount(), 1);
     EXPECT_EQ(myAttachment_->GetDetachCount(), 0);
-    EXPECT_EQ(GetValue(attachment_->AttachedTo()).lock(), object);
+    EXPECT_EQ(GetValue(attachment_->AttachedTo()).lock(), object.GetPtr<META_NS::IAttach>());
 
     EXPECT_EQ(att2->GetAttachCount(), 1);
     EXPECT_EQ(att2->GetDetachCount(), 0);
-    EXPECT_EQ(GetValue(attachment2->AttachedTo()).lock(), object);
+    EXPECT_EQ(GetValue(attachment2->AttachedTo()).lock(), object.GetPtr<META_NS::IAttach>());
 }
 
 TEST_F(UnitTest_AttachTest, ContainerReplace)
 {
-    META_NS::Object object;
+    META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
     auto attach = interface_pointer_cast<META_NS::IAttach>(object);
     ASSERT_NE(attach, nullptr);
     auto container = attach->GetAttachmentContainer(true);
@@ -397,7 +395,7 @@ TEST_F(UnitTest_AttachTest, ContainerReplace)
     auto att2 = interface_cast<IMyAttachment>(attachment2);
     ASSERT_NE(att2, nullptr);
 
-    EXPECT_TRUE(object.Attach(attachment_));
+    EXPECT_TRUE(AttachmentContainer(object).Attach(attachment_));
     EXPECT_TRUE(container->Replace(attachment_, attachment2));
 
     auto attachments = attach->GetAttachments<IAttachment>();
@@ -409,17 +407,17 @@ TEST_F(UnitTest_AttachTest, ContainerReplace)
 
     EXPECT_EQ(att2->GetAttachCount(), 1);
     EXPECT_EQ(att2->GetDetachCount(), 0);
-    EXPECT_EQ(GetValue(attachment2->AttachedTo()).lock(), object);
+    EXPECT_EQ(GetValue(attachment2->AttachedTo()).lock(), object.GetPtr<META_NS::IAttach>());
 }
 
 TEST_F(UnitTest_AttachTest, ObjectFlagsDefault)
 {
     TestSerialiser ser;
-    Object object;
+    AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
     object.Attach(attachment_);
     object.Attach(attachment2_);
 
-    ASSERT_TRUE(ser.Export(object));
+    ASSERT_TRUE(ser.Export(Object(object)));
 
     auto imported = ser.Import<IAttach>();
     ASSERT_TRUE(imported);
@@ -431,7 +429,7 @@ TEST_F(UnitTest_AttachTest, ObjectFlagsDefault)
 TEST_F(UnitTest_AttachTest, ObjectFlagsNoAttachments)
 {
     TestSerialiser ser;
-    Object object;
+    AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
     object.Attach(attachment_);
     object.Attach(attachment2_);
 
@@ -442,7 +440,7 @@ TEST_F(UnitTest_AttachTest, ObjectFlagsNoAttachments)
     objectFlags.Clear(ObjectFlagBits::SERIALIZE_ATTACHMENTS);
     flags->SetObjectFlags(objectFlags);
 
-    ASSERT_TRUE(ser.Export(object));
+    ASSERT_TRUE(ser.Export(Object(object)));
 
     auto imported = ser.Import<IAttach>();
     ASSERT_TRUE(imported);
@@ -457,29 +455,29 @@ TEST_F(UnitTest_AttachTest, Serialization)
 
     TestSerialiser ser;
 
-    META_NS::Object originalObject;
-    EXPECT_TRUE(originalObject.Attach(attachment_, dataContext_));
-    EXPECT_TRUE(originalObject.Attach(attachment2_));
+    META_NS::Object originalObject(CreateInstance(META_NS::ClassId::Object));
+    EXPECT_TRUE(AttachmentContainer(originalObject).Attach(attachment_, dataContext_));
+    EXPECT_TRUE(AttachmentContainer(originalObject).Attach(attachment2_));
 
     // The data context must also be serialized, so add it as a property in our object
-    originalObject.AddProperty(ConstructProperty<META_NS::IObject::Ptr>(dcxPropertyName, dataContext_));
+    Metadata(originalObject).AddProperty(ConstructProperty<META_NS::IObject::Ptr>(dcxPropertyName, dataContext_));
 
     // Export object
     EXPECT_TRUE(ser.Export(originalObject));
 
     // Import a new instance
-    META_NS::Object object;
-    ASSERT_TRUE(object.Initialize(ser.Import()));
+    META_NS::Object object(ser.Import());
+    ASSERT_TRUE(object);
 
     // Find the data context object from our deserialized object properties
-    auto dataContextProp = object.Metadata().GetProperty<META_NS::IObject::Ptr>(dcxPropertyName);
+    auto dataContextProp = Metadata(object).GetProperty<META_NS::IObject::Ptr>(dcxPropertyName);
     ASSERT_TRUE(dataContextProp);
     auto dataContext = dataContextProp->GetValue();
     ASSERT_TRUE(dataContext);
 
     // We should now have the same 2 attachments in our object
-    auto attachments = object.GetAttachments<IAttachment>();
-    auto myAttachments = object.GetAttachments<IMyAttachment>();
+    auto attachments = AttachmentContainer(object).GetAttachments<IAttachment>();
+    auto myAttachments = AttachmentContainer(object).GetAttachments<IMyAttachment>();
     ASSERT_THAT(attachments, testing::SizeIs(2));
     ASSERT_THAT(myAttachments, testing::SizeIs(1));
 
@@ -489,7 +487,7 @@ TEST_F(UnitTest_AttachTest, Serialization)
     ASSERT_TRUE(myAttachment);
 
     // Check that attach/detach counters have been correctly called
-    EXPECT_EQ(attachment->AttachedTo()->GetValue().lock(), object);
+    EXPECT_EQ(attachment->AttachedTo()->GetValue().lock(), object.GetPtr<META_NS::IAttach>());
     auto context = attachment->DataContext()->GetValue().lock();
     EXPECT_EQ(context, dataContext);
     EXPECT_EQ(myAttachment->GetAttachCount(), 1);
@@ -639,7 +637,7 @@ TEST(AttachmentTest, ResolveFinalClass)
     RegisterObjectType<MyTypedAttachment2>();
 
     {
-        META_NS::Object object;
+        META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
         object.Attach(registry.Create<IAttachment>(ClassId::MyTypedAttachment1));
         object.Attach(registry.Create<IAttachment>(ClassId::MyTypedAttachment2));
 
@@ -671,7 +669,7 @@ TEST(AttachmentTest, ResolveFinalClass)
 
 TEST(AttachmentTest, AttachProperty)
 {
-    META_NS::Object object;
+    META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
     auto p = ConstructProperty<int>("p");
     EXPECT_TRUE(object.Attach(p));
     auto attachments = object.GetAttachments();
@@ -701,10 +699,11 @@ TEST(AttachmentTest, AttachmentsWithSameName)
     interface_cast<INamed>(att2)->Name()->SetValue("test");
     auto p = ConstructProperty<int>("test");
     auto e = CreateShared<EventImpl<TestEvent>>();
-    Object dummy;
-    auto f = CreateFunction("test", dummy.GetIObject(), &IObject::GetName, nullptr);
+    Object dummy(CreateInstance(META_NS::ClassId::Object));
+    ;
+    auto f = CreateFunction("test", dummy.GetPtr(), &IObject::GetName, nullptr);
 
-    Object object;
+    AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
     object.Attach(att1);
     object.Attach(att2);
     object.Attach(p);
@@ -714,10 +713,9 @@ TEST(AttachmentTest, AttachmentsWithSameName)
     EXPECT_EQ(object.GetAttachments().size(), 5);
     EXPECT_EQ(object.GetAttachments<IAttachment>().size(), 2);
 
-    auto i = interface_cast<IMetadata>(object.GetIObject());
-    EXPECT_EQ(i->GetProperty("test"), p.GetProperty());
-    EXPECT_EQ(i->GetEvent("test"), e);
-    EXPECT_EQ(i->GetFunction("test"), f);
+    EXPECT_EQ(Metadata(object).GetProperty("test"), p.GetProperty());
+    EXPECT_EQ(Metadata(object).GetEvent("test"), e);
+    EXPECT_EQ(Metadata(object).GetFunction("test"), f);
 
     UnregisterObjectType<TestAttachment>();
 }

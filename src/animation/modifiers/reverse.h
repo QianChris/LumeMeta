@@ -20,8 +20,8 @@ META_BEGIN_NAMESPACE()
 
 namespace AnimationModifiers {
 
-class Reverse final : public IntroduceInterfaces<AnimationModifierFwd> {
-    META_OBJECT(Reverse, META_NS::ClassId::ReverseAnimationModifier, IntroduceInterfaces, ClassId::Object)
+class ReverseModifier final : public IntroduceInterfaces<AnimationModifierFwd> {
+    META_OBJECT(ReverseModifier, META_NS::ClassId::ReverseAnimationModifier, IntroduceInterfaces, ClassId::Object)
 public:
     bool Build(const IMetadata::Ptr& data) override;
 

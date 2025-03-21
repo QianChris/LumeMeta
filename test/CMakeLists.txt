@@ -31,7 +31,6 @@ set(test_sources
     src/api/test_mutex.cpp
     src/api/test_number.cpp
     src/api/test_object.cpp
-    src/api/test_object_api.cpp
     src/api/test_timer.cpp
     src/base/test_base_objects.cpp
     src/base/test_capture.cpp

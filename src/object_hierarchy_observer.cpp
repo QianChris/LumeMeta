@@ -19,10 +19,12 @@
 
 META_BEGIN_NAMESPACE()
 
+namespace Internal {
+
 // ContainerChangeListener
 
 ObjectChangeListener::ObjectChangeListener(const IObject::Ptr& object, HierarchyChangeObjectType myType,
-    const IObject::WeakPtr& parent, ObjectHierarchyObserver* observer, HierarchyChangeModeValue mode)
+    const IObject::WeakPtr& parent, Internal::ObjectHierarchyObserver* observer, HierarchyChangeModeValue mode)
     : object_(object), type_(myType), parent_(parent), observer_(observer)
 {
     CORE_ASSERT_MSG(observer_ && object, "ObjectChangeListener constructed with null objects");
@@ -201,7 +203,6 @@ void ObjectChangeListener::NotifyContentChangeOp()
 }
 
 // ContainerObserver
-
 bool ObjectHierarchyObserver::Build(const IMetadata::Ptr& p)
 {
     bool ret = Super::Build(p);
@@ -440,5 +441,7 @@ bool ObjectHierarchyObserver::Detaching(const META_NS::IAttach::Ptr& target)
     META_ACCESS_PROPERTY(DataContext)->SetValue({});
     return true;
 }
+
+} // namespace Internal
 
 META_END_NAMESPACE()

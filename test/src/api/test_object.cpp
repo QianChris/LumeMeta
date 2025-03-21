@@ -7,8 +7,7 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
-#include <meta/api/object.h>
+#include <meta/api/animation.h>
 #include <meta/api/object_name.h>
 
 #include "serialisation_utils.h"
@@ -21,16 +20,15 @@ namespace Test {
 
 TEST(ObjectTest, ObjectBaseAPI)
 {
-    META_NS::Object object;
+    META_NS::Object object(CreateInstance(ClassId::Object));
 
-    EXPECT_NE(object.GetIObject(), nullptr);
-    EXPECT_NE(object.GetInterfacePtr<IObject>(), nullptr);
-    EXPECT_EQ(object.GetInterfacePtr<IObject>(), object.GetIObject());
+    EXPECT_NE(object.GetPtr(), nullptr);
+    EXPECT_NE(object.GetPtr<IObject>(), nullptr);
+    EXPECT_EQ(object.GetPtr<IObject>(), object.GetPtr());
     EXPECT_EQ(interface_pointer_cast<IObject>(object), object);
-    EXPECT_EQ(interface_cast<IObject>(object), object.GetIObject().get());
+    EXPECT_EQ(interface_cast<IObject>(object), object.GetPtr().get());
 
-    META_NS::Object object2;
-    ASSERT_TRUE(object2.Initialize(object));
+    META_NS::Object object2(object);
     EXPECT_EQ(object, object2);
     EXPECT_TRUE(object == object2);
     EXPECT_FALSE(object != object2);
@@ -39,23 +37,22 @@ TEST(ObjectTest, ObjectBaseAPI)
     EXPECT_TRUE(object != object3);
     EXPECT_FALSE(object == object3);
     EXPECT_FALSE(object3); // not initialized yet
-    EXPECT_NE(object3.GetInterfacePtr<IObject>(), nullptr);
-    EXPECT_TRUE(object3); // Initialized after get
+    EXPECT_EQ(object3.GetPtr<IObject>(), nullptr);
 }
 
 TEST(ObjectTest, TypeConversion)
 {
-    META_NS::Object o1(interface_pointer_cast<IObject>(CreateTestType()));
-    META_NS::Object o2(interface_pointer_cast<IObject>(CreateTestContainer()));
+    META_NS::Object o1(CreateTestType());
+    META_NS::Object o2(CreateTestContainer());
 
     EXPECT_TRUE(o1);
     EXPECT_TRUE(o2);
-    EXPECT_NE(o1.GetIObject()->GetClassId(), o2.GetIObject()->GetClassId());
+    EXPECT_NE(o1.GetClassId(), o2.GetClassId());
 
     o1 = o2; // Changes type
     EXPECT_TRUE(o1);
-    EXPECT_EQ(o1.GetIObject(), o2.GetIObject());
-    EXPECT_EQ(o1.GetIObject()->GetClassId(), o2.GetIObject()->GetClassId());
+    EXPECT_EQ(o1.GetPtr(), o2.GetPtr());
+    EXPECT_EQ(o1.GetClassId(), o2.GetClassId());
 }
 /*
 TEST(ObjectTest, InvalidTypes)
@@ -99,17 +96,24 @@ TEST(ObjectTest, InvalidTypes)
 TEST(ObjectTest, LazyInitBase)
 {
     static constexpr auto propName = "value";
-    auto o1 = Object();
+    Object o1;
     Object o2;
 
     EXPECT_FALSE(o1);
     EXPECT_FALSE(o2);
     o2 = o1; // Does nothing
+    EXPECT_FALSE(o1);
+    EXPECT_FALSE(o2);
+    o1 = CreateInstance(ClassId::Object);
+    EXPECT_TRUE(o1);
+    EXPECT_FALSE(o2);
+    o2 = o1;
     EXPECT_TRUE(o1);
     EXPECT_TRUE(o2);
+
     Object o3;
     EXPECT_FALSE(o3);
-    o1.MetaProperty(propName, 5);
+    EXPECT_TRUE(Metadata(o1).AddProperty(propName, 5));
     o3 = o1;
     EXPECT_TRUE(o1);
     EXPECT_TRUE(o2);
@@ -117,9 +121,9 @@ TEST(ObjectTest, LazyInitBase)
     EXPECT_EQ(o1, o2);
     EXPECT_EQ(o1, o3);
 
-    auto p1 = o1.Metadata().GetProperty(propName);
-    auto p2 = o2.Metadata().GetProperty(propName);
-    auto p3 = o3.Metadata().GetProperty(propName);
+    auto p1 = Metadata(o1).GetProperty(propName);
+    auto p2 = Metadata(o1).GetProperty(propName);
+    auto p3 = Metadata(o1).GetProperty(propName);
     EXPECT_EQ(p1, p3);
     EXPECT_EQ(p2, p1);
 }
@@ -235,16 +239,16 @@ TEST(ObjectTest, CachedInterfaces)
 */
 TEST(ObjectTest, ResetIObject)
 {
-    META_NS::Object object1;
-    META_NS::Object object2;
-    auto iobject1 = object1.GetIObject();
+    META_NS::Object object1(CreateInstance(ClassId::Object));
+    META_NS::Object object2(CreateInstance(ClassId::Object));
+    auto iobject1 = object1.GetPtr();
     object2 = object1;
-    auto iobject2 = object2.GetIObject();
+    auto iobject2 = object2.GetPtr();
     EXPECT_EQ(iobject1, iobject2);
 
-    object1.ResetIObject();
+    object1 = nullptr;
     EXPECT_FALSE(object1);
-    EXPECT_NE(object1.GetIObject(), iobject2);
+    EXPECT_NE(object1.GetPtr(), iobject2);
 }
 /*
 TEST(ObjectTest, ResetIObjectDerived)
@@ -368,11 +372,10 @@ TEST(ObjectTest, NotCompatibileMoveAssignedObjectIsEmptyAndMovedObjectIsEmptyAls
 TEST(ObjectTest, ObjectName)
 {
     {
-        Object object;
-        auto op = object.GetIObject();
-        EXPECT_TRUE(SetName(op, "Test"));
-        EXPECT_EQ(GetName(op), "Test");
-        EXPECT_TRUE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(op)));
+        Object object(CreateInstance(ClassId::Object));
+        EXPECT_TRUE(SetName(object, "Test"));
+        EXPECT_EQ(GetName(object), "Test");
+        EXPECT_TRUE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(object)));
     }
     {
         auto op = GetObjectRegistry().Create<IObjectInstance>(ClassId::BaseObject);
@@ -380,11 +383,10 @@ TEST(ObjectTest, ObjectName)
         EXPECT_EQ(GetName(op), op->GetInstanceId().ToString());
     }
     {
-        PropertyAnimation anim;
-        auto op = anim.GetIObject();
-        EXPECT_TRUE(SetName(op, "Test"));
-        EXPECT_EQ(GetName(op), "Test");
-        EXPECT_FALSE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(op)));
+        PropertyAnimation anim(CreateInstance(ClassId::PropertyAnimation));
+        EXPECT_TRUE(SetName(anim, "Test"));
+        EXPECT_EQ(GetName(anim), "Test");
+        EXPECT_FALSE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(anim)));
     }
 }
 
@@ -392,10 +394,9 @@ TEST(ObjectTest, ObjectNameSerialise)
 {
     TestSerialiser ser;
     {
-        Object object;
-        auto op = object.GetIObject();
-        EXPECT_TRUE(SetName(op, "Test"));
-        ser.Export(op);
+        Object object(CreateInstance(ClassId::Object));
+        EXPECT_TRUE(SetName(object, "Test"));
+        ser.Export(object);
     }
     auto in = ser.Import();
     ASSERT_TRUE(in);

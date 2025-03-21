@@ -52,12 +52,12 @@ TEST_F(ResourceSerializationTest, Basic)
     TestSerialiser ser;
     ser.SetResourceManager(resources_);
     {
-        Object obj;
+        Object obj(CreateInstance(ClassId::Object));
         auto prop = ConstructProperty<IObject::ConstPtr>(
             "test", interface_pointer_cast<IObject>(resources_->GetResource("file://test_resource.json")));
         ASSERT_TRUE(prop);
         ASSERT_TRUE(prop->GetValue());
-        obj.AddProperty(prop);
+        Metadata(obj).AddProperty(prop);
         ser.Export(obj);
     }
     ser.Dump("file://./resource.json");

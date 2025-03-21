@@ -10,7 +10,6 @@
 #include <meta/api/make_callback.h>
 #include <meta/api/object.h>
 #include <meta/interface/builtin_objects.h>
-#include <meta/interface/intf_object_registry.h>
 #include <meta/interface/loaders/intf_file_content_loader.h>
 
 using namespace testing;
@@ -59,17 +58,17 @@ protected:
         const BASE_NS::string& path, const BASE_NS::vector<BASE_NS::string>& keys, const CsvContentType& content)
     {
         loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path));
-        Object object;
-        ASSERT_TRUE(object.Initialize(loader_->Create({})));
-        ASSERT_NE(object.GetIObject(), nullptr);
+        Object object(loader_->Create({}));
+        ASSERT_TRUE(object);
+        ASSERT_NE(object.GetPtr(), nullptr);
 
         // Object should have a "strings" property
         ASSERT_THAT(object, HasProperty(TRANSLATION_STRING_KEY));
-        auto stringsProp = object.Metadata().GetProperty<IObject::Ptr>(TRANSLATION_STRING_KEY);
+        auto stringsProp = Metadata(object).GetProperty<IObject::Ptr>(TRANSLATION_STRING_KEY);
         ASSERT_TRUE(stringsProp);
-        Object strings;
-        ASSERT_TRUE(strings.Initialize(stringsProp->GetValue()));
-        EXPECT_EQ(strings.Metadata().GetProperties().size(), content.size());
+        Object strings(stringsProp->GetValue());
+        ASSERT_TRUE(strings);
+        EXPECT_EQ(Metadata(strings).GetProperties().size(), content.size());
 
         // Go through our expected content and chech that the object has all of the languages and
         // corresponding strings
@@ -77,19 +76,19 @@ protected:
             BASE_NS::string_view lang(item.first);
             ASSERT_THAT(strings, HasProperty(lang));
 
-            auto translationsProp = strings.Metadata().GetProperty<IObject::Ptr>(lang);
+            auto translationsProp = Metadata(strings).GetProperty<IObject::Ptr>(lang);
             ASSERT_TRUE(translationsProp);
-            Object translations;
-            ASSERT_TRUE(translations.Initialize(translationsProp->GetValue()));
+            Object translations(translationsProp->GetValue());
+            ASSERT_TRUE(translations);
 
             // Must contain expected amount of translation strings
             const auto& expectedTranslations = item.second;
-            ASSERT_EQ(translations.Metadata().GetProperties().size(), expectedTranslations.size());
+            ASSERT_EQ(Metadata(translations).GetProperties().size(), expectedTranslations.size());
             ASSERT_EQ(keys.size(), expectedTranslations.size());
 
             // Check that each translation found in the object matches our expected translation table
             for (size_t i = 0; i < expectedTranslations.size(); i++) {
-                auto prop = translations.Metadata().GetProperty<BASE_NS::string>(keys[i]);
+                auto prop = Metadata(translations).GetProperty<BASE_NS::string>(keys[i]);
                 ASSERT_TRUE(prop) << "lang: " << item.first.data() << ", index: " << i;
                 ASSERT_EQ(prop->GetValue(), expectedTranslations[i])
                     << "lang: " << item.first.data() << ", index: " << i;

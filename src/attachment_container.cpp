@@ -9,7 +9,7 @@
 #include <meta/api/make_callback.h>
 #include <meta/api/util.h>
 
-META_BEGIN_NAMESPACE()
+META_BEGIN_INTERNAL_NAMESPACE()
 
 AttachmentContainer::AttachmentContainer()
 {
@@ -196,4 +196,4 @@ bool AttachmentContainer::AlreadyAttached(const IObject::Ptr& object)
     return false;
 }
 
-META_END_NAMESPACE()
+META_END_INTERNAL_NAMESPACE()

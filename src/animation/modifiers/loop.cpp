@@ -1,8 +1,5 @@
 #include "loop.h"
 
-#include <algorithm>
-#include <limits>
-
 #include <meta/api/make_callback.h>
 #include <meta/api/util.h>
 #include <meta/interface/builtin_objects.h>
@@ -11,13 +8,13 @@ META_BEGIN_NAMESPACE()
 
 namespace AnimationModifiers {
 
-bool Loop::Build(const IMetadata::Ptr& data)
+bool LoopModifier::Build(const IMetadata::Ptr& data)
 {
     LoopCount()->OnChanged()->AddHandler(META_ACCESS_EVENT(OnChanged).GetCallable());
     return true;
 }
 
-bool Loop::ProcessOnGetDuration(DurationData& duration) const
+bool LoopModifier::ProcessOnGetDuration(DurationData& duration) const
 {
     const auto loopCount = META_ACCESS_PROPERTY_VALUE(LoopCount);
     if (loopCount == 0) {
@@ -32,7 +29,7 @@ bool Loop::ProcessOnGetDuration(DurationData& duration) const
     return true;
 }
 
-bool Loop::ProcessOnStep(StepData& step) const
+bool LoopModifier::ProcessOnStep(StepData& step) const
 {
     return true;
 }

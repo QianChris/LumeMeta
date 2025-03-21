@@ -14,7 +14,6 @@
 #include <meta/api/util.h>
 #include <meta/ext/implementation_macros.h>
 #include <meta/ext/object_fwd.h>
-#include <meta/interface/intf_metadata.h>
 #include <meta/interface/property/array_property.h>
 #include <meta/interface/property/construct_array_property.h>
 #include <meta/interface/property/construct_property.h>

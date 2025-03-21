@@ -15,6 +15,8 @@
 
 META_BEGIN_NAMESPACE()
 
+namespace Internal {
+
 // ContainerChangeListener
 
 ContainerChangeListener::ContainerChangeListener(const IContainer::Ptr& container)
@@ -127,5 +129,7 @@ void ContainerObserver::Unsubscribe(const IContainer::Ptr& base)
         ++it;
     }
 }
+
+} // namespace Internal
 
 META_END_NAMESPACE()

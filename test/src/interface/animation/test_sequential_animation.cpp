@@ -8,8 +8,7 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
-#include <meta/interface/animation/builtin_animations.h>
+#include <meta/api/animation.h>
 #include <meta/interface/property/construct_property.h>
 
 using namespace testing;
@@ -28,11 +27,17 @@ TEST_F(SequentialAnimationTest, SeekingSequentialAnimationNeedsToBeStartedToUpda
     auto property1 = ConstructProperty("Property1", 0.0F);
     auto property2 = ConstructProperty("Property2", 0.0F);
 
-    auto animation = SequentialAnimation()
-                         .Child(KeyframeAnimation<float>().Property(property1).From(0.0F).To(1.0F).Duration(
-                             TimeSpan::Milliseconds(1000)))
-                         .Child(KeyframeAnimation<float>().Property(property2).From(0.0F).To(1.0F).Duration(
-                             TimeSpan::Milliseconds(1000)));
+    auto animation = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
+                         .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
+                                  .From(0.0F)
+                                  .To(1.0F)
+                                  .Property(property1)
+                                  .Duration(TimeSpan::Milliseconds(1000)))
+                         .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
+                                  .From(0.0F)
+                                  .To(1.0F)
+                                  .Property(property2)
+                                  .Duration(TimeSpan::Milliseconds(1000)));
     // when
     animation.Seek(0.25F);
     animation.Start();
@@ -71,11 +76,17 @@ TEST_F(SequentialAnimationTest, SeekingSequentialAnimationAndPause)
     auto property1 = ConstructProperty("Property1", 0.0F);
     auto property2 = ConstructProperty("Property2", 0.0F);
 
-    auto animation = SequentialAnimation()
-                         .Child(KeyframeAnimation<float>().Property(property1).From(0.0F).To(1.0F).Duration(
-                             TimeSpan::Milliseconds(1000)))
-                         .Child(KeyframeAnimation<float>().Property(property2).From(0.0F).To(1.0F).Duration(
-                             TimeSpan::Milliseconds(1000)));
+    auto animation = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
+                         .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
+                                  .From(0.0F)
+                                  .To(1.0F)
+                                  .Property(property1)
+                                  .Duration(TimeSpan::Milliseconds(1000)))
+                         .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
+                                  .From(0.0F)
+                                  .To(1.0F)
+                                  .Property(property2)
+                                  .Duration(TimeSpan::Milliseconds(1000)));
 
     // when
     animation.Start();

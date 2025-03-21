@@ -1,7 +1,6 @@
 #include <benchmark/benchmark.h>
 #include <deque>
 
-#include <meta/api/object.h>
 #include <meta/base/namespace.h>
 #include <meta/ext/object_fwd.h>
 

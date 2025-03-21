@@ -30,9 +30,9 @@ static constexpr ObjectTypeInfo OBJECTS[] = {
     TrackAnimation::OBJECT_INFO,
     ParallelAnimation::OBJECT_INFO,
     SequentialAnimation::OBJECT_INFO,
-    AnimationModifiers::Loop::OBJECT_INFO,
-    AnimationModifiers::Reverse::OBJECT_INFO,
-    AnimationModifiers::SpeedImpl::OBJECT_INFO,
+    AnimationModifiers::LoopModifier::OBJECT_INFO,
+    AnimationModifiers::ReverseModifier::OBJECT_INFO,
+    AnimationModifiers::SpeedModifier::OBJECT_INFO,
 
     Curves::Easing::LinearEasingCurve::OBJECT_INFO,
     Curves::Easing::InQuadEasingCurve::OBJECT_INFO,

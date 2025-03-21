@@ -11,7 +11,6 @@
 #include <meta/ext/object_fwd.h>
 #include <meta/ext/serialization/serializer.h>
 #include <meta/interface/detail/any.h>
-#include <meta/interface/intf_object_registry.h>
 #include <meta/interface/serialization/intf_exporter.h>
 #include <meta/interface/serialization/intf_ser_output.h>
 #include <meta/interface/serialization/intf_serializable.h>
@@ -93,9 +92,9 @@ TEST(SerializationTest, DISABLED_ExportImportWeakPtrPropertyWithGlobalAnchor)
         auto prop1 = ConstructProperty<ITestType::WeakPtr>("test", obj);
         auto prop2 = ConstructProperty<ITestType::Ptr>("object", obj);
 
-        Object object;
-        object.AddProperty(prop1);
-        object.AddProperty(prop2);
+        Object object(CreateInstance(ClassId::Object));
+        Metadata(object).AddProperty(prop1);
+        Metadata(object).AddProperty(prop2);
 
         ASSERT_TRUE(ser.Export(object));
         ser.Dump("file://./test.json");
@@ -116,13 +115,13 @@ TEST(SerializationTest, PropertyBind)
 {
     TestSerialiser ser;
     {
-        Object obj;
+        Object obj(CreateInstance(ClassId::Object));
         auto p = ConstructProperty<uint32_t>("test");
         auto source = ConstructProperty<uint32_t>("source");
         source->SetValue(2);
         EXPECT_TRUE(p->SetBind(source));
-        obj.AddProperty(p);
-        obj.AddProperty(source);
+        Metadata(obj).AddProperty(p);
+        Metadata(obj).AddProperty(source);
         ASSERT_TRUE(ser.Export(obj));
         ser.Dump("file://./test.json");
     }
@@ -144,14 +143,14 @@ TEST(SerializationTest, SerialiseBind)
     // serialise bind that requires resolving the bind later on when the target property owner has been serialised
     TestSerialiser ser;
     {
-        Object target;
+        Object target(CreateInstance(ClassId::Object));
         auto p1 = ConstructProperty<int>("p1");
-        target.AddProperty(p1);
+        Metadata(target).AddProperty(p1);
 
-        Object obj;
+        Object obj(CreateInstance(ClassId::Object));
         auto p2 = ConstructProperty<int>("p2");
-        obj.AddProperty(p2);
-        obj.Attach(target);
+        Metadata(obj).AddProperty(p2);
+        AttachmentContainer(obj).Attach(target);
 
         ASSERT_TRUE(p2->SetBind(p1));
 

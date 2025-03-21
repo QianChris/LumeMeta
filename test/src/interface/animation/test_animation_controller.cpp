@@ -10,8 +10,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
+#include <meta/api/animation.h>
+#include <meta/api/property/property_event_handler.h>
+#include <meta/api/util.h>
 #include <meta/base/namespace.h>
+#include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/animation/intf_animation_controller.h>
 #include <meta/interface/property/construct_property.h>
 
@@ -48,12 +51,12 @@ protected:
 
     META_NS::KeyframeAnimation<float> CreateAnimation()
     {
-        auto animation = META_NS::KeyframeAnimation<float>()
-                             .Property(property_)
-                             .From(0.f)
-                             .To(10.f)
-                             .Duration(ANIMATION_LENGTH)
-                             .Controller(sutAnimationCtrl_);
+        auto animation = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
+        animation.Property(property_);
+        animation.From(0.f);
+        animation.To(10.f);
+        animation.Duration(ANIMATION_LENGTH);
+        animation.Controller(sutAnimationCtrl_);
         return animation;
     }
 
@@ -152,27 +155,28 @@ TEST_F(AnimationControllerTest, Serialization)
         auto implicitProp = ConstructProperty<float>(ImplicitPropertyName, 0);
         auto keyframeProp = ConstructProperty<float>(KeyframePropertyName, 0);
 
-        Object object;
-        object.AddProperty(implicitProp);
-        object.AddProperty(keyframeProp);
+        Object object(CreateInstance(ClassId::Object));
+        Metadata(object).AddProperty(implicitProp);
+        Metadata(object).AddProperty(keyframeProp);
 
-        auto implicitAnim = PropertyAnimation().Property(implicitProp).Controller(controller);
-        auto keyframeAnim = SequentialAnimation()
-                                .Controller(controller)
-                                .Child(KeyframeAnimation<float>()
-                                           .From(0)
-                                           .To(10)
-                                           .Duration(TimeSpan::Milliseconds(100))
-                                           .Property(keyframeProp))
-                                .Child(KeyframeAnimation<float>()
-                                           .From(10)
-                                           .To(0)
-                                           .Duration(TimeSpan::Milliseconds(100))
-                                           .Property(keyframeProp));
+        auto implicitAnim =
+            PropertyAnimation(CreateInstance(ClassId::PropertyAnimation)).Property(implicitProp).Controller(controller);
+        auto keyframeAnim = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+        keyframeAnim.Controller(controller);
+        keyframeAnim.Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
+                             .From(0)
+                             .To(10)
+                             .Property(keyframeProp)
+                             .Duration(TimeSpan::Milliseconds(100)));
+        keyframeAnim.Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
+                             .From(10)
+                             .To(0)
+                             .Property(keyframeProp)
+                             .Duration(TimeSpan::Milliseconds(100)));
 
-        object.Attach(interface_pointer_cast<IAttachment>(implicitAnim));
-        object.Attach(interface_pointer_cast<IAttachment>(keyframeAnim));
-        object.Attach(interface_pointer_cast<IAttachment>(controller));
+        AttachmentContainer(object).Attach(implicitAnim);
+        AttachmentContainer(object).Attach(keyframeAnim);
+        AttachmentContainer(object).Attach(controller);
 
         ASSERT_TRUE(ser.Export(object));
         ser.Dump("project://animation_ser.ui");
@@ -180,10 +184,11 @@ TEST_F(AnimationControllerTest, Serialization)
 
     auto obj = ser.Import();
     ASSERT_TRUE(obj);
-    Object imported;
-    ASSERT_TRUE(imported.Initialize(obj));
+    Object imported(obj);
+    ASSERT_TRUE(imported);
 
-    auto controllers = imported.GetAttachments({ TypeId(META_NS::InterfaceId::IAnimationController) });
+    auto controllers =
+        AttachmentContainer(imported).GetAttachments({ TypeId(META_NS::InterfaceId::IAnimationController) });
     ASSERT_EQ(controllers.size(), 1);
 
     auto importedController = interface_pointer_cast<IAnimationController>(controllers[0]);
@@ -200,15 +205,15 @@ TEST_F(AnimationControllerTest, Serialization)
     }
 
     // Check that we got the same animation hierarchy back
-    PropertyAnimation implicitAnim;
-    SequentialAnimation seqAnim;
-    KeyframeAnimation<float> segment1;
-    ASSERT_TRUE(implicitAnim.Initialize(interface_pointer_cast<IObject>(animations[0])));
-    ASSERT_TRUE(seqAnim.Initialize(interface_pointer_cast<IObject>(animations[1])));
+    PropertyAnimation implicitAnim(animations[0].lock());
+    SequentialAnimation seqAnim(animations[1].lock());
+    ASSERT_TRUE(implicitAnim);
+    ASSERT_TRUE(seqAnim);
     auto children = seqAnim.GetAnimations();
     ASSERT_EQ(children.size(), 2);
-    ASSERT_TRUE(segment1.Initialize(interface_pointer_cast<IObject>(children[0])));
-    EXPECT_TRUE(segment1.Valid()->GetValue());
+    KeyframeAnimation<float> segment1(children[0]);
+    ASSERT_TRUE(segment1);
+    EXPECT_TRUE(GetValue(segment1.Valid()));
 
     // Start the sequential animation and check that it works
     seqAnim.Start();

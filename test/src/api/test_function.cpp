@@ -5,7 +5,6 @@
 
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
 #include <meta/api/connector.h>
 #include <meta/api/function.h>
 #include <meta/ext/any_builder.h>

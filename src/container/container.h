@@ -11,7 +11,7 @@
 
 #include "container_base.h"
 
-META_BEGIN_NAMESPACE()
+META_BEGIN_INTERNAL_NAMESPACE()
 
 class Container : public ContainerBase {
 public: // IContainer
@@ -26,6 +26,6 @@ private:
     void SetObjectParent(const IObject::Ptr& object, const IObject::Ptr& parent) const override;
 };
 
-META_END_NAMESPACE()
+META_END_INTERNAL_NAMESPACE()
 
 #endif // META_SRC_OBJECT_CONTAINER_H

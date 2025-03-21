@@ -9,7 +9,6 @@
 #define META_API_CONTAINER_FIND_CACHE_H
 
 #include <meta/api/event_handler.h>
-#include <meta/api/internal/object_api.h>
 #include <meta/api/threading/mutex.h>
 #include <meta/interface/intf_container.h>
 

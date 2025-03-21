@@ -433,7 +433,7 @@ protected:
 static CORE_NS::IFile::Ptr CreateTestFileWithoutProperty()
 {
     TestSerialiser ser;
-    ser.Export(Object().GetIObject());
+    ser.Export(CreateInstance(META_NS::ClassId::Object));
     auto s = ser.Get();
     return CORE_NS::IFile::Ptr(new MemFile(BASE_NS::vector<char>(s.begin(), s.end())));
 }
@@ -468,7 +468,9 @@ TEST_P(ContentLoaderObjectProviderTest, JsonWithoutProperty)
 static CORE_NS::IFile::Ptr CreateTestFileWithProperty()
 {
     TestSerialiser ser;
-    ser.Export(Object().MetaProperty<int>("Model.First", 0).GetIObject());
+    Metadata object(CreateInstance(META_NS::ClassId::Object));
+    object.AddProperty<int>("Model.First", 0);
+    ser.Export(object.GetPtr<META_NS::IObject>());
     auto s = ser.Get();
     return CORE_NS::IFile::Ptr(new MemFile(BASE_NS::vector<char>(s.begin(), s.end())));
 }

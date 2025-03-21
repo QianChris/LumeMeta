@@ -12,16 +12,17 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
-#include <meta/api/animation/modifiers/loop.h>
-#include <meta/api/curves/easing_curve.h>
+#include <meta/api/animation.h>
+#include <meta/api/util.h>
+#include <meta/interface/intf_containable.h>
 
-#include "meta/api/animation/modifiers/reverse.h"
 #include "serialisation_utils.h"
 #include "test_utils.h"
 
 using namespace std::chrono_literals;
 using namespace testing;
+
+using META_NS::CreateInstance;
 
 META_BEGIN_NAMESPACE()
 namespace Test {
@@ -53,39 +54,39 @@ protected:
 
 TEST_F(StaggeredAnimationTest, CreateParallel)
 {
-    auto anim = META_NS::ParallelAnimation().GetIObject();
+    auto anim = CreateInstance<IParallelAnimation>();
 
-    ASSERT_NE(anim, nullptr);
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IObject.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IAnimation.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IStaggeredAnimation.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IParallelAnimation.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IStartableAnimation.Id().ToUid()));
+    ASSERT_TRUE(anim);
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IObject.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IAnimation.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IStaggeredAnimation.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IParallelAnimation.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IStartableAnimation.Id().ToUid()));
 }
 
 TEST_F(StaggeredAnimationTest, CreateSequential)
 {
-    auto anim = META_NS::SequentialAnimation().GetIObject();
+    auto anim = CreateInstance<ISequentialAnimation>();
 
-    ASSERT_NE(anim, nullptr);
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IObject.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IAnimation.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IStaggeredAnimation.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::ISequentialAnimation.Id().ToUid()));
-    EXPECT_TRUE(anim->GetInterface(META_NS::InterfaceId::IStartableAnimation.Id().ToUid()));
+    ASSERT_TRUE(anim);
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IObject.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IAnimation.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IStaggeredAnimation.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::ISequentialAnimation.Id().ToUid()));
+    EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IStartableAnimation.Id().ToUid()));
 }
 
 TEST_F(StaggeredAnimationTest, ParallelSingleChild)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = CreateInstance<IParallelAnimation>();
+    auto anim1 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to { 100, 50, 0 };
 
     SetProperties(anim1, t1_->Vec3Property1(), from, to, TimeSpan::Milliseconds(100));
 
-    staggered.Child(anim1);
+    Container(staggered).Add(Object(anim1));
     staggered.Start();
     staggered.Step(GetTestClock());
 
@@ -119,10 +120,10 @@ TEST_F(StaggeredAnimationTest, ParallelSingleChild)
 
 TEST_F(StaggeredAnimationTest, Parallel)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = CreateInstance<IParallelAnimation>();
+    auto anim1 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
+    auto anim2 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
+    auto anim3 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -131,7 +132,10 @@ TEST_F(StaggeredAnimationTest, Parallel)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(50));
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(100));
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    auto c = Container(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
     staggered.Start();
     staggered.Step(GetTestClock());
 
@@ -188,13 +192,13 @@ TEST_F(StaggeredAnimationTest, Parallel)
 
 TEST_F(StaggeredAnimationTest, ParallelStopsItsChildrenWhenNotRunning)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto childAnim = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto childAnim = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     SetProperties(childAnim, t1_->Vec3Property1(), BASE_NS::Math::Vec3 { 0, 0, 0 }, BASE_NS::Math::Vec3 { 100, 50, 0 },
         TimeSpan::Milliseconds(100));
 
-    staggered.Child(childAnim);
+    Container(staggered).Add(childAnim);
     staggered.Start();
     StepAnimations({ staggered }, 10, 10, [](uint32_t /*frame*/) {});
     staggered.Stop();
@@ -209,23 +213,27 @@ TEST_F(StaggeredAnimationTest, ParallelSerialization)
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
     {
-        auto staggered = META_NS::ParallelAnimation();
-        auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-        auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-        auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+        auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+        auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+        auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+        auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
         SetProperties(anim1, t1_->Vec3Property1(), from, to[0], TimeSpan::Milliseconds(100));
         SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(50));
         SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(100));
 
-        staggered.Child(anim1).Child(anim2).Child(anim3);
+        auto c = Container(staggered);
 
-        Object obj;
+        c.Add(anim1);
+        c.Add(anim2);
+        c.Add(anim3);
+
+        Metadata obj(CreateInstance(ClassId::Object));
         obj.AddProperty(t1_->Vec3Property1());
         obj.AddProperty(t1_->Vec3Property2());
         obj.AddProperty(t1_->Vec3Property3());
-        obj.Attach(staggered);
-        ASSERT_TRUE(ser.Export(obj));
+        AttachmentContainer(obj).Attach(staggered);
+        ASSERT_TRUE(ser.Export(Object(obj)));
         ser.Dump("file://./test.json");
     }
 
@@ -236,17 +244,17 @@ TEST_F(StaggeredAnimationTest, ParallelSerialization)
     ASSERT_TRUE(att);
     auto attvec = att->GetAttachments<IAnimation>();
     ASSERT_EQ(attvec.size(), 1);
-    ParallelAnimation staggered;
-    ASSERT_TRUE(staggered.Initialize(interface_pointer_cast<IObject>(attvec.front())));
+    ParallelAnimation staggered(attvec.front());
+    ASSERT_TRUE(staggered);
 
     auto anims = staggered.GetAnimations();
     ASSERT_EQ(anims.size(), 3);
-    KeyframeAnimation<BASE_NS::Math::Vec3> anim1;
-    ASSERT_TRUE(anim1.Initialize(interface_pointer_cast<IObject>(anims[0])));
-    KeyframeAnimation<BASE_NS::Math::Vec3> anim2;
-    ASSERT_TRUE(anim2.Initialize(interface_pointer_cast<IObject>(anims[1])));
-    KeyframeAnimation<BASE_NS::Math::Vec3> anim3;
-    ASSERT_TRUE(anim3.Initialize(interface_pointer_cast<IObject>(anims[2])));
+    KeyframeAnimation<BASE_NS::Math::Vec3> anim1(anims[0]);
+    ASSERT_TRUE(anim1);
+    KeyframeAnimation<BASE_NS::Math::Vec3> anim2(anims[1]);
+    ASSERT_TRUE(anim2);
+    KeyframeAnimation<BASE_NS::Math::Vec3> anim3(anims[2]);
+    ASSERT_TRUE(anim3);
     Property<BASE_NS::Math::Vec3> prop1(anim1.Property()->GetValue().lock());
     ASSERT_TRUE(prop1);
     Property<BASE_NS::Math::Vec3> prop2(anim2.Property()->GetValue().lock());
@@ -304,14 +312,14 @@ TEST_F(StaggeredAnimationTest, ParallelSerialization)
 
 TEST_F(StaggeredAnimationTest, ParallelLoop)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
     const int loopCount = 3;
-    auto loop = META_NS::AnimationModifiers::Loop().LoopCount(loopCount);
+    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
 
-    staggered.Attach(loop);
+    AttachmentContainer(staggered).Attach(loop);
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -320,7 +328,10 @@ TEST_F(StaggeredAnimationTest, ParallelLoop)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(50));
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(100));
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
     staggered.Start();
     staggered.Step(GetTestClock());
 
@@ -391,13 +402,13 @@ TEST_F(StaggeredAnimationTest, ParallelLoop)
 
 TEST_F(StaggeredAnimationTest, ParallelReverse)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto reverse = META_NS::AnimationModifiers::Reverse();
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto reverse = META_NS::AnimationModifiers::Reverse(CreateInstance(ClassId::ReverseAnimationModifier));
 
-    staggered.Attach(reverse);
+    AttachmentContainer(staggered).Attach(reverse);
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -406,7 +417,10 @@ TEST_F(StaggeredAnimationTest, ParallelReverse)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(30));
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(100));
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
     staggered.Start();
     staggered.Step(GetTestClock());
 
@@ -470,23 +484,19 @@ TEST_F(StaggeredAnimationTest, ParallelReverse)
 
 TEST_F(StaggeredAnimationTest, LoopPastEnd)
 {
-    META_NS::KeyframeAnimation<float> a1;
-    META_NS::KeyframeAnimation<float> a2;
-    auto staggered = META_NS::SequentialAnimation()
-                         .Modifier(META_NS::AnimationModifiers::Loop().LoopIndefinitely())
-                         .Child(META_NS::KeyframeAnimation<float>()
-                                    .Store(a1)
-                                    .Property(t1_->FloatProperty1())
-                                    .From(0)
-                                    .To(10)
-                                    .Duration(TimeSpan::Milliseconds(100)))
-                         .Child(META_NS::KeyframeAnimation<float>()
-                                    .Store(a2)
-                                    .Property(t1_->FloatProperty1())
-                                    .From(10)
-                                    .To(0)
-                                    .Duration(TimeSpan::Milliseconds(100))
-                                    .Curve(META_NS::Curves::Easing::InOutCubic()));
+    META_NS::KeyframeAnimation<float> a1(CreateInstance(ClassId::KeyframeAnimation));
+    META_NS::KeyframeAnimation<float> a2(CreateInstance(ClassId::KeyframeAnimation));
+    auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    Container(staggered).Add(a1.From(0).To(10).Property(t1_->FloatProperty1()).Duration(TimeSpan::Milliseconds(100)));
+    Container(staggered).Add(
+        a2.From(10)
+            .To(0)
+            .Property(t1_->FloatProperty1())
+            .Duration(TimeSpan::Milliseconds(100))
+            .Curve(interface_pointer_cast<ICurve1D>(CreateInstance(ClassId::InOutCubicEasingCurve))));
+
+    AttachmentContainer(staggered).Attach(
+        META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopIndefinitely());
 
     staggered.Start();
     ASSERT_TRUE(GetValue(staggered.Running()));
@@ -516,9 +526,6 @@ TEST_F(StaggeredAnimationTest, LoopPastEnd)
     for (auto loop = 1; loop <= 3; loop++) {
         auto frameCount = loop == 1 ? 6 : 7;
         StepAnimations({ staggered }, frameCount, 30, [&](uint32_t frame) {
-            CORE_LOG_E("Frame %u, loop: %u: %u %u, %f", frame, loop, GetValue(a1.Running()), GetValue(a2.Running()),
-                GetValue(staggered.Progress()));
-
             auto progress = GetValue(staggered.Progress());
             expectedProgress += expectedProgressStep;
             expectedProgress = expectedProgress - BASE_NS::Math::floor(expectedProgress);
@@ -537,10 +544,10 @@ TEST_F(StaggeredAnimationTest, LoopPastEnd)
 
 TEST_F(StaggeredAnimationTest, Sequential)
 {
-    auto staggered = META_NS::SequentialAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -550,7 +557,10 @@ TEST_F(StaggeredAnimationTest, Sequential)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(100));
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(50));
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
 
     EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(200));
 
@@ -614,24 +624,27 @@ TEST_F(StaggeredAnimationTest, SequentialSerialization)
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
     {
-        auto staggered = META_NS::SequentialAnimation();
-        auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-        auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-        auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+        auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+        auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+        auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+        auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
         // In total 150ms of animations
         SetProperties(anim1, t1_->Vec3Property1(), from, to[0], TimeSpan::Milliseconds(50));
         SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(100));
         SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(50));
 
-        staggered.Child(anim1).Child(anim2).Child(anim3);
+        Container c(staggered);
+        c.Add(anim1);
+        c.Add(anim2);
+        c.Add(anim3);
 
-        Object obj;
+        Metadata obj(CreateInstance(ClassId::Object));
         obj.AddProperty(t1_->Vec3Property1());
         obj.AddProperty(t1_->Vec3Property2());
         obj.AddProperty(t1_->Vec3Property3());
-        obj.Attach(staggered);
-        ASSERT_TRUE(ser.Export(obj));
+        AttachmentContainer(obj).Attach(staggered);
+        ASSERT_TRUE(ser.Export(Object(obj)));
         ser.Dump("file://./test.json");
     }
 
@@ -642,17 +655,17 @@ TEST_F(StaggeredAnimationTest, SequentialSerialization)
     ASSERT_TRUE(att);
     auto attvec = att->GetAttachments<IAnimation>();
     ASSERT_EQ(attvec.size(), 1);
-    SequentialAnimation staggered;
-    ASSERT_TRUE(staggered.Initialize(interface_pointer_cast<IObject>(attvec.front())));
+    SequentialAnimation staggered(attvec.front());
+    ASSERT_TRUE(staggered);
 
     auto anims = staggered.GetAnimations();
     ASSERT_EQ(anims.size(), 3);
-    KeyframeAnimation<BASE_NS::Math::Vec3> anim1;
-    ASSERT_TRUE(anim1.Initialize(interface_pointer_cast<IObject>(anims[0])));
-    KeyframeAnimation<BASE_NS::Math::Vec3> anim2;
-    ASSERT_TRUE(anim2.Initialize(interface_pointer_cast<IObject>(anims[1])));
-    KeyframeAnimation<BASE_NS::Math::Vec3> anim3;
-    ASSERT_TRUE(anim3.Initialize(interface_pointer_cast<IObject>(anims[2])));
+    KeyframeAnimation<BASE_NS::Math::Vec3> anim1(anims[0]);
+    ASSERT_TRUE(anim1);
+    KeyframeAnimation<BASE_NS::Math::Vec3> anim2(anims[1]);
+    ASSERT_TRUE(anim2);
+    KeyframeAnimation<BASE_NS::Math::Vec3> anim3(anims[2]);
+    ASSERT_TRUE(anim3);
     Property<BASE_NS::Math::Vec3> prop1(anim1.Property()->GetValue().lock());
     ASSERT_TRUE(prop1);
     Property<BASE_NS::Math::Vec3> prop2(anim2.Property()->GetValue().lock());
@@ -716,17 +729,18 @@ TEST_F(StaggeredAnimationTest, SequentialSerialization)
 
 TEST_F(StaggeredAnimationTest, SequentialWithSameAnimation)
 {
-    auto staggered = META_NS::SequentialAnimation();
-    auto anim = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto anim = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to = { 100, 50, 0 };
 
     SetProperties(anim, t1_->Vec3Property1(), from, to, TimeSpan::Milliseconds(50));
 
-    staggered.Child(anim);
-    staggered.Child(anim);
-    staggered.Child(anim);
+    Container c(staggered);
+    c.Add(anim);
+    c.Add(anim);
+    c.Add(anim);
 
     EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(150));
 
@@ -756,14 +770,14 @@ TEST_F(StaggeredAnimationTest, SequentialWithSameAnimation)
 
 TEST_F(StaggeredAnimationTest, SequentialModified)
 {
-    auto staggered = META_NS::SequentialAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     const int loopCount = 3;
-    auto loop = META_NS::AnimationModifiers::Loop().LoopCount(loopCount);
-    staggered.Attach(loop);
+    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+    AttachmentContainer(staggered).Attach(loop);
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -773,7 +787,10 @@ TEST_F(StaggeredAnimationTest, SequentialModified)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], TimeSpan::Milliseconds(50));
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], TimeSpan::Milliseconds(50));
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
     staggered.Start();
     staggered.Step(GetTestClock());
 
@@ -840,10 +857,10 @@ TEST_F(StaggeredAnimationTest, SequentialModified)
 
 TEST_F(StaggeredAnimationTest, DurationParallel)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -856,7 +873,10 @@ TEST_F(StaggeredAnimationTest, DurationParallel)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], duration[1]);
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], duration[2]);
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
 
     auto staggeredDuration = *std::max_element(duration.begin(), duration.end());
     EXPECT_EQ(GetValue(staggered.TotalDuration()), staggeredDuration);
@@ -864,17 +884,18 @@ TEST_F(StaggeredAnimationTest, DurationParallel)
 
 TEST_F(StaggeredAnimationTest, ParallelWithSameAnimation)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to = { 100, 50, 0 };
 
     SetProperties(anim, t1_->Vec3Property1(), from, to, TimeSpan::Milliseconds(50));
 
-    staggered.Child(anim);
-    staggered.Child(anim);
-    staggered.Child(anim);
+    Container c(staggered);
+    c.Add(anim);
+    c.Add(anim);
+    c.Add(anim);
 
     EXPECT_EQ(staggered.GetAnimations().size(), 1);
     EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(50));
@@ -882,14 +903,14 @@ TEST_F(StaggeredAnimationTest, ParallelWithSameAnimation)
 
 TEST_F(StaggeredAnimationTest, DurationParallelModified)
 {
-    auto staggered = META_NS::ParallelAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     const int loopCount = 3;
-    auto loop = META_NS::AnimationModifiers::Loop().LoopCount(loopCount);
-    staggered.Attach(loop);
+    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+    AttachmentContainer(staggered).Attach(loop);
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -902,7 +923,10 @@ TEST_F(StaggeredAnimationTest, DurationParallelModified)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], duration[1]);
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], duration[2]);
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
 
     auto staggeredDuration = *std::max_element(duration.begin(), duration.end());
     EXPECT_EQ(GetValue(staggered.TotalDuration()), staggeredDuration * loopCount);
@@ -910,10 +934,10 @@ TEST_F(StaggeredAnimationTest, DurationParallelModified)
 
 TEST_F(StaggeredAnimationTest, DurationSequential)
 {
-    auto staggered = META_NS::SequentialAnimation();
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>();
+    auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
@@ -926,7 +950,10 @@ TEST_F(StaggeredAnimationTest, DurationSequential)
     SetProperties(anim2, t1_->Vec3Property2(), from, to[1], duration[1]);
     SetProperties(anim3, t1_->Vec3Property3(), from, to[2], duration[2]);
 
-    staggered.Child(anim1).Child(anim2).Child(anim3);
+    Container c(staggered);
+    c.Add(anim1);
+    c.Add(anim2);
+    c.Add(anim3);
 
     auto staggeredDuration = std::accumulate(duration.begin(), duration.end(), TimeSpan::Zero());
     EXPECT_EQ(GetValue(staggered.TotalDuration()), staggeredDuration);
@@ -953,14 +980,14 @@ TEST_F(StaggeredAnimationTest, Hierarchy)
     auto p3 = ConstructProperty<float>("p3", 0);
     auto p4 = ConstructProperty<float>("p4", 0);
 
-    auto seq1 = META_NS::SequentialAnimation();
-    auto par1 = META_NS::ParallelAnimation();
-    auto par2 = META_NS::ParallelAnimation();
+    auto seq1 = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto par1 = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto par2 = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
 
-    auto a1 = META_NS::KeyframeAnimation<float>();
-    auto a2 = META_NS::KeyframeAnimation<float>();
-    auto a3 = META_NS::KeyframeAnimation<float>();
-    auto a4 = META_NS::KeyframeAnimation<float>();
+    auto a1 = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
+    auto a2 = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
+    auto a3 = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
+    auto a4 = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
 
     float from[4] = { 0, 5, 10, 20 };
     float to[4] = { 10, 10, 25, 40 };
@@ -970,10 +997,10 @@ TEST_F(StaggeredAnimationTest, Hierarchy)
     SetProperties(a3, p3, from[2], to[2], TimeSpan::Milliseconds(75));
     SetProperties(a4, p4, from[3], to[3], TimeSpan::Milliseconds(150));
 
-    par2.Child(a1).Child(a2);
-    seq1.Child(a3);
-    par1.Child(seq1).Child(a4);
-    seq1.Child(par2);
+    par2.Add(a1).Add(a2);
+    seq1.Add(a3);
+    par1.Add(seq1).Add(a4);
+    seq1.Add(par2);
 
     par1.Start();
     par1.Step(GetTestClock());
@@ -1007,11 +1034,11 @@ TEST_F(StaggeredAnimationTest, Reparent)
 {
     auto p1 = ConstructProperty<float>("p1", 0);
     auto p2 = ConstructProperty<float>("p2", 0);
-    auto seq = META_NS::SequentialAnimation();
-    auto par = META_NS::ParallelAnimation();
+    auto seq = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto par = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
 
-    auto a1 = META_NS::KeyframeAnimation<float>();
-    auto a2 = META_NS::KeyframeAnimation<float>();
+    auto a1 = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
+    auto a2 = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
 
     auto a1cont = interface_cast<IContainable>(a1);
     auto a2cont = interface_cast<IContainable>(a2);
@@ -1025,7 +1052,7 @@ TEST_F(StaggeredAnimationTest, Reparent)
     SetProperties(a1, p1, from[0], to[0], duration[0]);
     SetProperties(a2, p2, from[1], to[1], duration[1]);
 
-    seq.Child(a1).Child(a2);
+    seq.Add(a1).Add(a2);
     EXPECT_EQ(a1cont->GetParent(), seq);
     EXPECT_EQ(a2cont->GetParent(), seq);
 
@@ -1038,7 +1065,7 @@ TEST_F(StaggeredAnimationTest, Reparent)
     EXPECT_TRUE(GetValue(a1.Running()));
 
     // Reparent the animation
-    par.Child(a1);
+    par.Add(a1);
     EXPECT_EQ(a1cont->GetParent(), par);
     EXPECT_EQ(a2cont->GetParent(), seq);
 
@@ -1058,19 +1085,21 @@ TEST_F(StaggeredAnimationTest, Reparent)
 
 TEST_F(StaggeredAnimationTest, Name)
 {
-    ParallelAnimation a1;
-    SequentialAnimation a2;
+    ParallelAnimation a1(CreateInstance(ClassId::ParallelAnimation));
+    SequentialAnimation a2(CreateInstance(ClassId::SequentialAnimation));
 
-    EXPECT_NE(GetValue(a1.Name()), "");
-    EXPECT_NE(GetValue(a2.Name()), "");
+    Named n1(a1);
+    Named n2(a2);
+    EXPECT_NE(GetValue(n1.Name()), "");
+    EXPECT_NE(GetValue(n2.Name()), "");
 
-    SetValue(a1.Name(), "Anim1");
-    SetValue(a2.Name(), "Anim2");
+    SetValue(n1.Name(), "Anim1");
+    SetValue(n2.Name(), "Anim2");
 
-    EXPECT_EQ(GetValue(a1.Name()), "Anim1");
-    EXPECT_EQ(a1.GetIObject()->GetName(), GetValue(a1.Name()));
-    EXPECT_EQ(GetValue(a2.Name()), "Anim2");
-    EXPECT_EQ(a2.GetIObject()->GetName(), GetValue(a2.Name()));
+    EXPECT_EQ(GetValue(n1.Name()), "Anim1");
+    EXPECT_EQ(a1.GetPtr()->GetName(), GetValue(n1.Name()));
+    EXPECT_EQ(GetValue(n2.Name()), "Anim2");
+    EXPECT_EQ(a2.GetPtr()->GetName(), GetValue(n2.Name()));
 }
 
 TEST_F(StaggeredAnimationTest, ParallelWithTrackAnimationSeeking)
@@ -1079,14 +1108,16 @@ TEST_F(StaggeredAnimationTest, ParallelWithTrackAnimationSeeking)
     static BASE_NS::vector<int> trackKeyframes = { 0, 10 };
 
     auto property = ConstructProperty<int>("Prop");
-    auto parallel = META_NS::ParallelAnimation();
-    auto anim = META_NS::TrackAnimation<int>()
-                    .Keyframes(trackKeyframes)
-                    .Timestamps(trackTimestamps)
-                    .Property(property)
-                    .Duration(TimeSpan::Milliseconds(1000));
+    auto parallel = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim = META_NS::TrackAnimation<int>(CreateInstance(ClassId::TrackAnimation));
+    anim.Keyframes(trackKeyframes)
+        .Timestamps(trackTimestamps)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
-    parallel.Child(anim);
+    ASSERT_TRUE(parallel);
+    ASSERT_TRUE(anim);
+    parallel.Add(anim);
     parallel.Start();
     parallel.Step(GetTestClock());
 

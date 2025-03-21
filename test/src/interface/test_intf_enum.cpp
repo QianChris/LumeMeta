@@ -176,8 +176,8 @@ TEST(EnumTest, Serialise)
     RegisterUserAny<Enum<MyEnumMetadata>>();
     TestSerialiser ser;
     {
-        Object obj;
-        obj.AddProperty(ConstructProperty<MyEnum>("test"));
+        Object obj(CreateInstance(ClassId::Object));
+        Metadata(obj).AddProperty(ConstructProperty<MyEnum>("test"));
         ASSERT_TRUE(ser.Export(obj));
     }
     ser.Dump("file://./enum.json");
@@ -197,14 +197,14 @@ TEST(EnumTest, SerialiseBitField)
     RegisterUserAny<Enum<MyBitFieldEnumMetadata>>();
     TestSerialiser ser;
     {
-        Object obj;
+        Object obj(CreateInstance(ClassId::Object));
         auto p = ConstructProperty<MyBitFieldEnum>("test");
         auto en = interface_pointer_cast<IEnum>(p->GetValueAny().Clone());
         ASSERT_TRUE(en);
         en->FlipValue(0, true);
         en->FlipValue(2, true);
         p->SetValueAny(*interface_cast<IAny>(en));
-        obj.AddProperty(p);
+        Metadata(obj).AddProperty(p);
         ASSERT_TRUE(ser.Export(obj));
     }
     ser.Dump("file://./enum_bitfield.json");

@@ -11,7 +11,6 @@
 #include <meta/api/function.h>
 #include <meta/api/object.h>
 #include <meta/api/property/array_element_bind.h>
-#include <meta/interface/intf_metadata.h>
 #include <meta/interface/property/array_property.h>
 #include <meta/interface/property/construct_array_property.h>
 #include <meta/interface/property/construct_property.h>
@@ -152,31 +151,32 @@ TEST(ArrayPropertyTest, TypelessAccess)
 
 TEST(ArrayPropertyTest, TypelessAccessCompatibility)
 {
-    Object a, b, c, d;
-    auto p = ConstructArrayProperty<SharedPtrIInterface>("p", { a.GetIObject(), b.GetIObject(), c.GetIObject() });
+    Object a(CreateInstance(ClassId::Object)), b(CreateInstance(ClassId::Object)), c(CreateInstance(ClassId::Object)),
+        d(CreateInstance(ClassId::Object));
+    auto p = ConstructArrayProperty<SharedPtrIInterface>("p", { a.GetPtr(), b.GetPtr(), c.GetPtr() });
     {
         ArrayPropertyLock l { p.GetProperty() };
 
-        EXPECT_TRUE(l->SetAnyAt(0, Any<IObject::Ptr> { d.GetIObject() }));
+        EXPECT_TRUE(l->SetAnyAt(0, Any<IObject::Ptr> { d.GetPtr() }));
 
         auto any = l->GetAnyAt(0);
         ASSERT_TRUE(any);
-        EXPECT_EQ(GetValue<SharedPtrIInterface>(*any), interface_pointer_cast<CORE_NS::IInterface>(d.GetIObject()));
+        EXPECT_EQ(GetValue<SharedPtrIInterface>(*any), interface_pointer_cast<CORE_NS::IInterface>(d));
         EXPECT_FALSE(p->GetAnyAt(5));
     }
 }
 
 TEST(ArrayPropertyTest, PropertyHelpers)
 {
-    Object a, b, c;
-    auto p = ConstructArrayProperty<SharedPtrIInterface>("p", { a.GetIObject(), b.GetIObject(), c.GetIObject() });
+    Object a(CreateInstance(ClassId::Object)), b(CreateInstance(ClassId::Object)), c(CreateInstance(ClassId::Object));
+    auto p = ConstructArrayProperty<SharedPtrIInterface>("p", { a.GetPtr(), b.GetPtr(), c.GetPtr() });
 
     EXPECT_FALSE(IsGetPointer(p));
     EXPECT_FALSE(IsSetPointer(p));
     EXPECT_TRUE(IsGetPointerArray(p));
     EXPECT_TRUE(IsSetPointerArray(p));
-    EXPECT_EQ(GetPointerAt(0, p), interface_pointer_cast<CORE_NS::IInterface>(a.GetIObject()));
-    EXPECT_EQ(GetPointerAt<IObject>(0, p), a.GetIObject());
+    EXPECT_EQ(GetPointerAt(0, p), interface_pointer_cast<CORE_NS::IInterface>(a));
+    EXPECT_EQ(GetPointerAt<IObject>(0, p), a.GetPtr());
 
     EXPECT_TRUE(IsArrayProperty(p));
     EXPECT_FALSE(IsArrayProperty(ConstructProperty<int>("p").GetProperty()));
@@ -186,7 +186,7 @@ TEST(ArrayPropertyTest, PropertyHelpers)
     EXPECT_TRUE(SetPointerAt(0, p, other));
     EXPECT_EQ(GetPointerAt(0, p), interface_pointer_cast<CORE_NS::IInterface>(other));
 
-    auto cp = ConstructArrayProperty<IObject::ConstPtr>("p", { a.GetIObject(), b.GetIObject(), c.GetIObject() });
+    auto cp = ConstructArrayProperty<IObject::ConstPtr>("p", { a.GetPtr(), b.GetPtr(), c.GetPtr() });
     EXPECT_TRUE(IsGetPointerArray(cp));
     EXPECT_TRUE(IsSetPointerArray(cp));
     EXPECT_TRUE(SetPointerAt(0, cp, other));

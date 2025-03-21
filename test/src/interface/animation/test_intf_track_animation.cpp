@@ -8,8 +8,7 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
-#include <meta/api/animation/modifiers/loop.h>
+#include <meta/api/animation.h>
 #include <meta/ext/object_fwd.h>
 #include <meta/interface/property/property.h>
 
@@ -71,12 +70,12 @@ TEST_F(TrackAnimationTest, TrackAnimation)
     }
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(keyframes)
-                         .Timestamps(timestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000))
-                         .KeyframeHandlers(handlers);
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(keyframes)
+        .Timestamps(timestamps)
+        .KeyframeHandlers(handlers)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     ASSERT_TRUE(GetValue(animation.Valid()));
 
@@ -179,11 +178,11 @@ TEST_F(TrackAnimationTest, AddKeyframe)
     auto added = ConstructProperty<BASE_NS::Math::Vec3>("Prop", { 100, 80, 0 });
     auto addedValue = added->GetValueAny().Clone(true);
 
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(trackKeyframes)
-                         .Timestamps(trackTimestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000));
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(trackKeyframes)
+        .Timestamps(trackTimestamps)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     ASSERT_TRUE(GetValue(animation.Valid()));
     ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
@@ -210,8 +209,8 @@ TEST_F(TrackAnimationTest, AddKeyframes)
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
     auto added = ConstructProperty<BASE_NS::Math::Vec3>("Prop", { 100, 80, 0 });
 
-    auto animation =
-        META_NS::TrackAnimation<BASE_NS::Math::Vec3>().Property(property).Duration(TimeSpan::Milliseconds(1000));
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Property(property).Duration(TimeSpan::Milliseconds(1000));
 
     size_t keyframes = 0;
     for (int i = 0; i < trackTimestamps.size() - 1; i++) {
@@ -240,11 +239,11 @@ TEST_F(TrackAnimationTest, AddKeyframes)
 TEST_F(TrackAnimationTest, RemoveKeyframe)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(trackKeyframes)
-                         .Timestamps(trackTimestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000));
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(trackKeyframes)
+        .Timestamps(trackTimestamps)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     animation.Start();
     animation.Step(this->GetTestClock());
@@ -269,11 +268,11 @@ TEST_F(TrackAnimationTest, RemoveKeyframe)
 TEST_F(TrackAnimationTest, RemoveAllKeyframes)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(trackKeyframes)
-                         .Timestamps(trackTimestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000));
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(trackKeyframes)
+        .Timestamps(trackTimestamps)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     animation.Start();
     animation.Step(this->GetTestClock());
@@ -301,12 +300,12 @@ TEST_F(TrackAnimationTest, HandlerTest)
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
 
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(keyframes)
-                         .Timestamps(timestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000))
-                         .KeyframeHandlers(handlers);
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(keyframes)
+        .KeyframeHandlers(handlers)
+        .Timestamps(timestamps)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     ASSERT_TRUE(GetValue(animation.Valid()));
 
@@ -345,12 +344,12 @@ TEST_F(TrackAnimationTest, HandlerTest2)
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
 
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(keyframes)
-                         .Timestamps(timestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000))
-                         .KeyframeHandlers(handlers);
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(keyframes)
+        .Timestamps(timestamps)
+        .KeyframeHandlers(handlers)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     ASSERT_TRUE(GetValue(animation.Valid()));
 
@@ -387,18 +386,18 @@ TEST_F(TrackAnimationTest, HandlerTest3)
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
 
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(keyframes)
-                         .Timestamps(timestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000))
-                         .KeyframeHandlers(handlers);
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(keyframes)
+        .Timestamps(timestamps)
+        .KeyframeHandlers(handlers)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(1000));
 
     ASSERT_TRUE(GetValue(animation.Valid()));
 
-    auto loop = META_NS::AnimationModifiers::Loop().LoopCount(3);
+    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(META_NS::ClassId::LoopAnimationModifier)).LoopCount(3);
     auto attach = interface_pointer_cast<META_NS::IAttach>(animation);
-    attach->Attach(loop);
+    attach->Attach(interface_pointer_cast<IObject>(loop));
 
     animation.Start();
     animation.Step(this->GetTestClock());
@@ -426,19 +425,19 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
     BASE_NS::vector<BASE_NS::Math::Vec3> keyframes = { { 50, 30, 0 }, { 100, 80, 0 }, { 170, 150, 0 },
         { 500, 500, 0 } };
     BASE_NS::Math::Vec3 initialValue = { 10, 10, 0 };
-    BASE_NS::vector<ICurve1D::Ptr> curves = { META_NS::Curves::Easing::InOutCubic(), nullptr,
-        META_NS::Curves::Easing::OutBack() };
+    BASE_NS::vector<ICurve1D::Ptr> curves = { CreateInstance<ICurve1D>(META_NS::ClassId::InOutCubicEasingCurve),
+        nullptr, CreateInstance<ICurve1D>(META_NS::ClassId::OutBackEasingCurve) };
     constexpr auto propertyName = "PropToAnimate";
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>(propertyName, initialValue);
 
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
-                         .Keyframes(keyframes)
-                         .Timestamps(timestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(animationMs))
-                         .KeyframeCurves(curves);
-    animation.AddProperty(property);
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.Keyframes(keyframes)
+        .Timestamps(timestamps)
+        .KeyframeCurves(curves)
+        .Property(property)
+        .Duration(TimeSpan::Milliseconds(animationMs));
+    Metadata(animation).AddProperty(property);
 
     ASSERT_TRUE(GetValue(animation.Valid()));
 
@@ -483,9 +482,9 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
     ASSERT_TRUE(serializer.Export(animation));
     serializer.Dump("file://./test.json");
 
-    META_NS::TrackAnimation<BASE_NS::Math::Vec3> imported;
-    ASSERT_TRUE(imported.Initialize(serializer.Import()));
-    auto importedProp = imported.Metadata().GetProperty<BASE_NS::Math::Vec3>(propertyName);
+    META_NS::TrackAnimation<BASE_NS::Math::Vec3> imported(serializer.Import());
+    ASSERT_TRUE(imported);
+    auto importedProp = Metadata(imported).GetProperty<BASE_NS::Math::Vec3>(propertyName);
     ASSERT_TRUE(importedProp);
 
     imported.Start();
@@ -493,9 +492,9 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
     EXPECT_TRUE(imported.Running()->GetValue());
 
     this->StepAnimations({ imported }, 100, step, [&](uint32_t frame) { checkFrame(importedProp, imported, frame); });
-    imported.RemoveProperty(importedProp);
+    Metadata(imported).RemoveProperty(importedProp);
 
-    animation.RemoveProperty(property);
+    Metadata(animation).RemoveProperty(property);
 }
 
 TEST_F(TrackAnimationTest, PropertyOnChanged)
@@ -508,7 +507,7 @@ TEST_F(TrackAnimationTest, PropertyOnChanged)
         property->GetValue();
     }));
 
-    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>()
+    auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>(CreateInstance(META_NS::ClassId::TrackAnimation))
                          .Keyframes(trackKeyframes)
                          .Timestamps(trackTimestamps)
                          .Property(property)
@@ -531,7 +530,7 @@ TEST_F(TrackAnimationTest, SeekingPaused)
 
     static BASE_NS::vector<float> trackTimestamps = { 0.0f, 1.f };
     static BASE_NS::vector<int> trackKeyframes = { 0, 10 };
-    auto animation = META_NS::TrackAnimation<int>()
+    auto animation = META_NS::TrackAnimation<int>(CreateInstance(META_NS::ClassId::TrackAnimation))
                          .Keyframes(trackKeyframes)
                          .Timestamps(trackTimestamps)
                          .Property(property)

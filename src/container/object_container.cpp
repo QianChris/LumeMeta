@@ -7,14 +7,12 @@
 
 #include "object_container.h"
 
-#include <algorithm>
-
 #include <meta/base/interface_utils.h>
 #include <meta/interface/intf_containable.h>
 #include <meta/interface/intf_content.h>
 #include <meta/interface/property/intf_property.h>
 
-META_BEGIN_NAMESPACE()
+META_BEGIN_INTERNAL_NAMESPACE()
 
 bool ObjectContainer::Build(const IMetadata::Ptr& data)
 {
@@ -81,4 +79,4 @@ void ObjectContainer::RemoveAll()
     }
 }
 
-META_END_NAMESPACE()
+META_END_INTERNAL_NAMESPACE()

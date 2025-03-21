@@ -4,10 +4,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/container/object_hierarchy_observer.h>
-#include <meta/api/content_object.h>
-#include <meta/api/make_callback.h>
+#include <meta/api/container/observer.h>
+#include <meta/api/util.h>
 #include <meta/base/ref_uri.h>
+#include <meta/interface/builtin_objects.h>
 #include <meta/interface/intf_startable_controller.h>
 #include <meta/interface/intf_task_queue_registry.h>
 #include <meta/interface/intf_tickable_controller.h>
@@ -83,9 +83,9 @@ protected:
     IContainer::Ptr container_;
     IContainer::Ptr container1_1_;
     IContainer::Ptr container2_1_;
-    META_NS::Object containerChild_;
-    META_NS::ContentObject contentObject_;
-    META_NS::Object contentChild_;
+    META_NS::Object containerChild_ { CreateInstance(ClassId::Object) };
+    META_NS::ContentObject contentObject_ { CreateInstance(ClassId::ContentObject) };
+    META_NS::Object contentChild_ { CreateInstance(ClassId::Object) };
     META_NS::IStartableController::Ptr controller_;
 };
 
@@ -140,9 +140,9 @@ TEST_F(UnitTest_StartableControllerTest, Lifecycle)
     auto test = interface_cast<ITestStartable>(startable);
     test->StartRecording();
     auto att = interface_pointer_cast<IAttachment>(startable);
-    EXPECT_TRUE(contentObject_.Attach(att));
+    EXPECT_TRUE(AttachmentContainer(contentObject_).Attach(att));
     EXPECT_EQ(GetValue(startable->StartableState()), StartableState::STARTED);
-    EXPECT_TRUE(contentObject_.Detach(att));
+    EXPECT_TRUE(AttachmentContainer(contentObject_).Detach(att));
     EXPECT_THAT(
         test->StopRecording(), ElementsAre(Operation::ATTACH, Operation::START, Operation::STOP, Operation::DETACH));
 }
@@ -181,7 +181,9 @@ TEST_F(UnitTest_StartableControllerTest, DynamicStart)
     startable2->StartRecording();
     SetValue(startable2Intf->StartableMode(), StartBehavior::MANUAL);
     SetValue(startableIntf->StartableMode(), StartBehavior::AUTOMATIC);
-    ASSERT_TRUE(containerIntf->Add(META_NS::Object().Attach(startableAttachment)));
+    META_NS::AttachmentContainer object(CreateInstance(ClassId::Object));
+    object.Attach(startableAttachment);
+    ASSERT_TRUE(containerIntf->Add(object));
     ASSERT_TRUE(interface_cast<IAttach>(containerIntf)->Attach(startable2Attachment));
     EXPECT_THAT(startable->GetOps(), ElementsAre(Operation::ATTACH));
     EXPECT_TRUE(container_->Add(container));
@@ -389,11 +391,11 @@ TEST_F(UnitTest_StartableControllerTest, Queue)
     auto att = interface_pointer_cast<IAttachment>(startable);
     // Attach/detach/attach, this should lead to only 1 Start (and no stops) being called
     // once we run our task queue
-    EXPECT_TRUE(contentObject_.Attach(att));
+    EXPECT_TRUE(AttachmentContainer(contentObject_).Attach(att));
     expectedOps.push_back(Operation::ATTACH);
-    EXPECT_TRUE(contentObject_.Detach(att));
+    EXPECT_TRUE(AttachmentContainer(contentObject_).Detach(att));
     expectedOps.push_back(Operation::DETACH);
-    EXPECT_TRUE(contentObject_.Attach(att));
+    EXPECT_TRUE(AttachmentContainer(contentObject_).Attach(att));
     expectedOps.push_back(Operation::ATTACH);
     EXPECT_EQ(GetValue(startable->StartableState()), StartableState::ATTACHED);
     EXPECT_THAT(test->GetOps(), ElementsAreArray(expectedOps));
@@ -426,7 +428,7 @@ TEST_F(UnitTest_StartableControllerTest, Queue)
     EXPECT_THAT(test->GetOps(), ElementsAreArray(expectedOps));
 
     // Detach
-    EXPECT_TRUE(contentObject_.Detach(att));
+    EXPECT_TRUE(AttachmentContainer(contentObject_).Detach(att));
     expectedOps.push_back(Operation::DETACH);
     EXPECT_EQ(GetValue(startable->StartableState()), StartableState::DETACHED);
     EXPECT_THAT(test->GetOps(), ElementsAreArray(expectedOps));

@@ -2,7 +2,6 @@
 #include <deque>
 
 #include <meta/api/make_callback.h>
-#include <meta/api/object.h>
 #include <meta/base/namespace.h>
 #include <meta/interface/intf_task_queue.h>
 

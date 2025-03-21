@@ -11,9 +11,10 @@
 
 #include <base/util/uid_util.h>
 
-#include <meta/api/curves/easing_curve.h>
+#include <meta/api/animation.h>
 #include <meta/ext/object_fwd.h>
 #include <meta/interface/builtin_objects.h>
+#include <meta/interface/curves/intf_easing_curve.h>
 #include <meta/interface/intf_object_registry.h>
 
 #include "util.h"

@@ -6,9 +6,8 @@
 
 #include <gtest/gtest.h>
 
-#include <meta/api/content_object.h>
 #include <meta/api/iteration.h>
-#include <meta/api/loaders/json_content_loader.h>
+#include <meta/api/object.h>
 #include <meta/interface/loaders/intf_class_content_loader.h>
 
 #include "serialisation_utils.h"
@@ -23,10 +22,10 @@ TEST(ContentTest, Search)
 {
     auto content = CreateTestType<IObject>("Content");
 
-    ContentObject co;
+    ContentObject co(CreateInstance(ClassId::ContentObject));
     co.SetContent(content);
     auto c = CreateTestContainer<IContainer>();
-    c->Add(co);
+    c->Add(co.GetPtr());
     EXPECT_FALSE(c->FindAny({ "Content", TraversalType::NO_HIERARCHY }));
     EXPECT_EQ(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }), content);
     EXPECT_EQ(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER, { ITestType::UID } }), content);
@@ -53,10 +52,10 @@ TEST(ContentTest, SearchContentContainer)
     auto content = CreateTestContainer<IContainer>();
     content->Add(ccontent);
 
-    ContentObject co;
+    ContentObject co(CreateInstance(ClassId::ContentObject));
     co.SetContent(interface_pointer_cast<IObject>(content));
     auto c = CreateTestContainer<IContainer>();
-    c->Add(co);
+    c->Add(co.GetPtr());
     EXPECT_FALSE(c->FindAny({ "Content", TraversalType::NO_HIERARCHY }));
     EXPECT_EQ(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }), ccontent);
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 3);
@@ -76,10 +75,10 @@ TEST(ContentTest, Iteration)
     auto content = CreateTestContainer<IContainer>();
     content->Add(ccontent);
 
-    ContentObject co;
+    ContentObject co(CreateInstance(ClassId::ContentObject));
     co.SetContent(interface_pointer_cast<IObject>(content));
     auto c = CreateTestContainer<IContainer>();
-    c->Add(co);
+    c->Add(co.GetPtr());
 
     {
         BASE_NS::vector<IObject::Ptr> vec;
@@ -105,7 +104,7 @@ TEST(ContentTest, Serialization)
     {
         TestSerialiser ser;
 
-        ContentObject co;
+        ContentObject co(CreateInstance(ClassId::ContentObject));
         co.SerializeContent(false);
         co.SetContent(CreateTestType<IObject>("Content"));
         ASSERT_TRUE(ser.Export(co));
@@ -117,7 +116,7 @@ TEST(ContentTest, Serialization)
     {
         TestSerialiser ser;
 
-        ContentObject co;
+        ContentObject co(CreateInstance(ClassId::ContentObject));
         co.SerializeContent(true);
         co.SetContent(CreateTestType<IObject>("Content"));
         ASSERT_TRUE(ser.Export(co));
@@ -133,7 +132,7 @@ TEST(ContentTest, Serialization)
 
 TEST(ContentTest, Defaults)
 {
-    ContentObject co;
+    ContentObject co(CreateInstance(ClassId::ContentObject));
     const auto objectFlags = interface_cast<IObjectFlags>(co);
     ASSERT_TRUE(objectFlags);
     EXPECT_FALSE(objectFlags->GetObjectFlags().IsSet(META_NS::ObjectFlagBits::SERIALIZE_HIERARCHY));
@@ -142,7 +141,7 @@ TEST(ContentTest, Defaults)
 TEST(ContentTest, ObjectFlagsNoHierarchy)
 {
     TestSerialiser ser;
-    ContentObject co;
+    ContentObject co(CreateInstance(ClassId::ContentObject));
     co.SetContent(CreateTestType<IObject>("Content"));
 
     // By default ContentObject should not export its Content (i.e. ObjectFlagBits::SERIALIZE_HIERARCHY is not set)
@@ -157,12 +156,12 @@ TEST(ContentTest, ObjectFlagsNoHierarchy)
 TEST(ContentTest, ObjectFlagsHierarchy)
 {
     TestSerialiser ser;
-    ContentObject co;
+    ContentObject co(CreateInstance(ClassId::ContentObject));
     co.SetContent(CreateTestType<IObject>("Content"));
 
     auto flagsIntfPtr = interface_cast<IObjectFlags>(co);
     ASSERT_TRUE(flagsIntfPtr);
-    SetObjectFlags(co, ObjectFlagBits::SERIALIZE_HIERARCHY, true);
+    SetObjectFlags(co.GetPtr(), ObjectFlagBits::SERIALIZE_HIERARCHY, true);
 
     ASSERT_TRUE(ser.Export(co));
     auto imported = ser.Import<IContent>();
@@ -175,8 +174,8 @@ TEST(ContentTest, ObjectFlagsHierarchy)
 
 TEST(ContentTest, ContentRequiredInterfaces)
 {
-    ContentObject co;
-    EXPECT_TRUE(co.SetRequiredInterfaces({ ITestType::UID }));
+    ContentObject co(CreateInstance(ClassId::ContentObject));
+    EXPECT_TRUE(RequiredInterfaces(co).SetRequiredInterfaces({ ITestType::UID }));
 
     auto correctType = GetObjectRegistry().Create(ClassId::TestType);
     auto wrongType = GetObjectRegistry().Create(ClassId::Object);
@@ -188,7 +187,7 @@ TEST(ContentTest, ContentRequiredInterfaces)
     EXPECT_EQ(co.Content()->GetValue(), correctType);
 
     // Relax requirements
-    EXPECT_TRUE(co.SetRequiredInterfaces({}));
+    EXPECT_TRUE(RequiredInterfaces(co).SetRequiredInterfaces({}));
     EXPECT_EQ(co.Content()->GetValue(), correctType);
 
     EXPECT_TRUE(co.SetContent(wrongType));

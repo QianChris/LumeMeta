@@ -20,7 +20,7 @@
 
 #include "object.h"
 
-META_BEGIN_NAMESPACE()
+META_BEGIN_INTERNAL_NAMESPACE()
 
 class ContentObject : public IntroduceInterfaces<MetaObject, IContent, IRequiredInterfaces, IIterable> {
     META_OBJECT(ContentObject, ClassId::ContentObject, IntroduceInterfaces)
@@ -137,13 +137,9 @@ private:
     BASE_NS::vector<TypeId> requiredInterfaces_;
 };
 
-namespace Internal {
-
 IObjectFactory::Ptr GetContentObjectFactory()
 {
     return ContentObject::GetFactory();
 }
 
-} // namespace Internal
-
-META_END_NAMESPACE()
+META_END_INTERNAL_NAMESPACE()

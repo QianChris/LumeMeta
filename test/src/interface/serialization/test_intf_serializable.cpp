@@ -4,7 +4,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/object.h>
 #include <meta/base/meta_types.h>
 #include <meta/ext/any_builder.h>
 #include <meta/ext/implementation_macros.h>

@@ -8,9 +8,7 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/object.h>
-#include <meta/interface/animation/builtin_animations.h>
-#include <meta/interface/animation/intf_animation.h>
+#include <meta/api/animation.h>
 #include <meta/interface/animation/intf_animation_controller.h>
 #include <meta/interface/property/construct_property.h>
 #include <meta/interface/property/property.h>
@@ -103,9 +101,9 @@ TEST_F(AnimationTest, KeyframeAnimationSerialization)
         ani->To()->SetValue(IAny::Ptr(new Any<int>(10)));
         ani->Duration()->SetValue(TimeSpan::Milliseconds(100));
 
-        Object obj;
-        obj.AddProperty(p);
-        obj.Attach(interface_pointer_cast<IAttachment>(pani));
+        Object obj(CreateInstance(ClassId::Object));
+        Metadata(obj).AddProperty(p);
+        AttachmentContainer(obj).Attach(pani);
         ASSERT_TRUE(ser.Export(obj));
         ser.Dump("file://./test.json");
     }
@@ -252,8 +250,8 @@ TEST_F(AnimationTest, ImplicitAnimationSerialization)
         EXPECT_TRUE(pani->Property()->SetValue(p));
         EXPECT_TRUE(ani->Duration()->SetValue(TimeSpan::Milliseconds(100)));
 
-        Object obj;
-        obj.AddProperty(p);
+        Object obj(CreateInstance(ClassId::Object));
+        Metadata(obj).AddProperty(p);
         ASSERT_TRUE(ser.Export(obj));
         ser.Dump("file://./test.json");
     }
@@ -304,9 +302,9 @@ TEST_F(AnimationTest, ImplicitAnimationSerializationWithAttachment)
         EXPECT_TRUE(pani->Property()->SetValue(p));
         EXPECT_TRUE(ani->Duration()->SetValue(TimeSpan::Milliseconds(100)));
 
-        Object obj;
-        obj.AddProperty(p);
-        obj.Attach(interface_pointer_cast<IAttachment>(pani));
+        Object obj(CreateInstance(ClassId::Object));
+        Metadata(obj).AddProperty(p);
+        AttachmentContainer(obj).Attach(interface_pointer_cast<IAttachment>(pani));
         ASSERT_TRUE(ser.Export(obj));
         ser.Dump("file://./test.json");
     }

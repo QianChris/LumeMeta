@@ -5,13 +5,8 @@
 #include <gtest/gtest.h>
 
 #include <meta/api/container/find_containers.h>
-#include <meta/api/make_callback.h>
 #include <meta/api/object.h>
 #include <meta/base/ref_uri.h>
-#include <meta/interface/intf_attachment.h>
-#include <meta/interface/intf_container_query.h>
-#include <meta/interface/intf_metadata.h>
-#include <meta/interface/intf_required_interfaces.h>
 
 using namespace ::testing;
 
@@ -26,7 +21,7 @@ TEST(ContainerInfoTest, Self)
     ASSERT_NE(info, nullptr);
     EXPECT_THAT(info->FindAllContainers(), SizeIs(1)); // attachments container
     */
-    Object object;
+    Object object(CreateInstance(ClassId::Object));
     EXPECT_THAT(FindAllContainers(object), SizeIs(1)); // attachments container
 }
 

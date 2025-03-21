@@ -5,7 +5,6 @@
 
 #include <meta/api/object.h>
 #include <meta/base/ref_uri.h>
-#include <meta/interface/intf_metadata.h>
 
 #include "testing_objects.h"
 #include "util.h"
@@ -269,59 +268,56 @@ TEST(RefUriTest, ObjectHierarchyTraversalWithProperty)
 TEST(RefUriTest, ResolveWithProperties)
 {
     {
-        Object obj;
+        Metadata obj(CreateInstance(META_NS::ClassId::Object));
         obj.AddProperty(CreateProperty<int>("prop", 0));
-        EXPECT_FALSE(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop")));
+        EXPECT_FALSE(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop")));
         RefUri abs("ref:/$prop");
         abs.SetAbsoluteInterpretation(true);
-        EXPECT_TRUE(obj.GetInterface<IObjectInstance>()->Resolve(abs));
+        EXPECT_TRUE(obj.GetPtr<IObjectInstance>()->Resolve(abs));
     }
     {
-        Object obj;
+        Metadata obj(CreateInstance(META_NS::ClassId::Object));
         obj.AddProperty(CreateProperty<IObject::Ptr>("prop", nullptr));
-        EXPECT_FALSE(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop")));
+        EXPECT_FALSE(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop")));
     }
     {
-        Object obj;
-        Object obj2;
-        auto prop = CreateProperty<IObject::Ptr>("prop", obj2.GetIObject());
+        Metadata obj(CreateInstance(META_NS::ClassId::Object));
+        Metadata obj2(CreateInstance(META_NS::ClassId::Object));
+        auto prop = CreateProperty<IObject::Ptr>("prop", obj2.GetPtr<IObject>());
         obj.AddProperty(prop);
-        EXPECT_EQ(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop")), obj2.GetInterfacePtr<IObject>());
+        EXPECT_EQ(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop")), obj2.GetPtr<IObject>());
         RefUri abs("ref:/$prop");
         abs.SetAbsoluteInterpretation(true);
-        EXPECT_EQ(obj.GetInterface<IObjectInstance>()->Resolve(abs), interface_pointer_cast<IObject>(prop));
+        EXPECT_EQ(obj.GetPtr<IObjectInstance>()->Resolve(abs), interface_pointer_cast<IObject>(prop));
     }
     {
-        Object obj;
-        Object obj2;
-        obj.AddProperty(CreateProperty<IObject::Ptr>("prop", obj2.GetIObject()));
+        Metadata obj(CreateInstance(META_NS::ClassId::Object));
+        Metadata obj2(CreateInstance(META_NS::ClassId::Object));
+        obj.AddProperty(CreateProperty<IObject::Ptr>("prop", obj2.GetPtr<IObject>()));
         obj2.AddProperty(CreateProperty<IObject::Ptr>("prop", nullptr));
-        EXPECT_EQ(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop")),
-            obj2.GetInterfacePtr<IObjectInstance>());
-        EXPECT_FALSE(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop/$prop")));
+        EXPECT_EQ(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop")), obj2.GetPtr<IObjectInstance>());
+        EXPECT_FALSE(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop/$prop")));
     }
     {
-        Object obj;
-        Object obj2;
-        Object obj3;
-        obj.AddProperty(CreateProperty<IObject::Ptr>("prop", obj2.GetIObject()));
-        obj2.AddProperty(CreateProperty<IObject::Ptr>("prop", obj3.GetIObject()));
-        EXPECT_EQ(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop")),
-            obj2.GetInterfacePtr<IObjectInstance>());
-        EXPECT_EQ(obj.GetInterface<IObjectInstance>()->Resolve(RefUri("ref:/$prop/$prop")),
-            obj3.GetInterfacePtr<IObjectInstance>());
+        Metadata obj(CreateInstance(META_NS::ClassId::Object));
+        Metadata obj2(CreateInstance(META_NS::ClassId::Object));
+        Metadata obj3(CreateInstance(META_NS::ClassId::Object));
+        obj.AddProperty(CreateProperty<IObject::Ptr>("prop", obj2.GetPtr<IObject>()));
+        obj2.AddProperty(CreateProperty<IObject::Ptr>("prop", obj3.GetPtr<IObject>()));
+        EXPECT_EQ(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop")), obj2.GetPtr<IObjectInstance>());
+        EXPECT_EQ(obj.GetPtr<IObjectInstance>()->Resolve(RefUri("ref:/$prop/$prop")), obj3.GetPtr<IObjectInstance>());
     }
 }
 
 TEST(RefUriTest, IObjectResolveAndSelf)
 {
-    Object obj;
-    Object obj2;
-    obj.AddProperty(CreateProperty<IObject::Ptr>("prop", obj2.GetIObject()));
-    EXPECT_EQ(obj.GetIObject()->Resolve(RefUri("ref:/$prop")), obj2.GetIObject());
-    EXPECT_EQ(obj.GetIObject()->GetSelf(), obj.GetIObject());
-    EXPECT_EQ(Resolve(obj.GetIObject(), RefUri("ref:/$prop")), obj2.GetIObject());
-    EXPECT_EQ(GetSelf(obj.GetIObject()), obj.GetIObject());
+    Metadata obj(CreateInstance(META_NS::ClassId::Object));
+    Metadata obj2(CreateInstance(META_NS::ClassId::Object));
+    obj.AddProperty(CreateProperty<IObject::Ptr>("prop", obj2.GetPtr<IObject>()));
+    EXPECT_EQ(obj.GetPtr<IObject>()->Resolve(RefUri("ref:/$prop")), obj2.GetPtr<IObject>());
+    EXPECT_EQ(obj.GetPtr<IObject>()->GetSelf(), obj.GetPtr<IObject>());
+    EXPECT_EQ(Resolve(obj.GetPtr<IObject>(), RefUri("ref:/$prop")), obj2.GetPtr<IObject>());
+    EXPECT_EQ(GetSelf(obj.GetPtr<IObject>()), obj.GetPtr<IObject>());
 }
 
 } // namespace Test

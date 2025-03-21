@@ -22,8 +22,8 @@ class ProxyObjectTest : public ::testing::Test {
 protected:
     void SetUp() override
     {
-        object_.AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop1, 42.f));
-        object_.AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop2, 21.f));
+        Metadata(object_).AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop1, 42.f));
+        Metadata(object_).AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop2, 21.f));
 
         proxy_ = GetObjectRegistry().Create<IProxyObject>(ClassId::ProxyObject);
         ASSERT_TRUE(proxy_);
@@ -37,10 +37,10 @@ protected:
 
     void SetPropValue(const char* propertyName, float value)
     {
-        object_.Metadata().GetProperty<float>(propertyName)->SetValue(value);
+        Metadata(object_).GetProperty<float>(propertyName)->SetValue(value);
     }
 
-    Object object_;
+    Object object_ { CreateInstance(ClassId::Object) };
     IProxyObject::Ptr proxy_;
 };
 
@@ -103,7 +103,7 @@ TEST_F(ProxyObjectTest, AddProperty)
 
     // Add a property to object, it should automatically be added to proxy
     auto prop3 = ConstructProperty<float>(GetObjectRegistry(), prop3Name, 2.f);
-    object_.AddProperty(prop3);
+    Metadata(object_).AddProperty(prop3);
 
     auto meta = interface_pointer_cast<IMetadata>(proxy_);
     ASSERT_TRUE(meta);
@@ -118,10 +118,10 @@ TEST_F(ProxyObjectTest, AddProperty)
 TEST_F(ProxyObjectTest, RemoveProperty)
 {
     // Remove prop2 from our source object
-    auto prop2 = object_.Metadata().GetProperty<float>(Prop2);
+    auto prop2 = Metadata(object_).GetProperty<float>(Prop2);
     ASSERT_TRUE(prop2);
-    object_.RemoveProperty(prop2);
-    ASSERT_FALSE(object_.Metadata().GetProperty<float>(Prop2));
+    Metadata(object_).RemoveProperty(prop2);
+    ASSERT_FALSE(Metadata(object_).GetProperty<float>(Prop2));
 
     // Property should be removed from proxy object as well
     auto meta = interface_pointer_cast<IMetadata>(proxy_);
@@ -134,9 +134,9 @@ TEST_F(ProxyObjectTest, RemoveProperty)
 
     // Remove property from object_, it should not be removed from proxy since
     // it has been set to a specific value
-    auto prop1 = object_.Metadata().GetProperty<float>(Prop1);
+    auto prop1 = Metadata(object_).GetProperty<float>(Prop1);
     ASSERT_TRUE(prop1);
-    object_.RemoveProperty(prop2);
+    Metadata(object_).RemoveProperty(prop2);
     prop1Proxy = meta->GetProperty<float>(Prop1);
     ASSERT_TRUE(prop1Proxy);
     EXPECT_EQ(prop1Proxy->GetValue(), 100.f);
@@ -154,7 +154,7 @@ TEST_F(ProxyObjectTest, Dynamic)
 
     // Add a property to object, it should not be added to proxy since Dynamic=false
     auto prop3 = ConstructProperty<float>(GetObjectRegistry(), prop3Name, 2.f);
-    object_.AddProperty(prop3);
+    Metadata(object_).AddProperty(prop3);
 
     auto meta = interface_pointer_cast<META_NS::IMetadata>(proxy_);
     ASSERT_TRUE(meta);
@@ -164,7 +164,7 @@ TEST_F(ProxyObjectTest, Dynamic)
     // Set Dynamic to false, then remove one property (it should be gone from proxy metadata).
     // Then, set dynamic back to true, the property should re-appear
     proxy_->Dynamic()->SetValue(false);
-    object_.RemoveProperty(prop3);
+    Metadata(object_).RemoveProperty(prop3);
     EXPECT_TRUE(meta->GetProperty<float>(prop3Name));
     proxy_->Dynamic()->SetValue(true);
     EXPECT_FALSE(meta->GetProperty<float>(prop3Name));
@@ -183,7 +183,7 @@ TEST_F(ProxyObjectTest, ProxyOfProxy)
     static constexpr auto prop3Name = "prop3";
     // Add a property to object, it should be added to proxy of proxy
     auto prop3 = ConstructProperty<float>(GetObjectRegistry(), prop3Name, 2.f);
-    object_.AddProperty(prop3);
+    Metadata(object_).AddProperty(prop3);
 
     auto meta = interface_pointer_cast<IMetadata>(proxy2);
     ASSERT_TRUE(meta);
@@ -198,7 +198,7 @@ TEST_F(ProxyObjectTest, ProxyOfProxy)
     ASSERT_FALSE(interface_cast<IObjectFlags>(proxy2)->GetObjectFlags() & ObjectFlagBits::SERIALIZE);
 
     // Remove prop3 from object_, should be gone from proxy2 as well
-    object_.RemoveProperty(prop3);
+    Metadata(object_).RemoveProperty(prop3);
     EXPECT_FALSE(meta->GetProperty<float>(prop3Name));
 
     ASSERT_FALSE(interface_cast<IObjectFlags>(proxy2)->GetObjectFlags() & ObjectFlagBits::SERIALIZE);
@@ -216,8 +216,8 @@ TEST_F(ProxyObjectTest, ProxyOfProxy)
 
 TEST_F(ProxyObjectTest, ProxyMember)
 {
-    Object p2obj;
-    p2obj.AddProperty(CreateProperty<int>("pint", 2));
+    Object p2obj(CreateInstance(ClassId::Object));
+    Metadata(p2obj).AddProperty(CreateProperty<int>("pint", 2));
     auto proxy2 = GetObjectRegistry().Create<IProxyObject>(ClassId::ProxyObject);
     proxy2->SetTarget(p2obj);
     interface_cast<IMetadata>(proxy_)->AddProperty(
@@ -235,13 +235,13 @@ TEST_F(ProxyObjectTest, ProxyMember)
     }
 
     // Create new proxy hierarchy and set it as target
-    Object object;
+    Object object(CreateInstance(ClassId::Object));
     auto nproxy = GetObjectRegistry().Create<IProxyObject>(ClassId::ProxyObject);
     ASSERT_TRUE(nproxy);
 
-    Object np2obj;
-    np2obj.AddProperty(CreateProperty<int>("pint", 7));
-    np2obj.AddProperty(CreateProperty<int>("pint2", 2));
+    Object np2obj(CreateInstance(ClassId::Object));
+    Metadata(np2obj).AddProperty(CreateProperty<int>("pint", 7));
+    Metadata(np2obj).AddProperty(CreateProperty<int>("pint2", 2));
     auto nproxy2 = GetObjectRegistry().Create<IProxyObject>(ClassId::ProxyObject);
     nproxy2->SetTarget(np2obj);
     interface_cast<IMetadata>(nproxy)->AddProperty(
@@ -300,8 +300,8 @@ TEST_F(ProxyObjectTest, InternalBindingIsScheduledForCreatingBeforeGettinProxyPr
 {
     proxy_->AddInternalProxy(Prop2, Prop1);
 
-    auto objectProp1 = object_.Metadata().GetProperty<float>(Prop1);
-    auto objectProp2 = object_.Metadata().GetProperty<float>(Prop2);
+    auto objectProp1 = Metadata(object_).GetProperty<float>(Prop1);
+    auto objectProp2 = Metadata(object_).GetProperty<float>(Prop2);
     auto proxyProperty = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop1);
 
     auto internalProxyProp2 = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop2);
@@ -321,8 +321,8 @@ TEST_F(ProxyObjectTest, InternalBindingIsScheduledForCreatingBeforeGettinProxyPr
 
 TEST_F(ProxyObjectTest, InternalBindingRemovesBindToTargetAndBindToInternalProperty)
 {
-    auto objectProp1 = object_.Metadata().GetProperty<float>(Prop1);
-    auto objectProp2 = object_.Metadata().GetProperty<float>(Prop2);
+    auto objectProp1 = Metadata(object_).GetProperty<float>(Prop1);
+    auto objectProp2 = Metadata(object_).GetProperty<float>(Prop2);
     auto proxyProperty = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop1);
 
     auto internalProxyProp2 = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop2);
@@ -347,9 +347,9 @@ TEST_F(ProxyObjectTest, InternalBindWorksAfterChangingProxyTarget)
     auto proxyProperty = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop1);
     auto internalProxyProp2 = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop2);
 
-    auto anotherObject = Object();
-    anotherObject.AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop1, 100.F));
-    anotherObject.AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop2, 200.F));
+    auto anotherObject = Object(CreateInstance(ClassId::Object));
+    Metadata(anotherObject).AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop1, 100.F));
+    Metadata(anotherObject).AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop2, 200.F));
 
     proxy_->SetTarget(anotherObject);
 
@@ -366,10 +366,10 @@ TEST_F(ProxyObjectTest, InternalBindIsRemovedWhenNewTargetDoesNotHaveSourcePrope
 
     auto internalProxyProp2 = interface_cast<IMetadata>(proxy_)->GetProperty<float>(Prop2);
 
-    auto anotherObject = Object();
-    anotherObject.AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop2, 200.F));
+    auto anotherObject = Object(CreateInstance(ClassId::Object));
+    Metadata(anotherObject).AddProperty(ConstructProperty<float>(GetObjectRegistry(), Prop2, 200.F));
 
-    auto objectProp2 = anotherObject.Metadata().GetProperty<float>(Prop2);
+    auto objectProp2 = Metadata(anotherObject).GetProperty<float>(Prop2);
 
     proxy_->SetTarget(anotherObject);
     EXPECT_THAT(internalProxyProp2->GetValue(), FloatEq(200.0F));

@@ -20,9 +20,8 @@
 #include <meta/interface/intf_named.h>
 #include <meta/interface/intf_object.h>
 #include <meta/interface/property/intf_property.h>
+#include <meta/interface/property/property_events.h>
 #include <meta/interface/simple_event.h>
-
-#include "meta/interface/property/property_events.h"
 
 META_BEGIN_NAMESPACE()
 

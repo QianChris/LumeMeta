@@ -227,8 +227,8 @@ TEST(SerializationTest, AutoSerialisationIContainer)
 
 TEST(SerializationTest, AutoSerialisationIAttach)
 {
-    Object original;
-    Object other;
+    AttachmentContainer original(CreateInstance(ClassId::Object));
+    Object other(CreateInstance(ClassId::Object));
     TestSerialiser ser;
     {
         original.Attach(CreateTestAttachment<IAttachment>("Test1"));
@@ -236,7 +236,7 @@ TEST(SerializationTest, AutoSerialisationIAttach)
         original.Attach(CreateTestAttachment<IAttachment>("Test3"));
         // use non-iattachment object
         original.Attach(other);
-        ASSERT_TRUE(ser.Export(original));
+        ASSERT_TRUE(ser.Export(Object(original)));
         ser.Dump("file://./test.json");
     }
     auto obj = ser.Import<IAttach>();
@@ -247,7 +247,7 @@ TEST(SerializationTest, AutoSerialisationIAttach)
 TEST(SerializationTest, AutoSerialisationIObjectFlags)
 {
     {
-        Object obj;
+        Object obj(CreateInstance(ClassId::Object));
         auto flags = interface_cast<IObjectFlags>(obj)->GetObjectFlags();
         TestSerialiser ser;
         ASSERT_TRUE(ser.Export(obj));
@@ -256,7 +256,7 @@ TEST(SerializationTest, AutoSerialisationIObjectFlags)
         EXPECT_EQ(imp->GetObjectFlags(), flags);
     }
     {
-        Object obj;
+        Object obj(CreateInstance(ClassId::Object));
         SetObjectFlags(obj, ObjectFlagBits::INTERNAL, true);
         auto flags = interface_cast<IObjectFlags>(obj)->GetObjectFlags();
         TestSerialiser ser;

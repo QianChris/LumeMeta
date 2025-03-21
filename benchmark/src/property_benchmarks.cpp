@@ -168,14 +168,14 @@ BENCHMARK_CAPTURE(EvaluatingProperty, Integer, 10);
 BENCHMARK_CAPTURE(EvaluatingPropertyChain, Integer, 10);
 
 // IObject
-BENCHMARK_CAPTURE(GettingPropertyValue, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(SettingPropertyValue, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(SettingPropertyValueWithDependency, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(SettingPropertyValueWithDependencyChain, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(BindingProperty, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(BindingPropertyChain, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(EvaluatingProperty, IObject, Object().GetIObject());
-BENCHMARK_CAPTURE(EvaluatingPropertyChain, IObject, Object().GetIObject());
+BENCHMARK_CAPTURE(GettingPropertyValue, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(SettingPropertyValue, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(SettingPropertyValueWithDependency, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(SettingPropertyValueWithDependencyChain, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(BindingProperty, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(BindingPropertyChain, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(EvaluatingProperty, IObject, CreateInstance(ClassId::Object));
+BENCHMARK_CAPTURE(EvaluatingPropertyChain, IObject, CreateInstance(ClassId::Object));
 
 // Custom interface
 BENCHMARK_CAPTURE(GettingPropertyValue, IBenchmarkType, CreateBenchmarkType());

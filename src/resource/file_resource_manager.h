@@ -29,17 +29,17 @@ public:
     BASE_NS::vector<CORE_NS::ResourceInfo> GetResourceInfos(BASE_NS::string_view group) const override;
     CORE_NS::ResourceInfo GetResourceInfo(const CORE_NS::ResourceId&) const override;
     CORE_NS::IResource::Ptr GetResource(
-        const CORE_NS::ResourceId&, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context = nullptr) override;
+        const CORE_NS::ResourceId&, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
     BASE_NS::vector<CORE_NS::IResource::Ptr> GetResources(
-        BASE_NS::string_view group, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context = nullptr) override;
+        BASE_NS::string_view group, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
     Status Export(BASE_NS::string_view filePath) override;
 
     bool AddResource(const CORE_NS::IResource::Ptr& resource) override;
     bool AddResource(const CORE_NS::IResource::Ptr& resource, BASE_NS::string_view path) override;
     bool AddResource(const CORE_NS::ResourceId&, CORE_NS::ResourceType, BASE_NS::string_view path,
         const CORE_NS::IResourceOptions::ConstPtr&) override;
-    bool ReloadResource(const CORE_NS::IResource::Ptr& resource,
-        const BASE_NS::shared_ptr<CORE_NS::IInterface>& context = nullptr) override;
+    bool ReloadResource(
+        const CORE_NS::IResource::Ptr& resource, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
     bool PurgeResource(const CORE_NS::ResourceId&) override;
     bool RemoveResource(const CORE_NS::ResourceId&) override;
     size_t PurgeGroup(BASE_NS::string_view group) override;

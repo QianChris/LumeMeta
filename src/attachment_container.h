@@ -16,7 +16,7 @@
 
 #include "container/flat_container.h"
 
-META_BEGIN_NAMESPACE()
+META_BEGIN_INTERNAL_NAMESPACE()
 
 class AttachmentContainer : public IntroduceInterfaces<MinimalObject, FlatContainer, IAttachmentContainer> {
     using Super = IntroduceInterfaces<MinimalObject, FlatContainer, IAttachmentContainer>;
@@ -69,6 +69,6 @@ private:
     static constexpr IContainer::SizeType N_POS = std::numeric_limits<IContainer::SizeType>::max();
 };
 
-META_END_NAMESPACE()
+META_END_INTERNAL_NAMESPACE()
 
 #endif

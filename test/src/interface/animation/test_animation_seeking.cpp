@@ -8,7 +8,8 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/animation/animation.h>
+#include <meta/api/animation.h>
+#include <meta/api/object.h>
 #include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/property/construct_property.h>
 
@@ -21,15 +22,31 @@ namespace Test {
 namespace {
 
 template<typename AnimationType>
-IStartableAnimation::Ptr CreateAnimation(const IProperty::WeakPtr& property)
+IStartableAnimation::Ptr CreateAnimation(const IProperty::WeakPtr& property);
+
+template<>
+IStartableAnimation::Ptr CreateAnimation<SequentialAnimation>(const IProperty::WeakPtr& property)
 {
-    return AnimationType().Child(KeyframeAnimation<float>());
+    return SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
+        .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation)));
+}
+
+template<>
+IStartableAnimation::Ptr CreateAnimation<ParallelAnimation>(const IProperty::WeakPtr& property)
+{
+    return ParallelAnimation(CreateInstance(ClassId::ParallelAnimation))
+        .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation)));
 }
 
 template<>
 IStartableAnimation::Ptr CreateAnimation<KeyframeAnimation<float>>(const IProperty::WeakPtr& property)
 {
-    return KeyframeAnimation<float>().From(0.0F).To(1.0F).Duration(TimeSpan::Milliseconds(1000)).Property(property);
+    KeyframeAnimation<float> animation(CreateInstance(ClassId::KeyframeAnimation));
+    animation.From(0.0F);
+    animation.To(1.0F);
+    animation.Duration(TimeSpan::Milliseconds(1000));
+    animation.Property(property);
+    return animation;
 }
 
 } // namespace

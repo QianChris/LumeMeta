@@ -14,6 +14,7 @@
 #include <meta/interface/intf_any.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_value.h>
+#include <meta/interface/property/array_property.h>
 #include <meta/interface/property/intf_modifier.h>
 #include <meta/interface/property/property.h>
 

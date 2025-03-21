@@ -5,7 +5,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <meta/api/object.h>
 #include <meta/ext/object_fwd.h>
 
 #include "serialisation_utils.h"
