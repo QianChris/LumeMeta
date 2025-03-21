@@ -268,7 +268,7 @@ bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource, B
     resources_[id.group][id.name] = BASE_NS::make_shared<ResourceData>(BASE_NS::move(d));
     return true;
 }
-bool FileResourceManager::AddResource(const CORE_NS::ResourceId& id, CORE_NS::ResourceType type,
+bool FileResourceManager::AddResource(const CORE_NS::ResourceId& id, const CORE_NS::ResourceType& type,
     BASE_NS::string_view path, const CORE_NS::IResourceOptions::ConstPtr& options)
 {
     std::unique_lock lock { mutex_ };

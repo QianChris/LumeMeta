@@ -36,8 +36,9 @@ public:
 
     bool AddResource(const CORE_NS::IResource::Ptr& resource) override;
     bool AddResource(const CORE_NS::IResource::Ptr& resource, BASE_NS::string_view path) override;
-    bool AddResource(const CORE_NS::ResourceId&, CORE_NS::ResourceType, BASE_NS::string_view path,
+    bool AddResource(const CORE_NS::ResourceId&, const CORE_NS::ResourceType&, BASE_NS::string_view path,
         const CORE_NS::IResourceOptions::ConstPtr&) override;
+
     bool ReloadResource(
         const CORE_NS::IResource::Ptr& resource, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
     bool PurgeResource(const CORE_NS::ResourceId&) override;

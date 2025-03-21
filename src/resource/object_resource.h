@@ -31,8 +31,8 @@ public:
     BASE_NS::string GetResourceName() const override;
     BASE_NS::Uid GetResourceType() const override;
     CORE_NS::IResource::Ptr LoadResource(const StorageInfo&) const override;
-    bool SaveResource(CORE_NS::IResource::ConstPtr, const StorageInfo&) const override;
-    bool ReloadResource(const StorageInfo&, CORE_NS::IResource::Ptr) const override;
+    bool SaveResource(const CORE_NS::IResource::ConstPtr&, const StorageInfo&) const override;
+    bool ReloadResource(const StorageInfo&, const CORE_NS::IResource::Ptr&) const override;
 
     void SetResourceType(const ObjectId& id) override;
 

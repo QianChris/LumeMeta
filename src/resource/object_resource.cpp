@@ -62,7 +62,7 @@ CORE_NS::IResource::Ptr ObjectResourceType::LoadResource(const StorageInfo& s) c
     }
     return res;
 }
-bool ObjectResourceType::SaveResource(CORE_NS::IResource::ConstPtr p, const StorageInfo& s) const
+bool ObjectResourceType::SaveResource(const CORE_NS::IResource::ConstPtr& p, const StorageInfo& s) const
 {
     bool res = true;
     if (s.payload) {
@@ -80,7 +80,7 @@ bool ObjectResourceType::SaveResource(CORE_NS::IResource::ConstPtr p, const Stor
     }
     return res;
 }
-bool ObjectResourceType::ReloadResource(const StorageInfo& s, CORE_NS::IResource::Ptr) const
+bool ObjectResourceType::ReloadResource(const StorageInfo& s, const CORE_NS::IResource::Ptr&) const
 {
     return false;
 }
