@@ -275,9 +275,6 @@ target_sources(MetaObjectHighLevelAPI PUBLIC
     include/meta/api/iteration.h
     include/meta/api/locking.h
     include/meta/api/make_callback.h
-    include/meta/api/model/container_data_model.h
-    include/meta/api/model/content_loader_object_provider.h
-    include/meta/api/model/instantiating_object_provider.h
     include/meta/api/number.h
     include/meta/api/object.h
     include/meta/api/property/array_element_bind.h
