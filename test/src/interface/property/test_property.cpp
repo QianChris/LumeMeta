@@ -62,7 +62,7 @@ TEST(PropertyTest, Values)
 
 TEST(PropertyTest, Misc)
 {
-    Object owner;
+    Object owner(CreateNew);
     auto p = ConstructProperty<int>("test");
     if (auto pp = interface_pointer_cast<IPropertyInternal>(p.GetProperty())) {
         pp->SetOwner(interface_pointer_cast<IOwner>(owner));

@@ -122,7 +122,7 @@ class UnitTest_ObjectHierarchyObserverTest : public ::testing::Test {
     void TearDown() override
     {
         container_.reset();
-        observer_ = ObjectHierarchyObserver {};
+        observer_.Release();
     }
 
 public:

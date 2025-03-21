@@ -24,12 +24,24 @@
 META_BEGIN_NAMESPACE()
 
 /**
+ * @brief Creates an instance of a class with given class id.
+ * @param clsi The class info of the class to instantiate.
+ * @return The created object.
+ */
+inline IObject::Ptr CreateInstance(const META_NS::ClassInfo& clsi)
+{
+    return META_NS::GetObjectRegistry().Create(clsi);
+}
+
+/**
  * @brief Wrapper class for for objects which implement IObject.
  * @note Object can be initialized with Any object created through IObjectRegistry::Create().
  */
 class Object : public InterfaceObject<IObject> {
 public:
     META_INTERFACE_OBJECT(Object, InterfaceObject<IObject>, IObject)
+    META_INTERFACE_OBJECT_INSTANTIATE(Object, ClassId::Object)
+
     auto GetClassId() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetClassId());
@@ -148,7 +160,7 @@ public:
 class Container : public InterfaceObject<IContainer> {
 public:
     META_INTERFACE_OBJECT(Container, InterfaceObject<IContainer>, IContainer)
-
+    META_INTERFACE_OBJECT_INSTANTIATE(Container, ClassId::ObjectContainer)
     auto GetAll() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetAll());
@@ -301,15 +313,6 @@ public:
 };
 
 /**
- * @brief Creates an instance of a class with given class id.
- * @param clsi The class info of the class to instantiate.
- * @return The created object.
- */
-inline IObject::Ptr CreateInstance(const META_NS::ClassInfo& clsi)
-{
-    return META_NS::GetObjectRegistry().Create(clsi);
-}
-/**
  * @brief Creates an instance of a class with given class id and converts it to a given interface type.
  * @param clsi The class info of the class to instantiate.
  * @return The created object converted to given interface type.
@@ -325,7 +328,7 @@ auto CreateInstance() = delete;
 template<>
 inline auto CreateInstance<IObject>()
 {
-    return Object(CreateInstance(META_NS::ClassId::Object));
+    return Object(CreateNew);
 }
 /// Returns a default object which implements IMetadata
 template<>
@@ -343,7 +346,7 @@ inline auto CreateInstance<IAttach>()
 template<>
 inline auto CreateInstance<IContainer>()
 {
-    return Container(CreateInstance(META_NS::ClassId::ObjectContainer));
+    return Container(CreateNew);
 }
 
 META_END_NAMESPACE()

@@ -333,11 +333,8 @@ TEST_P(LoopAnimationModifierTest, AnimationIsLoopingRegardlessOfSpeedModificator
 
     {
         const auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
-        attach->Attach(META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier))
-                           .LoopIndefinitely()
-                           .GetPtr());
-        attach->Attach(META_NS::AnimationModifiers::Speed(CreateInstance(ClassId::SpeedAnimationModifier))
-                           .SpeedFactor(speedFactor).GetPtr());
+        attach->Attach(META_NS::AnimationModifiers::Loop(CreateNew).LoopIndefinitely().GetPtr());
+        attach->Attach(META_NS::AnimationModifiers::Speed(CreateNew).SpeedFactor(speedFactor).GetPtr());
     }
     anim = Transform(anim);
     ASSERT_TRUE(anim);

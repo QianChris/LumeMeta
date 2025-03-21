@@ -48,7 +48,7 @@ class UnitTest_ContainerObserverTest : public ::testing::Test {
     void TearDown() override
     {
         container_.reset();
-        observer_ = {};
+        observer_.Release();
     }
 
 protected:

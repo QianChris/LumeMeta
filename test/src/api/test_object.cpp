@@ -33,7 +33,7 @@ TEST(ObjectTest, ObjectBaseAPI)
     EXPECT_TRUE(object == object2);
     EXPECT_FALSE(object != object2);
 
-    META_NS::Object object3;
+    META_NS::Object object3(nullptr);
     EXPECT_TRUE(object != object3);
     EXPECT_FALSE(object == object3);
     EXPECT_FALSE(object3); // not initialized yet
@@ -96,8 +96,8 @@ TEST(ObjectTest, InvalidTypes)
 TEST(ObjectTest, LazyInitBase)
 {
     static constexpr auto propName = "value";
-    Object o1;
-    Object o2;
+    Object o1(nullptr);
+    Object o2(nullptr);
 
     EXPECT_FALSE(o1);
     EXPECT_FALSE(o2);
@@ -111,7 +111,7 @@ TEST(ObjectTest, LazyInitBase)
     EXPECT_TRUE(o1);
     EXPECT_TRUE(o2);
 
-    Object o3;
+    Object o3(nullptr);
     EXPECT_FALSE(o3);
     EXPECT_TRUE(Metadata(o1).AddProperty(propName, 5));
     o3 = o1;
@@ -126,6 +126,15 @@ TEST(ObjectTest, LazyInitBase)
     auto p3 = Metadata(o1).GetProperty(propName);
     EXPECT_EQ(p1, p3);
     EXPECT_EQ(p2, p1);
+}
+
+TEST(ObjectTest, Instantiate)
+{
+    Object o1(CreateNew);
+    Object o2(nullptr);
+
+    EXPECT_TRUE(o1);
+    EXPECT_FALSE(o2);
 }
 
 /*

@@ -70,7 +70,7 @@ public:
     using Ptr = BASE_NS::shared_ptr<UnderlyingType>;
     using WeakPtr = BASE_NS::weak_ptr<UnderlyingType>;
     using IInterfacePtr = BASE_NS::shared_ptr<CORE_NS::IInterface>;
-    InterfaceObject() = default;
+    InterfaceObject() = delete;
     explicit InterfaceObject(const Ptr& p) noexcept : ptr_(p) {}
     explicit InterfaceObject(const IInterfacePtr& p) : ptr_(interface_pointer_cast<UnderlyingType>(p)) {}
     /// Assignment operator
@@ -100,6 +100,11 @@ public:
     {
         return interface_pointer_cast<Interface>(ptr_);
     }
+    /// Release the underlying object.
+    void Release()
+    {
+        ptr_.reset();
+    }
 
 protected:
     /// Helper method for safely calling a method from the underlying interface
@@ -123,8 +128,10 @@ protected:
 
 // InterfaceObject definition
 #define META_INTERFACE_OBJECT(Class, BaseClass, Interface)   \
+    using ClassType = Class;                                 \
+    using BaseClassType = BaseClass;                         \
     using InterfaceType = Interface;                         \
-    Class() = default;                                       \
+    Class() = delete;                                        \
     ~Class() override = default;                             \
     explicit Class(const IInterfacePtr& p) : BaseClass(p) {} \
     META_DEFAULT_COPY_MOVE(Class)                            \
@@ -158,6 +165,22 @@ protected:
         }                                               \
         return *this;                                   \
     }
+
+struct InitializationType {};
+
+/**
+ * @brief Some interface wrappers support creating an instance at wrapper object initialization.
+ *        Such classes can be made to automatically initialize the underlying object to a new class
+ *        instance defining Instanate
+ * @code
+ *        using namespace META_NS;
+ *        Object o(CreateNew); // Create a new instance of the underlying object suitable for this class.
+ * @endcode
+ */
+constexpr InitializationType CreateNew;
+
+#define META_INTERFACE_OBJECT_INSTANTIATE(Class, ClassId) \
+    Class(const InitializationType& t) : BaseClassType(META_NS::CreateInstance(ClassId)) {}
 
 META_END_NAMESPACE()
 

@@ -99,6 +99,7 @@ public:
 class PropertyAnimation : public TimedAnimation {
 public:
     META_INTERFACE_OBJECT(PropertyAnimation, TimedAnimation, IPropertyAnimation)
+    META_INTERFACE_OBJECT_INSTANTIATE(PropertyAnimation, ClassId::PropertyAnimation)
 
     /// Returns a PropertyAnimation instance which uses ClassId::PropertyAnimation as its underlying object.
     static auto CreateInstance()
@@ -116,11 +117,7 @@ template<typename Type>
 class KeyframeAnimation : public PropertyAnimation {
 public:
     META_INTERFACE_OBJECT(KeyframeAnimation<Type>, PropertyAnimation, IKeyframeAnimation)
-    /// Returns a KeyframeAnimation instance which uses ClassId::KeyframeAnimation as its underlying object.
-    static auto CreateInstance()
-    {
-        return KeyframeAnimation(META_NS::CreateInstance(ClassId::KeyframeAnimation));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(KeyframeAnimation<Type>, ClassId::KeyframeAnimation)
     /// @see IKeyframeAnimation::From
     auto From()
     {
@@ -163,11 +160,8 @@ template<typename T>
 class TrackAnimation : public PropertyAnimation {
 public:
     META_INTERFACE_OBJECT(TrackAnimation<T>, PropertyAnimation, ITrackAnimation)
-    /// Returns a TrackAnimation instance which uses ClassId::TrackAnimation as its underlying object.
-    static auto CreateInstance()
-    {
-        return TrackAnimation(META_NS::CreateInstance(ClassId::TrackAnimation));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(TrackAnimation<T>, ClassId::TrackAnimation)
+
     /// @see ITrackAnimation::Timestamps
     META_INTERFACE_OBJECT_PROPERTY(Timestamps, BASE_NS::array_view<const float>)
     /// Typed access to ITrackAnimation::Keyframes property.
@@ -240,11 +234,7 @@ public:
 class SequentialAnimation : public StaggeredAnimation {
 public:
     META_INTERFACE_OBJECT(SequentialAnimation, StaggeredAnimation, ISequentialAnimation)
-    /// Returns a SequentialAnimation instance which uses ClassId::SequentialAnimation as its underlying object.
-    static auto CreateInstance()
-    {
-        return SequentialAnimation(META_NS::CreateInstance(ClassId::SequentialAnimation));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(SequentialAnimation, ClassId::SequentialAnimation)
 };
 
 /**
@@ -253,11 +243,7 @@ public:
 class ParallelAnimation : public StaggeredAnimation {
 public:
     META_INTERFACE_OBJECT(ParallelAnimation, StaggeredAnimation, IParallelAnimation)
-    /// Returns a ParallelAnimation instance which uses ClassId::ParallelAnimation as its underlying object.
-    static auto CreateInstance()
-    {
-        return ParallelAnimation(META_NS::CreateInstance(ClassId::ParallelAnimation));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(ParallelAnimation, ClassId::ParallelAnimation)
 };
 
 /**
@@ -276,12 +262,7 @@ namespace AnimationModifiers {
 class Loop : public AnimationModifier {
 public:
     META_INTERFACE_OBJECT(Loop, AnimationModifier, ILoop)
-
-    /// Returns a Loop modifier instance which uses ClassId::LoopAnimationModifier as its underlying object.
-    static auto CreateInstance()
-    {
-        return Loop(META_NS::CreateInstance(ClassId::LoopAnimationModifier));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(Loop, ClassId::LoopAnimationModifier)
     /// @see ILoop::LoopCount
     META_INTERFACE_OBJECT_PROPERTY(LoopCount, int32_t)
     /// Set the modifier to loop indefinitely.
@@ -298,13 +279,9 @@ public:
 class Speed : public AnimationModifier {
 public:
     META_INTERFACE_OBJECT(Speed, AnimationModifier, ISpeed)
+    META_INTERFACE_OBJECT_INSTANTIATE(Speed, ClassId::SpeedAnimationModifier)
+    /// @see ISpeed::SpeedFactor
     META_INTERFACE_OBJECT_PROPERTY(SpeedFactor, float)
-
-    /// Returns a Speed modifier instance which uses ClassId::SpeedAnimationModifier as its underlying object.
-    static auto CreateInstance()
-    {
-        return Speed(META_NS::CreateInstance(ClassId::SpeedAnimationModifier));
-    }
 };
 
 /**
@@ -313,12 +290,7 @@ public:
 class Reverse : public InterfaceObject<IAnimationModifier> {
 public:
     META_INTERFACE_OBJECT(Reverse, InterfaceObject<IAnimationModifier>, IAnimationModifier)
-
-    /// Returns a Reverse modifier instance which uses ClassId::ReverseAnimationModifier as its underlying object.
-    static auto CreateInstance()
-    {
-        return Reverse(META_NS::CreateInstance(ClassId::ReverseAnimationModifier));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(Reverse, ClassId::ReverseAnimationModifier)
 };
 } // namespace AnimationModifiers
 
@@ -326,7 +298,7 @@ public:
 template<>
 inline auto CreateInstance<IPropertyAnimation>()
 {
-    return PropertyAnimation::CreateInstance();
+    return PropertyAnimation(CreateNew);
 }
 
 /**
@@ -340,10 +312,10 @@ inline auto CreateInstance()
     constexpr auto isTrackAnimation = BASE_NS::is_same_v<Interface, ITrackAnimation>;
     static_assert(isKeyframeAnimation || isTrackAnimation, "Invalid interface type for typed animation instantiation.");
     if constexpr (isKeyframeAnimation) {
-        return KeyframeAnimation<Type>::CreateInstance();
+        return KeyframeAnimation<Type>(CreateNew);
     }
     if constexpr (isTrackAnimation) {
-        return TrackAnimation<Type>::CreateInstance();
+        return TrackAnimation<Type>(CreateNew);
     }
 }
 
@@ -351,13 +323,13 @@ inline auto CreateInstance()
 template<>
 inline auto CreateInstance<IParallelAnimation>()
 {
-    return ParallelAnimation::CreateInstance();
+    return ParallelAnimation(CreateNew);
 }
 /// Returns a default object which implements IKeyframeAnimation
 template<>
 inline auto CreateInstance<ISequentialAnimation>()
 {
-    return SequentialAnimation::CreateInstance();
+    return SequentialAnimation(CreateNew);
 }
 
 META_END_NAMESPACE()
