@@ -182,6 +182,49 @@ constexpr InitializationType CreateNew;
 #define META_INTERFACE_OBJECT_INSTANTIATE(Class, ClassId) \
     Class(const InitializationType& t) : BaseClassType(META_NS::CreateInstance(ClassId)) {}
 
+/// Some methods support specifying whether the call should be asynchronous or synchronous through AsyncCallType
+/// template parameter.
+struct AsyncCallType {
+    bool async {};
+};
+/// Call should be synchronous and directly return the asynchronous call return value.
+constexpr AsyncCallType Sync { false };
+/// Call should be asynchronous and return a Future object as its return value.
+constexpr AsyncCallType Async { true };
+
+#define META_API_ASYNC template<const META_NS::AsyncCallType& CallType = META_NS::Sync>
+
+#define META_INTERFACE_OBJECT_ASYNC_CALL_PTR(SyncReturnType, Function) \
+    [&]() -> auto {                                                    \
+        auto f = META_INTERFACE_OBJECT_CALL_PTR(Function);             \
+        if constexpr (CallType.async) {                                \
+            return f;                                                  \
+        } else {                                                       \
+            return SyncReturnType(f.GetResult());                      \
+        }                                                              \
+    }()
+
+/**
+ * @brief Converts an a vector of shared_ptr<IInterface> to a vector of InterfaceObject derived types.
+ * @param from The vector to convert from
+ * @return Returns a vector of InterfaceObjects initialized with elements from source array.
+ */
+template<class To, class From>
+BASE_NS::vector<To> InterfaceObjectArrayCast(BASE_NS::vector<From>&& from)
+{
+    static_assert(META_NS::IsInterfacePtr_v<From>, "Conversion source array must contain shared_ptrs.");
+    static_assert(BASE_NS::is_base_of_v<META_NS::InterfaceObjectBase, To>,
+        "Conversion target type must be a META_NS::InterfaceObject");
+    BASE_NS::vector<To> converted;
+    if (!from.empty()) {
+        converted.reserve(from.size());
+        for (auto&& n : from) {
+            converted.emplace_back(n);
+        }
+    }
+    return converted;
+}
+
 META_END_NAMESPACE()
 
 // NOLINTBEGIN(readability-identifier-naming) to keep std like syntax
