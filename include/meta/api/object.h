@@ -226,10 +226,10 @@ public:
 /**
  * @brief Wrapper class for objects which implement INamed.
  */
-class Named : public InterfaceObject<INamed> {
+class Named : public Object {
 public:
-    META_INTERFACE_OBJECT(Named, InterfaceObject<INamed>, INamed)
-    META_INTERFACE_OBJECT_PROPERTY(Name, BASE_NS::string)
+    META_INTERFACE_OBJECT(Named, Object, INamed)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::string, Name)
 };
 
 /**
@@ -281,8 +281,8 @@ class ContentObject : public Object {
 public:
     META_INTERFACE_OBJECT(ContentObject, Object, IContent)
 
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(Content, IObject::Ptr)
-    META_INTERFACE_OBJECT_PROPERTY(ContentSearchable, bool)
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(IObject::Ptr, Content)
+    META_INTERFACE_OBJECT_PROPERTY(bool, ContentSearchable)
     auto SetContent(const IObject::Ptr& content) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(SetContent(content));

@@ -123,9 +123,9 @@ public:
         return CubicBezier(META_NS::CreateInstance(ClassId::CubicBezierEasingCurve));
     }
     /// @see ICubicBezier::ControlPoint1
-    META_INTERFACE_OBJECT_PROPERTY(ControlPoint1, BASE_NS::Math::Vec2)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::Math::Vec2, ControlPoint1)
     /// @see ICubicBezier::ControlPoint1
-    META_INTERFACE_OBJECT_PROPERTY(ControlPoint2, BASE_NS::Math::Vec2)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::Math::Vec2, ControlPoint2)
 };
 
 } // namespace Curves

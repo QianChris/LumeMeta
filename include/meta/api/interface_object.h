@@ -149,15 +149,15 @@ protected:
 #define META_INTERFACE_OBJECT_CALL_PTR(Function) CallPtr<InterfaceType>([&](auto& p) { return p.Function; })
 
 // InterfaceObject default readonly property wrapper
-#define META_INTERFACE_OBJECT_READONLY_PROPERTY(Name, Type) \
+#define META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name) \
     auto Name() const                                       \
     {                                                       \
         return META_INTERFACE_OBJECT_CALL_PTR(Name());      \
     }
 
 // InterfaceObject default writable property wrapper
-#define META_INTERFACE_OBJECT_PROPERTY(Name, Type)      \
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(Name, Type) \
+#define META_INTERFACE_OBJECT_PROPERTY(Type, Name)      \
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name) \
     auto& Name(const Type& value)                       \
     {                                                   \
         if (auto p = Name()) {                          \

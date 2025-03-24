@@ -24,13 +24,13 @@ class Animation : public Object {
 public:
     META_INTERFACE_OBJECT(Animation, Object, IAnimation)
 
-    META_INTERFACE_OBJECT_PROPERTY(Enabled, bool)
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(Valid, bool)
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(TotalDuration, TimeSpan)
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(Running, bool)
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(Progress, float)
-    META_INTERFACE_OBJECT_PROPERTY(Curve, ICurve1D::Ptr)
-    META_INTERFACE_OBJECT_PROPERTY(Controller, BASE_NS::weak_ptr<IAnimationController>)
+    META_INTERFACE_OBJECT_PROPERTY(bool, Enabled)
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(bool, Valid)
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(TimeSpan, TotalDuration)
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(bool, Running)
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(float, Progress)
+    META_INTERFACE_OBJECT_PROPERTY(ICurve1D::Ptr, Curve)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::weak_ptr<IAnimationController>, Controller)
 
     void Step(const IClock::ConstPtr& clock)
     {
@@ -90,7 +90,7 @@ public:
 class TimedAnimation : public StartableAnimation {
 public:
     META_INTERFACE_OBJECT(TimedAnimation, StartableAnimation, ITimedAnimation)
-    META_INTERFACE_OBJECT_PROPERTY(Duration, TimeSpan)
+    META_INTERFACE_OBJECT_PROPERTY(TimeSpan, Duration)
 };
 
 /**
@@ -107,7 +107,7 @@ public:
         return PropertyAnimation(META_NS::CreateInstance(ClassId::PropertyAnimation));
     }
     /// @see IPropertyAnimation::Property
-    META_INTERFACE_OBJECT_PROPERTY(Property, IProperty::WeakPtr)
+    META_INTERFACE_OBJECT_PROPERTY(IProperty::WeakPtr, Property)
 };
 
 /**
@@ -163,7 +163,7 @@ public:
     META_INTERFACE_OBJECT_INSTANTIATE(TrackAnimation<T>, ClassId::TrackAnimation)
 
     /// @see ITrackAnimation::Timestamps
-    META_INTERFACE_OBJECT_PROPERTY(Timestamps, BASE_NS::array_view<const float>)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::array_view<const float>, Timestamps)
     /// Typed access to ITrackAnimation::Keyframes property.
     ArrayProperty<T> Keyframes() const
     {
@@ -184,11 +184,11 @@ public:
         return *this;
     }
     /// @see ITrackAnimation::KeyframeCurves
-    META_INTERFACE_OBJECT_PROPERTY(KeyframeCurves, BASE_NS::array_view<const ICurve1D::Ptr>)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::array_view<const ICurve1D::Ptr>, KeyframeCurves)
     /// @see ITrackAnimation::KeyframeHandlers
-    META_INTERFACE_OBJECT_PROPERTY(KeyframeHandlers, BASE_NS::array_view<const IFunction::Ptr>)
+    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::array_view<const IFunction::Ptr>, KeyframeHandlers)
     /// @see ITrackAnimation::CurrentKeyframeIndex
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(CurrentKeyframeIndex, uint32_t)
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(uint32_t, CurrentKeyframeIndex)
     /// @see ITrackAnimation::AddKeyframe
     auto AddKeyframe(float timestamp, const IAny::ConstPtr& value)
     {
@@ -264,7 +264,7 @@ public:
     META_INTERFACE_OBJECT(Loop, AnimationModifier, ILoop)
     META_INTERFACE_OBJECT_INSTANTIATE(Loop, ClassId::LoopAnimationModifier)
     /// @see ILoop::LoopCount
-    META_INTERFACE_OBJECT_PROPERTY(LoopCount, int32_t)
+    META_INTERFACE_OBJECT_PROPERTY(int32_t, LoopCount)
     /// Set the modifier to loop indefinitely.
     auto& LoopIndefinitely()
     {
@@ -281,7 +281,7 @@ public:
     META_INTERFACE_OBJECT(Speed, AnimationModifier, ISpeed)
     META_INTERFACE_OBJECT_INSTANTIATE(Speed, ClassId::SpeedAnimationModifier)
     /// @see ISpeed::SpeedFactor
-    META_INTERFACE_OBJECT_PROPERTY(SpeedFactor, float)
+    META_INTERFACE_OBJECT_PROPERTY(float, SpeedFactor)
 };
 
 /**
