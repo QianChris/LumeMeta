@@ -38,10 +38,9 @@ namespace Curves {
     class Class : public EasingCurve {                                          \
     public:                                                                     \
         Class(const IInterfacePtr& ptr) : EasingCurve(ptr) {}                   \
-        static auto CreateInstance()                                            \
-        {                                                                       \
-            return Class(META_NS::CreateInstance(ClassId::Class##EasingCurve)); \
-        }                                                                       \
+        Class(const META_NS::InitializationType& t)                             \
+            : EasingCurve(META_NS::CreateInstance(ClassId::Class##EasingCurve)) \
+        {}                                                                      \
     };
 
 /// Linear easing curve
@@ -117,11 +116,7 @@ META_EASING_CURVE_INTERFACE_OBJECT(StepEnd)
 class CubicBezier : public EasingCurve {
 public:
     META_INTERFACE_OBJECT(CubicBezier, EasingCurve, ICubicBezier)
-    /// Returns a CubicBezier easing curve instance which uses ClassId::CubicBezierEasingCurve as its underlying object.
-    static auto CreateInstance()
-    {
-        return CubicBezier(META_NS::CreateInstance(ClassId::CubicBezierEasingCurve));
-    }
+    META_INTERFACE_OBJECT_INSTANTIATE(CubicBezier, ClassId::CubicBezierEasingCurve)
     /// @see ICubicBezier::ControlPoint1
     META_INTERFACE_OBJECT_PROPERTY(BASE_NS::Math::Vec2, ControlPoint1)
     /// @see ICubicBezier::ControlPoint1
@@ -134,7 +129,7 @@ public:
 template<>
 inline auto CreateInstance<ICubicBezier>()
 {
-    return Curves::CubicBezier::CreateInstance();
+    return Curves::CubicBezier(CreateNew);
 }
 
 /// Return a default object which implements ICubicBezier.
@@ -142,7 +137,7 @@ template<>
 inline auto CreateInstance<IEasingCurve>()
 {
     // By default return an InOutCubic easing curve for IEasingCurve
-    return Curves::InOutCubic::CreateInstance();
+    return Curves::InOutCubic(CreateNew);
 }
 
 META_END_NAMESPACE()
