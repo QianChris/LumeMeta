@@ -145,7 +145,7 @@ bool EngineValueManager::ConstructValue(EnginePropertyParams property, EngineVal
 bool EngineValueManager::ConstructValueImplArraySubs(
     EnginePropertyParams params, BASE_NS::string pathTaken, BASE_NS::string_view path, EngineValueOptions options)
 {
-    if (!params.property.type.isArray || !params.property.metaData.containerMethods) {
+    if (!params.property.type.isArray && !params.property.metaData.containerMethods) {
         CORE_LOG_W("Cannot index non-array in property path");
         return false;
     }
