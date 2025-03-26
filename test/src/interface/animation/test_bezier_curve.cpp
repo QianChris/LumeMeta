@@ -43,7 +43,7 @@ protected:
     }
 
     META_NS::ICurve1D* curve_ {};
-    META_NS::Curves::CubicBezier bezier_ { META_NS::Curves::CubicBezier::CreateInstance() };
+    META_NS::Curves::CubicBezier bezier_ { META_NS::CreateNew };
 
     static constexpr float epsilon_ = 0.001f;
     static constexpr auto frames_ = 20;

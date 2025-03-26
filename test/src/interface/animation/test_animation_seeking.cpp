@@ -22,24 +22,24 @@ namespace Test {
 namespace {
 
 template<typename AnimationType>
-IStartableAnimation::Ptr CreateAnimation(const IProperty::WeakPtr& property);
+Animation CreateAnimation(const IProperty::WeakPtr& property);
 
 template<>
-IStartableAnimation::Ptr CreateAnimation<SequentialAnimation>(const IProperty::WeakPtr& property)
+Animation CreateAnimation<SequentialAnimation>(const IProperty::WeakPtr& property)
 {
     return SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
         .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation)));
 }
 
 template<>
-IStartableAnimation::Ptr CreateAnimation<ParallelAnimation>(const IProperty::WeakPtr& property)
+Animation CreateAnimation<ParallelAnimation>(const IProperty::WeakPtr& property)
 {
     return ParallelAnimation(CreateInstance(ClassId::ParallelAnimation))
         .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation)));
 }
 
 template<>
-IStartableAnimation::Ptr CreateAnimation<KeyframeAnimation<float>>(const IProperty::WeakPtr& property)
+Animation CreateAnimation<KeyframeAnimation<float>>(const IProperty::WeakPtr& property)
 {
     KeyframeAnimation<float> animation(CreateInstance(ClassId::KeyframeAnimation));
     animation.From(0.0F);
@@ -57,7 +57,7 @@ public:
     AnimationSeekingTest()
     {
         property_ = ConstructProperty("animatedProperty", 0.0F);
-        startableInterface_ = CreateAnimation<AnimationType>(property_);
+        startableInterface_ = interface_pointer_cast<IStartableAnimation>(CreateAnimation<AnimationType>(property_));
         animationInterface_ = interface_pointer_cast<IAnimation>(startableInterface_);
     }
 

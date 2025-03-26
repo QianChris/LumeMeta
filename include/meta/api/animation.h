@@ -24,72 +24,100 @@ class Animation : public Object {
 public:
     META_INTERFACE_OBJECT(Animation, Object, IAnimation)
 
+    /// @see IAnimation::Enabled
     META_INTERFACE_OBJECT_PROPERTY(bool, Enabled)
+    /// @see IAnimation::Valid
     META_INTERFACE_OBJECT_READONLY_PROPERTY(bool, Valid)
+    /// @see IAnimation::TotalDuration
     META_INTERFACE_OBJECT_READONLY_PROPERTY(TimeSpan, TotalDuration)
+    /// @see IAnimation::Running
     META_INTERFACE_OBJECT_READONLY_PROPERTY(bool, Running)
+    /// @see IAnimation::Progress
     META_INTERFACE_OBJECT_READONLY_PROPERTY(float, Progress)
+    /// @see IAnimation::Curve
     META_INTERFACE_OBJECT_PROPERTY(ICurve1D::Ptr, Curve)
+    /// @see IAnimation::Controller
     META_INTERFACE_OBJECT_PROPERTY(BASE_NS::weak_ptr<IAnimationController>, Controller)
-
+    /**
+     * @see IStartableAnimation::Pause
+     * @note Does nothing if the underlying animation does not implement IStartableAnimation
+     */
+    void Pause()
+    {
+        CallPtr<IStartableAnimation>([](auto& p) { p.Pause(); });
+    }
+    /**
+     * @see IStartableAnimation::Restart
+     * @note Does nothing if the underlying animation does not implement IStartableAnimation
+     */
+    void Restart()
+    {
+        CallPtr<IStartableAnimation>([](auto& p) { p.Restart(); });
+    }
+    /**
+     * @see IStartableAnimation::Seek
+     * @note Does nothing if the underlying animation does not implement IStartableAnimation
+     */
+    void Seek(float position)
+    {
+        CallPtr<IStartableAnimation>([position](auto& p) { p.Seek(position); });
+    }
+    /**
+     * @see IStartableAnimation::Start
+     * @note Does nothing if the underlying animation does not implement IStartableAnimation
+     */
+    void Start()
+    {
+        CallPtr<IStartableAnimation>([](auto& p) { p.Start(); });
+    }
+    /**
+     * @see IStartableAnimation::Stop
+     * @note Does nothing if the underlying animation does not implement IStartableAnimation
+     */
+    void Stop()
+    {
+        CallPtr<IStartableAnimation>([](auto& p) { p.Stop(); });
+    }
+    /**
+     * @see IStartableAnimation::Finish
+     * @note Does nothing if the underlying animation does not implement IStartableAnimation
+     */
+    void Finish()
+    {
+        CallPtr<IStartableAnimation>([](auto& p) { p.Finish(); });
+    }
+    /// @see IAnimation::Step
     void Step(const IClock::ConstPtr& clock)
     {
         META_INTERFACE_OBJECT_CALL_PTR(Step(clock));
     }
+    /// @see IAnimation::OnFinished
     auto OnFinished()
     {
         return META_INTERFACE_OBJECT_CALL_PTR(OnFinished());
     }
+    /// @see IAnimation::OnStarted
     auto OnStarted()
     {
         return META_INTERFACE_OBJECT_CALL_PTR(OnStarted());
     }
+    /**
+     * @brief Add a modifier to the animation
+     * @param modifier The modifier to add
+     * @return True if the modifier was successfully applied, false otherwise.
+     */
     bool Modifier(const IAnimationModifier::Ptr& modifier)
     {
-        auto attach = AttachmentContainer(*this);
-        return attach ? attach.Attach(modifier) : false;
-    }
-};
-
-/**
- * @brief Wrapper class for IStartableAnimation.
- */
-class StartableAnimation : public Animation {
-public:
-    META_INTERFACE_OBJECT(StartableAnimation, Animation, IStartableAnimation)
-
-    void Pause()
-    {
-        META_INTERFACE_OBJECT_CALL_PTR(Pause());
-    }
-    void Restart()
-    {
-        META_INTERFACE_OBJECT_CALL_PTR(Restart());
-    }
-    void Seek(float position)
-    {
-        META_INTERFACE_OBJECT_CALL_PTR(Seek(position));
-    }
-    void Start()
-    {
-        META_INTERFACE_OBJECT_CALL_PTR(Start());
-    }
-    void Stop()
-    {
-        META_INTERFACE_OBJECT_CALL_PTR(Stop());
-    }
-    void Finish()
-    {
-        META_INTERFACE_OBJECT_CALL_PTR(Finish());
+        return CallPtr<IAttach>([&](auto& p) { return p.Attach(modifier); });
     }
 };
 
 /**
  * @brief Wrapper class for ITimedAnimation.
  */
-class TimedAnimation : public StartableAnimation {
+class TimedAnimation : public Animation {
 public:
-    META_INTERFACE_OBJECT(TimedAnimation, StartableAnimation, ITimedAnimation)
+    META_INTERFACE_OBJECT(TimedAnimation, Animation, ITimedAnimation)
     META_INTERFACE_OBJECT_PROPERTY(TimeSpan, Duration)
 };
 
@@ -101,11 +129,6 @@ public:
     META_INTERFACE_OBJECT(PropertyAnimation, TimedAnimation, IPropertyAnimation)
     META_INTERFACE_OBJECT_INSTANTIATE(PropertyAnimation, ClassId::PropertyAnimation)
 
-    /// Returns a PropertyAnimation instance which uses ClassId::PropertyAnimation as its underlying object.
-    static auto CreateInstance()
-    {
-        return PropertyAnimation(META_NS::CreateInstance(ClassId::PropertyAnimation));
-    }
     /// @see IPropertyAnimation::Property
     META_INTERFACE_OBJECT_PROPERTY(IProperty::WeakPtr, Property)
 };
@@ -209,9 +232,9 @@ public:
 /**
  * @brief Wrapper class for animation containers.
  */
-class StaggeredAnimation : public StartableAnimation {
+class StaggeredAnimation : public Animation {
 public:
-    META_INTERFACE_OBJECT(StaggeredAnimation, StartableAnimation, IStaggeredAnimation)
+    META_INTERFACE_OBJECT(StaggeredAnimation, Animation, IStaggeredAnimation)
     auto& Add(const IAnimation::Ptr& animation)
     {
         META_INTERFACE_OBJECT_CALL_PTR(AddAnimation(animation));

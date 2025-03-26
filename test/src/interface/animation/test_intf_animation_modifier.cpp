@@ -243,7 +243,7 @@ IAnimation::Ptr Serialize(AnimationModifierTestBase& test, IAnimation::Ptr anim)
         Object obj(CreateInstance(ClassId::Object));
         AttachmentContainer(obj).Attach(interface_pointer_cast<IAttachment>(anim));
 
-        for (auto v : test.keepAliveProperties) {
+        for (auto&& v : test.keepAliveProperties) {
             Metadata(obj).AddProperty(v);
         }
 
@@ -446,11 +446,9 @@ TEST_P(SpeedAnimationModifierTest, SpeedFactorModifiesDuration)
     auto expectedDuration = originalDuration / BASE_NS::Math::abs(speedFactor);
 
     {
-        auto speedModifier = META_NS::AnimationModifiers::Speed(CreateInstance(ClassId::SpeedAnimationModifier))
-                                 .SpeedFactor(speedFactor);
+        auto speedModifier = META_NS::AnimationModifiers::Speed(CreateNew).SpeedFactor(speedFactor);
         auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
-        ASSERT_NE(attach, nullptr);
-        attach->Attach(speedModifier.GetPtr());
+        ASSERT_TRUE(attach->Attach(speedModifier.GetPtr()));
     }
     anim = Transform(anim);
     ASSERT_TRUE(anim);
