@@ -221,6 +221,24 @@ FileResourceManager::Status FileResourceManager::SaveResourceData(const Resource
     }
     return Status::OK;
 }
+bool FileResourceManager::UpdateOptions(ResourceData& r)
+{
+    if (r.object) {
+        auto it = types_.find(r.type);
+        if (it == types_.end()) {
+            CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(r.type).c_str());
+            return false;
+        }
+        MemFile opts;
+        if (!it->second->SaveResource(r.object,
+                CORE_NS::IResourceType::StorageInfo { &opts, nullptr, r.id, r.path, GetSelf<IResourceManager>() })) {
+            CORE_LOG_W("Failed to save resource options");
+            return false;
+        }
+        r.optionData = opts.Data();
+    }
+    return true;
+}
 FileResourceManager::Status FileResourceManager::Export(BASE_NS::string_view filePath)
 {
     std::unique_lock lock { mutex_ };
@@ -233,6 +251,7 @@ FileResourceManager::Status FileResourceManager::Export(BASE_NS::string_view fil
     f->Write(vstr.data(), vstr.size());
     for (auto&& g : resources_) {
         for (auto&& v : g.second) {
+            UpdateOptions(*v.second);
             SaveResourceHeader(*v.second, *f);
             SaveResourceData(*v.second);
         }

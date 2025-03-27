@@ -58,6 +58,7 @@ private:
     bool ReadHeader(const std::string& line);
     bool ReadHeaders(CORE_NS::IFile& file);
     BASE_NS::shared_ptr<ResourceData> FindResource(const CORE_NS::ResourceId& id);
+    bool UpdateOptions(ResourceData& r);
 
 private:
     mutable std::shared_mutex mutex_;
