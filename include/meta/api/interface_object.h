@@ -127,22 +127,22 @@ protected:
 };
 
 // InterfaceObject definition
-#define META_INTERFACE_OBJECT(Class, BaseClass, Interface)   \
-    using ClassType = Class;                                 \
-    using BaseClassType = BaseClass;                         \
-    using InterfaceType = Interface;                         \
-    Class() = delete;                                        \
-    ~Class() override = default;                             \
-    explicit Class(const IInterfacePtr& p) : BaseClass(p) {} \
-    META_DEFAULT_COPY_MOVE(Class)                            \
-    operator InterfaceType::Ptr() const noexcept             \
-    {                                                        \
-        return GetPtr<InterfaceType>();                      \
-    }                                                        \
-    auto& operator=(const InterfaceType::Ptr& p) noexcept    \
-    {                                                        \
-        ptr_ = interface_pointer_cast<UnderlyingType>(p);    \
-        return *this;                                        \
+#define META_INTERFACE_OBJECT(Class, BaseClass, Interface)                                      \
+    using ClassType = Class;                                                                    \
+    using BaseClassType = BaseClass;                                                            \
+    using InterfaceType = Interface;                                                            \
+    Class() = delete;                                                                           \
+    ~Class() override = default;                                                                \
+    explicit Class(const IInterfacePtr& p) : BaseClass(interface_pointer_cast<Interface>(p)) {} \
+    META_DEFAULT_COPY_MOVE(Class)                                                               \
+    operator InterfaceType::Ptr() const noexcept                                                \
+    {                                                                                           \
+        return GetPtr<InterfaceType>();                                                         \
+    }                                                                                           \
+    auto& operator=(const InterfaceType::Ptr& p) noexcept                                       \
+    {                                                                                           \
+        ptr_ = interface_pointer_cast<UnderlyingType>(p);                                       \
+        return *this;                                                                           \
     }
 
 // InterfaceObject default interface function call wrapper

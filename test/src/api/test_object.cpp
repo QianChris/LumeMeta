@@ -54,6 +54,26 @@ TEST(ObjectTest, TypeConversion)
     EXPECT_EQ(o1.GetPtr(), o2.GetPtr());
     EXPECT_EQ(o1.GetClassId(), o2.GetClassId());
 }
+
+TEST(ObjectTest, TypeCompatibility)
+{
+    auto parallel = ParallelAnimation(CreateNew);
+    auto sequential = SequentialAnimation(CreateNew);
+    ASSERT_TRUE(parallel);
+    ASSERT_TRUE(sequential);
+    Animation animation = parallel;
+    ASSERT_TRUE(animation);
+
+    auto parallelAsSequential = SequentialAnimation(interface_pointer_cast<CORE_NS::IInterface>(parallel));
+    EXPECT_FALSE(parallelAsSequential);
+
+    auto parallelAsAnimationAsSequential = SequentialAnimation(animation);
+    EXPECT_FALSE(parallelAsAnimationAsSequential);
+
+    auto parallelAsAnimationAsParallel = ParallelAnimation(animation);
+    EXPECT_TRUE(parallelAsAnimationAsParallel);
+}
+
 /*
 TEST(ObjectTest, InvalidTypes)
 {
