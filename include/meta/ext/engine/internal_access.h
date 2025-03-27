@@ -76,17 +76,37 @@ public:
     }
     AnyReturnValue SyncToEngine(const IAny& value, const EnginePropertyParams& params) const override
     {
-        CORE_NS::ScopedHandle<Type> guard { params.handle.Handle() };
-        return guard ? value.GetData(UidFromType<Type>(), (void*)((uintptr_t) & *guard + params.Offset()),
-                           sizeof(Type)) /*NOLINT(bugprone-sizeof-expression)*/
-                     : AnyReturn::FAIL;
+        if (CORE_NS::ScopedHandle<Type> guard { params.handle.Handle() }) {
+            uintptr_t offset = (uintptr_t) & *guard + params.Offset();
+            auto cont = params.containerMethods;
+            if (cont) {
+                auto arroffset = (uintptr_t) & *guard + params.arraySubsOffset;
+                if (params.index >= cont->size(arroffset)) {
+                    return AnyReturn::FAIL;
+                }
+                offset = uintptr_t(cont->get(arroffset, params.index)) + params.Offset();
+            }
+            return value.GetData(
+                UidFromType<Type>(), (void*)offset, sizeof(Type)); /*NOLINT(bugprone-sizeof-expression)*/
+        }
+        return AnyReturn::FAIL;
     }
     AnyReturnValue SyncFromEngine(const EnginePropertyParams& params, IAny& out) const override
     {
-        CORE_NS::ScopedHandle<const Type> guard { params.handle.Handle() };
-        return guard ? out.SetData(UidFromType<Type>(), (const void*)((uintptr_t) & *guard + params.Offset()),
-                           sizeof(Type)) /*NOLINT(bugprone-sizeof-expression)*/
-                     : AnyReturn::FAIL;
+        if (CORE_NS::ScopedHandle<const Type> guard { params.handle.Handle() }) {
+            uintptr_t offset = (uintptr_t) & *guard + params.Offset();
+            auto cont = params.containerMethods;
+            if (cont) {
+                auto arroffset = (uintptr_t) & *guard + params.arraySubsOffset;
+                if (params.index >= cont->size(arroffset)) {
+                    return AnyReturn::FAIL;
+                }
+                offset = uintptr_t(cont->get(arroffset, params.index)) + params.Offset();
+            }
+            return out.SetData(
+                UidFromType<Type>(), (const void*)offset, sizeof(Type)); /*NOLINT(bugprone-sizeof-expression)*/
+        }
+        return AnyReturn::FAIL;
     }
 };
 
@@ -123,9 +143,9 @@ public:
                     }
                 } else {
                     auto cont = params.property.metaData.containerMethods;
-                    cont->resize(params.Offset(), vec.size());
+                    cont->resize((uintptr_t) & *guard + params.Offset(), vec.size());
                     for (size_t i = 0; i != vec.size(); ++i) {
-                        *((Type*)cont->get(params.Offset(), i)) = vec[i];
+                        *((Type*)cont->get((uintptr_t) & *guard + params.Offset(), i)) = vec[i];
                     }
                 }
             }
@@ -145,9 +165,9 @@ public:
                 }
             } else {
                 auto cont = params.property.metaData.containerMethods;
-                vec.resize(cont->size(params.Offset()));
+                vec.resize(cont->size((uintptr_t) & *guard + params.Offset()));
                 for (size_t i = 0; i != vec.size(); ++i) {
-                    vec[i] = *((const Type*)cont->get(params.Offset(), i));
+                    vec[i] = *((const Type*)cont->get((uintptr_t) & *guard + params.Offset(), i));
                 }
             }
             res = out.SetData(UidFromType<InternalType>(), &vec, sizeof(InternalType));

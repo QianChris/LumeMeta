@@ -266,6 +266,7 @@ TEST_F(EngineManagerTest, AddSingleValue)
     TestWithSingle<CORE_NS::IPropertyHandle*>("handle");
     TestWithSingle<int>("handle.value");
     TestWithSingle<BASE_NS::vector<uint32_t>>("handle.array");
+    TestWithSingle<BASE_NS::vector<EngineTestType>>("handle.complexVec");
 
     TestWithSingle<uint32_t>("handle.array[0]");
     TestWithSingle<uint32_t>("handle.array[1]");
@@ -274,6 +275,8 @@ TEST_F(EngineManagerTest, AddSingleValue)
     TestWithSingle<BASE_NS::Math::IVec2>("handle.complex[1].vec");
     TestWithSingle<int32_t>("handle.complex[2].vec.x");
     TestWithSingle<int32_t>("handle.complex[2].vec.y");
+    TestWithSingle<int32_t>("handle.complexVec[0].vec.x");
+    TestWithSingle<int32_t>("handle.complexVec[1].vec.y");
 
     TestWithSingle<BASE_NS::Math::IVec2>("type.vec");
     TestWithSingle<int32_t>("type.vec.x");
@@ -412,6 +415,68 @@ TEST_F(EngineManagerTest, BitField)
     EXPECT_FALSE(ei->IsValueSet(0));
     EXPECT_TRUE(ei->IsValueSet(1));
     EXPECT_EQ(GetValue<int64_t>(*v), int64_t(EngineTestBitField::MY_VALUE_2));
+}
+
+TEST_F(EngineManagerTest, ContainerSubscription)
+{
+    TestComponentManager<prop2::EngineTestProp> cman { prop2::ENGINE_TESTPROP_METADATA };
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+
+    bool arrres =
+        manager->ConstructValue(EnginePropertyHandle { &cman, cman.entityRef }, "complexVec", EngineValueOptions {});
+    ASSERT_TRUE(arrres);
+
+    auto arr = manager->ConstructArrayProperty<EngineTestType>("complexVec");
+    ASSERT_TRUE(arr);
+
+    {
+        bool res = manager->ConstructValue(
+            EnginePropertyHandle { &cman, cman.entityRef }, "complexVec[2]", EngineValueOptions {});
+        ASSERT_FALSE(res);
+    }
+
+    bool res0 =
+        manager->ConstructValue(EnginePropertyHandle { &cman, cman.entityRef }, "complexVec[0]", EngineValueOptions {});
+    ASSERT_TRUE(res0);
+
+    auto v0 = manager->ConstructProperty<EngineTestType>("complexVec[0]");
+    ASSERT_TRUE(v0);
+    EXPECT_EQ(v0->GetValue(), (EngineTestType { { 1, 2 } }));
+
+    bool res1 =
+        manager->ConstructValue(EnginePropertyHandle { &cman, cman.entityRef }, "complexVec[1]", EngineValueOptions {});
+    ASSERT_TRUE(res1);
+
+    auto v1 = manager->ConstructProperty<EngineTestType>("complexVec[1]");
+    ASSERT_TRUE(v1);
+    EXPECT_EQ(v1->GetValue(), (EngineTestType { { 8, 8 } }));
+
+    arr->SetValue({ EngineTestType { { 4, 4 } } });
+    EXPECT_TRUE(manager->Sync(EngineSyncDirection::AUTO));
+
+    EXPECT_EQ(v0->GetValue(), (EngineTestType { { 4, 4 } }));
+    v0->SetValue({ { 5, 6 } });
+    // old value is returned since there is nothing behind it any more
+    EXPECT_EQ(v1->GetValue(), (EngineTestType { { 8, 8 } }));
+    v1->SetValue({ { 3, 3 } });
+
+    manager->Sync(EngineSyncDirection::AUTO);
+
+    {
+        bool res = manager->ConstructValue(
+            EnginePropertyHandle { &cman, cman.entityRef }, "complexVec[0].vec.x", EngineValueOptions {});
+        ASSERT_TRUE(res);
+
+        auto v = manager->ConstructProperty<int32_t>("complexVec[0].vec.x");
+        ASSERT_TRUE(v);
+        EXPECT_EQ(v->GetValue(), 5);
+        v->SetValue(7);
+        manager->Sync(EngineSyncDirection::AUTO);
+        EXPECT_EQ(v->GetValue(), 7);
+    }
+    EXPECT_EQ(v0->GetValue(), (EngineTestType { { 7, 6 } }));
 }
 
 } // namespace Test

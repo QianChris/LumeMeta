@@ -15,6 +15,15 @@ namespace Test {
 
 struct EngineTestType {
     BASE_NS::Math::IVec2 vec;
+
+    bool operator==(const EngineTestType& v) const
+    {
+        return vec == v.vec;
+    }
+    bool operator!=(const EngineTestType& v) const
+    {
+        return !(*this == v);
+    }
 };
 
 enum class EngineTestEnum {
@@ -37,6 +46,7 @@ CORE_BEGIN_NAMESPACE()
 
 DECLARE_PROPERTY_TYPE(META_NS::Test::EngineTestType);
 DATA_TYPE_METADATA(META_NS::Test::EngineTestType, MEMBER_PROPERTY(vec, "Vec", 0))
+DECLARE_PROPERTY_TYPE(BASE_NS::vector<META_NS::Test::EngineTestType>);
 
 DECLARE_PROPERTY_TYPE(META_NS::Test::EngineTestEnum);
 DECLARE_PROPERTY_TYPE(META_NS::Test::EngineTestBitField);
@@ -75,9 +85,12 @@ struct EngineTestProp {
 constexpr size_t TEST_PROPERTY_COUNT = 6;
 constexpr size_t TEST_RECURSIVE_PROPERTY_COUNT = 11;
 
-PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value it is", 0),
-    MEMBER_PROPERTY(floats, "Floats", 0), MEMBER_PROPERTY(vec2, "Vec2", 0), MEMBER_PROPERTY(type, "Type", 0),
-    MEMBER_PROPERTY(array, "Array", 0), MEMBER_PROPERTY(handle, "Handle", 0))
+PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value it is", 0), //
+    MEMBER_PROPERTY(floats, "Floats", 0),                                                         //
+    MEMBER_PROPERTY(vec2, "Vec2", 0),                                                             //
+    MEMBER_PROPERTY(type, "Type", 0),                                                             //
+    MEMBER_PROPERTY(array, "Array", 0),                                                           //
+    MEMBER_PROPERTY(handle, "Handle", 0))
 
 } // namespace prop1
 
@@ -86,12 +99,15 @@ struct EngineTestProp {
     int value { 1 };
     uint32_t array[2] { 1, 1 };
     EngineTestType complex[3];
+    BASE_NS::vector<EngineTestType> complexVec { EngineTestType { { 1, 2 } }, EngineTestType { { 8, 8 } } };
 };
 
-constexpr size_t TEST_PROPERTY_COUNT = 3;
+constexpr size_t TEST_PROPERTY_COUNT = 4;
 
-PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value", 0),
-    MEMBER_PROPERTY(array, "Array", 0), MEMBER_PROPERTY(complex, "Complex", 0))
+PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value", 0), //
+    MEMBER_PROPERTY(array, "Array", 0),                                                     //
+    MEMBER_PROPERTY(complex, "Complex", 0),                                                 //
+    MEMBER_PROPERTY(complexVec, "ComplexVec", 0))
 
 } // namespace prop2
 
@@ -232,6 +248,9 @@ inline void RegisterEngineTestType()
     r.GetEngineData().RegisterInternalValueAccess(MetaType<Test::EngineTestType[]>::coreType,
         CreateShared<EngineInternalArrayValueAccess<Test::EngineTestType>>());
 
+    r.GetEngineData().RegisterInternalValueAccess(MetaType<BASE_NS::vector<Test::EngineTestType>>::coreType,
+        CreateShared<EngineInternalArrayValueAccess<Test::EngineTestType>>());
+
     r.GetEngineData().RegisterInternalValueAccess(
         MetaType<Test::EngineTestEnum>::coreType, CreateShared<EngineInternalValueAccess<Test::EngineTestEnum>>());
     r.GetEngineData().RegisterInternalValueAccess(MetaType<Test::EngineTestBitField>::coreType,
@@ -244,6 +263,7 @@ inline void UnregisterEngineTestType()
     r.GetPropertyRegister().UnregisterAny(Any<Test::EngineTestType>::StaticGetClassId());
     r.GetEngineData().UnregisterInternalValueAccess(MetaType<Test::EngineTestType>::coreType);
     r.GetEngineData().UnregisterInternalValueAccess(MetaType<Test::EngineTestType[]>::coreType);
+    r.GetEngineData().UnregisterInternalValueAccess(MetaType<BASE_NS::vector<Test::EngineTestType>>::coreType);
 
     r.GetEngineData().UnregisterInternalValueAccess(MetaType<Test::EngineTestEnum>::coreType);
     r.GetEngineData().UnregisterInternalValueAccess(MetaType<Test::EngineTestBitField>::coreType);

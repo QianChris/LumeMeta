@@ -83,9 +83,35 @@ struct EnginePropertyParams {
         return baseOffset + property.offset;
     }
 
+    uint32_t index {};
+    const CORE_NS::ContainerApi* containerMethods {};
+    uintptr_t arraySubsOffset {};
+
     // to support some old code, we allow to push the value directly to the engine property
     // if this is set, the values can only be set in the engine task queue thread
     bool pushValueToEngineDirectly {};
+
+    EnginePropertyParams() = default;
+
+    EnginePropertyParams(const EnginePropertyHandle& h, const CORE_NS::Property& p, uintptr_t bOffset)
+        : handle(h), property(p), baseOffset(bOffset)
+    {}
+
+    EnginePropertyParams(const EnginePropertyParams& base, const CORE_NS::Property& p) : EnginePropertyParams(base)
+    {
+        property = p;
+        baseOffset = base.Offset();
+    }
+
+    EnginePropertyParams(const EnginePropertyParams& base, const CORE_NS::ContainerApi* capi, uint32_t i)
+        : EnginePropertyParams(base)
+    {
+        arraySubsOffset = base.Offset();
+        property = capi->property;
+        index = i;
+        containerMethods = capi;
+        baseOffset = 0;
+    }
 };
 
 META_REGISTER_INTERFACE(IEngineInternalValueAccess, "f11f1272-e936-4804-9202-3b93606c25ea")

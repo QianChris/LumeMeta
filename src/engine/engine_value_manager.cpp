@@ -99,7 +99,7 @@ bool EngineValueManager::ConstructValues(EnginePropertyHandle handle, EngineValu
         if (auto api = rh->Owner()) {
             std::unique_lock lock { mutex_ };
             for (auto& prop : api->MetaData()) {
-                EnginePropertyParams params { handle, prop };
+                EnginePropertyParams params(handle, prop, 0);
                 params.pushValueToEngineDirectly = options.pushValuesDirectlyToEngine;
                 AddValue(params, options);
             }
@@ -127,7 +127,7 @@ bool EngineValueManager::ConstructValues(IValue::Ptr value, EngineValueOptions o
     if (auto i = interface_cast<IEngineValueInternal>(value)) {
         auto params = i->GetPropertyParams();
         for (auto&& p : params.property.metaData.memberProperties) {
-            EnginePropertyParams propParams { params.handle, p, params.Offset() };
+            EnginePropertyParams propParams { params, p };
             propParams.pushValueToEngineDirectly = options.pushValuesDirectlyToEngine;
             AddValue(propParams, EngineValueOptions { prefix, options.values });
         }
@@ -145,7 +145,7 @@ bool EngineValueManager::ConstructValue(EnginePropertyParams property, EngineVal
 bool EngineValueManager::ConstructValueImplArraySubs(
     EnginePropertyParams params, BASE_NS::string pathTaken, BASE_NS::string_view path, EngineValueOptions options)
 {
-    if (!params.property.type.isArray && !params.property.metaData.containerMethods) {
+    if (!params.property.metaData.containerMethods) {
         CORE_LOG_W("Cannot index non-array in property path");
         return false;
     }
@@ -160,16 +160,34 @@ bool EngineValueManager::ConstructValueImplArraySubs(
         CORE_LOG_W("Invalid property path array index");
         return false;
     }
-    if (index >= params.property.count) {
-        CORE_LOG_W("Invalid property path array index, out of range");
-        return false;
+    EnginePropertyParams elementParams;
+    auto cmethods = params.property.metaData.containerMethods;
+    if (params.property.type.isArray) {
+        if (index >= params.property.count) {
+            CORE_LOG_W("Invalid property path array index, out of range");
+            return false;
+        }
+        elementParams = EnginePropertyParams(params, cmethods->property);
+        elementParams.baseOffset += elementParams.property.size * index;
+    } else {
+        if (params.containerMethods) {
+            CORE_LOG_W("Can only refer to one subscription over container");
+            return false;
+        }
+        auto handle = params.handle.Handle();
+        auto data = (uintptr_t)handle->RLock();
+        if (!data) {
+            CORE_LOG_W("Invalid property data");
+            return false;
+        }
+        if (index >= cmethods->size(data + params.Offset())) {
+            handle->RUnlock();
+            CORE_LOG_W("Invalid property path container index, out of range");
+            return false;
+        }
+        handle->RUnlock();
+        elementParams = EnginePropertyParams(params, cmethods, index);
     }
-
-    EnginePropertyParams elementParams { params.handle, params.property.metaData.containerMethods->property,
-        params.Offset() };
-    elementParams.baseOffset += elementParams.property.size * index;
-    elementParams.pushValueToEngineDirectly = options.pushValuesDirectlyToEngine;
-
     pathTaken += path.substr(0, endPos + 1);
     path.remove_prefix(endPos + 1);
     if (path.empty()) {
@@ -223,8 +241,7 @@ bool EngineValueManager::ConstructValueImpl(
         auto root = path.substr(0, path.find_first_of('.'));
         for (auto&& p : params.property.metaData.memberProperties) {
             if (p.name == root) {
-                EnginePropertyParams propParams { params.handle, p, params.Offset() };
-                propParams.pushValueToEngineDirectly = options.pushValuesDirectlyToEngine;
+                EnginePropertyParams propParams(params, p);
                 return ConstructValueImpl(propParams, BASE_NS::move(pathTaken), path, options);
             }
         }
@@ -241,7 +258,7 @@ bool EngineValueManager::ConstructValueImpl(
             if (!root.empty()) {
                 for (auto& prop : api->MetaData()) {
                     if (prop.name == root) {
-                        EnginePropertyParams params { handle, prop };
+                        EnginePropertyParams params(handle, prop, 0);
                         params.pushValueToEngineDirectly = options.pushValuesDirectlyToEngine;
                         return ConstructValueImpl(params, BASE_NS::move(pathTaken), path, options);
                     }
