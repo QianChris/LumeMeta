@@ -17,7 +17,7 @@ META_BEGIN_NAMESPACE()
 namespace Test {
 
 struct MemFile : public CORE_NS::IFile {
-    explicit MemFile(BASE_NS::vector<char> vec = {});
+    explicit MemFile(BASE_NS::vector<uint8_t> vec = {});
 
     Mode GetMode() const override;
     void Close() override;
@@ -28,16 +28,16 @@ struct MemFile : public CORE_NS::IFile {
     bool Seek(uint64_t offset) override;
     uint64_t GetPosition() const override;
 
-    BASE_NS::vector<char> Data() const;
+    BASE_NS::vector<uint8_t> Data() const;
 
 private:
     void Destroy() override;
-    BASE_NS::vector<char> data_;
+    BASE_NS::vector<uint8_t> data_;
     size_t pos_ {};
 };
 
 struct TestSerialiser {
-    explicit TestSerialiser(BASE_NS::vector<char> data = {});
+    explicit TestSerialiser(BASE_NS::vector<uint8_t> data = {});
 
     bool Export(const IObject::Ptr& object);
     IObject::Ptr Import();
@@ -57,6 +57,7 @@ struct TestSerialiser {
     bool LoadFile(BASE_NS::string_view path);
     void Dump(BASE_NS::string_view file);
     BASE_NS::string Get() const;
+    BASE_NS::vector<uint8_t> GetData() const;
 
     void SetSerializationSettings(SerializationSettings s);
 
@@ -73,7 +74,7 @@ private:
     CORE_NS::IResourceManager::Ptr resources_;
 };
 
-void WriteToFile(const BASE_NS::vector<char>&, BASE_NS::string_view file);
+void WriteToFile(const BASE_NS::vector<uint8_t>&, BASE_NS::string_view file);
 
 } // namespace Test
 

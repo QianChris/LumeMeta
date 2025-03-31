@@ -16,7 +16,7 @@
 META_BEGIN_NAMESPACE()
 namespace Test {
 
-MemFile::MemFile(BASE_NS::vector<char> vec) : data_(BASE_NS::move(vec)) {}
+MemFile::MemFile(BASE_NS::vector<uint8_t> vec) : data_(BASE_NS::move(vec)) {}
 
 MemFile::Mode MemFile::GetMode() const
 {
@@ -29,8 +29,10 @@ void MemFile::Close()
 uint64_t MemFile::Read(void* buffer, uint64_t count)
 {
     size_t read = std::min<size_t>(count, data_.size() - pos_);
-    std::memcpy(buffer, &data_[pos_], read);
-    pos_ += read;
+    if (read) {
+        std::memcpy(buffer, &data_[pos_], read);
+        pos_ += read;
+    }
     return read;
 }
 uint64_t MemFile::Write(const void* buffer, uint64_t count)
@@ -67,7 +69,7 @@ uint64_t MemFile::GetPosition() const
 {
     return pos_;
 }
-BASE_NS::vector<char> MemFile::Data() const
+BASE_NS::vector<uint8_t> MemFile::Data() const
 {
     return data_;
 }
@@ -76,7 +78,7 @@ void MemFile::Destroy()
     delete this;
 }
 
-TestSerialiser::TestSerialiser(BASE_NS::vector<char> vec) : data_(BASE_NS::move(vec)) {}
+TestSerialiser::TestSerialiser(BASE_NS::vector<uint8_t> vec) : data_(BASE_NS::move(vec)) {}
 
 bool TestSerialiser::Export(const IObject::Ptr& object)
 {
@@ -113,7 +115,7 @@ bool TestSerialiser::LoadFile(BASE_NS::string_view path)
         return false;
     }
 
-    BASE_NS::vector<char> vec;
+    BASE_NS::vector<uint8_t> vec;
     vec.resize(f->GetLength());
     f->Read(vec.data(), vec.size());
     data_ = MemFile { BASE_NS::move(vec) };
@@ -127,7 +129,13 @@ void TestSerialiser::Dump(BASE_NS::string_view file)
 
 BASE_NS::string TestSerialiser::Get() const
 {
-    return BASE_NS::string(BASE_NS::string_view(data_.Data().data(), data_.Data().size()));
+    return BASE_NS::string(
+        BASE_NS::string_view(reinterpret_cast<const char*>(data_.Data().data()), data_.Data().size()));
+}
+
+BASE_NS::vector<uint8_t> TestSerialiser::GetData() const
+{
+    return data_.Data();
 }
 
 BASE_NS::unordered_map<InstanceId, InstanceId> TestSerialiser::GetInstanceIdMapping() const
@@ -143,7 +151,7 @@ void TestSerialiser::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
     resources_ = BASE_NS::move(p);
 }
 
-void WriteToFile(const BASE_NS::vector<char>& vec, BASE_NS::string_view file)
+void WriteToFile(const BASE_NS::vector<uint8_t>& vec, BASE_NS::string_view file)
 {
     auto f = CORE_NS::GetPluginRegister().GetFileManager().CreateFile(file);
     if (f) {

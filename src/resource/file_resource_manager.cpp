@@ -14,6 +14,17 @@
 
 META_BEGIN_NAMESPACE()
 
+static bool ResourceMatches(
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection, const CORE_NS::ResourceId& id)
+{
+    for (auto&& s : selection) {
+        if ((s.hasWildCardName || id.name == s.name) && (s.hasWildCardGroup || id.group == s.group)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 FileResourceManager::FileResourceManager()
 {
     auto factory = CORE_NS::GetInstance<CORE_NS::IFileSystemApi>(CORE_NS::UID_FILESYSTEM_API_FACTORY);
@@ -21,6 +32,41 @@ FileResourceManager::FileResourceManager()
     fileManager_->RegisterFilesystem("file", factory->CreateStdFileSystem());
 }
 
+void FileResourceManager::AddListener(const IResourceListener::Ptr& p)
+{
+    std::unique_lock lock { listenerMutex_ };
+    for (auto&& v : listeners_) {
+        if (v.lock() == p) {
+            return;
+        }
+    }
+    listeners_.push_back(p);
+}
+void FileResourceManager::RemoveListener(const IResourceListener::Ptr& p)
+{
+    std::unique_lock lock { listenerMutex_ };
+    auto it = listeners_.begin();
+    for (; it != listeners_.end() && it->lock() != p; ++it) {
+    }
+    if (it != listeners_.end()) {
+        listeners_.erase(it);
+    }
+}
+void FileResourceManager::Notify(const BASE_NS::vector<CORE_NS::ResourceId>& ids, IResourceListener::EventType type)
+{
+    if (!ids.empty()) {
+        BASE_NS::vector<IResourceListener::WeakPtr> list;
+        {
+            std::shared_lock lock { listenerMutex_ };
+            list = listeners_;
+        }
+        for (auto&& v : list) {
+            if (auto l = v.lock()) {
+                l->OnResourceEvent(type, ids);
+            }
+        }
+    }
+}
 bool FileResourceManager::AddResourceType(CORE_NS::IResourceType::Ptr p)
 {
     if (p) {
@@ -44,21 +90,7 @@ BASE_NS::vector<CORE_NS::IResourceType::Ptr> FileResourceManager::GetResourceTyp
     }
     return res;
 }
-static BASE_NS::vector<char> FromHex(std::string_view s)
-{
-    if (s.size() % 2) {
-        CORE_LOG_W("Invalid data");
-        return {};
-    }
-    BASE_NS::vector<char> vec;
-    for (std::size_t i = 0; i != s.size(); i += 2) {
-        int v1 = BASE_NS::HexToDec(s[i]);
-        int v2 = BASE_NS::HexToDec(s[i + 1]);
-        vec.push_back(static_cast<std::uint8_t>(v1 << 4 | v2));
-    }
-    return vec;
-}
-bool FileResourceManager::ReadHeader(const std::string& line)
+CORE_NS::ResourceId FileResourceManager::ReadHeader(const std::string& line)
 {
     std::istringstream in(line);
     std::string name;
@@ -67,7 +99,7 @@ bool FileResourceManager::ReadHeader(const std::string& line)
     std::string type;
     in >> std::quoted(name) >> std::quoted(group) >> std::quoted(path) >> type;
     if (!in || type.size() != 36U) {
-        return false;
+        return {};
     }
 
     auto data = BASE_NS::make_shared<ResourceData>();
@@ -81,9 +113,9 @@ bool FileResourceManager::ReadHeader(const std::string& line)
         data->optionData = BASE_NS::Base64Decode(opt.c_str());
     }
     resources_[data->id.group][data->id.name] = data;
-    return true;
+    return data->id;
 }
-bool FileResourceManager::ReadHeaders(CORE_NS::IFile& file)
+bool FileResourceManager::ReadHeaders(CORE_NS::IFile& file, BASE_NS::vector<CORE_NS::ResourceId>& result)
 {
     std::string vec;
     vec.resize(file.GetLength());
@@ -92,25 +124,31 @@ bool FileResourceManager::ReadHeaders(CORE_NS::IFile& file)
     std::string line;
     while (std::getline(ss, line)) {
         if (!line.empty() && line[0] != '#') {
-            if (!ReadHeader(line)) {
+            auto res = ReadHeader(line);
+            if (!res.IsValid()) {
                 return false;
             }
+            result.push_back(std::move(res));
         }
     }
     return true;
 }
-FileResourceManager::Status FileResourceManager::Import(BASE_NS::string_view url)
+FileResourceManager::Result FileResourceManager::Import(BASE_NS::string_view url)
 {
-    std::unique_lock lock { mutex_ };
-    auto f = fileManager_->OpenFile(url);
-    if (!f) {
-        CORE_LOG_W("Failed to open resource manager file: %s", BASE_NS::string(url).c_str());
-        return Status::FILE_NOT_FOUND;
+    BASE_NS::vector<CORE_NS::ResourceId> result;
+    {
+        std::unique_lock lock { mutex_ };
+        auto f = fileManager_->OpenFile(url);
+        if (!f) {
+            CORE_LOG_W("Failed to open resource manager file: %s", BASE_NS::string(url).c_str());
+            return Result::FILE_NOT_FOUND;
+        }
+        if (!ReadHeaders(*f, result)) {
+            return Result::INVALID_FILE;
+        }
     }
-    if (ReadHeaders(*f)) {
-        return Status::OK;
-    }
-    return Status::INVALID_FILE;
+    Notify(result, IResourceListener::EventType::ADDED);
+    return Result::OK;
 }
 BASE_NS::vector<CORE_NS::ResourceInfo> FileResourceManager::GetResourceInfos(BASE_NS::string_view group) const
 {
@@ -122,6 +160,15 @@ BASE_NS::vector<CORE_NS::ResourceInfo> FileResourceManager::GetResourceInfos(BAS
         }
     }
     return infos;
+}
+BASE_NS::vector<BASE_NS::string> FileResourceManager::GetResourceGroups() const
+{
+    std::shared_lock lock { mutex_ };
+    BASE_NS::vector<BASE_NS::string> groups;
+    for (auto&& g : resources_) {
+        groups.push_back(g.first);
+    }
+    return groups;
 }
 CORE_NS::ResourceInfo FileResourceManager::GetResourceInfo(const CORE_NS::ResourceId& id) const
 {
@@ -159,19 +206,22 @@ CORE_NS::IResource::Ptr FileResourceManager::GetResource(
     return ConstructResource(id, context);
 }
 BASE_NS::vector<CORE_NS::IResource::Ptr> FileResourceManager::GetResources(
-    BASE_NS::string_view group, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context)
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection,
+    const BASE_NS::shared_ptr<CORE_NS::IInterface>& context)
 {
     BASE_NS::vector<CORE_NS::IResource::Ptr> res;
     BASE_NS::vector<CORE_NS::ResourceId> populate;
     {
         std::shared_lock lock { mutex_ };
-        auto git = resources_.find(group);
-        if (git != resources_.end()) {
-            for (auto it = git->second.begin(); it != git->second.end(); ++it) {
-                if (it->second->object) {
-                    res.push_back(it->second->object);
-                } else {
-                    populate.push_back(it->second->id);
+        for (auto&& g : resources_) {
+            for (auto&& v : g.second) {
+                auto& r = *v.second;
+                if (ResourceMatches(selection, r.id)) {
+                    if (r.object) {
+                        res.push_back(r.object);
+                    } else {
+                        populate.push_back(r.id);
+                    }
                 }
             }
         }
@@ -193,33 +243,33 @@ static void SaveResourceHeader(const ResourceData& r, CORE_NS::IFile& file)
     auto buf = out.str();
     file.Write(buf.data(), buf.size());
 }
-FileResourceManager::Status FileResourceManager::SaveResourceData(const ResourceData& r)
+FileResourceManager::Result FileResourceManager::SaveResourceData(const ResourceData& r)
 {
     if (!r.object) {
-        return Status::NO_RESOURCE_DATA;
+        return Result::NO_RESOURCE_DATA;
     }
     auto it = types_.find(r.type);
     if (it == types_.end()) {
         CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(r.type).c_str());
-        return Status::NO_RESOURCE_TYPE;
+        return Result::NO_RESOURCE_TYPE;
     }
     if (!r.path.empty()) {
         MemFile data;
         if (!it->second->SaveResource(r.object,
                 CORE_NS::IResourceType::StorageInfo { nullptr, &data, r.id, r.path, GetSelf<IResourceManager>() })) {
             CORE_LOG_W("Failed to save resource: %s", r.id.ToString().c_str());
-            return Status::EXPORT_FAILURE;
+            return Result::EXPORT_FAILURE;
         }
         if (data.GetLength()) {
             auto f = fileManager_->CreateFile(r.path);
             if (!f) {
                 CORE_LOG_W("Failed to open resource file: %s", r.path.c_str());
-                return Status::FILE_WRITE_ERROR;
+                return Result::FILE_WRITE_ERROR;
             }
             f->Write(data.RawData(), data.GetLength());
         }
     }
-    return Status::OK;
+    return Result::OK;
 }
 bool FileResourceManager::UpdateOptions(ResourceData& r)
 {
@@ -239,24 +289,28 @@ bool FileResourceManager::UpdateOptions(ResourceData& r)
     }
     return true;
 }
-FileResourceManager::Status FileResourceManager::Export(BASE_NS::string_view filePath)
+FileResourceManager::Result FileResourceManager::Export(
+    BASE_NS::string_view filePath, const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection)
 {
     std::unique_lock lock { mutex_ };
     auto f = fileManager_->CreateFile(filePath);
     if (!f) {
         CORE_LOG_W("Failed to create resource manager file: %s", BASE_NS::string(filePath).c_str());
-        return Status::FILE_WRITE_ERROR;
+        return Result::FILE_WRITE_ERROR;
     }
     BASE_NS::string vstr = "# Lume Resource Index Version 1\n";
     f->Write(vstr.data(), vstr.size());
     for (auto&& g : resources_) {
         for (auto&& v : g.second) {
-            UpdateOptions(*v.second);
-            SaveResourceHeader(*v.second, *f);
-            SaveResourceData(*v.second);
+            auto& res = *v.second;
+            if (ResourceMatches(selection, res.id)) {
+                UpdateOptions(res);
+                SaveResourceHeader(res, *f);
+                SaveResourceData(res);
+            }
         }
     }
-    return Status::OK;
+    return Result::OK;
 }
 
 bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource)
@@ -265,46 +319,54 @@ bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource)
 }
 bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource, BASE_NS::string_view path)
 {
-    std::unique_lock lock { mutex_ };
-    auto it = types_.find(resource->GetResourceType());
-    if (it == types_.end()) {
-        CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(resource->GetResourceType()).c_str());
-        return false;
+    {
+        std::unique_lock lock { mutex_ };
+        auto it = types_.find(resource->GetResourceType());
+        if (it == types_.end()) {
+            CORE_LOG_W(
+                "Resource type not registered [type=%s]", BASE_NS::to_string(resource->GetResourceType()).c_str());
+            return false;
+        }
+        auto id = resource->GetResourceId();
+        ResourceData d;
+        d.object = resource;
+        d.type = resource->GetResourceType();
+        d.id = id;
+        d.path = path;
+        MemFile opts;
+        if (!it->second->SaveResource(resource,
+                CORE_NS::IResourceType::StorageInfo { &opts, nullptr, d.id, d.path, GetSelf<IResourceManager>() })) {
+            CORE_LOG_W("Failed to save resource options");
+            return false;
+        }
+        d.optionData = opts.Data();
+        resources_[id.group][id.name] = BASE_NS::make_shared<ResourceData>(BASE_NS::move(d));
     }
-    auto id = resource->GetResourceId();
-    ResourceData d;
-    d.object = resource;
-    d.type = resource->GetResourceType();
-    d.id = id;
-    d.path = path;
-    MemFile opts;
-    if (!it->second->SaveResource(resource,
-            CORE_NS::IResourceType::StorageInfo { &opts, nullptr, d.id, d.path, GetSelf<IResourceManager>() })) {
-        CORE_LOG_W("Failed to save resource options");
-        return false;
-    }
-    d.optionData = opts.Data();
-    resources_[id.group][id.name] = BASE_NS::make_shared<ResourceData>(BASE_NS::move(d));
+    Notify({ resource->GetResourceId() }, IResourceListener::EventType::ADDED);
     return true;
 }
 bool FileResourceManager::AddResource(const CORE_NS::ResourceId& id, const CORE_NS::ResourceType& type,
     BASE_NS::string_view path, const CORE_NS::IResourceOptions::ConstPtr& options)
 {
-    std::unique_lock lock { mutex_ };
-    auto it = types_.find(type);
-    if (it == types_.end()) {
-        CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(type).c_str());
-        return false;
+    {
+        std::unique_lock lock { mutex_ };
+        auto it = types_.find(type);
+        if (it == types_.end()) {
+            CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(type).c_str());
+            return false;
+        }
+        ResourceData d;
+        d.type = type;
+        d.id = id;
+        d.path = path;
+        if (options) {
+            MemFile opts;
+            options->Save(opts, GetSelf<IResourceManager>());
+            d.optionData = opts.Data();
+        }
+        resources_[id.group][id.name] = BASE_NS::make_shared<ResourceData>(BASE_NS::move(d));
     }
-    ResourceData d;
-    d.type = type;
-    d.id = id;
-    d.path = path;
-    if (options) {
-        MemFile opts(d.optionData);
-        options->Save(opts, GetSelf<IResourceManager>());
-    }
-    resources_[id.group][id.name] = BASE_NS::make_shared<ResourceData>(BASE_NS::move(d));
+    Notify({ id }, IResourceListener::EventType::ADDED);
     return true;
 }
 bool FileResourceManager::ReloadResource(
@@ -342,6 +404,30 @@ bool FileResourceManager::ReloadResource(
         GetSelf<IResourceManager>(), context };
     return type->ReloadResource(info, resource);
 }
+bool FileResourceManager::RenameResource(const CORE_NS::ResourceId& id, const CORE_NS::ResourceId& newId)
+{
+    {
+        std::unique_lock lock { mutex_ };
+        auto git = resources_.find(id.group);
+        if (git == resources_.end()) {
+            return false;
+        }
+        auto it = git->second.find(id.name);
+        if (it == git->second.end()) {
+            return false;
+        }
+        auto& v = resources_[newId.group][newId.name];
+        if (v) {
+            return false;
+        }
+        v = it->second;
+        git->second.erase(it);
+    }
+
+    Notify({ id }, IResourceListener::EventType::REMOVED);
+    Notify({ newId }, IResourceListener::EventType::ADDED);
+    return true;
+}
 bool FileResourceManager::PurgeResource(const CORE_NS::ResourceId& id)
 {
     std::unique_lock lock { mutex_ };
@@ -354,9 +440,16 @@ bool FileResourceManager::PurgeResource(const CORE_NS::ResourceId& id)
 }
 bool FileResourceManager::RemoveResource(const CORE_NS::ResourceId& id)
 {
-    std::unique_lock lock { mutex_ };
-    auto git = resources_.find(id.group);
-    return git != resources_.end() && git->second.erase(id.name) == 1;
+    bool res = false;
+    {
+        std::unique_lock lock { mutex_ };
+        auto git = resources_.find(id.group);
+        res = git != resources_.end() && git->second.erase(id.name) == 1;
+    }
+    if (res) {
+        Notify({ id }, IResourceListener::EventType::REMOVED);
+    }
+    return res;
 }
 size_t FileResourceManager::PurgeGroup(BASE_NS::string_view group)
 {
@@ -375,22 +468,46 @@ size_t FileResourceManager::PurgeGroup(BASE_NS::string_view group)
 }
 bool FileResourceManager::RemoveGroup(BASE_NS::string_view group)
 {
-    std::unique_lock lock { mutex_ };
-    return resources_.erase(group) == 1;
+    bool res = false;
+    BASE_NS::vector<CORE_NS::ResourceId> result;
+    {
+        std::unique_lock lock { mutex_ };
+        auto it = resources_.find(group);
+        res = it != resources_.end();
+        if (res) {
+            for (auto&& g : it->second) {
+                result.push_back(g.second->id);
+            }
+            resources_.erase(it);
+        }
+    }
+    if (res) {
+        Notify(result, IResourceListener::EventType::REMOVED);
+    }
+    return res;
 }
 void FileResourceManager::RemoveAllResources()
 {
-    std::unique_lock lock { mutex_ };
-    resources_.clear();
+    BASE_NS::vector<CORE_NS::ResourceId> result;
+    {
+        std::unique_lock lock { mutex_ };
+        for (auto&& g : resources_) {
+            for (auto&& v : g.second) {
+                result.push_back(v.second->id);
+            }
+        }
+        resources_.clear();
+    }
+    Notify(result, IResourceListener::EventType::REMOVED);
 }
 
-FileResourceManager::Status FileResourceManager::ExportResourcePayload(const CORE_NS::IResource::Ptr& resource)
+FileResourceManager::Result FileResourceManager::ExportResourcePayload(const CORE_NS::IResource::Ptr& resource)
 {
     std::shared_lock lock { mutex_ };
     auto res = FindResource(resource->GetResourceId());
     if (!res) {
         CORE_LOG_W("No such resource: %s", resource->GetResourceId().ToString().c_str());
-        return Status::NO_RESOURCE_DATA;
+        return Result::NO_RESOURCE_DATA;
     }
     return SaveResourceData(*res);
 }

@@ -57,6 +57,7 @@ set(test_sources
     src/interface/property/test_array_property.cpp
     src/interface/property/test_intf_modifier.cpp
     src/interface/property/test_property.cpp
+    src/interface/resource/test_file_resource_manager.cpp
     src/interface/serialization/test_intf_serializable.cpp
     src/interface/serialization/test_property_serialization.cpp
     src/interface/serialization/test_resource_serialization.cpp

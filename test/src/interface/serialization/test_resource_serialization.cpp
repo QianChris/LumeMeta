@@ -78,14 +78,14 @@ TEST_F(ResourceSerializationTest, Basic)
 
 TEST_F(ResourceSerializationTest, ResourceManagerSerialisation)
 {
-    ASSERT_EQ(resources_->Export("file://test.resources"), CORE_NS::IResourceManager::Status::OK);
+    ASSERT_EQ(resources_->Export("file://test.resources"), CORE_NS::IResourceManager::Result::OK);
 
     auto resman = GetObjectRegistry().Create<CORE_NS::IResourceManager>(ClassId::FileResourceManager);
     ASSERT_TRUE(resman);
     ASSERT_TRUE(
         resman->AddResourceType(GetObjectRegistry().Create<CORE_NS::IResourceType>(ClassId::ObjectResourceType)));
 
-    ASSERT_EQ(resman->Import("file://test.resources"), CORE_NS::IResourceManager::Status::OK);
+    ASSERT_EQ(resman->Import("file://test.resources"), CORE_NS::IResourceManager::Result::OK);
 
     auto res = resman->GetResource("file://test_resource.json");
     ASSERT_TRUE(res);

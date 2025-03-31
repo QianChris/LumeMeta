@@ -22,17 +22,22 @@ class FileResourceManager : public IntroduceInterfaces<MetaObject, CORE_NS::IRes
 public:
     FileResourceManager();
 
+    void AddListener(const IResourceListener::Ptr&) override;
+    void RemoveListener(const IResourceListener::Ptr&) override;
     bool AddResourceType(CORE_NS::IResourceType::Ptr) override;
     bool RemoveResourceType(const CORE_NS::ResourceType& type) override;
     BASE_NS::vector<CORE_NS::IResourceType::Ptr> GetResourceTypes() const override;
-    Status Import(BASE_NS::string_view url) override;
+    Result Import(BASE_NS::string_view url) override;
     BASE_NS::vector<CORE_NS::ResourceInfo> GetResourceInfos(BASE_NS::string_view group) const override;
+    BASE_NS::vector<BASE_NS::string> GetResourceGroups() const override;
     CORE_NS::ResourceInfo GetResourceInfo(const CORE_NS::ResourceId&) const override;
     CORE_NS::IResource::Ptr GetResource(
         const CORE_NS::ResourceId&, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
     BASE_NS::vector<CORE_NS::IResource::Ptr> GetResources(
-        BASE_NS::string_view group, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
-    Status Export(BASE_NS::string_view filePath) override;
+        const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection,
+        const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
+    Result Export(BASE_NS::string_view filePath,
+        const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) override;
 
     bool AddResource(const CORE_NS::IResource::Ptr& resource) override;
     bool AddResource(const CORE_NS::IResource::Ptr& resource, BASE_NS::string_view path) override;
@@ -41,24 +46,26 @@ public:
 
     bool ReloadResource(
         const CORE_NS::IResource::Ptr& resource, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context) override;
+    bool RenameResource(const CORE_NS::ResourceId&, const CORE_NS::ResourceId&) override;
     bool PurgeResource(const CORE_NS::ResourceId&) override;
     bool RemoveResource(const CORE_NS::ResourceId&) override;
     size_t PurgeGroup(BASE_NS::string_view group) override;
     bool RemoveGroup(BASE_NS::string_view group) override;
     void RemoveAllResources() override;
 
-    Status ExportResourcePayload(const CORE_NS::IResource::Ptr& resource) override;
+    Result ExportResourcePayload(const CORE_NS::IResource::Ptr& resource) override;
 
     void SetFileManager(CORE_NS::IFileManager::Ptr fileManager) override;
 
 private:
     CORE_NS::IResource::Ptr ConstructResource(
         const CORE_NS::ResourceId& id, const BASE_NS::shared_ptr<CORE_NS::IInterface>& context);
-    Status SaveResourceData(const ResourceData& r);
-    bool ReadHeader(const std::string& line);
-    bool ReadHeaders(CORE_NS::IFile& file);
+    Result SaveResourceData(const ResourceData& r);
+    CORE_NS::ResourceId ReadHeader(const std::string& line);
+    bool ReadHeaders(CORE_NS::IFile& file, BASE_NS::vector<CORE_NS::ResourceId>& result);
     BASE_NS::shared_ptr<ResourceData> FindResource(const CORE_NS::ResourceId& id);
     bool UpdateOptions(ResourceData& r);
+    void Notify(const BASE_NS::vector<CORE_NS::ResourceId>& id, IResourceListener::EventType type);
 
 private:
     mutable std::shared_mutex mutex_;
@@ -66,6 +73,8 @@ private:
     BASE_NS::unordered_map<BASE_NS::string, BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>>
         resources_;
     CORE_NS::IFileManager::Ptr fileManager_;
+    mutable std::shared_mutex listenerMutex_;
+    BASE_NS::vector<IResourceListener::WeakPtr> listeners_;
 };
 
 META_END_NAMESPACE()

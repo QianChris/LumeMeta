@@ -434,8 +434,7 @@ static CORE_NS::IFile::Ptr CreateTestFileWithoutProperty()
 {
     TestSerialiser ser;
     ser.Export(CreateInstance(META_NS::ClassId::Object));
-    auto s = ser.Get();
-    return CORE_NS::IFile::Ptr(new MemFile(BASE_NS::vector<char>(s.begin(), s.end())));
+    return CORE_NS::IFile::Ptr(new MemFile(ser.GetData()));
 }
 
 TEST_P(ContentLoaderObjectProviderTest, JsonWithoutProperty)
@@ -471,8 +470,7 @@ static CORE_NS::IFile::Ptr CreateTestFileWithProperty()
     Metadata object(CreateInstance(META_NS::ClassId::Object));
     object.AddProperty<int>("Model.First", 0);
     ser.Export(object.GetPtr<META_NS::IObject>());
-    auto s = ser.Get();
-    return CORE_NS::IFile::Ptr(new MemFile(BASE_NS::vector<char>(s.begin(), s.end())));
+    return CORE_NS::IFile::Ptr(new MemFile(ser.GetData()));
 }
 
 TEST_P(ContentLoaderObjectProviderTest, JsonWithProperty)

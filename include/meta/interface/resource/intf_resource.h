@@ -7,6 +7,7 @@
 #include <meta/base/meta_types.h>
 #include <meta/base/namespace.h>
 #include <meta/interface/interface_macros.h>
+#include <meta/interface/property/construct_property.h>
 
 META_BEGIN_NAMESPACE()
 

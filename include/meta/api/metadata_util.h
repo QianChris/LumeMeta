@@ -148,10 +148,11 @@ inline bool CreatePropertiesFromStaticMeta(const ObjectId& id, IMetadata& out)
     }
     if (auto sm = fac->GetClassStaticMetadata()) {
         for (auto&& v : GetAllStaticMetadata(*sm, MetadataType::PROPERTY)) {
-            if (v.data && v.data->create) {
-                if (auto p = interface_pointer_cast<IProperty>(v.data->create(nullptr, *v.data))) {
-                    SetObjectFlags(p, ObjectFlagBits::SERIALIZE, true);
-                    out.AddProperty(p);
+            if (v.data && v.data->runtimeValue) {
+                if (auto def = v.data->runtimeValue()) {
+                    if (auto p = ConstructPropertyAny(v.data->name, *def)) {
+                        out.AddProperty(p);
+                    }
                 }
             }
         }
