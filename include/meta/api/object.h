@@ -42,29 +42,25 @@ public:
     META_INTERFACE_OBJECT(Object, InterfaceObject<IObject>, IObject)
     META_INTERFACE_OBJECT_INSTANTIATE(Object, ClassId::Object)
 
+    /// Returns the class id of the underlying object.
     auto GetClassId() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetClassId());
     }
+    /// Returns the class name of the underlying object.
     auto GetClassName() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetClassName());
     }
+    /// Returns the name of the object.
     auto GetName() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetName());
     }
-    auto GetInterfaces() const
-    {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetInterfaces());
-    }
+    /// @see IObject::Resolve
     auto Resolve(const RefUri& uri) const
     {
         return Object(META_INTERFACE_OBJECT_CALL_PTR(Resolve(uri)));
-    }
-    auto GetSelf() const
-    {
-        return Object(META_INTERFACE_OBJECT_CALL_PTR(GetSelf()));
     }
 };
 
@@ -75,66 +71,57 @@ class Metadata : public InterfaceObject<IMetadata> {
 public:
     META_INTERFACE_OBJECT(Metadata, InterfaceObject<IMetadata>, IMetadata)
 
-    auto GetProperties()
-    {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetProperties());
-    }
+    /// @see IMetadata::GetProperties
     auto GetProperties() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetProperties());
     }
-    auto GetFunctions()
-    {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetFunctions());
-    }
+    /// @see IMetadata::GetFunctions
     auto GetFunctions() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetFunctions());
     }
-    auto GetEvents()
-    {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetEvents());
-    }
+    /// @see IMetadata::GetEvents
     auto GetEvents() const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetEvents());
     }
+    /// @see IMetadata::GetAllMetadatas
     auto GetAllMetadatas(MetadataType types) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetAllMetadatas(types));
     }
+    /// @see IMetadata::GetMetadata
     auto GetMetadata(MetadataType type, BASE_NS::string_view name) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetMetadata(type, name));
     }
-    auto GetProperty(BASE_NS::string_view name, MetadataQuery query)
-    {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetProperty(name, query));
-    }
-    auto GetProperty(BASE_NS::string_view name)
-    {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetProperty(name));
-    }
+    /// @see IMetadata::GetProperty
     auto GetProperty(BASE_NS::string_view name, MetadataQuery query) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetProperty(name, query));
     }
+    /// @see IMetadata::GetProperty
     auto GetProperty(BASE_NS::string_view name) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetProperty(name));
     }
-    auto GetEvent(BASE_NS::string_view name)
+    /// @see IMetadata::GetEvent
+    auto GetEvent(BASE_NS::string_view name) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetEvent(name));
     }
-    auto GetFunction(BASE_NS::string_view name)
+    /// @see IMetadata::GetFunction
+    auto GetFunction(BASE_NS::string_view name) const
     {
         return META_INTERFACE_OBJECT_CALL_PTR(GetFunction(name));
     }
+    /// @see IMetadata::AddProperty
     auto AddProperty(const IProperty::Ptr& property)
     {
         return META_INTERFACE_OBJECT_CALL_PTR(AddProperty(property));
     }
+    /// @see IMetadata::RemoveProperty
     auto RemoveProperty(const IProperty::Ptr& property)
     {
         return META_INTERFACE_OBJECT_CALL_PTR(RemoveProperty(property));
@@ -163,7 +150,7 @@ public:
     META_INTERFACE_OBJECT_INSTANTIATE(Container, ClassId::ObjectContainer)
     auto GetAll() const
     {
-        return META_INTERFACE_OBJECT_CALL_PTR(GetAll());
+        return Internal::ArrayCast<Object>(META_INTERFACE_OBJECT_CALL_PTR(GetAll()));
     }
     auto GetAt(IContainer::SizeType index)
     {
@@ -175,7 +162,7 @@ public:
     }
     auto FindAll(const IContainer::FindOptions& options) const
     {
-        return META_INTERFACE_OBJECT_CALL_PTR(FindAll(options));
+        return Internal::ArrayCast<Object>(META_INTERFACE_OBJECT_CALL_PTR(FindAll(options)));
     }
     auto FindAny(const IContainer::FindOptions& options) const
     {
@@ -183,7 +170,7 @@ public:
     }
     auto FindByName(BASE_NS::string_view name) const
     {
-        return META_INTERFACE_OBJECT_CALL_PTR(FindByName(name));
+        return Object(META_INTERFACE_OBJECT_CALL_PTR(FindByName(name)));
     }
     auto Add(const IObject::Ptr& object)
     {
@@ -229,6 +216,7 @@ public:
 class Named : public Object {
 public:
     META_INTERFACE_OBJECT(Named, Object, INamed)
+    /// @see INamed::Name
     META_INTERFACE_OBJECT_PROPERTY(BASE_NS::string, Name)
 };
 

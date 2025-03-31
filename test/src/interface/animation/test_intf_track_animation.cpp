@@ -71,27 +71,27 @@ TEST_F(TrackAnimationTest, TrackAnimation)
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(keyframes)
-        .Timestamps(timestamps)
-        .KeyframeHandlers(handlers)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(keyframes)
+        .SetTimestamps(timestamps)
+        .SetKeyframeHandlers(handlers)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
+    ASSERT_TRUE(animation.GetValid());
 
-    ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
+    ASSERT_EQ(TimeSpan::Seconds(1.0f), animation.GetTotalDuration());
 
     animation.Start();
     // First frame
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
     BASE_NS::Math::Vec3 previous = initialValue;
 
     uint32_t steps = 0;
 
     // Each step steps by 10ms, so 100 steps should cover the whole 1000ms animation
     this->StepAnimations({ animation }, 100, [&](uint32_t frame) {
-        const auto progress = GetValue(animation.Progress());
+        const auto progress = animation.GetProgress();
         const auto value = GetValue(property);
         if (progress < timestamps[0]) {
             // First timestamp at 0.1, before that just get the value
@@ -99,7 +99,7 @@ TEST_F(TrackAnimationTest, TrackAnimation)
             // First timestamp at 0.1, before that just get the first keyframe
             EXPECT_EQ(value, keyframes.front()) << "Frame: " << frame;
             EXPECT_EQ(!handlerObjects[0]->Called(), 1) << "Frame: " << frame;
-            EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), -1) << "Frame: " << frame;
+            EXPECT_EQ(animation.GetCurrentKeyframeIndex(), -1) << "Frame: " << frame;
         } else {
             steps++;
             BASE_NS::Math::Vec3 expected;
@@ -108,22 +108,22 @@ TEST_F(TrackAnimationTest, TrackAnimation)
             if (progress >= timestamps[3]) {
                 expectedRangeStart = keyframes[2];
                 expectedRangeEnd = keyframes[3];
-                EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 3) << "Frame: " << frame;
+                EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 3) << "Frame: " << frame;
             } else if (progress >= timestamps[2]) {
                 expectedRangeStart = keyframes[2];
                 expectedRangeEnd = keyframes[3];
                 EXPECT_EQ(handlerObjects[2]->Called(), 1) << "Frame: " << frame;
-                EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 2) << "Frame: " << frame;
+                EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 2) << "Frame: " << frame;
             } else if (progress >= timestamps[1]) {
                 expectedRangeStart = keyframes[1];
                 expectedRangeEnd = keyframes[2];
                 EXPECT_EQ(handlerObjects[1]->Called(), 1) << "Frame: " << frame;
-                EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 1) << "Frame: " << frame;
+                EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 1) << "Frame: " << frame;
             } else if (progress >= timestamps[0]) {
                 expectedRangeStart = keyframes[0];
                 expectedRangeEnd = keyframes[1];
                 EXPECT_EQ(handlerObjects[0]->Called(), 1) << "Frame: " << frame;
-                EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 0) << "Frame: " << frame;
+                EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 0) << "Frame: " << frame;
             } else {
                 // Should not end up here
                 FAIL() << "Frame: " << frame;
@@ -137,32 +137,32 @@ TEST_F(TrackAnimationTest, TrackAnimation)
 
     EXPECT_EQ(steps, (timestamps[3] - timestamps[0]) * 100 + 1);
 
-    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
-    EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 3);
+    EXPECT_EQ(animation.GetProgress(), 1.f);
+    EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 3);
     EXPECT_EQ(GetValue(property), keyframes.back());
-    EXPECT_FALSE(GetValue(animation.Running()));
+    EXPECT_FALSE(animation.GetRunning());
 
     animation.Stop();
 
     for (const auto& h : handlerObjects) {
         EXPECT_EQ(h->Called(), 1);
     }
-    EXPECT_FALSE(GetValue(animation.Running()));
+    EXPECT_FALSE(animation.GetRunning());
 
     auto value = GetValue(property);
 
     animation.Start();
     animation.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(animation.Running()));
-    EXPECT_EQ(GetValue(animation.Progress()), 0.f);
+    EXPECT_TRUE(animation.GetRunning());
+    EXPECT_EQ(animation.GetProgress(), 0.f);
     EXPECT_EQ(value, GetValue(property)); // Value should not change as our first keyframe is at 0.1
 
     // Jump past the end
     IncrementClockTime(TimeSpan::Milliseconds(2000));
     animation.Step(GetTestClock());
 
-    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
+    EXPECT_EQ(animation.GetProgress(), 1.f);
     EXPECT_EQ(keyframes.back(), GetValue(property));
 
     UnregisterObjectType<KeyframeHandler>();
@@ -179,27 +179,27 @@ TEST_F(TrackAnimationTest, AddKeyframe)
     auto addedValue = added->GetValueAny().Clone(true);
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(trackKeyframes)
-        .Timestamps(trackTimestamps)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(trackKeyframes)
+        .SetTimestamps(trackTimestamps)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
-    ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
+    ASSERT_TRUE(animation.GetValid());
+    ASSERT_EQ(TimeSpan::Seconds(1.0f), animation.GetTotalDuration());
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
 
     StepAnimations({ animation }, 1, 200, [&animation](uint32_t frame) {
-        EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 0) << frame; // 1st keyframe
+        EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 0) << frame; // 1st keyframe
     });
 
     // Add a keyframe that is in the middle of the current and next keyframe
     EXPECT_EQ(animation.AddKeyframe(0.3, addedValue), 1);
 
     StepAnimations({ animation }, 1, 100, [&animation, &property, &added](uint32_t frame) {
-        EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 1); // 2nd keyframe that we just added
+        EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 1); // 2nd keyframe that we just added
         EXPECT_EQ(GetValue(property), GetValue(added));
     });
 }
@@ -210,29 +210,29 @@ TEST_F(TrackAnimationTest, AddKeyframes)
     auto added = ConstructProperty<BASE_NS::Math::Vec3>("Prop", { 100, 80, 0 });
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Property(property).Duration(TimeSpan::Milliseconds(1000));
+    animation.SetProperty(property).SetDuration(TimeSpan::Milliseconds(1000));
 
     size_t keyframes = 0;
     for (int i = 0; i < trackTimestamps.size() - 1; i++) {
         added->SetValue(trackKeyframes[i]);
         auto addedValue = added->GetValueAny().Clone(true);
         EXPECT_EQ(animation.AddKeyframe(trackTimestamps[i], addedValue), i);
-        EXPECT_EQ(GetValue(animation.Valid()), ++keyframes > 1);
+        EXPECT_EQ(animation.GetValid(), ++keyframes > 1);
     }
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
 
     added->SetValue(trackKeyframes[trackTimestamps.size() - 1]);
     auto addedValue = added->GetValueAny().Clone(true);
     EXPECT_EQ(animation.AddKeyframe(trackTimestamps[trackTimestamps.size() - 1], addedValue), 2);
 
-    EXPECT_EQ(animation.Keyframes()->GetSize(), trackKeyframes.size());
-    EXPECT_EQ(animation.Timestamps()->GetSize(), trackTimestamps.size());
+    EXPECT_EQ(animation.Keyframes().size(), trackKeyframes.size());
+    EXPECT_EQ(animation.GetTimestamps().size(), trackTimestamps.size());
 
     StepAnimations({ animation }, 3, 359, [&animation, &property, &added](uint32_t frame) {
-        EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), frame - 1) << frame;
+        EXPECT_EQ(animation.GetCurrentKeyframeIndex(), frame - 1) << frame;
     });
 }
 
@@ -240,28 +240,28 @@ TEST_F(TrackAnimationTest, RemoveKeyframe)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(trackKeyframes)
-        .Timestamps(trackTimestamps)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(trackKeyframes)
+        .SetTimestamps(trackTimestamps)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
 
     StepAnimations({ animation }, 1, 300, [&animation](uint32_t frame) {
-        EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 0) << frame; // 1st keyframe
+        EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 0) << frame; // 1st keyframe
     });
 
     EXPECT_TRUE(animation.RemoveKeyframe(1));
 
-    EXPECT_EQ(animation.Keyframes()->GetSize(), trackKeyframes.size() - 1);
-    EXPECT_EQ(animation.Timestamps()->GetSize(), trackTimestamps.size() - 1);
+    EXPECT_EQ(animation.Keyframes().size(), trackKeyframes.size() - 1);
+    EXPECT_EQ(animation.GetTimestamps().size(), trackTimestamps.size() - 1);
 
     StepAnimations({ animation }, 1, 300, [&animation](uint32_t frame) {
         // Originally this would have moved to second keyframe, but since we removed it
         // we should still be in the first keyframe
-        EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 0) << frame;
+        EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 0) << frame;
     });
 }
 
@@ -269,18 +269,18 @@ TEST_F(TrackAnimationTest, RemoveAllKeyframes)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(trackKeyframes)
-        .Timestamps(trackTimestamps)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(trackKeyframes)
+        .SetTimestamps(trackTimestamps)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
 
     animation.RemoveAllKeyframes();
-    EXPECT_FALSE(GetValue(animation.Running()));
-    EXPECT_FALSE(GetValue(animation.Valid()));
+    EXPECT_FALSE(animation.GetRunning());
+    EXPECT_FALSE(animation.GetValid());
 }
 
 TEST_F(TrackAnimationTest, HandlerTest)
@@ -301,26 +301,26 @@ TEST_F(TrackAnimationTest, HandlerTest)
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(keyframes)
-        .KeyframeHandlers(handlers)
-        .Timestamps(timestamps)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(keyframes)
+        .SetKeyframeHandlers(handlers)
+        .SetTimestamps(timestamps)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
+    ASSERT_TRUE(animation.GetValid());
 
-    ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
+    ASSERT_EQ(TimeSpan::Seconds(1.0f), animation.GetTotalDuration());
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
     BASE_NS::Math::Vec3 previous = initialValue;
 
     // Each step steps by 10ms, so 100 steps should cover the whole 1000ms animation
     this->StepAnimations({ animation }, 100, [&](uint32_t frame) {});
 
-    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
-    EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 3);
+    EXPECT_EQ(animation.GetProgress(), 1.f);
+    EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 3);
     for (const auto& h : handlerObjects) {
         EXPECT_EQ(h->Called(), 1);
     }
@@ -345,24 +345,24 @@ TEST_F(TrackAnimationTest, HandlerTest2)
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(keyframes)
-        .Timestamps(timestamps)
-        .KeyframeHandlers(handlers)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(keyframes)
+        .SetTimestamps(timestamps)
+        .SetKeyframeHandlers(handlers)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
+    ASSERT_TRUE(animation.GetValid());
 
-    ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
+    ASSERT_EQ(TimeSpan::Seconds(1.0f), animation.GetTotalDuration());
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
     // Each step steps by 10ms, so 100 steps should cover the whole 1000ms animation
     this->StepAnimations({ animation }, 100, [&](uint32_t frame) {});
 
-    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
-    EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), ITrackAnimation::INVALID_INDEX);
+    EXPECT_EQ(animation.GetProgress(), 1.f);
+    EXPECT_EQ(animation.GetCurrentKeyframeIndex(), ITrackAnimation::INVALID_INDEX);
     for (const auto& h : handlerObjects) {
         EXPECT_EQ(h->Called(), 1);
     }
@@ -387,27 +387,28 @@ TEST_F(TrackAnimationTest, HandlerTest3)
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", initialValue);
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(keyframes)
-        .Timestamps(timestamps)
-        .KeyframeHandlers(handlers)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    animation.SetKeyframes(keyframes)
+        .SetTimestamps(timestamps)
+        .SetKeyframeHandlers(handlers)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
+    ASSERT_TRUE(animation.GetValid());
 
-    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(META_NS::ClassId::LoopAnimationModifier)).LoopCount(3);
+    auto loop =
+        META_NS::AnimationModifiers::Loop(CreateInstance(META_NS::ClassId::LoopAnimationModifier)).SetLoopCount(3);
     auto attach = interface_pointer_cast<META_NS::IAttach>(animation);
     attach->Attach(interface_pointer_cast<IObject>(loop));
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
     // Each step steps by 10ms, so 300 steps should cover the whole 1000ms animation 3 times
     this->StepAnimations(
         { animation }, 302, [&](uint32_t frame) {}); // TODO figure out why we need 2 extra frames, 300 should be enough
 
-    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
-    EXPECT_EQ(GetValue(animation.CurrentKeyframeIndex()), 3);
+    EXPECT_EQ(animation.GetProgress(), 1.f);
+    EXPECT_EQ(animation.GetCurrentKeyframeIndex(), 3);
 
     EXPECT_EQ(handlerObjects[0]->Called(), 3);
     EXPECT_EQ(handlerObjects[1]->Called(), 3);
@@ -432,18 +433,18 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
     auto property = ConstructProperty<BASE_NS::Math::Vec3>(propertyName, initialValue);
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
-    animation.Keyframes(keyframes)
-        .Timestamps(timestamps)
-        .KeyframeCurves(curves)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(animationMs));
+    animation.SetKeyframes(keyframes)
+        .SetTimestamps(timestamps)
+        .SetKeyframeCurves(curves)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(animationMs));
     Metadata(animation).AddProperty(property);
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
+    ASSERT_TRUE(animation.GetValid());
 
     animation.Start();
     animation.Step(this->GetTestClock());
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
     const float step = animationMs / 100.f;
 
     auto checkFrame = [&](const Property<BASE_NS::Math::Vec3>& animated,
@@ -457,8 +458,8 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
                 break;
             }
         }
-        EXPECT_EQ(linearProgress, GetValue(checkAnim.Progress())) << "Frame:" << frame;
-        EXPECT_EQ(keyframe, GetValue(checkAnim.CurrentKeyframeIndex())) << "Frame:" << frame;
+        EXPECT_EQ(linearProgress, checkAnim.GetProgress()) << "Frame:" << frame;
+        EXPECT_EQ(keyframe, checkAnim.GetCurrentKeyframeIndex()) << "Frame:" << frame;
 
         if (keyframe < timestamps.size() - 1) {
             auto startTs = timestamps[keyframe];
@@ -489,7 +490,7 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
 
     imported.Start();
     imported.Step(this->GetTestClock());
-    EXPECT_TRUE(imported.Running()->GetValue());
+    EXPECT_TRUE(imported.GetRunning());
 
     this->StepAnimations({ imported }, 100, step, [&](uint32_t frame) { checkFrame(importedProp, imported, frame); });
     Metadata(imported).RemoveProperty(importedProp);
@@ -508,19 +509,19 @@ TEST_F(TrackAnimationTest, PropertyOnChanged)
     }));
 
     auto animation = META_NS::TrackAnimation<BASE_NS::Math::Vec3>(CreateInstance(META_NS::ClassId::TrackAnimation))
-                         .Keyframes(trackKeyframes)
-                         .Timestamps(trackTimestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000));
+                         .SetKeyframes(trackKeyframes)
+                         .SetTimestamps(trackTimestamps)
+                         .SetProperty(property)
+                         .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
-    ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
+    ASSERT_TRUE(animation.GetValid());
+    ASSERT_EQ(TimeSpan::Seconds(1.0f), animation.GetTotalDuration());
 
     animation.Start();
     StepAnimations({ animation }, 102, [&animation, &property](uint32_t frame) {
 
     });
-    EXPECT_FALSE(GetValue(animation.Running()));
+    EXPECT_FALSE(animation.GetRunning());
     EXPECT_TRUE(count >= 50) << count;
 }
 
@@ -531,13 +532,13 @@ TEST_F(TrackAnimationTest, SeekingPaused)
     static BASE_NS::vector<float> trackTimestamps = { 0.0f, 1.f };
     static BASE_NS::vector<int> trackKeyframes = { 0, 10 };
     auto animation = META_NS::TrackAnimation<int>(CreateInstance(META_NS::ClassId::TrackAnimation))
-                         .Keyframes(trackKeyframes)
-                         .Timestamps(trackTimestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000));
+                         .SetKeyframes(trackKeyframes)
+                         .SetTimestamps(trackTimestamps)
+                         .SetProperty(property)
+                         .SetDuration(TimeSpan::Milliseconds(1000));
 
-    ASSERT_TRUE(GetValue(animation.Valid()));
-    ASSERT_EQ(TimeSpan::Seconds(1.0f), GetValue(animation.TotalDuration()));
+    ASSERT_TRUE(animation.GetValid());
+    ASSERT_EQ(TimeSpan::Seconds(1.0f), animation.GetTotalDuration());
 
     animation.Start();
     StepAnimations({ animation }, 10, [](uint32_t frame) {});

@@ -56,6 +56,32 @@ public:
 protected:
     virtual CORE_NS::IInterface* GetInterfacePtr() const noexcept = 0;
 };
+
+namespace Internal {
+/**
+ * @brief Converts vector types
+ * @param from The vector to convert from
+ * @return Returns a vector of InterfaceObjects initialized with elements from source array.
+ */
+template<class To, class From>
+constexpr auto ArrayCast(BASE_NS::vector<From>&& from) noexcept
+{
+    if constexpr (BASE_NS::is_same_v<To, From>) {
+        return BASE_NS::move(from);
+    } else {
+        BASE_NS::vector<To> converted;
+        if (!from.empty()) {
+            converted.reserve(from.size());
+            for (auto&& n : from) {
+                converted.emplace_back(n);
+            }
+        }
+        return converted;
+    }
+}
+
+} // namespace Internal
+
 /**
  * @brief The InterfaceObject class is the base BASE_NS::shared_ptr<T> wrapper inherited by actual interface wrapper
  * objects.
@@ -119,6 +145,7 @@ protected:
             fn(*p);
         }
     }
+
     CORE_NS::IInterface* GetInterfacePtr() const noexcept override
     {
         return ptr_.get();
@@ -148,22 +175,71 @@ protected:
 // InterfaceObject default interface function call wrapper
 #define META_INTERFACE_OBJECT_CALL_PTR(Function) CallPtr<InterfaceType>([&](auto& p) { return p.Function; })
 
+#define META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(Name)  \
+private:                                               \
+    auto Get##Name##Property() const                   \
+    {                                                  \
+        return META_INTERFACE_OBJECT_CALL_PTR(Name()); \
+    }                                                  \
+                                                       \
+public:
+
 // InterfaceObject default readonly property wrapper
-#define META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name) \
-    auto Name() const                                       \
-    {                                                       \
-        return META_INTERFACE_OBJECT_CALL_PTR(Name());      \
+#define META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name)    \
+    META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(Name)              \
+    auto Get##Name() const                                     \
+    {                                                          \
+        return Type(META_NS::GetValue(Get##Name##Property())); \
     }
 
-// InterfaceObject default writable property wrapper
+// InterfaceObject default property wrapper
 #define META_INTERFACE_OBJECT_PROPERTY(Type, Name)      \
     META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name) \
-    auto& Name(const Type& value)                       \
+    auto& Set##Name(const Type& value)                  \
     {                                                   \
-        if (auto p = Name()) {                          \
-            p->SetValue(value);                         \
+        if (auto pr = Get##Name##Property()) {          \
+            pr->SetValue(value);                        \
         }                                               \
         return *this;                                   \
+    }
+
+// InterfaceObject default readonly array property wrapper
+#define META_INTERFACE_OBJECT_READONLY_ARRAY_PROPERTY(Type, PropertyName, AccessorName)                   \
+    META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(PropertyName)                                                 \
+    auto Get##PropertyName() const                                                                        \
+    {                                                                                                     \
+        auto pr = Get##PropertyName##Property();                                                          \
+        using ReturnType = decltype(pr->GetValue());                                                      \
+        auto value = pr ? pr->GetValue() : ReturnType {};                                                 \
+        return META_NS::Internal::ArrayCast<Type, typename ReturnType::value_type>(BASE_NS::move(value)); \
+    }                                                                                                     \
+    auto Get##AccessorName##Count() const                                                                 \
+    {                                                                                                     \
+        auto pr = Get##PropertyName##Property();                                                          \
+        return pr ? pr->GetSize() : 0;                                                                    \
+    }                                                                                                     \
+    auto Get##AccessorName##At(size_t index) const                                                        \
+    {                                                                                                     \
+        auto pr = Get##PropertyName##Property();                                                          \
+        return Type(pr ? pr->GetValueAt(index) : decltype(pr->GetValueAt(index)) {});                     \
+    }
+
+// InterfaceObject default array property wrapper
+#define META_INTERFACE_OBJECT_ARRAY_PROPERTY(Type, PropertyName, AccessorName)      \
+    META_INTERFACE_OBJECT_READONLY_ARRAY_PROPERTY(Type, PropertyName, AccessorName) \
+    auto& Set##PropertyName(BASE_NS::array_view<const Type> value)                  \
+    {                                                                               \
+        if (auto pr = Get##PropertyName##Property()) {                              \
+            pr->SetValue(value);                                                    \
+        }                                                                           \
+        return *this;                                                               \
+    }                                                                               \
+    auto& Set##AccessorName##At(size_t index, const Type& value)                    \
+    {                                                                               \
+        if (auto pr = Get##PropertyName##Property()) {                              \
+            pr->SetValueAt(index, value);                                           \
+        }                                                                           \
+        return *this;                                                               \
     }
 
 struct InitializationType {};
@@ -203,27 +279,6 @@ constexpr AsyncCallType Async { true };
             return SyncReturnType(f.GetResult());                      \
         }                                                              \
     }()
-
-/**
- * @brief Converts an a vector of shared_ptr<IInterface> to a vector of InterfaceObject derived types.
- * @param from The vector to convert from
- * @return Returns a vector of InterfaceObjects initialized with elements from source array.
- */
-template<class To, class From>
-BASE_NS::vector<To> InterfaceObjectArrayCast(BASE_NS::vector<From>&& from)
-{
-    static_assert(META_NS::IsInterfacePtr_v<From>, "Conversion source array must contain shared_ptrs.");
-    static_assert(BASE_NS::is_base_of_v<META_NS::InterfaceObjectBase, To>,
-        "Conversion target type must be a META_NS::InterfaceObject");
-    BASE_NS::vector<To> converted;
-    if (!from.empty()) {
-        converted.reserve(from.size());
-        for (auto&& n : from) {
-            converted.emplace_back(n);
-        }
-    }
-    return converted;
-}
 
 META_END_NAMESPACE()
 

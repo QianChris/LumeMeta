@@ -42,10 +42,10 @@ template<>
 Animation CreateAnimation<KeyframeAnimation<float>>(const IProperty::WeakPtr& property)
 {
     KeyframeAnimation<float> animation(CreateInstance(ClassId::KeyframeAnimation));
-    animation.From(0.0F);
-    animation.To(1.0F);
-    animation.Duration(TimeSpan::Milliseconds(1000));
-    animation.Property(property);
+    animation.SetFrom(0.0F);
+    animation.SetTo(1.0F);
+    animation.SetDuration(TimeSpan::Milliseconds(1000));
+    animation.SetProperty(property);
     return animation;
 }
 

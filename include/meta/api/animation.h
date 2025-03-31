@@ -8,6 +8,7 @@
 #ifndef META_API_ANIMATION_H
 #define META_API_ANIMATION_H
 
+#include <meta/api/curves.h>
 #include <meta/api/object.h>
 #include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/animation/intf_animation.h>
@@ -106,7 +107,7 @@ public:
      * @param modifier The modifier to add
      * @return True if the modifier was successfully applied, false otherwise.
      */
-    bool Modifier(const IAnimationModifier::Ptr& modifier)
+    bool AddModifier(const IAnimationModifier::Ptr& modifier)
     {
         return CallPtr<IAttach>([&](auto& p) { return p.Attach(modifier); });
     }
@@ -142,23 +143,27 @@ public:
     META_INTERFACE_OBJECT(KeyframeAnimation<Type>, PropertyAnimation, IKeyframeAnimation)
     META_INTERFACE_OBJECT_INSTANTIATE(KeyframeAnimation<Type>, ClassId::KeyframeAnimation)
     /// @see IKeyframeAnimation::From
-    auto From()
+    auto GetFrom()
     {
-        return META_INTERFACE_OBJECT_CALL_PTR(From());
+        Type value;
+        Any<Type>(GetValue(META_INTERFACE_OBJECT_CALL_PTR(From()))).GetValue(value);
+        return value;
     }
     /// @see IKeyframeAnimation::To
-    auto To()
+    auto GetTo()
     {
-        return META_INTERFACE_OBJECT_CALL_PTR(To());
+        Type value;
+        Any<Type>(GetValue(META_INTERFACE_OBJECT_CALL_PTR(To()))).GetValue(value);
+        return value;
     }
-    auto& From(const Type& value)
+    auto& SetFrom(const Type& value)
     {
-        SetAnyPtrProperty(From(), value);
+        SetAnyPtrProperty(META_INTERFACE_OBJECT_CALL_PTR(From()), value);
         return *this;
     }
-    auto& To(const Type& value)
+    auto& SetTo(const Type& value)
     {
-        SetAnyPtrProperty(To(), value);
+        SetAnyPtrProperty(META_INTERFACE_OBJECT_CALL_PTR(To()), value);
         return *this;
     }
 
@@ -186,30 +191,37 @@ public:
     META_INTERFACE_OBJECT_INSTANTIATE(TrackAnimation<T>, ClassId::TrackAnimation)
 
     /// @see ITrackAnimation::Timestamps
-    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::array_view<const float>, Timestamps)
+    META_INTERFACE_OBJECT_ARRAY_PROPERTY(float, Timestamps, Timestamp)
     /// Typed access to ITrackAnimation::Keyframes property.
-    ArrayProperty<T> Keyframes() const
+    auto Keyframes() const
     {
-        auto kf = META_INTERFACE_OBJECT_CALL_PTR(Keyframes());
-        if (auto internal = interface_cast<META_NS::IPropertyInternalAny>(kf)) {
-            if (!internal->GetInternalAny()) {
-                internal->SetInternalAny(ConstructArrayAny<T>());
-            }
-        }
-        return ArrayProperty<T>(kf);
+        auto kf = GetKeyframesProperty();
+        return kf ? kf->GetValue() : decltype(kf->GetValue()) {};
     }
     /// Set ITrackAnimation::Keyframes property from a typed array.
-    auto& Keyframes(const BASE_NS::array_view<const T> keyframes)
+    auto& SetKeyframes(const BASE_NS::array_view<const T> keyframes)
     {
-        if (auto kf = Keyframes()) {
+        if (auto kf = GetKeyframesProperty()) {
             kf->SetValue(keyframes);
         }
         return *this;
     }
+    auto& SetKeyframe(size_t index, const T& keyframe)
+    {
+        if (auto kf = GetKeyframesProperty()) {
+            kf->SetValueAt(index, keyframe);
+        }
+        return *this;
+    }
+    T GetKeyframe(size_t index) const
+    {
+        auto kf = GetKeyframesProperty();
+        return kf ? kf->GetValueAt(index) : T {};
+    }
     /// @see ITrackAnimation::KeyframeCurves
-    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::array_view<const ICurve1D::Ptr>, KeyframeCurves)
+    META_INTERFACE_OBJECT_ARRAY_PROPERTY(ICurve1D::Ptr, KeyframeCurves, KeyframeCurve)
     /// @see ITrackAnimation::KeyframeHandlers
-    META_INTERFACE_OBJECT_PROPERTY(BASE_NS::array_view<const IFunction::Ptr>, KeyframeHandlers)
+    META_INTERFACE_OBJECT_ARRAY_PROPERTY(IFunction::Ptr, KeyframeHandlers, KeyframeHandler)
     /// @see ITrackAnimation::CurrentKeyframeIndex
     META_INTERFACE_OBJECT_READONLY_PROPERTY(uint32_t, CurrentKeyframeIndex)
     /// @see ITrackAnimation::AddKeyframe
@@ -226,6 +238,18 @@ public:
     void RemoveAllKeyframes()
     {
         META_INTERFACE_OBJECT_CALL_PTR(RemoveAllKeyframes());
+    }
+
+private:
+    auto GetKeyframesProperty() const
+    {
+        auto kf = META_INTERFACE_OBJECT_CALL_PTR(Keyframes());
+        if (auto internal = interface_cast<META_NS::IPropertyInternalAny>(kf)) {
+            if (!internal->GetInternalAny()) {
+                internal->SetInternalAny(ConstructArrayAny<T>());
+            }
+        }
+        return ArrayProperty<T>(kf);
     }
 };
 
@@ -291,7 +315,7 @@ public:
     /// Set the modifier to loop indefinitely.
     auto& LoopIndefinitely()
     {
-        META_NS::SetValue(LoopCount(), -1);
+        SetLoopCount(-1);
         return *this;
     }
 };

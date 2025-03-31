@@ -42,10 +42,10 @@ protected:
     template<class A, class T>
     void SetProperties(A& target, const IProperty::Ptr& property, T from, T to, TimeSpan duration)
     {
-        SetValue(target.Property(), property);
-        target.From(from);
-        target.To(to);
-        SetValue(target.Duration(), duration);
+        target.SetProperty(property);
+        target.SetFrom(from);
+        target.SetTo(to);
+        target.SetDuration(duration);
     }
 
     ITestType::Ptr t1_;
@@ -90,20 +90,20 @@ TEST_F(StaggeredAnimationTest, ParallelSingleChild)
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(staggered.Running()));
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(100));
+    EXPECT_TRUE(staggered.GetRunning());
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(100));
 
     BASE_NS::Math::Vec3 previous = from;
     float previousProgress = 0.f;
 
     StepAnimations({ staggered }, 10, 10, [&](uint32_t frame) {
-        auto progress = GetValue(staggered.Progress());
+        auto progress = staggered.GetProgress();
         // Check that progress of ParallelAnimation moves forward
         EXPECT_GT(progress, previousProgress);
         previousProgress = progress;
 
-        bool running = GetValue(anim1.Running());
+        bool running = anim1.GetRunning();
         EXPECT_EQ(running, frame < 10) << "Frame: " << frame;
 
         // Check animations that are still running are proceeding
@@ -112,9 +112,9 @@ TEST_F(StaggeredAnimationTest, ParallelSingleChild)
         previous = pos;
     });
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to);
 }
 
@@ -139,25 +139,25 @@ TEST_F(StaggeredAnimationTest, Parallel)
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(staggered.Running()));
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_TRUE(GetValue(anim2.Running()));
-    EXPECT_TRUE(GetValue(anim3.Running()));
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(100));
+    EXPECT_TRUE(staggered.GetRunning());
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_TRUE(anim2.GetRunning());
+    EXPECT_TRUE(anim3.GetRunning());
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(100));
 
     BASE_NS::Math::Vec3 previous[3] = { from, from, from };
     float previousProgress = 0.f;
 
     StepAnimations({ staggered }, 10, 10, [&](uint32_t frame) {
-        auto progress = GetValue(staggered.Progress());
+        auto progress = staggered.GetProgress();
         // Check that progress of ParallelAnimation moves forward
         EXPECT_GT(progress, previousProgress);
         previousProgress = progress;
 
         std::bitset<3> currentAnimsRunning;
-        currentAnimsRunning[0] = GetValue(anim1.Running());
-        currentAnimsRunning[1] = GetValue(anim2.Running());
-        currentAnimsRunning[2] = GetValue(anim3.Running());
+        currentAnimsRunning[0] = anim1.GetRunning();
+        currentAnimsRunning[1] = anim2.GetRunning();
+        currentAnimsRunning[2] = anim3.GetRunning();
         // First animation finishes at 50ms, the rest at 100ms
         size_t expectedRunning = frame > 4 ? frame > 9 ? 0 : 2 : 3;
         EXPECT_EQ(currentAnimsRunning.count(), expectedRunning) << "Frame: " << frame;
@@ -180,11 +180,11 @@ TEST_F(StaggeredAnimationTest, Parallel)
         }
     });
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
+    EXPECT_EQ(anim2.GetProgress(), 1.f);
+    EXPECT_EQ(anim3.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to[0]);
     EXPECT_EQ(GetValue(t1_->Vec3Property2()), to[1]);
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
@@ -203,8 +203,8 @@ TEST_F(StaggeredAnimationTest, ParallelStopsItsChildrenWhenNotRunning)
     StepAnimations({ staggered }, 10, 10, [](uint32_t /*frame*/) {});
     staggered.Stop();
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_FALSE(GetValue(childAnim.Running()));
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_FALSE(childAnim.GetRunning());
 }
 
 TEST_F(StaggeredAnimationTest, ParallelSerialization)
@@ -255,11 +255,11 @@ TEST_F(StaggeredAnimationTest, ParallelSerialization)
     ASSERT_TRUE(anim2);
     KeyframeAnimation<BASE_NS::Math::Vec3> anim3(anims[2]);
     ASSERT_TRUE(anim3);
-    Property<BASE_NS::Math::Vec3> prop1(anim1.Property()->GetValue().lock());
+    Property<BASE_NS::Math::Vec3> prop1(anim1.GetProperty().lock());
     ASSERT_TRUE(prop1);
-    Property<BASE_NS::Math::Vec3> prop2(anim2.Property()->GetValue().lock());
+    Property<BASE_NS::Math::Vec3> prop2(anim2.GetProperty().lock());
     ASSERT_TRUE(prop2);
-    Property<BASE_NS::Math::Vec3> prop3(anim3.Property()->GetValue().lock());
+    Property<BASE_NS::Math::Vec3> prop3(anim3.GetProperty().lock());
     ASSERT_TRUE(prop3);
 
     staggered.Start();
@@ -269,15 +269,15 @@ TEST_F(StaggeredAnimationTest, ParallelSerialization)
     float previousProgress = 0.f;
 
     StepAnimations({ staggered }, 10, 10, [&](uint32_t frame) {
-        auto progress = GetValue(staggered.Progress());
+        auto progress = staggered.GetProgress();
         // Check that progress of ParallelAnimation moves forward
         EXPECT_GT(progress, previousProgress);
         previousProgress = progress;
 
         std::bitset<3> currentAnimsRunning;
-        currentAnimsRunning[0] = GetValue(anim1.Running());
-        currentAnimsRunning[1] = GetValue(anim2.Running());
-        currentAnimsRunning[2] = GetValue(anim3.Running());
+        currentAnimsRunning[0] = anim1.GetRunning();
+        currentAnimsRunning[1] = anim2.GetRunning();
+        currentAnimsRunning[2] = anim3.GetRunning();
         // First animation finishes at 50ms, the rest at 100ms
         size_t expectedRunning = frame > 4 ? frame > 9 ? 0 : 2 : 3;
         EXPECT_EQ(currentAnimsRunning.count(), expectedRunning) << "Frame: " << frame;
@@ -300,11 +300,11 @@ TEST_F(StaggeredAnimationTest, ParallelSerialization)
         }
     });
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
+    EXPECT_EQ(anim2.GetProgress(), 1.f);
+    EXPECT_EQ(anim3.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(prop1), to[0]);
     EXPECT_EQ(GetValue(prop2), to[1]);
     EXPECT_EQ(GetValue(prop3), to[2]);
@@ -317,7 +317,8 @@ TEST_F(StaggeredAnimationTest, ParallelLoop)
     auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
     auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
     const int loopCount = 3;
-    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+    auto loop =
+        META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
 
     AttachmentContainer(staggered).Attach(loop);
 
@@ -335,11 +336,11 @@ TEST_F(StaggeredAnimationTest, ParallelLoop)
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(staggered.Running()));
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_TRUE(GetValue(anim2.Running()));
-    EXPECT_TRUE(GetValue(anim3.Running()));
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(100) * loopCount);
+    EXPECT_TRUE(staggered.GetRunning());
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_TRUE(anim2.GetRunning());
+    EXPECT_TRUE(anim3.GetRunning());
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(100) * loopCount);
 
     for (int i = 0; i < loopCount; ++i) {
         float previousProgress = -1.f;
@@ -348,15 +349,15 @@ TEST_F(StaggeredAnimationTest, ParallelLoop)
         auto loop = i + 1;
 
         StepAnimations({ staggered }, 10, 10, [&](uint32_t frame) {
-            auto progress = GetValue(staggered.Progress());
+            auto progress = staggered.GetProgress();
             // Check that progress of ParallelAnimation moves forward
             EXPECT_GT(progress, previousProgress) << "Frame " << frame << ", Loop: " << loop;
             previousProgress = progress;
 
             std::bitset<3> currentAnimsRunning;
-            currentAnimsRunning[0] = GetValue(anim1.Running());
-            currentAnimsRunning[1] = GetValue(anim2.Running());
-            currentAnimsRunning[2] = GetValue(anim3.Running());
+            currentAnimsRunning[0] = anim1.GetRunning();
+            currentAnimsRunning[1] = anim2.GetRunning();
+            currentAnimsRunning[2] = anim3.GetRunning();
 
             size_t expectedRunning = frame > 4 ? frame > 9 ? 0 : 2 : 3;
             ASSERT_EQ(currentAnimsRunning.count(), expectedRunning) << "Frame: " << frame << ", Loop: " << loop;
@@ -381,20 +382,20 @@ TEST_F(StaggeredAnimationTest, ParallelLoop)
 
         if (loop == loopCount) {
             // Last loop, animation should have finished
-            EXPECT_FALSE(GetValue(staggered.Running()));
+            EXPECT_FALSE(staggered.GetRunning());
         } else {
-            EXPECT_TRUE(GetValue(staggered.Running()));
+            EXPECT_TRUE(staggered.GetRunning());
             staggered.Step(GetTestClock()); // One extra step to let the animations jump back to beginning
         }
     }
 
-    EXPECT_FLOAT_EQ(1.0f, GetValue(staggered.Progress()));
+    EXPECT_FLOAT_EQ(1.0f, staggered.GetProgress());
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
+    EXPECT_EQ(anim2.GetProgress(), 1.f);
+    EXPECT_EQ(anim3.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to[0]);
     EXPECT_EQ(GetValue(t1_->Vec3Property2()), to[1]);
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
@@ -424,11 +425,11 @@ TEST_F(StaggeredAnimationTest, ParallelReverse)
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(staggered.Running()));
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_FALSE(GetValue(anim2.Running()));
-    EXPECT_TRUE(GetValue(anim3.Running()));
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(100));
+    EXPECT_TRUE(staggered.GetRunning());
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_FALSE(anim2.GetRunning());
+    EXPECT_TRUE(anim3.GetRunning());
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(100));
 
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to[0]);
     EXPECT_EQ(GetValue(t1_->Vec3Property2()), from);
@@ -439,15 +440,15 @@ TEST_F(StaggeredAnimationTest, ParallelReverse)
     BASE_NS::Math::Vec3 previous[3] = { initFrom, initFrom, initFrom };
 
     StepAnimations({ staggered }, 10, 10, [&](uint32_t frame) {
-        auto progress = GetValue(staggered.Progress());
+        auto progress = staggered.GetProgress();
         // Check that progress of ParallelAnimation moves forward
         EXPECT_GT(progress, previousProgress) << "Frame " << frame;
         previousProgress = progress;
 
         std::bitset<3> currentAnimsRunning;
-        currentAnimsRunning[0] = GetValue(anim1.Running());
-        currentAnimsRunning[1] = GetValue(anim2.Running());
-        currentAnimsRunning[2] = GetValue(anim3.Running());
+        currentAnimsRunning[0] = anim1.GetRunning();
+        currentAnimsRunning[1] = anim2.GetRunning();
+        currentAnimsRunning[2] = anim3.GetRunning();
 
         size_t expectedRunning = frame > 6 ? frame > 9 ? 0 : 3 : 2;
         ASSERT_EQ(currentAnimsRunning.count(), expectedRunning) << "Frame: " << frame;
@@ -470,13 +471,13 @@ TEST_F(StaggeredAnimationTest, ParallelReverse)
         }
     });
 
-    EXPECT_FLOAT_EQ(1.0f, GetValue(staggered.Progress()));
+    EXPECT_FLOAT_EQ(1.0f, staggered.GetProgress());
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 0.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 0.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 0.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 0.f);
+    EXPECT_EQ(anim2.GetProgress(), 0.f);
+    EXPECT_EQ(anim3.GetProgress(), 0.f);
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), from);
     EXPECT_EQ(GetValue(t1_->Vec3Property2()), from);
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), from);
@@ -487,19 +488,20 @@ TEST_F(StaggeredAnimationTest, LoopPastEnd)
     META_NS::KeyframeAnimation<float> a1(CreateInstance(ClassId::KeyframeAnimation));
     META_NS::KeyframeAnimation<float> a2(CreateInstance(ClassId::KeyframeAnimation));
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
-    Container(staggered).Add(a1.From(0).To(10).Property(t1_->FloatProperty1()).Duration(TimeSpan::Milliseconds(100)));
     Container(staggered).Add(
-        a2.From(10)
-            .To(0)
-            .Property(t1_->FloatProperty1())
-            .Duration(TimeSpan::Milliseconds(100))
-            .Curve(interface_pointer_cast<ICurve1D>(CreateInstance(ClassId::InOutCubicEasingCurve))));
+        a1.SetFrom(0).SetTo(10).SetProperty(t1_->FloatProperty1()).SetDuration(TimeSpan::Milliseconds(100)));
+    Container(staggered).Add(
+        a2.SetFrom(10)
+            .SetTo(0)
+            .SetProperty(t1_->FloatProperty1())
+            .SetDuration(TimeSpan::Milliseconds(100))
+            .SetCurve(interface_pointer_cast<ICurve1D>(CreateInstance(ClassId::InOutCubicEasingCurve))));
 
     AttachmentContainer(staggered).Attach(
         META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopIndefinitely());
 
     staggered.Start();
-    ASSERT_TRUE(GetValue(staggered.Running()));
+    ASSERT_TRUE(staggered.GetRunning());
 
     float expectedProgress = 0.f;
     float expectedProgressStep = 20.f / 200.f; // 200ms animation with 20ms step
@@ -508,12 +510,12 @@ TEST_F(StaggeredAnimationTest, LoopPastEnd)
     for (auto loop = 1; loop <= 3; loop++) {
         staggered.Step(GetTestClock());
         StepAnimations({ staggered }, 10, 20, [&](uint32_t frame) {
-            auto progress = GetValue(staggered.Progress());
+            auto progress = staggered.GetProgress();
             expectedProgress += expectedProgressStep;
             expectedProgress = expectedProgress - BASE_NS::Math::floor(expectedProgress);
 
-            EXPECT_EQ(GetValue(a1.Running()), frame < 5) << "Frame: " << frame << ", loop: " << loop;
-            EXPECT_EQ(GetValue(a2.Running()), frame >= 5 && frame < 10) << "Frame: " << frame << ", loop: " << loop;
+            EXPECT_EQ(a1.GetRunning(), frame < 5) << "Frame: " << frame << ", loop: " << loop;
+            EXPECT_EQ(a2.GetRunning(), frame >= 5 && frame < 10) << "Frame: " << frame << ", loop: " << loop;
         });
     }
 
@@ -526,7 +528,7 @@ TEST_F(StaggeredAnimationTest, LoopPastEnd)
     for (auto loop = 1; loop <= 3; loop++) {
         auto frameCount = loop == 1 ? 6 : 7;
         StepAnimations({ staggered }, frameCount, 30, [&](uint32_t frame) {
-            auto progress = GetValue(staggered.Progress());
+            auto progress = staggered.GetProgress();
             expectedProgress += expectedProgressStep;
             expectedProgress = expectedProgress - BASE_NS::Math::floor(expectedProgress);
 
@@ -536,8 +538,8 @@ TEST_F(StaggeredAnimationTest, LoopPastEnd)
             bool a1running = frame < 4;
             bool a2running = !a1running && progress < 1.f;
 
-            EXPECT_EQ(GetValue(a1.Running()), a1running) << "Frame: " << frame << ", loop: " << loop;
-            EXPECT_EQ(GetValue(a2.Running()), a2running) << "Frame: " << frame << ", loop: " << loop;
+            EXPECT_EQ(a1.GetRunning(), a1running) << "Frame: " << frame << ", loop: " << loop;
+            EXPECT_EQ(a2.GetRunning(), a2running) << "Frame: " << frame << ", loop: " << loop;
         });
     }
 }
@@ -562,29 +564,29 @@ TEST_F(StaggeredAnimationTest, Sequential)
     c.Add(anim2);
     c.Add(anim3);
 
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(200));
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(200));
 
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_TRUE(GetValue(staggered.Running()));
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_TRUE(staggered.GetRunning());
 
     std::bitset<3> animsRun;
     float previousProgress = 0.f;
 
     // 20 frames at 10ms interval should finish the animation
     RunFrames(20, [&animsRun, &anim1, &anim2, &anim3, &staggered, &previousProgress](uint32_t frame) {
-        auto progress = GetValue(staggered.Progress());
+        auto progress = staggered.GetProgress();
 
         // Each frame should progress the animation
         EXPECT_GT(progress, previousProgress) << "at frame " << frame;
         previousProgress = progress;
 
         std::bitset<3> currentAnimsRunning;
-        currentAnimsRunning[0] = GetValue(anim1.Running());
-        currentAnimsRunning[1] = GetValue(anim2.Running());
-        currentAnimsRunning[2] = GetValue(anim3.Running());
+        currentAnimsRunning[0] = anim1.GetRunning();
+        currentAnimsRunning[1] = anim2.GetRunning();
+        currentAnimsRunning[2] = anim3.GetRunning();
 
         // Only one animation should be running at a time
         EXPECT_EQ(currentAnimsRunning.count(), frame < 20 ? 1 : 0) << "at frame " << frame;
@@ -608,11 +610,11 @@ TEST_F(StaggeredAnimationTest, Sequential)
     });
 
     EXPECT_EQ(animsRun.count(), 3);
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
+    EXPECT_EQ(anim2.GetProgress(), 1.f);
+    EXPECT_EQ(anim3.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to[0]);
     EXPECT_EQ(GetValue(t1_->Vec3Property2()), to[1]);
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
@@ -666,34 +668,34 @@ TEST_F(StaggeredAnimationTest, SequentialSerialization)
     ASSERT_TRUE(anim2);
     KeyframeAnimation<BASE_NS::Math::Vec3> anim3(anims[2]);
     ASSERT_TRUE(anim3);
-    Property<BASE_NS::Math::Vec3> prop1(anim1.Property()->GetValue().lock());
+    Property<BASE_NS::Math::Vec3> prop1(anim1.GetProperty().lock());
     ASSERT_TRUE(prop1);
-    Property<BASE_NS::Math::Vec3> prop2(anim2.Property()->GetValue().lock());
+    Property<BASE_NS::Math::Vec3> prop2(anim2.GetProperty().lock());
     ASSERT_TRUE(prop2);
-    Property<BASE_NS::Math::Vec3> prop3(anim3.Property()->GetValue().lock());
+    Property<BASE_NS::Math::Vec3> prop3(anim3.GetProperty().lock());
     ASSERT_TRUE(prop3);
 
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_TRUE(GetValue(staggered.Running()));
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_TRUE(staggered.GetRunning());
 
     std::bitset<3> animsRun;
     float previousProgress = 0.f;
 
     // 20 frames at 10ms interval should finish the animation
     RunFrames(20, [&animsRun, &anim1, &anim2, &anim3, &staggered, &previousProgress](uint32_t frame) {
-        auto progress = GetValue(staggered.Progress());
+        auto progress = staggered.GetProgress();
 
         // Each frame should progress the animation
         EXPECT_GT(progress, previousProgress) << "at frame " << frame;
         previousProgress = progress;
 
         std::bitset<3> currentAnimsRunning;
-        currentAnimsRunning[0] = GetValue(anim1.Running());
-        currentAnimsRunning[1] = GetValue(anim2.Running());
-        currentAnimsRunning[2] = GetValue(anim3.Running());
+        currentAnimsRunning[0] = anim1.GetRunning();
+        currentAnimsRunning[1] = anim2.GetRunning();
+        currentAnimsRunning[2] = anim3.GetRunning();
 
         // Only one animation should be running at a time
         EXPECT_EQ(currentAnimsRunning.count(), frame < 20 ? 1 : 0) << "at frame " << frame;
@@ -717,11 +719,11 @@ TEST_F(StaggeredAnimationTest, SequentialSerialization)
     });
 
     EXPECT_EQ(animsRun.count(), 3);
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
+    EXPECT_EQ(anim2.GetProgress(), 1.f);
+    EXPECT_EQ(anim3.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(prop1), to[0]);
     EXPECT_EQ(GetValue(prop2), to[1]);
     EXPECT_EQ(GetValue(prop3), to[2]);
@@ -742,30 +744,30 @@ TEST_F(StaggeredAnimationTest, SequentialWithSameAnimation)
     c.Add(anim);
     c.Add(anim);
 
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(150));
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(150));
 
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(anim.Running()));
-    EXPECT_TRUE(GetValue(staggered.Running()));
+    EXPECT_TRUE(anim.GetRunning());
+    EXPECT_TRUE(staggered.GetRunning());
 
     float previousProgress = 0.f;
 
     // 20 frames + 10ms sleep at end of each frame -> Should be enough time
     // for all animations to run
     StepAnimations({ staggered }, 15, 10, [&](uint32_t frame) {
-        EXPECT_EQ(GetValue(staggered.Running()), frame < 15) << "Frame: " << frame;
-        auto progress = GetValue(staggered.Progress());
+        EXPECT_EQ(staggered.GetRunning(), frame < 15) << "Frame: " << frame;
+        auto progress = staggered.GetProgress();
 
         // Each frame should progress the animation
         EXPECT_GT(progress, previousProgress) << "Frame: " << frame;
         previousProgress = progress;
     });
 
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim.GetProgress(), 1.f);
 }
 
 TEST_F(StaggeredAnimationTest, SequentialModified)
@@ -776,7 +778,8 @@ TEST_F(StaggeredAnimationTest, SequentialModified)
     auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     const int loopCount = 3;
-    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+    auto loop =
+        META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
     AttachmentContainer(staggered).Attach(loop);
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
@@ -794,8 +797,8 @@ TEST_F(StaggeredAnimationTest, SequentialModified)
     staggered.Start();
     staggered.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(anim1.Running()));
-    EXPECT_TRUE(GetValue(staggered.Running()));
+    EXPECT_TRUE(anim1.GetRunning());
+    EXPECT_TRUE(staggered.GetRunning());
 
     std::bitset<3> animsRun;
 
@@ -804,16 +807,16 @@ TEST_F(StaggeredAnimationTest, SequentialModified)
         auto loop = i + 1;
 
         StepAnimations({ staggered }, 15, 10, [&](uint32_t frame) {
-            auto progress = GetValue(staggered.Progress());
+            auto progress = staggered.GetProgress();
 
             // Each frame should progress the animation
             EXPECT_GT(progress, previousProgress) << "Frame: " << frame << ", Loop: " << loop;
             previousProgress = progress;
 
             std::bitset<3> currentAnimsRunning;
-            currentAnimsRunning[0] = GetValue(anim1.Running());
-            currentAnimsRunning[1] = GetValue(anim2.Running());
-            currentAnimsRunning[2] = GetValue(anim3.Running());
+            currentAnimsRunning[0] = anim1.GetRunning();
+            currentAnimsRunning[1] = anim2.GetRunning();
+            currentAnimsRunning[2] = anim3.GetRunning();
 
             // Only one animation should be running at a time
             EXPECT_EQ(currentAnimsRunning.count(), frame < 15 ? 1 : 0) << "Frame: " << frame << ", Loop: " << loop;
@@ -837,19 +840,19 @@ TEST_F(StaggeredAnimationTest, SequentialModified)
         });
         if (loop == loopCount) {
             // Last loop, animation should have finished
-            EXPECT_FALSE(GetValue(staggered.Running()));
+            EXPECT_FALSE(staggered.GetRunning());
         } else {
-            EXPECT_TRUE(GetValue(staggered.Running()));
+            EXPECT_TRUE(staggered.GetRunning());
             staggered.Step(GetTestClock()); // One extra step to let the animations jump back to beginning
         }
     }
 
     EXPECT_EQ(animsRun.count(), 3);
-    EXPECT_FALSE(GetValue(staggered.Running()));
-    EXPECT_EQ(GetValue(staggered.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(anim3.Progress()), 1.f);
+    EXPECT_FALSE(staggered.GetRunning());
+    EXPECT_EQ(staggered.GetProgress(), 1.f);
+    EXPECT_EQ(anim1.GetProgress(), 1.f);
+    EXPECT_EQ(anim2.GetProgress(), 1.f);
+    EXPECT_EQ(anim3.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to[0]);
     EXPECT_EQ(GetValue(t1_->Vec3Property2()), to[1]);
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
@@ -879,7 +882,7 @@ TEST_F(StaggeredAnimationTest, DurationParallel)
     c.Add(anim3);
 
     auto staggeredDuration = *std::max_element(duration.begin(), duration.end());
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), staggeredDuration);
+    EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration);
 }
 
 TEST_F(StaggeredAnimationTest, ParallelWithSameAnimation)
@@ -898,7 +901,7 @@ TEST_F(StaggeredAnimationTest, ParallelWithSameAnimation)
     c.Add(anim);
 
     EXPECT_EQ(staggered.GetAnimations().size(), 1);
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), TimeSpan::Milliseconds(50));
+    EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(50));
 }
 
 TEST_F(StaggeredAnimationTest, DurationParallelModified)
@@ -909,7 +912,8 @@ TEST_F(StaggeredAnimationTest, DurationParallelModified)
     auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
     const int loopCount = 3;
-    auto loop = META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+    auto loop =
+        META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
     AttachmentContainer(staggered).Attach(loop);
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
@@ -929,7 +933,7 @@ TEST_F(StaggeredAnimationTest, DurationParallelModified)
     c.Add(anim3);
 
     auto staggeredDuration = *std::max_element(duration.begin(), duration.end());
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), staggeredDuration * loopCount);
+    EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration * loopCount);
 }
 
 TEST_F(StaggeredAnimationTest, DurationSequential)
@@ -956,7 +960,7 @@ TEST_F(StaggeredAnimationTest, DurationSequential)
     c.Add(anim3);
 
     auto staggeredDuration = std::accumulate(duration.begin(), duration.end(), TimeSpan::Zero());
-    EXPECT_EQ(GetValue(staggered.TotalDuration()), staggeredDuration);
+    EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration);
 }
 
 TEST_F(StaggeredAnimationTest, Hierarchy)
@@ -1008,22 +1012,22 @@ TEST_F(StaggeredAnimationTest, Hierarchy)
     float previousProgress = 0.f;
 
     StepAnimations({ par1 }, 15, 10, [&](uint32_t frame) {
-        EXPECT_EQ(GetValue(par1.Running()), frame < 15) << "Frame " << frame;
+        EXPECT_EQ(par1.GetRunning(), frame < 15) << "Frame " << frame;
 
-        auto progress = GetValue(par1.Progress());
+        auto progress = par1.GetProgress();
         EXPECT_GT(progress, previousProgress) << "Frame " << frame;
         previousProgress = progress;
     });
 
-    EXPECT_FALSE(GetValue(par1.Running()));
+    EXPECT_FALSE(par1.GetRunning());
 
-    EXPECT_EQ(GetValue(seq1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(par1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(par2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(a1.Progress()), 1.f);
-    EXPECT_EQ(GetValue(a2.Progress()), 1.f);
-    EXPECT_EQ(GetValue(a3.Progress()), 1.f);
-    EXPECT_EQ(GetValue(a4.Progress()), 1.f);
+    EXPECT_EQ(seq1.GetProgress(), 1.f);
+    EXPECT_EQ(par1.GetProgress(), 1.f);
+    EXPECT_EQ(par2.GetProgress(), 1.f);
+    EXPECT_EQ(a1.GetProgress(), 1.f);
+    EXPECT_EQ(a2.GetProgress(), 1.f);
+    EXPECT_EQ(a3.GetProgress(), 1.f);
+    EXPECT_EQ(a4.GetProgress(), 1.f);
     EXPECT_EQ(GetValue(p1), to[0]);
     EXPECT_EQ(GetValue(p2), to[1]);
     EXPECT_EQ(GetValue(p3), to[2]);
@@ -1056,31 +1060,31 @@ TEST_F(StaggeredAnimationTest, Reparent)
     EXPECT_EQ(a1cont->GetParent(), seq);
     EXPECT_EQ(a2cont->GetParent(), seq);
 
-    EXPECT_EQ(GetValue(seq.TotalDuration()), duration[0] + duration[1]);
+    EXPECT_EQ(seq.GetTotalDuration(), duration[0] + duration[1]);
 
     seq.Start();
     seq.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(seq.Running()));
-    EXPECT_TRUE(GetValue(a1.Running()));
+    EXPECT_TRUE(seq.GetRunning());
+    EXPECT_TRUE(a1.GetRunning());
 
     // Reparent the animation
     par.Add(a1);
     EXPECT_EQ(a1cont->GetParent(), par);
     EXPECT_EQ(a2cont->GetParent(), seq);
 
-    EXPECT_TRUE(GetValue(seq.Running()));
-    EXPECT_TRUE(GetValue(a1.Running()));
+    EXPECT_TRUE(seq.GetRunning());
+    EXPECT_TRUE(a1.GetRunning());
     seq.Stop();
 
     // Animation durations should have been updated due to hierarchy change
-    EXPECT_EQ(GetValue(seq.TotalDuration()), duration[1]);
-    EXPECT_EQ(GetValue(par.TotalDuration()), duration[0]);
+    EXPECT_EQ(seq.GetTotalDuration(), duration[1]);
+    EXPECT_EQ(par.GetTotalDuration(), duration[0]);
 
     par.Start();
-    EXPECT_FALSE(GetValue(seq.Running()));
-    EXPECT_TRUE(GetValue(par.Running()));
-    EXPECT_TRUE(GetValue(a1.Running()));
+    EXPECT_FALSE(seq.GetRunning());
+    EXPECT_TRUE(par.GetRunning());
+    EXPECT_TRUE(a1.GetRunning());
 }
 
 TEST_F(StaggeredAnimationTest, Name)
@@ -1090,16 +1094,16 @@ TEST_F(StaggeredAnimationTest, Name)
 
     Named n1(a1);
     Named n2(a2);
-    EXPECT_NE(GetValue(n1.Name()), "");
-    EXPECT_NE(GetValue(n2.Name()), "");
+    EXPECT_NE(n1.GetName(), "");
+    EXPECT_NE(n2.GetName(), "");
 
-    SetValue(n1.Name(), "Anim1");
-    SetValue(n2.Name(), "Anim2");
+    n1.SetName("Anim1");
+    n2.SetName("Anim2");
 
-    EXPECT_EQ(GetValue(n1.Name()), "Anim1");
-    EXPECT_EQ(a1.GetPtr()->GetName(), GetValue(n1.Name()));
-    EXPECT_EQ(GetValue(n2.Name()), "Anim2");
-    EXPECT_EQ(a2.GetPtr()->GetName(), GetValue(n2.Name()));
+    EXPECT_EQ(n1.GetName(), "Anim1");
+    EXPECT_EQ(a1.GetPtr()->GetName(), n1.GetName());
+    EXPECT_EQ(n2.GetName(), "Anim2");
+    EXPECT_EQ(a2.GetPtr()->GetName(), n2.GetName());
 }
 
 TEST_F(StaggeredAnimationTest, ParallelWithTrackAnimationSeeking)
@@ -1110,10 +1114,10 @@ TEST_F(StaggeredAnimationTest, ParallelWithTrackAnimationSeeking)
     auto property = ConstructProperty<int>("Prop");
     auto parallel = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
     auto anim = META_NS::TrackAnimation<int>(CreateInstance(ClassId::TrackAnimation));
-    anim.Keyframes(trackKeyframes)
-        .Timestamps(trackTimestamps)
-        .Property(property)
-        .Duration(TimeSpan::Milliseconds(1000));
+    anim.SetKeyframes(trackKeyframes)
+        .SetTimestamps(trackTimestamps)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(1000));
 
     ASSERT_TRUE(parallel);
     ASSERT_TRUE(anim);
@@ -1121,8 +1125,8 @@ TEST_F(StaggeredAnimationTest, ParallelWithTrackAnimationSeeking)
     parallel.Start();
     parallel.Step(GetTestClock());
 
-    EXPECT_TRUE(GetValue(parallel.Running()));
-    EXPECT_TRUE(GetValue(anim.Running()));
+    EXPECT_TRUE(parallel.GetRunning());
+    EXPECT_TRUE(anim.GetRunning());
 
     parallel.Pause();
 

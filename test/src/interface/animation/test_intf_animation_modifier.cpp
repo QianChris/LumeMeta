@@ -70,28 +70,28 @@ TEST_F(AnimationModifierTestBase, ReverseImplicitAnimation)
 
     auto property = META_NS::ConstructProperty<float>("test", start);
 
-    animation.Property(property);
-    animation.Duration(META_NS::TimeSpan::Milliseconds(100));
-    animation.Modifier(META_NS::AnimationModifiers::Reverse(CreateInstance(ClassId::ReverseAnimationModifier)));
+    animation.SetProperty(property);
+    animation.SetDuration(META_NS::TimeSpan::Milliseconds(100));
+    animation.AddModifier(META_NS::AnimationModifiers::Reverse(CreateInstance(ClassId::ReverseAnimationModifier)));
 
     property->SetValue(to);
 
-    EXPECT_TRUE(GetValue(animation.Running()));
+    EXPECT_TRUE(animation.GetRunning());
     animation.Step(GetTestClock());
 
     bool finished = false;
     animation.OnFinished()->AddHandler(MakeCallback<IOnChanged>([&] { finished = true; }));
 
     StepAnimations({ animation }, 10, [&](uint32_t frame) {
-        auto progress = GetValue(animation.Progress());
+        auto progress = animation.GetProgress();
         EXPECT_EQ(progress, frame / 10.f) << "Frame: " << frame;
 
         auto value = GetValue(property);
         EXPECT_EQ(value, start + (1.f - progress) * (to - start)) << "Frame: " << frame;
     });
 
-    EXPECT_FALSE(GetValue(animation.Running()));
-    EXPECT_EQ(GetValue(animation.Progress()), 1.f);
+    EXPECT_FALSE(animation.GetRunning());
+    EXPECT_EQ(animation.GetProgress(), 1.f);
     EXPECT_TRUE(finished);
 }
 
@@ -170,10 +170,10 @@ IAnimation::Ptr CreateKeyFrameAnimation(AnimationModifierTestBase& test)
     auto property = ConstructProperty<float>("test", 5.0f);
     test.keepAliveProperties.push_back(property);
 
-    animation.From(start);
-    animation.To(to);
-    animation.Duration(TimeSpan::Milliseconds(1000));
-    animation.Property(property);
+    animation.SetFrom(start);
+    animation.SetTo(to);
+    animation.SetDuration(TimeSpan::Milliseconds(1000));
+    animation.SetProperty(property);
 
     return animation;
 }
@@ -187,8 +187,8 @@ IAnimation::Ptr CreatePropertyAnimation(AnimationModifierTestBase& test)
     auto property = ConstructProperty<float>("test", start);
     test.keepAliveProperties.push_back(property);
 
-    animation.Property(property);
-    animation.Duration(TimeSpan::Milliseconds(1000));
+    animation.SetProperty(property);
+    animation.SetDuration(TimeSpan::Milliseconds(1000));
 
     // property->SetValue(to);
 
@@ -207,10 +207,10 @@ IAnimation::Ptr CreateTrackAnimation(AnimationModifierTestBase& test)
     BASE_NS::array_view<float> kf = keyframes;
 
     auto animation = TrackAnimation<float>(CreateInstance(ClassId::TrackAnimation))
-                         .Keyframes(keyframes)
-                         .Timestamps(timestamps)
-                         .Property(property)
-                         .Duration(TimeSpan::Milliseconds(1000));
+                         .SetKeyframes(keyframes)
+                         .SetTimestamps(timestamps)
+                         .SetProperty(property)
+                         .SetDuration(TimeSpan::Milliseconds(1000));
 
     return animation;
 }
@@ -301,7 +301,7 @@ TEST_P(LoopAnimationModifierTest, LoopCountModifiesDuration)
     auto originalDuration = GetValue(anim->TotalDuration());
 
     {
-        auto loop = AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+        auto loop = AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
         auto attach = interface_pointer_cast<IAttach>(anim);
         EXPECT_TRUE(attach->Attach(interface_pointer_cast<IObject>(loop)));
     }
@@ -312,12 +312,12 @@ TEST_P(LoopAnimationModifierTest, LoopCountModifiesDuration)
     ASSERT_TRUE(loop);
 
     EXPECT_EQ(GetValue(anim->TotalDuration()), loopCount * originalDuration);
-    loop.LoopCount(loopCount * 2);
+    loop.SetLoopCount(loopCount * 2);
     EXPECT_EQ(GetValue(anim->TotalDuration()), loopCount * 2 * originalDuration);
-    loop.LoopCount(loopCount);
+    loop.SetLoopCount(loopCount);
     EXPECT_EQ(GetValue(anim->TotalDuration()), loopCount * originalDuration);
 
-    loop.LoopCount(-1);
+    loop.SetLoopCount(-1);
     EXPECT_EQ(GetValue(anim->TotalDuration()), TimeSpan::Infinite());
 }
 
@@ -334,7 +334,7 @@ TEST_P(LoopAnimationModifierTest, AnimationIsLoopingRegardlessOfSpeedModificator
     {
         const auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
         attach->Attach(META_NS::AnimationModifiers::Loop(CreateNew).LoopIndefinitely().GetPtr());
-        attach->Attach(META_NS::AnimationModifiers::Speed(CreateNew).SpeedFactor(speedFactor).GetPtr());
+        attach->Attach(META_NS::AnimationModifiers::Speed(CreateNew).SetSpeedFactor(speedFactor).GetPtr());
     }
     anim = Transform(anim);
     ASSERT_TRUE(anim);
@@ -372,7 +372,7 @@ TEST_P(LoopAnimationModifierTest, AnimationIslooping)
     EXPECT_TRUE(GetValue(anim->Valid()));
     {
         auto loop =
-            META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).LoopCount(loopCount);
+            META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
         auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
         attach->Attach(loop.GetPtr());
     }
@@ -446,7 +446,7 @@ TEST_P(SpeedAnimationModifierTest, SpeedFactorModifiesDuration)
     auto expectedDuration = originalDuration / BASE_NS::Math::abs(speedFactor);
 
     {
-        auto speedModifier = META_NS::AnimationModifiers::Speed(CreateNew).SpeedFactor(speedFactor);
+        auto speedModifier = META_NS::AnimationModifiers::Speed(CreateNew).SetSpeedFactor(speedFactor);
         auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
         ASSERT_TRUE(attach->Attach(speedModifier.GetPtr()));
     }
@@ -460,17 +460,17 @@ TEST_P(SpeedAnimationModifierTest, SpeedFactorModifiesDuration)
     EXPECT_EQ(GetValue(anim->TotalDuration()), expectedDuration);
 
     // Change speed factor, total duration should follow
-    speedModifier.SpeedFactor(speedFactor * 2);
+    speedModifier.SetSpeedFactor(speedFactor * 2);
     EXPECT_EQ(GetValue(anim->TotalDuration()).ToMilliseconds(), (expectedDuration / 2).ToMilliseconds());
-    speedModifier.SpeedFactor(speedFactor);
+    speedModifier.SetSpeedFactor(speedFactor);
     EXPECT_EQ(GetValue(anim->TotalDuration()), expectedDuration);
 
-    speedModifier.SpeedFactor(-speedFactor * 2);
+    speedModifier.SetSpeedFactor(-speedFactor * 2);
     EXPECT_EQ(GetValue(anim->TotalDuration()).ToMilliseconds(), (expectedDuration / 2).ToMilliseconds());
-    speedModifier.SpeedFactor(-speedFactor);
+    speedModifier.SetSpeedFactor(-speedFactor);
     EXPECT_EQ(GetValue(anim->TotalDuration()), expectedDuration);
 
-    speedModifier.SpeedFactor(0);
+    speedModifier.SetSpeedFactor(0);
     EXPECT_EQ(GetValue(anim->TotalDuration()), TimeSpan::Infinite());
 }
 
@@ -483,7 +483,7 @@ TEST_P(SpeedAnimationModifierTest, SpeedFactorAffectsPlayback)
 
     {
         auto speedModifier = META_NS::AnimationModifiers::Speed(CreateInstance(ClassId::SpeedAnimationModifier))
-                                 .SpeedFactor(speedFactor);
+                                 .SetSpeedFactor(speedFactor);
 
         auto attach = interface_pointer_cast<META_NS::IAttach>(anim);
         ASSERT_NE(attach, nullptr);

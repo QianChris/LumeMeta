@@ -37,11 +37,11 @@ TEST(ContentTest, Search)
 
     EXPECT_TRUE(ContainsObjectWithName(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }), "Content"));
 
-    co.ContentSearchable(false);
+    co.SetContentSearchable(false);
     EXPECT_FALSE(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }));
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 1);
 
-    co.ContentSearchable(true);
+    co.SetContentSearchable(true);
     EXPECT_EQ(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }), content);
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 2);
 }
@@ -60,11 +60,11 @@ TEST(ContentTest, SearchContentContainer)
     EXPECT_EQ(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }), ccontent);
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 3);
 
-    co.ContentSearchable(false);
+    co.SetContentSearchable(false);
     EXPECT_FALSE(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }));
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 1);
 
-    co.ContentSearchable(true);
+    co.SetContentSearchable(true);
     EXPECT_EQ(c->FindAny({ "Content", TraversalType::DEPTH_FIRST_PRE_ORDER }), ccontent);
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 3);
 }
@@ -88,7 +88,7 @@ TEST(ContentTest, Iteration)
         EXPECT_TRUE(ContainsObjectWithName(vec, "Content"));
     }
 
-    co.ContentSearchable(false);
+    co.SetContentSearchable(false);
 
     {
         BASE_NS::vector<IObject::Ptr> vec;
@@ -181,17 +181,17 @@ TEST(ContentTest, ContentRequiredInterfaces)
     auto wrongType = GetObjectRegistry().Create(ClassId::Object);
 
     EXPECT_FALSE(co.SetContent(wrongType));
-    EXPECT_FALSE(co.Content()->GetValue());
+    EXPECT_FALSE(co.GetContent());
 
     EXPECT_TRUE(co.SetContent(correctType));
-    EXPECT_EQ(co.Content()->GetValue(), correctType);
+    EXPECT_EQ(co.GetContent(), correctType);
 
     // Relax requirements
     EXPECT_TRUE(RequiredInterfaces(co).SetRequiredInterfaces({}));
-    EXPECT_EQ(co.Content()->GetValue(), correctType);
+    EXPECT_EQ(co.GetContent(), correctType);
 
     EXPECT_TRUE(co.SetContent(wrongType));
-    EXPECT_EQ(co.Content()->GetValue(), wrongType);
+    EXPECT_EQ(co.GetContent(), wrongType);
 }
 
 } // namespace Test

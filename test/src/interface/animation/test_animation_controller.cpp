@@ -52,11 +52,11 @@ protected:
     META_NS::KeyframeAnimation<float> CreateAnimation()
     {
         auto animation = META_NS::KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation));
-        animation.Property(property_);
-        animation.From(0.f);
-        animation.To(10.f);
-        animation.Duration(ANIMATION_LENGTH);
-        animation.Controller(sutAnimationCtrl_);
+        animation.SetProperty(property_);
+        animation.SetFrom(0.f);
+        animation.SetTo(10.f);
+        animation.SetDuration(ANIMATION_LENGTH);
+        animation.SetController(sutAnimationCtrl_);
         return animation;
     }
 
@@ -75,7 +75,7 @@ TEST_F(AnimationControllerTest, RunningAnimationListContainsStartedAnimations)
     anim.Start();
 
     // expected
-    ASSERT_EQ(GetValue(anim.Running()), true);
+    ASSERT_EQ(anim.GetRunning(), true);
     const auto runningAnimations = sutAnimationCtrl_->GetRunning();
     ASSERT_THAT(runningAnimations.size(), Eq(1));
     EXPECT_THAT(runningAnimations[0].lock(), Eq(anim));
@@ -91,7 +91,7 @@ TEST_F(AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWere
     anim.Stop();
 
     // expected
-    ASSERT_EQ(GetValue(anim.Running()), false);
+    ASSERT_EQ(anim.GetRunning(), false);
     EXPECT_TRUE(sutAnimationCtrl_->GetRunning().empty());
 }
 
@@ -106,7 +106,7 @@ TEST_F(AnimationControllerTest, RunningAnimationListContainsResumedAnimations)
     anim.Start();
 
     // expected
-    ASSERT_EQ(GetValue(anim.Running()), true);
+    ASSERT_EQ(anim.GetRunning(), true);
     const auto runningAnimations = sutAnimationCtrl_->GetRunning();
     ASSERT_THAT(runningAnimations.size(), Eq(1));
     EXPECT_THAT(runningAnimations[0].lock(), Eq(anim));
@@ -123,8 +123,8 @@ TEST_F(AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWere
     StepAnimationController(ANIMATION_LENGTH.ToMilliseconds());
 
     // expected
-    ASSERT_EQ(GetValue(anim.Running()), false);
-    ASSERT_EQ(GetValue(anim.Progress()), 1.f);
+    ASSERT_EQ(anim.GetRunning(), false);
+    ASSERT_EQ(anim.GetProgress(), 1.f);
     EXPECT_TRUE(sutAnimationCtrl_->GetRunning().empty());
 }
 
@@ -132,15 +132,15 @@ TEST_F(AnimationControllerTest, AnimationControllerUpdatesControllerPropOfAddedA
 {
     // given
     auto anim = CreateAnimation();
-    anim.Controller()->Reset();
-    ASSERT_TRUE(GetValue(anim.Controller()).expired());
+    anim.SetController({});
+    ASSERT_TRUE(anim.GetController().expired());
 
     // when
     sutAnimationCtrl_->AddAnimation(anim);
 
     // expected
-    ASSERT_FALSE(GetValue(anim.Controller()).expired());
-    EXPECT_THAT(GetValue(anim.Controller()).lock(), Eq(sutAnimationCtrl_));
+    ASSERT_FALSE(anim.GetController().expired());
+    EXPECT_THAT(anim.GetController().lock(), Eq(sutAnimationCtrl_));
 }
 
 TEST_F(AnimationControllerTest, Serialization)
@@ -159,20 +159,21 @@ TEST_F(AnimationControllerTest, Serialization)
         Metadata(object).AddProperty(implicitProp);
         Metadata(object).AddProperty(keyframeProp);
 
-        auto implicitAnim =
-            PropertyAnimation(CreateInstance(ClassId::PropertyAnimation)).Property(implicitProp).Controller(controller);
+        auto implicitAnim = PropertyAnimation(CreateInstance(ClassId::PropertyAnimation))
+                                .SetProperty(implicitProp)
+                                .SetController(controller);
         auto keyframeAnim = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
-        keyframeAnim.Controller(controller);
+        keyframeAnim.SetController(controller);
         keyframeAnim.Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                             .From(0)
-                             .To(10)
-                             .Property(keyframeProp)
-                             .Duration(TimeSpan::Milliseconds(100)));
+                             .SetFrom(0)
+                             .SetTo(10)
+                             .SetProperty(keyframeProp)
+                             .SetDuration(TimeSpan::Milliseconds(100)));
         keyframeAnim.Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                             .From(10)
-                             .To(0)
-                             .Property(keyframeProp)
-                             .Duration(TimeSpan::Milliseconds(100)));
+                             .SetFrom(10)
+                             .SetTo(0)
+                             .SetProperty(keyframeProp)
+                             .SetDuration(TimeSpan::Milliseconds(100)));
 
         AttachmentContainer(object).Attach(implicitAnim);
         AttachmentContainer(object).Attach(keyframeAnim);
@@ -213,20 +214,20 @@ TEST_F(AnimationControllerTest, Serialization)
     ASSERT_EQ(children.size(), 2);
     KeyframeAnimation<float> segment1(children[0]);
     ASSERT_TRUE(segment1);
-    EXPECT_TRUE(GetValue(segment1.Valid()));
+    EXPECT_TRUE(segment1.GetValid());
 
     // Start the sequential animation and check that it works
     seqAnim.Start();
     importedController->Step(GetTestClock());
 
-    EXPECT_TRUE(seqAnim.Running()->GetValue());
-    EXPECT_EQ(seqAnim.Progress()->GetValue(), 0);
-    auto progress = seqAnim.Progress()->GetValue();
+    EXPECT_TRUE(seqAnim.GetRunning());
+    EXPECT_EQ(seqAnim.GetProgress(), 0);
+    auto progress = seqAnim.GetProgress();
 
     for (auto i = 0; i < 5; i++) {
         IncrementClockTime(TimeSpan::Milliseconds(10));
         importedController->Step(GetTestClock());
-        auto current = seqAnim.Progress()->GetValue();
+        auto current = seqAnim.GetProgress();
         EXPECT_GT(current, progress);
         progress = current;
     }

@@ -29,15 +29,15 @@ TEST_F(SequentialAnimationTest, SeekingSequentialAnimationNeedsToBeStartedToUpda
 
     auto animation = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
                          .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                                  .From(0.0F)
-                                  .To(1.0F)
-                                  .Property(property1)
-                                  .Duration(TimeSpan::Milliseconds(1000)))
+                                  .SetFrom(0.0F)
+                                  .SetTo(1.0F)
+                                  .SetProperty(property1)
+                                  .SetDuration(TimeSpan::Milliseconds(1000)))
                          .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                                  .From(0.0F)
-                                  .To(1.0F)
-                                  .Property(property2)
-                                  .Duration(TimeSpan::Milliseconds(1000)));
+                                  .SetFrom(0.0F)
+                                  .SetTo(1.0F)
+                                  .SetProperty(property2)
+                                  .SetDuration(TimeSpan::Milliseconds(1000)));
     // when
     animation.Seek(0.25F);
     animation.Start();
@@ -78,15 +78,15 @@ TEST_F(SequentialAnimationTest, SeekingSequentialAnimationAndPause)
 
     auto animation = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
                          .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                                  .From(0.0F)
-                                  .To(1.0F)
-                                  .Property(property1)
-                                  .Duration(TimeSpan::Milliseconds(1000)))
+                                  .SetFrom(0.0F)
+                                  .SetTo(1.0F)
+                                  .SetProperty(property1)
+                                  .SetDuration(TimeSpan::Milliseconds(1000)))
                          .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                                  .From(0.0F)
-                                  .To(1.0F)
-                                  .Property(property2)
-                                  .Duration(TimeSpan::Milliseconds(1000)));
+                                  .SetFrom(0.0F)
+                                  .SetTo(1.0F)
+                                  .SetProperty(property2)
+                                  .SetDuration(TimeSpan::Milliseconds(1000)));
 
     // when
     animation.Start();
