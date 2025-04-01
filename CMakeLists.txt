@@ -303,6 +303,7 @@ target_sources(MetaObjectExtAPI PUBLIC
     include/meta/ext/animation/interpolator.h
     include/meta/ext/any_builder.h
     include/meta/ext/attachment/attachment.h
+    include/meta/ext/attachment/behavior.h
     include/meta/ext/base_object.h
     include/meta/ext/base_object_fwd.h
     include/meta/ext/engine/core_any.h
