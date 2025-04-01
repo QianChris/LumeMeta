@@ -11,6 +11,7 @@
 #include <meta/base/interface_macros.h>
 #include <meta/interface/interface_macros.h>
 #include <meta/interface/intf_startable.h>
+#include <meta/interface/intf_task_queue.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -79,6 +80,11 @@ public:
      */
     virtual bool SetStartableQueueId(
         const BASE_NS::Uid& startStartableQueueId, const BASE_NS::Uid& stopStartableQueueId) = 0;
+    /**
+     * @see SetStartableQueueId
+     */
+    virtual bool SetStartableQueue(
+        const META_NS::ITaskQueue::Ptr& startStartableQueue, const META_NS::ITaskQueue::Ptr& stopStartableQueue) = 0;
     /**
      * @brief Starts all StartBehavior::AUTOMATIC startables
      */

@@ -30,7 +30,7 @@ public:
     /**
      * @brief Run tasks with given queueId.
      */
-    virtual void RunTasks(const BASE_NS::Uid& queueId) = 0;
+    virtual void RunTasks(const ITaskQueue::Ptr& queue) = 0;
 };
 
 class StartableObjectController : public IntroduceInterfaces<ObjectFwd, IStartableController, IObjectHierarchyObserver,
@@ -60,6 +60,8 @@ public: // IStartableController
     BASE_NS::vector<IStartable::Ptr> GetAllStartables() const override;
     bool SetStartableQueueId(
         const BASE_NS::Uid& startStartableQueueId, const BASE_NS::Uid& stopStartableQueueId) override;
+    bool SetStartableQueue(const META_NS::ITaskQueue::Ptr& startStartableQueue,
+        const META_NS::ITaskQueue::Ptr& stopStartableQueue) override;
 
 public: // IObjectHierarchyObserver
     void SetTarget(const IObject::Ptr& root, HierarchyChangeModeValue mode) override;
@@ -83,7 +85,7 @@ private:
     IObjectHierarchyObserver::Ptr observer_;
 
 private: // IStartableObjectControllerInternal
-    void RunTasks(const BASE_NS::Uid& queueId) override;
+    void RunTasks(const ITaskQueue::Ptr& queue) override;
 
 private: // Task queue handling
     struct StartableOperation {
@@ -98,14 +100,19 @@ private: // Task queue handling
         IObject::WeakPtr root_;
     };
 
+    mutable META_NS::ITaskQueue::WeakPtr startQueue_;
+    mutable META_NS::ITaskQueue::WeakPtr stopQueue_;
     BASE_NS::Uid startQueueId_;
     BASE_NS::Uid stopQueueId_;
-    bool HasTasks(const BASE_NS::Uid& queueId) const;
-    bool ProcessOps(const BASE_NS::Uid& queueId);
-    bool AddOperation(StartableOperation&& operation, const BASE_NS::Uid& queue);
-    BASE_NS::unordered_map<BASE_NS::Uid, BASE_NS::vector<StartableOperation>> operations_;
+    bool HasTasks(const ITaskQueue::Ptr& queue) const;
+    bool ProcessOps(const ITaskQueue::Ptr& queue);
+    bool AddOperation(StartableOperation&& operation, const ITaskQueue::Ptr& queue);
+    BASE_NS::unordered_map<ITaskQueue*, BASE_NS::vector<StartableOperation>> operations_;
     mutable std::shared_mutex mutex_;
     std::size_t executingStart_ {};
+
+    META_NS::ITaskQueue::Ptr GetStartQueue() const;
+    META_NS::ITaskQueue::Ptr GetStopQueue() const;
 
 private: // Tickables
     void InvalidateTickables();
