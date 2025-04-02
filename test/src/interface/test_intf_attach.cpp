@@ -12,6 +12,7 @@
 #include <meta/interface/intf_attachment_container.h>
 
 #include "serialisation_utils.h"
+#include "testing_objects.h"
 
 constexpr auto DataContextPropertyName = "FloatProp";
 

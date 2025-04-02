@@ -5,6 +5,7 @@
 #define META_TEST_TESTING_OBJECTS_HEADER
 
 #include <meta/api/make_callback.h>
+#include <meta/api/object.h>
 #include <meta/base/types.h>
 #include <meta/interface/interface_macros.h>
 #include <meta/interface/intf_container.h>
@@ -16,6 +17,12 @@
 #include "meta/interface/intf_startable.h"
 
 META_BEGIN_NAMESPACE()
+
+// Allow creating object instances with CreateInstance in addition to CreateObjectInstance
+inline auto CreateInstance(const META_NS::ClassInfo& clsi)
+{
+    return META_NS::CreateObjectInstance(clsi);
+}
 
 // compatibility
 META_REGISTER_CLASS(EmbeddedTestType, "4a3bd491-1111-4a9a-bcad-92530493be09", ObjectCategoryBits::NO_CATEGORY)

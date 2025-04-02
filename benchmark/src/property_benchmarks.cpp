@@ -5,6 +5,12 @@
 
 #include "property_utils.h"
 
+// Allow creating object instances with CreateInstance in addition to CreateObjectInstance
+inline auto CreateInstance(const META_NS::ClassInfo& clsi)
+{
+    return META_NS::CreateObjectInstance(clsi);
+}
+
 META_BEGIN_NAMESPACE()
 namespace benchmarks {
 

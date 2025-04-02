@@ -28,7 +28,7 @@ META_BEGIN_NAMESPACE()
  * @param clsi The class info of the class to instantiate.
  * @return The created object.
  */
-inline IObject::Ptr CreateInstance(const META_NS::ClassInfo& clsi)
+inline IObject::Ptr CreateObjectInstance(const META_NS::ClassInfo& clsi)
 {
     return META_NS::GetObjectRegistry().Create(clsi);
 }
@@ -306,33 +306,33 @@ public:
  * @return The created object converted to given interface type.
  */
 template<typename Interface>
-inline auto CreateInstance(const META_NS::ClassInfo& clsi)
+inline auto CreateObjectInstance(const META_NS::ClassInfo& clsi)
 {
     return interface_pointer_cast<Interface>(CreateInstance(clsi));
 }
 template<typename Interface>
-auto CreateInstance() = delete;
+auto CreateObjectInstance() = delete;
 /// Returns a default object which implements IObject
 template<>
-inline auto CreateInstance<IObject>()
+inline auto CreateObjectInstance<IObject>()
 {
     return Object(CreateNew);
 }
 /// Returns a default object which implements IMetadata
 template<>
-inline auto CreateInstance<IMetadata>()
+inline auto CreateObjectInstance<IMetadata>()
 {
-    return Metadata(CreateInstance(META_NS::ClassId::Object));
+    return Metadata(CreateObjectInstance(META_NS::ClassId::Object));
 }
 /// Returns a default object which implements IAttach
 template<>
-inline auto CreateInstance<IAttach>()
+inline auto CreateObjectInstance<IAttach>()
 {
-    return AttachmentContainer(CreateInstance(META_NS::ClassId::Object));
+    return AttachmentContainer(CreateObjectInstance(META_NS::ClassId::Object));
 }
 /// Returns a default object which implements IContainer
 template<>
-inline auto CreateInstance<IContainer>()
+inline auto CreateObjectInstance<IContainer>()
 {
     return Container(CreateNew);
 }

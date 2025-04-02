@@ -426,8 +426,8 @@ TEST_F(TrackAnimationTest, KeyframeCurves)
     BASE_NS::vector<BASE_NS::Math::Vec3> keyframes = { { 50, 30, 0 }, { 100, 80, 0 }, { 170, 150, 0 },
         { 500, 500, 0 } };
     BASE_NS::Math::Vec3 initialValue = { 10, 10, 0 };
-    BASE_NS::vector<ICurve1D::Ptr> curves = { CreateInstance<ICurve1D>(META_NS::ClassId::InOutCubicEasingCurve),
-        nullptr, CreateInstance<ICurve1D>(META_NS::ClassId::OutBackEasingCurve) };
+    BASE_NS::vector<ICurve1D::Ptr> curves = { CreateObjectInstance<ICurve1D>(META_NS::ClassId::InOutCubicEasingCurve),
+        nullptr, CreateObjectInstance<ICurve1D>(META_NS::ClassId::OutBackEasingCurve) };
     constexpr auto propertyName = "PropToAnimate";
 
     auto property = ConstructProperty<BASE_NS::Math::Vec3>(propertyName, initialValue);

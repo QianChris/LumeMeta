@@ -343,7 +343,7 @@ public:
 
 /// Returns a default object which implements IPropertyAnimation
 template<>
-inline auto CreateInstance<IPropertyAnimation>()
+inline auto CreateObjectInstance<IPropertyAnimation>()
 {
     return PropertyAnimation(CreateNew);
 }
@@ -353,7 +353,7 @@ inline auto CreateInstance<IPropertyAnimation>()
  * @note Supported interfaces are IKeyframeAnimation and ITrackAnimation
  */
 template<typename Interface, typename Type>
-inline auto CreateInstance()
+inline auto CreateObjectInstance()
 {
     constexpr auto isKeyframeAnimation = BASE_NS::is_same_v<Interface, IKeyframeAnimation>;
     constexpr auto isTrackAnimation = BASE_NS::is_same_v<Interface, ITrackAnimation>;
@@ -368,13 +368,13 @@ inline auto CreateInstance()
 
 /// Returns a default object which implements IKeyframeAnimation
 template<>
-inline auto CreateInstance<IParallelAnimation>()
+inline auto CreateObjectInstance<IParallelAnimation>()
 {
     return ParallelAnimation(CreateNew);
 }
 /// Returns a default object which implements IKeyframeAnimation
 template<>
-inline auto CreateInstance<ISequentialAnimation>()
+inline auto CreateObjectInstance<ISequentialAnimation>()
 {
     return SequentialAnimation(CreateNew);
 }

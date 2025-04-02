@@ -21,7 +21,7 @@ TEST(ContainerInfoTest, Self)
     ASSERT_NE(info, nullptr);
     EXPECT_THAT(info->FindAllContainers(), SizeIs(1)); // attachments container
     */
-    Object object(CreateInstance(ClassId::Object));
+    Object object(CreateObjectInstance(ClassId::Object));
     EXPECT_THAT(FindAllContainers(object), SizeIs(1)); // attachments container
 }
 

@@ -34,13 +34,13 @@ public:
 
 namespace Curves {
 
-#define META_EASING_CURVE_INTERFACE_OBJECT(Class)                               \
-    class Class : public EasingCurve {                                          \
-    public:                                                                     \
-        Class(const IInterfacePtr& ptr) : EasingCurve(ptr) {}                   \
-        Class(const META_NS::InitializationType& t)                             \
-            : EasingCurve(META_NS::CreateInstance(ClassId::Class##EasingCurve)) \
-        {}                                                                      \
+#define META_EASING_CURVE_INTERFACE_OBJECT(Class)                                       \
+    class Class : public EasingCurve {                                                  \
+    public:                                                                             \
+        Class(const IInterfacePtr& ptr) : EasingCurve(ptr) {}                           \
+        Class(const ::META_NS::InitializationType& t)                                   \
+            : EasingCurve(::META_NS::CreateObjectInstance(ClassId::Class##EasingCurve)) \
+        {}                                                                              \
     };
 
 /// Linear easing curve
@@ -127,14 +127,14 @@ public:
 
 /// Return a default object which implements ICubicBezier
 template<>
-inline auto CreateInstance<ICubicBezier>()
+inline auto CreateObjectInstance<ICubicBezier>()
 {
     return Curves::CubicBezier(CreateNew);
 }
 
 /// Return a default object which implements ICubicBezier.
 template<>
-inline auto CreateInstance<IEasingCurve>()
+inline auto CreateObjectInstance<IEasingCurve>()
 {
     // By default return an InOutCubic easing curve for IEasingCurve
     return Curves::InOutCubic(CreateNew);

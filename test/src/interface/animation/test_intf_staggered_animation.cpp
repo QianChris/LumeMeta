@@ -54,7 +54,7 @@ protected:
 
 TEST_F(StaggeredAnimationTest, CreateParallel)
 {
-    auto anim = CreateInstance<IParallelAnimation>();
+    auto anim = CreateObjectInstance<IParallelAnimation>();
 
     ASSERT_TRUE(anim);
     EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IObject.Id().ToUid()));
@@ -66,7 +66,7 @@ TEST_F(StaggeredAnimationTest, CreateParallel)
 
 TEST_F(StaggeredAnimationTest, CreateSequential)
 {
-    auto anim = CreateInstance<ISequentialAnimation>();
+    auto anim = CreateObjectInstance<ISequentialAnimation>();
 
     ASSERT_TRUE(anim);
     EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IObject.Id().ToUid()));
@@ -78,8 +78,8 @@ TEST_F(StaggeredAnimationTest, CreateSequential)
 
 TEST_F(StaggeredAnimationTest, ParallelSingleChild)
 {
-    auto staggered = CreateInstance<IParallelAnimation>();
-    auto anim1 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
+    auto staggered = CreateObjectInstance<IParallelAnimation>();
+    auto anim1 = CreateObjectInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to { 100, 50, 0 };
@@ -120,10 +120,10 @@ TEST_F(StaggeredAnimationTest, ParallelSingleChild)
 
 TEST_F(StaggeredAnimationTest, Parallel)
 {
-    auto staggered = CreateInstance<IParallelAnimation>();
-    auto anim1 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
-    auto anim2 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
-    auto anim3 = CreateInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
+    auto staggered = CreateObjectInstance<IParallelAnimation>();
+    auto anim1 = CreateObjectInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
+    auto anim2 = CreateObjectInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
+    auto anim3 = CreateObjectInstance<IKeyframeAnimation, BASE_NS::Math::Vec3>();
 
     BASE_NS::Math::Vec3 from { 0, 0, 0 };
     BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };

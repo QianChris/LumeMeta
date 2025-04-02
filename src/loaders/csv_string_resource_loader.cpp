@@ -83,7 +83,7 @@ IObject::Ptr CsvStringResourceLoader::CreateStringResourceObject(
         return {};
     }
 
-    Metadata strings(CreateInstance(META_NS::ClassId::Object));
+    Metadata strings(CreateObjectInstance(META_NS::ClassId::Object));
     const BASE_NS::vector<BASE_NS::string>* keys = nullptr;
 
     // Find the column which contains our keys
@@ -104,14 +104,14 @@ IObject::Ptr CsvStringResourceLoader::CreateStringResourceObject(
         if (&column.second == keys) {
             continue; // ignore the column whose header is <KeyHeaderColumn>
         }
-        Metadata item(CreateInstance(META_NS::ClassId::Object));
+        Metadata item(CreateObjectInstance(META_NS::ClassId::Object));
         for (size_t i = 0; i < column.second.size(); i++) {
             item.AddProperty(ConstructProperty<BASE_NS::string>(keys->at(i), column.second[i]));
         }
         strings.AddProperty(ConstructProperty<IObject::Ptr>(column.first, Object(item)));
     }
 
-    Metadata object(CreateInstance(META_NS::ClassId::Object));
+    Metadata object(CreateObjectInstance(META_NS::ClassId::Object));
     object.AddProperty(ConstructProperty<IObject::Ptr>(options.targetPropertyName, Object(strings)));
     return object.GetPtr<IObject>();
 }

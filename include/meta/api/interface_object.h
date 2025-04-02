@@ -256,7 +256,7 @@ struct InitializationType {};
 constexpr InitializationType CreateNew;
 
 #define META_INTERFACE_OBJECT_INSTANTIATE(Class, ClassId) \
-    Class(const META_NS::InitializationType& t) : BaseClassType(META_NS::CreateInstance(ClassId)) {}
+    Class(const META_NS::InitializationType& t) : BaseClassType(::META_NS::CreateObjectInstance(ClassId)) {}
 
 /// Some methods support specifying whether the call should be asynchronous or synchronous through AsyncCallType
 /// template parameter.

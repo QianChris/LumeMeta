@@ -14,8 +14,6 @@
 #include <meta/interface/property/property.h>
 
 #include "serialisation_utils.h"
-#include "testing_objects.h"
-#include "util.h"
 
 using namespace testing;
 

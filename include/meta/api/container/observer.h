@@ -21,6 +21,7 @@ META_BEGIN_NAMESPACE()
 class ObjectHierarchyObserver : public InterfaceObject<IObjectHierarchyObserver> {
 public:
     META_INTERFACE_OBJECT(ObjectHierarchyObserver, InterfaceObject<IObjectHierarchyObserver>, IObjectHierarchyObserver)
+    META_INTERFACE_OBJECT_INSTANTIATE(ObjectHierarchyObserver, ClassId::ObjectHierarchyObserver)
     void SetTarget(const IObject::Ptr& root, HierarchyChangeModeValue mode)
     {
         META_INTERFACE_OBJECT_CALL_PTR(SetTarget(root, mode));
@@ -68,6 +69,7 @@ public:
 class ContainerObserver : public InterfaceObject<IContainerObserver> {
 public:
     META_INTERFACE_OBJECT(ContainerObserver, InterfaceObject<IContainerObserver>, IContainerObserver)
+    META_INTERFACE_OBJECT_INSTANTIATE(ContainerObserver, ClassId::ContainerObserver)
     void SetContainer(const IContainer::Ptr& container)
     {
         META_INTERFACE_OBJECT_CALL_PTR(SetContainer(container));
@@ -98,15 +100,15 @@ public:
 
 /// Returns a default object which implements IObjectHierarchyObserver
 template<>
-inline auto CreateInstance<IObjectHierarchyObserver>()
+inline auto CreateObjectInstance<IObjectHierarchyObserver>()
 {
-    return ObjectHierarchyObserver(CreateInstance(META_NS::ClassId::ObjectHierarchyObserver));
+    return ObjectHierarchyObserver(CreateNew);
 }
 /// Returns a default object which implements IObjectHierarchyObserver
 template<>
-inline auto CreateInstance<IContainerObserver>()
+inline auto CreateObjectInstance<IContainerObserver>()
 {
-    return ContainerObserver(CreateInstance(META_NS::ClassId::ContainerObserver));
+    return ContainerObserver(CreateNew);
 }
 
 META_END_NAMESPACE()

@@ -20,7 +20,7 @@ namespace Test {
 
 TEST(ObjectTest, ObjectBaseAPI)
 {
-    META_NS::Object object(CreateInstance(ClassId::Object));
+    META_NS::Object object(CreateObjectInstance(ClassId::Object));
 
     EXPECT_NE(object.GetPtr(), nullptr);
     EXPECT_NE(object.GetPtr<IObject>(), nullptr);
@@ -124,7 +124,7 @@ TEST(ObjectTest, LazyInitBase)
     o2 = o1; // Does nothing
     EXPECT_FALSE(o1);
     EXPECT_FALSE(o2);
-    o1 = CreateInstance(ClassId::Object);
+    o1 = CreateObjectInstance(ClassId::Object);
     EXPECT_TRUE(o1);
     EXPECT_FALSE(o2);
     o2 = o1;
@@ -268,8 +268,8 @@ TEST(ObjectTest, CachedInterfaces)
 */
 TEST(ObjectTest, ResetIObject)
 {
-    META_NS::Object object1(CreateInstance(ClassId::Object));
-    META_NS::Object object2(CreateInstance(ClassId::Object));
+    META_NS::Object object1(CreateObjectInstance(ClassId::Object));
+    META_NS::Object object2(CreateObjectInstance(ClassId::Object));
     auto iobject1 = object1.GetPtr();
     object2 = object1;
     auto iobject2 = object2.GetPtr();
@@ -401,7 +401,7 @@ TEST(ObjectTest, NotCompatibileMoveAssignedObjectIsEmptyAndMovedObjectIsEmptyAls
 TEST(ObjectTest, ObjectName)
 {
     {
-        Object object(CreateInstance(ClassId::Object));
+        Object object(CreateObjectInstance(ClassId::Object));
         EXPECT_TRUE(SetName(object, "Test"));
         EXPECT_EQ(GetName(object), "Test");
         EXPECT_TRUE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(object)));
@@ -412,7 +412,7 @@ TEST(ObjectTest, ObjectName)
         EXPECT_EQ(GetName(op), op->GetInstanceId().ToString());
     }
     {
-        PropertyAnimation anim(CreateInstance(ClassId::PropertyAnimation));
+        PropertyAnimation anim(CreateObjectInstance(ClassId::PropertyAnimation));
         EXPECT_TRUE(SetName(anim, "Test"));
         EXPECT_EQ(GetName(anim), "Test");
         EXPECT_FALSE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(anim)));
@@ -423,7 +423,7 @@ TEST(ObjectTest, ObjectNameSerialise)
 {
     TestSerialiser ser;
     {
-        Object object(CreateInstance(ClassId::Object));
+        Object object(CreateObjectInstance(ClassId::Object));
         EXPECT_TRUE(SetName(object, "Test"));
         ser.Export(object);
     }

@@ -52,7 +52,7 @@ TEST_F(ResourceSerializationTest, Basic)
     TestSerialiser ser;
     ser.SetResourceManager(resources_);
     {
-        Object obj(CreateInstance(ClassId::Object));
+        Object obj(CreateObjectInstance(ClassId::Object));
         auto prop = ConstructProperty<IObject::ConstPtr>(
             "test", interface_pointer_cast<IObject>(resources_->GetResource("file://test_resource.json")));
         ASSERT_TRUE(prop);
