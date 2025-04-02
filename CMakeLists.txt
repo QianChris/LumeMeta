@@ -1,8 +1,25 @@
+#
+# Copyright (C) 2022 Huawei Technologies Co, Ltd.
+#
+
 cmake_minimum_required(VERSION 3.19)
+
+project (LumeMeta LANGUAGES CXX)
+
+set(META_PLUGIN LumeMeta) # plugin name
+set(LUMEBASE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeBase CACHE PATH "Path to lume base sources")
+set(LUMEENGINE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeEngine CACHE PATH "Path to lume engine sources")
+set(CORE_UNPACKED_LIB_DIR ${CMAKE_BINARY_DIR}/unpacked CACHE PATH "Path where to extract 3rd party library sources.")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+#
+# Options
+#
 option(META_VISUAL_STUDIO_TIDY  "Create hackish targets to run clang-tidy steps in visual studio" OFF)
-option(META_SUBMODULE_ENABLED "Use LumeMeta as submodule" OFF)
+option(META_SUBMODULE_ENABLED "Use ${META_PLUGIN} as submodule" OFF)
 if(DEFINED ENV{LUME_PACKAGE_CACHE})
     set(PACKAGE_CACHE_PATH $ENV{LUME_PACKAGE_CACHE} CACHE PATH "Path to lume package cache")
 else()
@@ -16,12 +33,17 @@ else()
     set(HAS_PACKAGE_CACHE false)
 endif()
 option(BUILD_DEPS "Try to build deps from submodules" ${HAS_NO_PACKAGE_CACHE})
+option(META_UNIT_TESTS_ENABLED "Build ${META_PLUGIN} unit tests" ON)
+if(META_UNIT_TESTS_ENABLED)
+    option(META_UNIT_TESTS_WITH_SANITIZERS "Build ${META_PLUGIN} unit tests with sanitizers" OFF)
+else()
+    unset(META_UNIT_TESTS_WITH_SANITIZERS CACHE)
+endif()
+option(META_BENCHMARK_TESTS_ENABLED "Build ${META_PLUGIN} benchmark tests" OFF)
 
-set(LUMEBASE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeBase CACHE PATH "Path to lume base sources")
-set(LUMEENGINE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeEngine CACHE PATH "Path to lume engine sources")
-set(CORE_UNPACKED_LIB_DIR ${CMAKE_BINARY_DIR}/unpacked CACHE PATH "Path where to extract 3rd party library sources.")
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+#
+# Lib config.
+#
 if (${BUILD_DEPS})
     if (EXISTS ${LUMEBASE_PATH}/CMakeLists.txt AND
         EXISTS ${LUMEENGINE_PATH}/CMakeLists.txt)
@@ -35,8 +57,6 @@ else()
     list(APPEND CMAKE_MODULE_PATH "${PACKAGE_CACHE_PATH}/LumeBase/cmake")
     list(APPEND CMAKE_MODULE_PATH "${PACKAGE_CACHE_PATH}/LumeEngine/cmake")
 endif()
-
-project (MetaObject LANGUAGES CXX)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     # enable multi-processor compilation.
@@ -72,7 +92,6 @@ endif()
 
 include(MetaObjectTargetCodeInspection)
 
-
 if (BUILD_DEPS AND NOT META_SUBMODULE_ENABLED)
     # Find_package macro will workaround the findpackage issues (ie. if the target exists, then do nothing)
     # do this and that, since well.. typos.
@@ -100,8 +119,8 @@ endif()
 find_package(AGPEngineAPI REQUIRED)
 find_package(AGPEngineDLL QUIET)
 
-add_library(MetaObjectBase INTERFACE)
-target_sources(MetaObjectBase PUBLIC
+add_library(${META_PLUGIN}Base INTERFACE)
+target_sources(${META_PLUGIN}Base PUBLIC
     include/meta/base/algorithms.h
     include/meta/base/bit_field.h
     include/meta/base/capture.h
@@ -122,13 +141,13 @@ target_sources(MetaObjectBase PUBLIC
     include/meta/base/version.h
     )
 
-target_include_directories(MetaObjectBase INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(MetaObjectBase INTERFACE AGPBase::AGPBaseAPI AGPEngine::AGPEngineAPI)
+target_include_directories(${META_PLUGIN}Base INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
+target_link_libraries(${META_PLUGIN}Base INTERFACE AGPBase::AGPBaseAPI AGPEngine::AGPEngineAPI)
 
 # meta object interface (for users of meta objects)
-add_library(MetaObjectAPI INTERFACE)
-add_library(MetaObject::API ALIAS MetaObjectAPI)
-target_sources(MetaObjectAPI PUBLIC
+add_library(${META_PLUGIN}API INTERFACE)
+add_library(${META_PLUGIN}::API ALIAS ${META_PLUGIN}API)
+target_sources(${META_PLUGIN}API PUBLIC
     include/meta/interface/animation/builtin_animations.h
     include/meta/interface/animation/intf_animation.h
     include/meta/interface/animation/intf_animation_controller.h
@@ -246,13 +265,13 @@ target_sources(MetaObjectAPI PUBLIC
     include/meta/interface/threading/primitive_api.h
     )
 
-target_include_directories(MetaObjectAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(MetaObjectAPI INTERFACE MetaObjectBase)
+target_include_directories(${META_PLUGIN}API INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
+target_link_libraries(${META_PLUGIN}API INTERFACE ${META_PLUGIN}Base)
 
 # Meta object helper implementations. (for implementers of meta objects)
-add_library(MetaObjectHighLevelAPI INTERFACE)
-add_library(MetaObject::HighLevelAPI ALIAS MetaObjectHighLevelAPI)
-target_sources(MetaObjectHighLevelAPI PUBLIC
+add_library(${META_PLUGIN}HighLevelAPI INTERFACE)
+add_library(${META_PLUGIN}::HighLevelAPI ALIAS ${META_PLUGIN}HighLevelAPI)
+target_sources(${META_PLUGIN}HighLevelAPI PUBLIC
     include/meta/api/animation.h
     include/meta/api/array_util.h
     include/meta/api/call_context.h
@@ -293,13 +312,13 @@ target_sources(MetaObjectHighLevelAPI PUBLIC
     include/meta/api/util.h
     )
 
-target_include_directories(MetaObjectHighLevelAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(MetaObjectHighLevelAPI INTERFACE MetaObjectAPI)
+target_include_directories(${META_PLUGIN}HighLevelAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
+target_link_libraries(${META_PLUGIN}HighLevelAPI INTERFACE ${META_PLUGIN}API)
 
 # Meta object helper implementations. (for implementers of meta objects)
-add_library(MetaObjectExtAPI INTERFACE)
-add_library(MetaObject::ExtAPI ALIAS MetaObjectExtAPI)
-target_sources(MetaObjectExtAPI PUBLIC
+add_library(${META_PLUGIN}ExtAPI INTERFACE)
+add_library(${META_PLUGIN}::ExtAPI ALIAS ${META_PLUGIN}ExtAPI)
+target_sources(${META_PLUGIN}ExtAPI PUBLIC
     include/meta/ext/animation/interpolator.h
     include/meta/ext/any_builder.h
     include/meta/ext/attachment/attachment.h
@@ -325,16 +344,16 @@ target_sources(MetaObjectExtAPI PUBLIC
     include/meta/ext/task_queue.h
     )
 
-target_include_directories(MetaObjectExtAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(MetaObjectExtAPI INTERFACE MetaObjectAPI MetaObjectHighLevelAPI)
+target_include_directories(${META_PLUGIN}ExtAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
+target_link_libraries(${META_PLUGIN}ExtAPI INTERFACE ${META_PLUGIN}API ${META_PLUGIN}HighLevelAPI)
 
 # Meta object plugin
-add_library(MetaObject SHARED)
-add_library(MetaObject::Plugin ALIAS MetaObject)
-set_property(TARGET MetaObject PROPERTY CXX_STANDARD 17)
-set_property(TARGET MetaObject PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET MetaObject PROPERTY CXX_EXTENSIONS off)
-target_sources(MetaObject PRIVATE
+add_library(${META_PLUGIN} SHARED)
+add_library(${META_PLUGIN}::Plugin ALIAS ${META_PLUGIN})
+set_property(TARGET ${META_PLUGIN} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${META_PLUGIN} PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ${META_PLUGIN} PROPERTY CXX_EXTENSIONS off)
+target_sources(${META_PLUGIN} PRIVATE
     src/animation/animation.h
     src/animation/animation_controller.cpp
     src/animation/animation_controller.h
@@ -485,58 +504,63 @@ target_sources(MetaObject PRIVATE
 
 set_source_files_properties(src/register_default_props.cpp PROPERTIES COMPILE_FLAGS $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/bigobj>)
 
-target_compile_definitions(MetaObject PRIVATE CORE_PLUGIN=1 INTERFACE CORE_DYNAMIC=1)
+target_compile_definitions(${META_PLUGIN} PRIVATE CORE_PLUGIN=1 INTERFACE CORE_DYNAMIC=1)
 
-set_target_properties(MetaObject PROPERTIES
+set_target_properties(${META_PLUGIN} PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN 1
-    OUTPUT_NAME PluginMetaObject
+    OUTPUT_NAME Plugin${META_PLUGIN}
     )
 
-target_link_libraries(MetaObject PRIVATE MetaObjectAPI MetaObjectExtAPI MetaObjectHighLevelAPI)
+target_link_libraries(${META_PLUGIN} PRIVATE ${META_PLUGIN}API ${META_PLUGIN}ExtAPI ${META_PLUGIN}HighLevelAPI)
 
 
-get_target_property(IMPL_SOURCES MetaObject SOURCES)
+get_target_property(IMPL_SOURCES ${META_PLUGIN} SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX src FILES ${IMPL_SOURCES})
 
-get_target_property(BASE_SOURCES MetaObjectBase INTERFACE_SOURCES)
+get_target_property(BASE_SOURCES ${META_PLUGIN}Base INTERFACE_SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/base PREFIX base FILES ${BASE_SOURCES})
 
-get_target_property(API_SOURCES MetaObjectAPI INTERFACE_SOURCES)
+get_target_property(API_SOURCES ${META_PLUGIN}API INTERFACE_SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/interface PREFIX interface FILES ${API_SOURCES})
 
-get_target_property(HIGHLEVEL_API_SOURCES MetaObjectHighLevelAPI INTERFACE_SOURCES)
+get_target_property(HIGHLEVEL_API_SOURCES ${META_PLUGIN}HighLevelAPI INTERFACE_SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/api PREFIX api FILES ${HIGHLEVEL_API_SOURCES})
 
-get_target_property(EXT_API_SOURCES MetaObjectExtAPI INTERFACE_SOURCES)
+get_target_property(EXT_API_SOURCES ${META_PLUGIN}ExtAPI INTERFACE_SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/ext PREFIX ext FILES ${EXT_API_SOURCES})
 
-meta_object_target_code_inspection(MetaObject)
-
-option(META_TESTS_ENABLED "Build MetaObject unit tests" ON)
+meta_object_target_code_inspection(${META_PLUGIN})
 
 #
-# Build tests if required.
+# Testing projects
 #
-if(META_TESTS_ENABLED)
-    if (NOT TARGET gtest)
-        # Add gtest if not already added, note that if there is a gtest version conflict your results may vary.
-        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/googletest 3rdparty/googletest EXCLUDE_FROM_ALL)
+if(META_UNIT_TESTS_ENABLED)
+
+    # Sanitizers
+    if(META_UNIT_TESTS_WITH_SANITIZERS AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND NOT ANDROID AND NOT OHOS)
+        target_compile_options(AGPEngine PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(AGPEngine PRIVATE -fsanitize=address -fsanitize=undefined)
     endif()
-    if (NOT TARGET benchmark)
-        # Add benchmark if not already added, note that if there is a benchmark version conflict your results may vary.
-        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/benchmark 3rdparty/benchmark EXCLUDE_FROM_ALL)
-    endif()
-    add_subdirectory(environment_setup)
-    add_subdirectory(test)
-    add_subdirectory(benchmark)
-    add_test(NAME metaobject COMMAND MetaObjectTestRunner --gtest_filter=*)
+
     enable_testing()
+
+    # API unit tests
+    add_subdirectory(test/api_unit_test)
+    add_test(NAME ${META_PLUGIN}API COMMAND ${META_PLUGIN}APITestRunner)
+    #add_test(NAME ${META_PLUGIN} COMMAND ${META_PLUGIN}TestRunner --gtest_filter=*)
+
+    # SRC unit tests
+endif()
+
+if(META_BENCHMARK_TESTS_ENABLED AND NOT ANDROID AND NOT OHOS)
+    # Benchmark tests
+    add_subdirectory(test/benchmark)
 endif()
 
 if (META_VISUAL_STUDIO_TIDY AND NOT META_SUBMODULE_ENABLED)
     # Somewhat hackish way to run the clang-tidy step from visual studio...
-    message("Creating VS ExecTidyMeta in MetaObject cmakelists.txt")
+    message("Creating VS ExecTidyMeta in ${META_PLUGIN} cmakelists.txt")
     add_custom_target(ExecTidyMeta DEPENDS thatMetaTidy.txt
         OUTPUT  thatMetaTidy.txt
         COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_TESTS_ENABLED=${META_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
