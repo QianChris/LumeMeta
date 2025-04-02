@@ -107,8 +107,7 @@ TEST(DeferredCallbackTest, PropertyChangedHandler)
     auto q = registry.Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
 
     PropertyChangedEventHandler handler_;
-    handler_.Subscribe(
-        p, [&] { ++count; }, q);
+    handler_.Subscribe(p, [&] { ++count; }, q);
 
     p->SetValue(1);
 
@@ -130,8 +129,7 @@ TEST(DeferredCallbackTest, PropertyChangedHandlerId)
     META_NS::GetTaskQueueRegistry().RegisterTaskQueue(q, queueId.ToUid());
 
     PropertyChangedEventHandler handler_;
-    handler_.Subscribe(
-        p, [&] { ++count; }, queueId.ToUid());
+    handler_.Subscribe(p, [&] { ++count; }, queueId.ToUid());
 
     p->SetValue(1);
 

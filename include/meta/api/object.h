@@ -308,7 +308,7 @@ public:
 template<typename Interface>
 inline auto CreateObjectInstance(const META_NS::ClassInfo& clsi)
 {
-    return interface_pointer_cast<Interface>(CreateInstance(clsi));
+    return interface_pointer_cast<Interface>(CreateObjectInstance(clsi));
 }
 template<typename Interface>
 auto CreateObjectInstance() = delete;

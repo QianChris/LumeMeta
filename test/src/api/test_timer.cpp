@@ -37,15 +37,13 @@ TEST_F(TimerTests, Ctor)
 {
     {
         std::atomic<int> count = 0;
-        Timer t(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid());
+        Timer t(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid());
         EXPECT_TRUE(t.IsRunning());
         EXPECT_EQ_TIMED(350, count, 3);
     }
     {
         std::atomic<int> count = 0;
-        Timer t(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queue_);
+        Timer t(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queue_);
         EXPECT_TRUE(t.IsRunning());
         EXPECT_EQ_TIMED(350, count, 3);
     }
@@ -53,8 +51,7 @@ TEST_F(TimerTests, Ctor)
 
 TEST_F(TimerTests, Moving)
 {
-    Timer t(
-        TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, queueId_.ToUid());
+    Timer t(TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, queueId_.ToUid());
     EXPECT_TRUE(t.IsRunning());
     Timer t2 = BASE_NS::move(t);
     EXPECT_FALSE(t.IsRunning());
@@ -66,16 +63,14 @@ TEST_F(TimerTests, Start)
     {
         std::atomic<int> count = 0;
         Timer t;
-        EXPECT_TRUE(t.Start(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid()));
+        EXPECT_TRUE(t.Start(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid()));
         EXPECT_TRUE(t.IsRunning());
         EXPECT_EQ_TIMED(350, count, 3);
     }
     {
         std::atomic<int> count = 0;
         Timer t;
-        EXPECT_TRUE(t.Start(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queue_));
+        EXPECT_TRUE(t.Start(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queue_));
         EXPECT_TRUE(t.IsRunning());
         EXPECT_EQ_TIMED(350, count, 3);
     }
@@ -86,8 +81,7 @@ TEST_F(TimerTests, Stop)
     {
         std::atomic<int> count = 0;
         Timer t;
-        EXPECT_TRUE(t.Start(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid()));
+        EXPECT_TRUE(t.Start(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid()));
         EXPECT_TRUE(t.IsRunning());
         EXPECT_EQ_TIMED(150, count, 1);
         t.Stop();
@@ -99,8 +93,8 @@ TEST_F(TimerTests, Stop)
         std::atomic<int> count = 0;
         {
             Timer t;
-            EXPECT_TRUE(t.Start(
-                TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid()));
+            EXPECT_TRUE(
+                t.Start(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::RECURRING, queueId_.ToUid()));
             EXPECT_TRUE(t.IsRunning());
             EXPECT_EQ_TIMED(150, count, 1);
         }
@@ -114,8 +108,7 @@ TEST_F(TimerTests, SingleShot)
     {
         std::atomic<int> count = 0;
         Timer t;
-        EXPECT_TRUE(t.Start(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::SINGLE_SHOT, queueId_.ToUid()));
+        EXPECT_TRUE(t.Start(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::SINGLE_SHOT, queueId_.ToUid()));
         EXPECT_TRUE(t.IsRunning());
         EXPECT_EQ_TIMED(150, count, 1);
         META_WAIT_TIMED(150);
@@ -124,8 +117,7 @@ TEST_F(TimerTests, SingleShot)
     }
     {
         std::atomic<int> count = 0;
-        SingleShotTimer(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, queueId_.ToUid());
+        SingleShotTimer(TimeSpan::Milliseconds(100), [&count] { ++count; }, queueId_.ToUid());
         EXPECT_EQ_TIMED(150, count, 1);
         META_WAIT_TIMED(150);
         EXPECT_EQ(count, 1);
@@ -137,8 +129,7 @@ TEST_F(TimerTests, Detach)
     std::atomic<int> count = 0;
     {
         Timer t;
-        EXPECT_TRUE(t.Start(
-            TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::SINGLE_SHOT, queueId_.ToUid()));
+        EXPECT_TRUE(t.Start(TimeSpan::Milliseconds(100), [&count] { ++count; }, Timer::SINGLE_SHOT, queueId_.ToUid()));
         t.Detach();
         EXPECT_FALSE(t.IsRunning());
     }
@@ -163,14 +154,12 @@ TEST_F(TimerTests, BadQueue)
         EXPECT_TRUE(!t.IsRunning());
     }
     {
-        Timer t(
-            TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, nullptr);
+        Timer t(TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, nullptr);
         EXPECT_TRUE(!t.IsRunning());
     }
     {
         Timer t;
-        EXPECT_FALSE(t.Start(
-            TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, nullptr));
+        EXPECT_FALSE(t.Start(TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, nullptr));
         EXPECT_TRUE(!t.IsRunning());
     }
 }

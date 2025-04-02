@@ -1013,8 +1013,7 @@ TEST_F(UnitTest_ContainerTest, IterationSupport)
 
     {
         int count = 0;
-        ForEachShared(
-            container_, [&](const IObject::Ptr&) { ++count; }, TraversalType::DEPTH_FIRST_PRE_ORDER);
+        ForEachShared(container_, [&](const IObject::Ptr&) { ++count; }, TraversalType::DEPTH_FIRST_PRE_ORDER);
         EXPECT_EQ(count, NumChildContainers + NumChildTestTypes);
     }
     {
@@ -1030,8 +1029,7 @@ TEST_F(UnitTest_ContainerTest, IterationSupport)
     }
     {
         int count = 0;
-        ForEachUnique(
-            container_, [&](const IObject::Ptr&) { ++count; }, TraversalType::DEPTH_FIRST_PRE_ORDER);
+        ForEachUnique(container_, [&](const IObject::Ptr&) { ++count; }, TraversalType::DEPTH_FIRST_PRE_ORDER);
         EXPECT_EQ(count, NumChildContainers + NumChildTestTypes);
     }
     {
