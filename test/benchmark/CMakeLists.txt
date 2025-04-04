@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-project (LumeMetaBenchmarks)
+project (LumeMetaBenchmark)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,7 +26,7 @@ endif()
 #
 # Benchmark app name.
 #
-set(executableName LumeMetaBenchmarks)
+set(executableName LumeMetaBenchmark)
 
 set(benchmark_sources
     src/main.cpp
@@ -55,12 +55,12 @@ target_link_libraries(${executableName} PRIVATE
 # Cmake helper TargetPluginsDependencies doesn't copy pdb files
 #include(TargetPluginsDependencies)
 #
-#target_plugins_dependencies(LumeMetaBenchmarks
+#target_plugins_dependencies(LumeMetaBenchmark
 #        PLUGINS AGPEngine::AGPEngineDLL
 #        RELATIVE_DEPLOY_PATH .
 #        VERBOSE)
 #
-#target_plugins_dependencies(LumeMetaBenchmarks
+#target_plugins_dependencies(LumeMetaBenchmark
 #        PLUGINS LumeMeta::Plugin
 #        RELATIVE_DEPLOY_PATH "plugins"
 #        VERBOSE)

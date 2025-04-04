@@ -8,6 +8,7 @@
 #define META_SRC_ANIMATION_CONTROLLER_H
 
 #include <shared_mutex>
+#include <mutex>
 
 #include <base/containers/vector.h>
 

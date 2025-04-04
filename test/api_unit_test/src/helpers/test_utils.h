@@ -30,19 +30,6 @@
 
 #include "helpers/testing_objects.h"
 
-// Operators for EXPECT_LT/GT/LE/GE macros to work
-// Note: These are not proper comparison operators, they only verify if
-// both x and y of lhs is > or < than rhs.
-bool operator>(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
-bool operator<(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
-bool operator>(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
-bool operator<(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
-
-bool operator>=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
-bool operator<=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
-bool operator>=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
-bool operator<=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
-
 // Tests if all components of a vector are within epsilon of each other
 bool AreEqual(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs, float epsilon = BASE_NS::Math::EPSILON);
 bool AreNear(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
@@ -57,6 +44,18 @@ std::ostream& operator<<(std::ostream& os, const BASE_NS::string_view& s);
 namespace Math {
 std::ostream& operator<<(std::ostream& os, const BASE_NS::Math::Vec2& vec);
 std::ostream& operator<<(std::ostream& os, const BASE_NS::Math::Vec3& vec);
+// Operators for EXPECT_LT/GT/LE/GE macros to work
+// Note: These are not proper comparison operators, they only verify if
+// both x and y of lhs is > or < than rhs.
+bool operator>(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
+bool operator<(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
+bool operator>(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
+bool operator<(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
+
+bool operator>=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
+bool operator<=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs);
+bool operator>=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
+bool operator<=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs);
 } // namespace Math
 } // namespace BASE_NS
 

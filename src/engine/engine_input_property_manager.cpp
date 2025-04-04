@@ -1,5 +1,7 @@
 #include "engine_input_property_manager.h"
 
+#include <mutex>
+
 META_BEGIN_NAMESPACE()
 
 namespace Internal {

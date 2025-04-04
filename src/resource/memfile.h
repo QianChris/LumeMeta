@@ -5,6 +5,7 @@
 #define META_SRC_RESOURCE_MEMFILE_HEADER
 
 #include <algorithm>
+#include <cstring>
 
 #include <base/containers/vector.h>
 #include <core/io/intf_file.h>

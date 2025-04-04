@@ -20,46 +20,6 @@
 
 #include <base/containers/string.h>
 
-bool operator>(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
-{
-    return ((lhs.x > rhs.x) && (lhs.y > rhs.y));
-}
-
-bool operator<(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
-{
-    return ((lhs.x < rhs.x) && (lhs.y < rhs.y));
-}
-
-bool operator>(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
-{
-    return ((lhs.x > rhs.x) && (lhs.y > rhs.y));
-}
-
-bool operator<(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
-{
-    return ((lhs.x < rhs.x) && (lhs.y < rhs.y));
-}
-
-bool operator>=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
-{
-    return ((lhs.x >= rhs.x) && (lhs.y >= rhs.y));
-}
-
-bool operator<=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
-{
-    return ((lhs.x <= rhs.x) && (lhs.y <= rhs.y));
-}
-
-bool operator>=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
-{
-    return ((lhs.x >= rhs.x) && (lhs.y >= rhs.y));
-}
-
-bool operator<=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
-{
-    return ((lhs.x <= rhs.x) && (lhs.y <= rhs.y));
-}
-
 bool AreEqual(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs, float epsilon)
 {
     return BASE_NS::Math::abs(lhs.x - rhs.x) < epsilon && BASE_NS::Math::abs(lhs.y - rhs.y) < epsilon &&
@@ -122,6 +82,46 @@ std::ostream& operator<<(std::ostream& os, const BASE_NS::Math::Vec2& vec)
     std::stringstream ss;
     ss << std::setprecision(6) << "BASE_NS::Math::Vec2 {" << vec.x << ", " << vec.y << "}";
     return os << ss.str();
+}
+
+bool operator>(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
+{
+    return ((lhs.x > rhs.x) && (lhs.y > rhs.y));
+}
+
+bool operator<(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
+{
+    return ((lhs.x < rhs.x) && (lhs.y < rhs.y));
+}
+
+bool operator>(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
+{
+    return ((lhs.x > rhs.x) && (lhs.y > rhs.y));
+}
+
+bool operator<(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
+{
+    return ((lhs.x < rhs.x) && (lhs.y < rhs.y));
+}
+
+bool operator>=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
+{
+    return ((lhs.x >= rhs.x) && (lhs.y >= rhs.y));
+}
+
+bool operator<=(const BASE_NS::Math::Vec3& lhs, const BASE_NS::Math::Vec3& rhs)
+{
+    return ((lhs.x <= rhs.x) && (lhs.y <= rhs.y));
+}
+
+bool operator>=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
+{
+    return ((lhs.x >= rhs.x) && (lhs.y >= rhs.y));
+}
+
+bool operator<=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
+{
+    return ((lhs.x <= rhs.x) && (lhs.y <= rhs.y));
 }
 
 } // namespace Math

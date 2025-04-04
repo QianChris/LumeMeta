@@ -3,6 +3,7 @@
 #define META_SRC_RESOURCE_FILE_RESOURCE_MANAGER_H
 
 #include <shared_mutex>
+#include <mutex>
 #include <string>
 
 #include <base/containers/unordered_map.h>

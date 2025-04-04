@@ -2,6 +2,7 @@
 #include "container_base.h"
 
 #include <algorithm>
+#include <mutex>
 
 #include <base/math/mathf.h>
 

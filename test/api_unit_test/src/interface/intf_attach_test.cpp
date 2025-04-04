@@ -643,9 +643,6 @@ public:
 
 #if defined(_CPPRTTI) || defined(__GXX_RTTI)
 TEST(API_AttachmentTest, ResolveFinalClass)
-#else
-TEST(API_AttachmentTest, DISABLED_ResolveFinalClass)
-#endif
 {
     auto& registry = GetObjectRegistry();
     RegisterObjectType<MyTypedAttachment1>();
@@ -681,6 +678,12 @@ TEST(API_AttachmentTest, DISABLED_ResolveFinalClass)
     UnregisterObjectType<MyTypedAttachment1>();
     UnregisterObjectType<MyTypedAttachment2>();
 }
+#else
+TEST(API_AttachmentTest, DISABLED_ResolveFinalClass)
+{
+    // Skip
+}
+#endif
 
 TEST(API_AttachmentTest, AttachProperty)
 {

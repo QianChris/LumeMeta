@@ -8,6 +8,7 @@
 #define META_SRC_CLASS_REGISTRY_H
 
 #include <shared_mutex>
+#include <mutex>
 
 #include <base/containers/unordered_map.h>
 

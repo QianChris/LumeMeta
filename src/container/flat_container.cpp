@@ -2,6 +2,7 @@
 #include "flat_container.h"
 
 #include <algorithm>
+#include <mutex>
 
 #include <base/math/mathf.h>
 

@@ -82,10 +82,10 @@ public:
     void SetUp() override
     {
 #if defined(__ANDROID__)
-        const PlatformCreateInfo info { ::Test::g_androidApp->GetEnv(), *(::Test::g_androidApp->GetContext()) };
+        const CORE_NS::PlatformCreateInfo info { ::Test::g_androidApp->GetEnv(), *(::Test::g_androidApp->GetContext()) };
         const BASE_NS::string appAssetPath = "";
 #elif defined(__OHOS__)
-        const PlatformCreateInfo info { ::Test::g_ohosApp->GetEnv(), ::Test::g_ohosApp->GetContext(), nullptr,
+        const CORE_NS::PlatformCreateInfo info { ::Test::g_ohosApp->GetEnv(), ::Test::g_ohosApp->GetContext(), nullptr,
             ::Test::g_ohosApp->GetRsManager(), ::Test::g_ohosApp->GetNativeLibDir() };
         const BASE_NS::string appAssetPath = "";
 #elif defined(_WIN32)
@@ -94,7 +94,7 @@ public:
 
         const BASE_NS::string appAssetPath = ::Test::g_windowsApp->GetAssetDir();
 #elif defined(__linux__)
-        const PlatformCreateInfo info { ::Test::g_linuxApp->GetEngineDir(), ::Test::g_linuxApp->GetAppDir(),
+        const CORE_NS::PlatformCreateInfo info { ::Test::g_linuxApp->GetEngineDir(), ::Test::g_linuxApp->GetAppDir(),
             ::Test::g_linuxApp->GetPluginsDir() };
 
         const BASE_NS::string appAssetPath = ::Test::g_linuxApp->GetAssetDir();

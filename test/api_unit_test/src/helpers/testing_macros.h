@@ -14,9 +14,10 @@
  */
 
 #ifndef META_TEST_TESTING_MACROS_HEADER
-#define META_TEST_TESTING_MACORS_HEADER
+#define META_TEST_TESTING_MACROS_HEADER
 
 #include <chrono>
+#include <thread>
 
 #include <gtest/gtest.h>
 
@@ -42,4 +43,4 @@
     META_WAIT_TRUE_TIMED(millis, (testing::Matches(matcher)(arg))); \
     EXPECT_THAT(arg, matcher);
 
-#endif // META_TEST_TESTING_MACORS_HEADER
+#endif // META_TEST_TESTING_MACROS_HEADER

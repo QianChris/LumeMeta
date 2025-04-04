@@ -8,6 +8,7 @@
 #define META_SRC_OBJECT_HIERARCHY_OBSERVER_H
 
 #include <shared_mutex>
+#include <mutex>
 
 #include <base/containers/unordered_map.h>
 

@@ -1,6 +1,7 @@
 #include "engine_value_manager.h"
 
 #include <charconv>
+#include <mutex>
 
 #include <core/property/intf_property_api.h>
 #include <core/property/scoped_handle.h>

@@ -6,6 +6,7 @@
  */
 
 #include <shared_mutex>
+#include <mutex>
 
 #include <meta/api/event_handler.h>
 #include <meta/api/property/property_event_handler.h>

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <atomic>
+
 #include <meta/api/timer.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_task_queue.h>
