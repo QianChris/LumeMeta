@@ -57,7 +57,7 @@ public:
         resourceType_ = id;
     }
 
-private:
+protected:
     mutable std::shared_mutex mutex_;
     CORE_NS::ResourceId resource_;
     ObjectId resourceType_;

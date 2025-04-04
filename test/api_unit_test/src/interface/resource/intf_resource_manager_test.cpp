@@ -64,7 +64,7 @@ public:
 
 struct Listener : CORE_NS::IResourceManager::IResourceListener {
     void OnResourceEvent(CORE_NS::IResourceManager::IResourceListener::EventType type,
-        const BASE_NS::vector<CORE_NS::ResourceId>& ids) override
+        const BASE_NS::array_view<const CORE_NS::ResourceId>& ids) override
     {
         if (type == CORE_NS::IResourceManager::IResourceListener::EventType::ADDED) {
             added.insert(added.end(), ids.begin(), ids.end());
@@ -191,6 +191,8 @@ TEST_F(FileResourceManagerTest, ExportImportGroups)
     EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceId("test_1", "hops")));
     EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceId("test_1", "some")));
     EXPECT_EQ(resources->GetResources("some").size(), 0);
+
+    EXPECT_EQ(resources->GetResourceInfos("hips").size(), 10);
 }
 
 TEST_F(FileResourceManagerTest, Rename)

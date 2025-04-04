@@ -150,13 +150,16 @@ FileResourceManager::Result FileResourceManager::Import(BASE_NS::string_view url
     Notify(result, IResourceListener::EventType::ADDED);
     return Result::OK;
 }
-BASE_NS::vector<CORE_NS::ResourceInfo> FileResourceManager::GetResourceInfos(BASE_NS::string_view group) const
+BASE_NS::vector<CORE_NS::ResourceInfo> FileResourceManager::GetResourceInfos(
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) const
 {
     std::shared_lock lock { mutex_ };
     BASE_NS::vector<CORE_NS::ResourceInfo> infos;
     for (auto&& g : resources_) {
         for (auto&& v : g.second) {
-            infos.push_back(*v.second);
+            if (ResourceMatches(selection, v.second->id)) {
+                infos.push_back(*v.second);
+            }
         }
     }
     return infos;

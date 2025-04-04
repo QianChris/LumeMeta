@@ -108,17 +108,24 @@ inline void CopyValue(const IProperty::ConstPtr& p, IMetadata& out, BASE_NS::str
     }
 }
 
+inline void CopyToDefaultAndReset(const IProperty::ConstPtr& p, IProperty& out)
+{
+    if (PropertyLock plock { p }) {
+        if (PropertyLock lock { &out }) {
+            if (auto sc = interface_cast<IStackProperty>(&out)) {
+                sc->SetDefaultValue(p->GetValue());
+            }
+            out.ResetValue();
+        }
+    }
+}
+
 inline void CopyToDefaultAndReset(const IProperty::ConstPtr& p, IMetadata& out, BASE_NS::string_view name = {})
 {
     if (PropertyLock plock { p }) {
         BASE_NS::string n(name.empty() ? p->GetName() : name);
         if (auto target = out.GetProperty(n)) {
-            if (PropertyLock lock { target }) {
-                if (auto sc = interface_cast<IStackProperty>(target)) {
-                    sc->SetDefaultValue(p->GetValue());
-                }
-                target->ResetValue();
-            }
+            CopyToDefaultAndReset(p, *target);
         } else {
             CORE_LOG_W("No such property [%s]", n.c_str());
         }

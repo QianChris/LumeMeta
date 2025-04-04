@@ -82,7 +82,8 @@ public:
     void SetUp() override
     {
 #if defined(__ANDROID__)
-        const CORE_NS::PlatformCreateInfo info { ::Test::g_androidApp->GetEnv(), *(::Test::g_androidApp->GetContext()) };
+        const CORE_NS::PlatformCreateInfo info { ::Test::g_androidApp->GetEnv(),
+            *(::Test::g_androidApp->GetContext()) };
         const BASE_NS::string appAssetPath = "";
 #elif defined(__OHOS__)
         const CORE_NS::PlatformCreateInfo info { ::Test::g_ohosApp->GetEnv(), ::Test::g_ohosApp->GetContext(), nullptr,

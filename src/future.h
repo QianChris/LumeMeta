@@ -13,6 +13,7 @@
 #include <thread>
 
 #include <base/containers/shared_ptr.h>
+
 #include <meta/base/interface_macros.h>
 #include <meta/base/namespace.h>
 #include <meta/ext/minimal_object.h>

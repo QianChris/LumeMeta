@@ -2,8 +2,8 @@
 #ifndef META_SRC_RESOURCE_FILE_RESOURCE_MANAGER_H
 #define META_SRC_RESOURCE_FILE_RESOURCE_MANAGER_H
 
-#include <shared_mutex>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 
 #include <base/containers/unordered_map.h>
@@ -29,7 +29,8 @@ public:
     bool RemoveResourceType(const CORE_NS::ResourceType& type) override;
     BASE_NS::vector<CORE_NS::IResourceType::Ptr> GetResourceTypes() const override;
     Result Import(BASE_NS::string_view url) override;
-    BASE_NS::vector<CORE_NS::ResourceInfo> GetResourceInfos(BASE_NS::string_view group) const override;
+    BASE_NS::vector<CORE_NS::ResourceInfo> GetResourceInfos(
+        const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) const override;
     BASE_NS::vector<BASE_NS::string> GetResourceGroups() const override;
     CORE_NS::ResourceInfo GetResourceInfo(const CORE_NS::ResourceId&) const override;
     CORE_NS::IResource::Ptr GetResource(
