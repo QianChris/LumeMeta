@@ -23,8 +23,8 @@
 #include <meta/ext/attachment/attachment.h>
 #include <meta/interface/intf_attachment_container.h>
 
-#include "helpers/testing_objects.h"
 #include "helpers/serialisation_utils.h"
+#include "helpers/testing_objects.h"
 
 constexpr auto DataContextPropertyName = "FloatProp";
 

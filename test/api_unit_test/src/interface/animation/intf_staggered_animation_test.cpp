@@ -499,7 +499,8 @@ TEST_F(API_StaggeredAnimationTest, LoopPastEnd)
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
     Container(staggered).Add(
         a1.SetFrom(0).SetTo(10).SetProperty(t1_->FloatProperty1()).SetDuration(TimeSpan::Milliseconds(100)));
-    Container(staggered).Add(a2.SetFrom(10)
+    Container(staggered).Add(
+        a2.SetFrom(10)
             .SetTo(0)
             .SetProperty(t1_->FloatProperty1())
             .SetDuration(TimeSpan::Milliseconds(100))

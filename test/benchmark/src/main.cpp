@@ -1,13 +1,14 @@
 #include <benchmark/benchmark.h>
-#include <meta/base/plugin.h>
 
 #include <core/engine_info.h>
-#include <core/os/intf_platform.h>
 #include <core/implementation_uids.h>
 #include <core/intf_engine.h>
 #include <core/log.h>
+#include <core/os/intf_platform.h>
 #include <core/plugin/intf_class_register.h>
 #include <core/plugin/intf_plugin_register.h>
+
+#include <meta/base/plugin.h>
 
 #include "utils.h"
 
@@ -17,7 +18,7 @@ class BenchmarkEnvironment {
 public:
     BenchmarkEnvironment()
     {
-        const CORE_NS::PlatformCreateInfo info { "./", "./", "./plugins" }; 
+        const CORE_NS::PlatformCreateInfo info { "./", "./", "./plugins" };
         CORE_NS::CreatePluginRegistry(info);
         constexpr BASE_NS::Uid uids[] { META_NS::META_OBJECT_PLUGIN_UID };
         CORE_NS::GetPluginRegister().LoadPlugins(uids);

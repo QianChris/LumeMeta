@@ -171,15 +171,15 @@ TEST_F(API_AnimationControllerTest, Serialization)
         auto keyframeAnim = SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
         keyframeAnim.SetController(controller);
         keyframeAnim.Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                .SetFrom(0)
-                .SetTo(10)
-                .SetProperty(keyframeProp)
-                .SetDuration(TimeSpan::Milliseconds(100)));
+                             .SetFrom(0)
+                             .SetTo(10)
+                             .SetProperty(keyframeProp)
+                             .SetDuration(TimeSpan::Milliseconds(100)));
         keyframeAnim.Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation))
-                .SetFrom(10)
-                .SetTo(0)
-                .SetProperty(keyframeProp)
-                .SetDuration(TimeSpan::Milliseconds(100)));
+                             .SetFrom(10)
+                             .SetTo(0)
+                             .SetProperty(keyframeProp)
+                             .SetDuration(TimeSpan::Milliseconds(100)));
 
         AttachmentContainer(object).Attach(implicitAnim);
         AttachmentContainer(object).Attach(keyframeAnim);

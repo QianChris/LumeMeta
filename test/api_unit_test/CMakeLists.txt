@@ -24,45 +24,45 @@ endif()
 
 # Platform interface
 set(common_test_sources
-    ../common/log_util.h
     ../common/log_util.cpp
+    ../common/log_util.h
     ../common/test_runner_common.h
 )
 if(ANDROID)
 list(APPEND common_test_sources
-    ../common/test_runner_android.h
     ../common/test_runner_android.cpp
+    ../common/test_runner_android.h
 )
 elseif(OHOS)
 list(APPEND common_test_sources
-    ../common/test_runner_ohos.h
     ../common/test_runner_ohos.cpp
+    ../common/test_runner_ohos.h
 )
 elseif(WIN32)
 list(APPEND common_test_sources
-    ../common/test_runner_windows.h
     ../common/test_runner_windows.cpp
+    ../common/test_runner_windows.h
 )
 else() #Unix
 list(APPEND common_test_sources
-    ../common/test_runner_linux.h
     ../common/test_runner_linux.cpp
+    ../common/test_runner_linux.h
 )
 endif()
 
 # For Clang format
 set(all_common_test_sources
-    ../common/log_util.h
     ../common/log_util.cpp
-    ../common/test_runner_common.h
-    ../common/test_runner_android.h
+    ../common/log_util.h
     ../common/test_runner_android.cpp
-    ../common/test_runner_ohos.h
-    ../common/test_runner_ohos.cpp
-    ../common/test_runner_windows.h
-    ../common/test_runner_windows.cpp
-    ../common/test_runner_linux.h
+    ../common/test_runner_android.h
+    ../common/test_runner_common.h
     ../common/test_runner_linux.cpp
+    ../common/test_runner_linux.h
+    ../common/test_runner_ohos.cpp
+    ../common/test_runner_ohos.h
+    ../common/test_runner_windows.cpp
+    ../common/test_runner_windows.h
 )
 
 # using hash(#) marks for additional information
@@ -73,22 +73,19 @@ set(test_sources
     src/test_runner.h
 
     # Helpers
+    src/helpers/animation_test_base.cpp
+    src/helpers/animation_test_base.h
+    src/helpers/serialisation_utils.cpp
+    src/helpers/serialisation_utils.h
+    src/helpers/test_data_helpers.h
+    src/helpers/test_utils.cpp
+    src/helpers/test_utils.h
     src/helpers/testing_macros.h
     src/helpers/testing_objects.cpp
     src/helpers/testing_objects.h
-    src/helpers/serialisation_utils.cpp
-    src/helpers/serialisation_utils.h
     src/helpers/util.h
-    src/helpers/test_utils.cpp
-    src/helpers/test_utils.h
-    src/helpers/test_data_helpers.h
-    src/helpers/animation_test_base.cpp
-    src/helpers/animation_test_base.h
 
     # API
-    src/api/property/array_property_event_handler_test.cpp
-    src/api/property/custom_value_test.cpp
-    src/api/property/property_info_test.cpp
     src/api/bitfield_property_test.cpp
     src/api/compatible_value_util_test.cpp
     src/api/deferred_callback_test.cpp
@@ -96,6 +93,9 @@ set(test_sources
     src/api/mutex_test.cpp
     src/api/number_test.cpp
     src/api/object_test.cpp
+    src/api/property/array_property_event_handler_test.cpp
+    src/api/property/custom_value_test.cpp
+    src/api/property/property_info_test.cpp
     src/api/timer_test.cpp
     
     # Base
@@ -114,39 +114,21 @@ set(test_sources
     src/interface/animation/animation_controller_test.cpp
     src/interface/animation/animation_seeking_test.cpp
     src/interface/animation/bezier_curve_test.cpp
-    src/interface/animation/intf_animation_test.cpp
     src/interface/animation/intf_animation_modifier_test.cpp
+    src/interface/animation/intf_animation_test.cpp
     src/interface/animation/intf_staggered_animation_test.cpp
     src/interface/animation/intf_track_animation_test.cpp
-    
     src/interface/animation/sequential_animation_test.cpp
-    
     src/interface/engine/engine_test_property.h
     src/interface/engine/intf_engine_input_property_manager_test.cpp
     src/interface/engine/intf_engine_value_manager_test.cpp
-    
-    src/interface/loaders/csv_string_resource_loader_test.cpp
-    
-    src/interface/model/intf_data_model_test.cpp
-    src/interface/model/intf_object_provider_test.cpp
-    
-    src/interface/property/array_property_test.cpp
-    src/interface/property/intf_modifier_test.cpp
-    src/interface/property/property_test.cpp
-    
-    src/interface/serialization/intf_serializable_test.cpp
-    src/interface/serialization/property_serialization_test.cpp
-    src/interface/serialization/resource_serialization_test.cpp
-    src/interface/serialization/ser_compatibility_test.cpp
-    src/interface/serialization/serialization_test.cpp
-    
     src/interface/intf_any_test.cpp
     src/interface/intf_attach_test.cpp
     src/interface/intf_call_context_test.cpp
     src/interface/intf_class_registry_test.cpp
-    src/interface/intf_container_test.cpp
     src/interface/intf_container_observer_test.cpp
     src/interface/intf_container_query_test.cpp
+    src/interface/intf_container_test.cpp
     src/interface/intf_content_test.cpp
     src/interface/intf_enum_test.cpp
     src/interface/intf_metadata_test.cpp
@@ -154,8 +136,20 @@ set(test_sources
     src/interface/intf_object_registry_test.cpp
     src/interface/intf_proxy_object_test.cpp
     src/interface/intf_startable_controller_test.cpp
-    src/interface/intf_task_queue_test.cpp
     src/interface/intf_task_queue_registry_test.cpp
+    src/interface/intf_task_queue_test.cpp
+    src/interface/loaders/csv_string_resource_loader_test.cpp
+    src/interface/model/intf_data_model_test.cpp
+    src/interface/model/intf_object_provider_test.cpp
+    src/interface/property/array_property_test.cpp
+    src/interface/property/intf_modifier_test.cpp
+    src/interface/property/property_test.cpp
+    src/interface/resource/intf_resource_manager_test.cpp
+    src/interface/serialization/intf_serializable_test.cpp
+    src/interface/serialization/property_serialization_test.cpp
+    src/interface/serialization/resource_serialization_test.cpp
+    src/interface/serialization/ser_compatibility_test.cpp
+    src/interface/serialization/serialization_test.cpp
     src/interface/simple_event_test.cpp
 )
 
