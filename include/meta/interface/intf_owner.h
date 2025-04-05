@@ -15,7 +15,7 @@
 META_BEGIN_NAMESPACE()
 
 class IProperty;
-class StaticMetadata;
+struct StaticMetadata;
 
 /// Generic owner concept interface
 class IOwner : public CORE_NS::IInterface {

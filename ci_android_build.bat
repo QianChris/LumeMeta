@@ -112,7 +112,7 @@ if exist CMakeCache.txt (
 )
 !CMAKE_COMMAND!  -GNinja %BUILD_OPTIONS% %RELEASE_OPTIONS% %SOURCE_PATH%
 if %errorlevel% neq 0 exit /b %errorlevel%
-!CMAKE_COMMAND!  --build . --target MetaObject
+!CMAKE_COMMAND!  --build . --target LumeMeta
 if %errorlevel% neq 0 exit /b %errorlevel%
 popd release
 mkdir debug
@@ -124,7 +124,7 @@ if exist CMakeCache.txt (
 )
 !CMAKE_COMMAND!  -GNinja %BUILD_OPTIONS% %DEBUG_OPTIONS% %SOURCE_PATH% 
 if %errorlevel% neq 0 exit /b %errorlevel%
-!CMAKE_COMMAND!  --build . --target MetaObject
+!CMAKE_COMMAND!  --build . --target LumeMeta
 if %errorlevel% neq 0 exit /b %errorlevel%
 popd debug
 popd

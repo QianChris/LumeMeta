@@ -93,7 +93,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif()
 
-include(MetaObjectTargetCodeInspection)
+include(LumeMetaTargetCodeInspection)
 
 if (BUILD_DEPS AND NOT META_SUBMODULE_ENABLED)
     # Find_package macro will workaround the findpackage issues (ie. if the target exists, then do nothing)
@@ -515,15 +515,15 @@ set_target_properties(${META_PLUGIN} PROPERTIES
 
 # Utilize common linker flags from Base
 include(${BASE_ROOT_DIRECTORY}/cmake/cmake_tools.cmake)
-append_link_flags(MetaObject "${BASE_SO_LINK_FLAGS}")
+append_link_flags(${META_PLUGIN} "${BASE_SO_LINK_FLAGS}")
 
 if(MSVC)
-    target_compile_options(MetaObject PRIVATE /GR-)
+    target_compile_options(${META_PLUGIN} PRIVATE /GR-)
     if(CMAKE_CXX_FLAGS MATCHES "/EHs ")
       string(REPLACE "/EHs" "/EHs-c- /D_HAS_EXCEPTIONS=0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     endif()
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_compile_options(MetaObject PRIVATE -Oz -fno-exceptions -fno-rtti)
+    target_compile_options(${META_PLUGIN} PRIVATE -Oz -fno-exceptions -fno-rtti)
 endif()
 
 target_link_libraries(${META_PLUGIN} PRIVATE ${META_PLUGIN}API ${META_PLUGIN}ExtAPI ${META_PLUGIN}HighLevelAPI)
@@ -576,7 +576,7 @@ if (META_VISUAL_STUDIO_TIDY AND NOT META_SUBMODULE_ENABLED)
     message("Creating VS ExecTidyMeta in ${META_PLUGIN} cmakelists.txt")
     add_custom_target(ExecTidyMeta DEPENDS thatMetaTidy.txt
         OUTPUT  thatMetaTidy.txt
-        COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_TESTS_ENABLED=${META_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
+        COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_UNIT_TESTS_ENABLED=${META_UNIT_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/TidyMetaTask --target TidyMeta_For_CI
         DEPENDS  thisMetaTidy.txt
     )

@@ -26,7 +26,7 @@ if "%PACKAGE_CACHE_PATH:~-1%"=="\" set "PACKAGE_CACHE_PATH=%PACKAGE_CACHE_PATH:~
 if "%TEMPLATE_PATH:~-1%"=="\" set "TEMPLATE_PATH=%TEMPLATE_PATH:~0,-1%"
 set DST_PATH=%PACKAGE_CACHE_PATH%\%2
 
-echo building MetaObject for OHOS from %SRC_PATH% to %DST_PATH% (building in %BUILD_PATH%, using packages from %PACKAGE_CACHE_PATH%)
+echo building LumeMeta for OHOS from %SRC_PATH% to %DST_PATH% (building in %BUILD_PATH%, using packages from %PACKAGE_CACHE_PATH%)
 
 rem first "build"/install the api.
 rem (so the find_package in the agpengine cmakelists.txt works. the order of operations is a bit weird.)
@@ -53,8 +53,8 @@ call %TEMPLATE_PATH%\builder_ohos.bat %SRC_PATH% %BUILD_PATH% release %FLAGS%
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 
-xcopy %BUILD_PATH%\bin\debug\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Debug\OHOS\%ABI%\ /Y /Q
-xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Release\OHOS\%ABI%\ /Y /Q
-xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so.sym %DST_PATH%\bin\Release\OHOS\%ABI%\ /Y /Q
+xcopy %BUILD_PATH%\bin\debug\%ABI%\libPluginLumeMeta.so %DST_PATH%\bin\Debug\OHOS\%ABI%\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginLumeMeta.so %DST_PATH%\bin\Release\OHOS\%ABI%\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginLumeMeta.so.sym %DST_PATH%\bin\Release\OHOS\%ABI%\ /Y /Q
 
 echo Ohos %2 Success.
