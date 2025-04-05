@@ -43,14 +43,19 @@ set MODULES="%PACKAGE_CACHE_PATH%\LumeBase\cmake"
 set MODULES=%MODULES%;"%PACKAGE_CACHE_PATH%\LumeEngine\cmake"
 set MODULES=%MODULES%;"%DST_PATH%\cmake"
 set FLAGS=-DCMAKE_MODULE_PATH:PATH=%MODULES% %FLAGS%
-set FLAGS=-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH="%BUILD_PATH%\bin\debug" %FLAGS%
-set FLAGS=-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE:PATH="%BUILD_PATH%\bin\release" %FLAGS%
+set OUTPUT_FLAGS=-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH="%BUILD_PATH%\bin\debug"
+set OUTPUT_FLAGS=-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE:PATH="%BUILD_PATH%\bin\release" %OUTPUT_FLAGS%
 set FLAGS=-DMETA_TESTS_ENABLED=OFF -DMETA_SUBMODULE_ENABLED=ON -DBUILD_DEPS=OFF %FLAGS%
 
+set VALIDATION_ON=-DCORE_VALIDATION_ENABLED=ON -DRENDER_VALIDATION_ENABLED=ON
+set VALIDATION_OFF=-DCORE_VALIDATION_ENABLED=OFF -DRENDER_VALIDATION_ENABLED=OFF
+
+:: Release / Debug
 if exist %BUILD_PATH% (
     rmdir %BUILD_PATH% /S /Q
 )
-cmake -G"Visual Studio 15 2017 Win64" %FLAGS% -S %SRC_PATH% -B %BUILD_PATH%
+
+cmake -G"Visual Studio 15 2017 Win64" %FLAGS% %OUTPUT_FLAGS% %VALIDATION_ON% -S %SRC_PATH% -B %BUILD_PATH%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cmake --build %BUILD_PATH% --config Release --target MetaObject -- /m /verbosity:q
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -58,8 +63,27 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cmake --build %BUILD_PATH% --config Debug --target MetaObject -- /m /verbosity:q
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-xcopy %BUILD_PATH%\bin\release\PluginMetaObject.dll %DST_PATH%\bin\Release\Win64\ /Y /Q
-xcopy %BUILD_PATH%\bin\debug\PluginMetaObject.dll %DST_PATH%\bin\Debug\Win64\ /Y /Q
-xcopy %BUILD_PATH%\bin\debug\PluginMetaObject.pdb %DST_PATH%\bin\Debug\Win64\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\PluginMetaObject.dll %DST_PATH%\bin\Release\windows\x64\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\PluginMetaObject.pdb %DST_PATH%\bin\Release\windows\x64\ /Y /Q
+xcopy %BUILD_PATH%\bin\debug\PluginMetaObject.dll %DST_PATH%\bin\Debug\windows\x64\ /Y /Q
+xcopy %BUILD_PATH%\bin\debug\PluginMetaObject.pdb %DST_PATH%\bin\Debug\windows\x64\ /Y /Q
+
+:: Profile
+set BUILD_PATH=%BUILD_PATH%_profile
+set OUTPUT_FLAGS=-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG:PATH="%BUILD_PATH%\bin\debug"
+set OUTPUT_FLAGS=-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE:PATH="%BUILD_PATH%\bin\release" %OUTPUT_FLAGS%
+
+if exist %BUILD_PATH% (
+    rmdir %BUILD_PATH% /S /Q
+)
+
+echo building MetaObject Profile to %BUILD_PATH%
+cmake -G"Visual Studio 15 2017 Win64" %FLAGS% %OUTPUT_FLAGS% -DCORE_PERF_ENABLED=ON -DRENDER_PERF_ENABLED=ON %VALIDATION_OFF% -S %SRC_PATH% -B %BUILD_PATH%
+if %errorlevel% neq 0 exit /b %errorlevel%
+cmake --build %BUILD_PATH% --config Release --target MetaObject -- /m /verbosity:q
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy %BUILD_PATH%\bin\release\PluginMetaObject.dll %DST_PATH%\bin\Profile\windows\x64\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\PluginMetaObject.pdb %DST_PATH%\bin\Profile\windows\x64\ /Y /Q
 
 echo Windows %2 success.

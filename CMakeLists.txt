@@ -15,6 +15,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# do not add /GR to MSVC builds by default
+cmake_policy(SET CMP0117 NEW)
+
 #
 # Options
 #
@@ -510,8 +513,20 @@ set_target_properties(${META_PLUGIN} PROPERTIES
     OUTPUT_NAME Plugin${META_PLUGIN}
     )
 
-target_link_libraries(${META_PLUGIN} PRIVATE ${META_PLUGIN}API ${META_PLUGIN}ExtAPI ${META_PLUGIN}HighLevelAPI)
+# Utilize common linker flags from Base
+include(${BASE_ROOT_DIRECTORY}/cmake/cmake_tools.cmake)
+append_link_flags(MetaObject "${BASE_SO_LINK_FLAGS}")
 
+if(MSVC)
+    target_compile_options(MetaObject PRIVATE /GR-)
+    if(CMAKE_CXX_FLAGS MATCHES "/EHs ")
+      string(REPLACE "/EHs" "/EHs-c- /D_HAS_EXCEPTIONS=0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_compile_options(MetaObject PRIVATE -Oz -fno-exceptions -fno-rtti)
+endif()
+
+target_link_libraries(${META_PLUGIN} PRIVATE ${META_PLUGIN}API ${META_PLUGIN}ExtAPI ${META_PLUGIN}HighLevelAPI)
 
 get_target_property(IMPL_SOURCES ${META_PLUGIN} SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX src FILES ${IMPL_SOURCES})

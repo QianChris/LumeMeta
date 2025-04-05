@@ -29,7 +29,7 @@ if "%SOURCE_PATH:~-1%"=="\" set "SOURCE_PATH=%SOURCE_PATH:~0,-1%"
 if "%BUILD_PATH:~-1%"=="\" set "BUILD_PATH=%BUILD_PATH:~0,-1%"
 
 set BUILD_TYPE=%3
-for /f "tokens=2,* delims= " %%a in ("%*") do set OPTIONS=%%b
+for /f "tokens=3,* delims= " %%a in ("%*") do set OPTIONS=%%b
 
 rem build %1 repo.
 rem copy api folder. and binaries

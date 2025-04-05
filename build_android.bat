@@ -44,17 +44,35 @@ set MODULES=%MODULES%;"%PACKAGE_CACHE_PATH%\LumeEngine\cmake"
 set MODULES=%MODULES%;"%DST_PATH%\cmake"
 set FLAGS=-DCMAKE_MODULE_PATH:PATH=%MODULES% %FLAGS%
 
+set DEBUG_FLAGS=-DCORE_VALIDATION_ENABLED=ON -DRENDER_VALIDATION_ENABLED=ON
+set RELEASE_FLAGS=-DCORE_VALIDATION_ENABLED=OFF -DRENDER_VALIDATION_ENABLED=OFF
+
+:: Release / Debug
 if exist %BUILD_PATH% (
     rmdir %BUILD_PATH% /S /Q
 )
-call %TEMPLATE_PATH%\builder_android.bat %SRC_PATH% %BUILD_PATH% debug %FLAGS% 
+
+call %TEMPLATE_PATH%\builder_android.bat %SRC_PATH% %BUILD_PATH% debug %FLAGS% %DEBUG_FLAGS%
 if %errorlevel% neq 0 exit /b %errorlevel%
-call %TEMPLATE_PATH%\builder_android.bat %SRC_PATH% %BUILD_PATH% release %FLAGS%
+call %TEMPLATE_PATH%\builder_android.bat %SRC_PATH% %BUILD_PATH% release %FLAGS% %RELEASE_FLAGS%
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+xcopy %BUILD_PATH%\bin\debug\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Debug\android\%ABI%\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Release\android\%ABI%\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so.sym %DST_PATH%\bin\Release\android\%ABI%\ /Y /Q
 
-xcopy %BUILD_PATH%\bin\debug\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Debug\%ABI%\ /Y /Q
-xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Release\%ABI%\ /Y /Q
-xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so.sym %DST_PATH%\bin\Release\%ABI%\ /Y /Q
+:: Profile
+set BUILD_PATH=%BUILD_PATH%_profile
+
+if exist %BUILD_PATH% (
+    rmdir %BUILD_PATH% /S /Q
+)
+
+echo building MetaObject Profile to %BUILD_PATH%
+call %TEMPLATE_PATH%\builder_android.bat %SRC_PATH% %BUILD_PATH% release -DCORE_PERF_ENABLED=ON -DRENDER_PERF_ENABLED=ON %FLAGS% %RELEASE_FLAGS%
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so %DST_PATH%\bin\Profile\android\%ABI%\ /Y /Q
+xcopy %BUILD_PATH%\bin\release\%ABI%\libPluginMetaObject.so.sym %DST_PATH%\bin\Profile\android\%ABI%\ /Y /Q
 
 echo Android %2 Success.
