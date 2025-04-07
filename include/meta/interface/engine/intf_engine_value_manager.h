@@ -30,6 +30,11 @@ struct EngineValueOptions {
      *        the values can only be set in the engine task queue thread
      **/
     bool pushValuesDirectlyToEngine {};
+    /**
+     * @brief If true, also recursively handle known struct types. E.g. Vec4 would be expanded into x, y, z, and w
+     * properties.
+     */
+    bool recurseKnownStructs {};
 };
 
 /**

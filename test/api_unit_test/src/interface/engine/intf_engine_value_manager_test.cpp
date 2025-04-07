@@ -140,7 +140,9 @@ TEST_F(API_EngineManagerTest, AddValuesRecursively)
     auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
     ASSERT_TRUE(manager);
 
-    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman, cman.entityRef });
+    EngineValueOptions options;
+    options.recurseKnownStructs = true;
+    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman, cman.entityRef }, options);
     EXPECT_EQ(manager->GetAllEngineValues().size(), prop1::TEST_RECURSIVE_PROPERTY_COUNT);
     auto p = manager->ConstructProperty<BASE_NS::Math::IVec2>("vec2");
     ASSERT_TRUE(p);
@@ -198,7 +200,9 @@ TEST_F(API_EngineManagerTest, AddValuesRecursivelyWithHandle)
     auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
     ASSERT_TRUE(manager);
 
-    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman1, cman1.entityRef });
+    EngineValueOptions options;
+    options.recurseKnownStructs = true;
+    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman1, cman1.entityRef }, options);
     EXPECT_EQ(manager->GetAllEngineValues().size(), prop1::TEST_RECURSIVE_PROPERTY_COUNT + prop2::TEST_PROPERTY_COUNT);
 
     auto handle = manager->ConstructProperty<CORE_NS::IPropertyHandle*>("handle");
@@ -227,7 +231,9 @@ TEST_F(API_EngineManagerTest, ChangeHandle)
 
     //    manager->ConstructValue(EnginePropertyHandle {&cman1, cman1.entityRef}, "handle.value", EngineValueOptions{});
     //    EXPECT_EQ(manager->GetAllEngineValues().size(), 2);
-    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman1, cman1.entityRef });
+    EngineValueOptions options;
+    options.recurseKnownStructs = true;
+    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman1, cman1.entityRef }, options);
     EXPECT_EQ(manager->GetAllEngineValues().size(), prop1::TEST_RECURSIVE_PROPERTY_COUNT + prop2::TEST_PROPERTY_COUNT);
 
     auto handle = manager->ConstructProperty<CORE_NS::IPropertyHandle*>("handle");
@@ -303,7 +309,9 @@ TEST_F(API_EngineManagerTest, Overlapping)
     auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
     ASSERT_TRUE(manager);
 
-    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman, cman.entityRef });
+    EngineValueOptions options;
+    options.recurseKnownStructs = true;
+    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman, cman.entityRef }, options);
     EXPECT_EQ(manager->GetAllEngineValues().size(), prop1::TEST_RECURSIVE_PROPERTY_COUNT);
 
     auto p = manager->ConstructProperty<BASE_NS::Math::IVec2>("vec2");

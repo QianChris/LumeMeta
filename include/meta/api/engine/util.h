@@ -22,13 +22,16 @@ inline void AddEngineValuesRecursively(
     const IEngineValueManager::Ptr& m, const IEngineValue::Ptr& value, EngineValueOptions options = {})
 {
     BASE_NS::vector<IEngineValue::Ptr> vec;
-    if (m->ConstructValues(
-            value, EngineValueOptions { options.namePrefix, &vec, options.pushValuesDirectlyToEngine })) {
+    auto evo = options;
+    evo.values = &vec;
+    if (m->ConstructValues(value, evo)) {
         if (options.values) {
             options.values->insert(options.values->end(), vec.begin(), vec.end());
         }
-        for (auto&& v : vec) {
-            AddEngineValuesRecursively(m, v, options);
+        if (evo.recurseKnownStructs) {
+            for (auto&& v : vec) {
+                AddEngineValuesRecursively(m, v, options);
+            }
         }
     }
 }
@@ -43,14 +46,17 @@ inline void AddEngineValuesRecursively(
     const IEngineValueManager::Ptr& m, EnginePropertyHandle handle, EngineValueOptions options = {})
 {
     BASE_NS::vector<IEngineValue::Ptr> vec;
-    if (m->ConstructValues(
-            handle, EngineValueOptions { options.namePrefix, &vec, options.pushValuesDirectlyToEngine })) {
+    auto evo = options;
+    evo.values = &vec;
+    if (m->ConstructValues(handle, evo)) {
         if (options.values) {
             options.values->insert(options.values->end(), vec.begin(), vec.end());
         }
-        for (auto&& v : vec) {
-            AddEngineValuesRecursively(
-                m, v, EngineValueOptions { "", options.values, options.pushValuesDirectlyToEngine });
+        if (evo.recurseKnownStructs) {
+            options.namePrefix = "";
+            for (auto&& v : vec) {
+                AddEngineValuesRecursively(m, v, options);
+            }
         }
     }
 }
