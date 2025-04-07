@@ -27,7 +27,6 @@
 #include "proxy_object.h"
 #include "resource/file_resource_manager.h"
 #include "resource/object_resource.h"
-#include "resource/resource_container.h"
 #include "resource/resource_placeholder.h"
 #include "serialization/backend/debug_output.h"
 #include "serialization/backend/json_input.h"
@@ -56,8 +55,7 @@ IObjectFactory::Ptr GetContentObjectFactory();
 static constexpr ObjectTypeInfo OBJECTS[] = {
     Internal::Object::OBJECT_INFO,
     ObjectContainer::OBJECT_INFO,
-    ObjectFlatContainer::OBJECT_INFO,
-    ResourceContainer::OBJECT_INFO,
+    ObjectFlatContainer::OBJECT_INFO,    
     ProxyObject::OBJECT_INFO,
     Internal::ContainerObserver::OBJECT_INFO,
     SettableFunction::OBJECT_INFO,

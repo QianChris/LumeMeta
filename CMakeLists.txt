@@ -248,7 +248,6 @@ target_sources(${META_PLUGIN}API PUBLIC
     include/meta/interface/property/property_events.h
     include/meta/interface/resource/intf_dynamic_resource.h
     include/meta/interface/resource/intf_resource.h
-    include/meta/interface/resource/intf_resource_container.h
     include/meta/interface/serialization/intf_export_context.h
     include/meta/interface/serialization/intf_exporter.h
     include/meta/interface/serialization/intf_global_serialization_data.h
@@ -474,7 +473,6 @@ target_sources(${META_PLUGIN} PRIVATE
     src/register_engine_access.cpp
     src/register_entities.cpp
     src/register_value_serializers.cpp
-    src/resource/resource_container.h
     src/serialization/backend/debug_output.cpp
     src/serialization/backend/debug_output.h
     src/serialization/backend/json_input.cpp

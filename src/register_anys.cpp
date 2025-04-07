@@ -14,6 +14,7 @@
 #include <meta/interface/detail/any.h>
 #include <meta/interface/intf_attach.h>
 #include <meta/interface/intf_object_registry.h>
+#include <meta/interface/intf_startable.h>
 #include <meta/interface/loaders/intf_content_loader.h>
 
 META_BEGIN_NAMESPACE()
@@ -48,7 +49,9 @@ using BasicTypes = TypeList<
     BASE_NS::Math::Quat,
     BASE_NS::Math::Mat3X3,
     BASE_NS::Math::Mat4X4,
-    TimeSpan
+    TimeSpan,
+    StartableState,
+    StartBehavior
     >;
 using ObjectTypes = TypeList<
     SharedPtrIInterface,

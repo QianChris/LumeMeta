@@ -26,7 +26,6 @@ META_REGISTER_CLASS(ProxyObject, "bd2164e1-b1b6-472a-8783-7787c7de9b36", ObjectC
 META_REGISTER_CLASS(ObjectContainer, "e25ec91e-f5cb-4afa-b277-a16c19da2e4a", ObjectCategoryBits::CONTAINER)
 META_REGISTER_CLASS(ObjectFlatContainer, "30f501c2-7b62-44a4-911b-9b0ff2c850c4", ObjectCategoryBits::CONTAINER)
 META_REGISTER_CLASS(AttachmentContainer, "d03551ab-8ef4-4b0b-98ba-f0edd2db6ba2", ObjectCategoryBits::CONTAINER)
-META_REGISTER_CLASS(ResourceContainer, "d86402a2-1a05-4d6e-9c31-f5979f3fa017", ObjectCategoryBits::CONTAINER)
 META_REGISTER_CLASS(ObjectDataContainer, "699f6e94-a988-406d-af8b-8a4fa88a3485", ObjectCategoryBits::CONTAINER)
 META_REGISTER_CLASS(ContainerObserver, "a13844ca-9830-4dd2-8ecc-625563bcc5b0", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(ObjectHierarchyObserver, "48cb1bb4-dd0a-44a5-a530-c2073e3a70df", ObjectCategoryBits::NO_CATEGORY)

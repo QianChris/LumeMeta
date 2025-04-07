@@ -29,8 +29,8 @@ class BehaviorBase : public IntroduceInterfaces<AttachmentFwd, IStartable> {
     META_BEGIN_STATIC_DATA()
     META_STATIC_PROPERTY_DATA(
         META_NS::IStartable, META_NS::StartBehavior, StartableMode, META_NS::StartBehavior::AUTOMATIC)
-    META_STATIC_PROPERTY_DATA(
-        META_NS::IStartable, META_NS::StartableState, StartableState, META_NS::StartableState::DETACHED)
+    META_STATIC_PROPERTY_DATA(META_NS::IStartable, META_NS::StartableState, StartableState,
+        META_NS::StartableState::DETACHED, DEFAULT_PROPERTY_FLAGS_NO_SER)
     META_END_STATIC_DATA()
 
     META_IMPLEMENT_PROPERTY(META_NS::StartBehavior, StartableMode)
