@@ -374,5 +374,41 @@ TEST(API_SerializationTest, InstanceIdMapping)
     // ser2.Dump("file://./ids2.json");
 }
 
+META_REGISTER_CLASS(TestMetadata, "95d0b30e-5c77-4d4f-8741-04a7b2b11ad2", ObjectCategoryBits::NO_CATEGORY)
+
+class TestMetadata : public IntroduceInterfaces<MetaObject, ISerializable> {
+    META_OBJECT(TestMetadata, ClassId::TestMetadata, IntroduceInterfaces)
+public:
+    ReturnError Export(IExportContext& c) const override
+    {
+        EXPECT_EQ(SerMetadataValues(c.GetMetadata()).GetVersion(), Version(1, 2));
+        return GenericError::SUCCESS;
+    }
+    ReturnError Import(IImportContext& c) override
+    {
+        EXPECT_EQ(SerMetadataValues(c.GetMetadata()).GetVersion(), Version(1, 2));
+        return GenericError::SUCCESS;
+    }
+};
+
+TEST(API_SerializationTest, Metadata)
+{
+    auto& reg = GetObjectRegistry();
+    reg.RegisterObjectType<TestMetadata>();
+
+    TestSerialiser ser;
+    {
+        ser.SetMetadata(SerMetadataValues().SetVersion(Version(1, 2)).SetType("test"));
+        auto original = CreateTestType();
+        ASSERT_TRUE(ser.Export(original));
+    }
+    auto obj = ser.Import<IMetadata>();
+    SerMetadataValues m(ser.GetMetadata());
+    EXPECT_EQ(m.GetVersion(), Version(1, 2));
+    EXPECT_EQ(m.GetType(), "test");
+
+    reg.UnregisterObjectType<TestMetadata>();
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

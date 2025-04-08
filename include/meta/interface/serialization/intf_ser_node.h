@@ -14,6 +14,7 @@
 #include <meta/base/namespace.h>
 #include <meta/base/ref_uri.h>
 #include <meta/base/version.h>
+#include <meta/interface/serialization/ser_metadata.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -31,15 +32,12 @@ public:
 class IRootNode : public ISerNode {
     META_INTERFACE(ISerNode, IRootNode, "d42016dc-3941-463b-b332-b101ca2a9665")
 public:
-    /// Get version of serialisation format
-    virtual Version GetVersion() const = 0;
-    /// Get version of serializer used to generate it
-    virtual Version GetSerializerVersion() const = 0;
+    /// Get metadata
+    virtual SerMetadata GetMetadata() const = 0;
     /// Get root object
     virtual ISerNode::Ptr GetObject() const = 0;
 
-    virtual void SetVersion(Version) = 0;
-    virtual void SetSerializerVersion(Version) = 0;
+    virtual void SetMetadata(SerMetadata) = 0;
     virtual void SetObject(ISerNode::Ptr) = 0;
 };
 

@@ -64,7 +64,7 @@ public:
 
     void Visit(const IRootNode& n) override
     {
-        node.reset(new RootNode(VisitNode(n.GetObject()), NEW_VERSION, n.GetSerializerVersion()));
+        node.reset(new RootNode(VisitNode(n.GetObject()), {}));
     }
     void Visit(const IObjectNode& n) override
     {

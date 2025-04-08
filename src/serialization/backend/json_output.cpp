@@ -120,8 +120,9 @@ json_value MetadataObject(const IRootNode& root)
 {
     json_value::object object;
     object.emplace_back("meta-version", json_value::string(META_VERSION.ToString()));
-    object.emplace_back("version", json_value::string(root.GetVersion().ToString()));
-    object.emplace_back("exporter-version", json_value::string(root.GetSerializerVersion().ToString()));
+    for (auto&& v : root.GetMetadata()) {
+        object.emplace_back(BASE_NS::string(v.key), json_value::string(v.data));
+    }
     return object;
 }
 

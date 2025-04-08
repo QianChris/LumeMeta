@@ -38,6 +38,10 @@ void Exporter::SetUserContext(IObject::Ptr p)
 {
     userContext_ = BASE_NS::move(p);
 }
+void Exporter::SetMetadata(SerMetadata m)
+{
+    metadata_ = BASE_NS::move(m);
+}
 
 InstanceId Exporter::ConvertInstanceId(const InstanceId& id) const
 {
@@ -77,7 +81,7 @@ ISerNode::Ptr Exporter::Export(const IObject::ConstPtr& object)
                     CORE_LOG_E("Failed to resolve deferred weak ptr export");
                 }
             }
-            res.reset(new RootNode { BASE_NS::move(node), VERSION, EXPORTER_VERSION });
+            res.reset(new RootNode { BASE_NS::move(node), metadata_ });
         }
     }
     return res;
@@ -468,6 +472,10 @@ ReturnError ExportContext::SubstituteThis(ISerNode::Ptr n)
         res = GenericError::SUCCESS;
     }
     return res;
+}
+SerMetadata ExportContext::GetMetadata() const
+{
+    return exporter_.GetMetadata();
 }
 
 } // namespace Serialization

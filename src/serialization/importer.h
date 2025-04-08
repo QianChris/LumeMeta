@@ -53,6 +53,10 @@ public:
     {
         return userContext_;
     }
+    SerMetadata GetMetadata() const override
+    {
+        return metadata_;
+    }
 
 private:
     InstanceId ConvertInstanceId(const InstanceId& id) const;
@@ -79,7 +83,6 @@ private:
 private:
     IObjectRegistry& registry_;
     IGlobalSerializationData& globalData_;
-    Version importVersion_;
     BASE_NS::unordered_map<InstanceId, InstanceId> mapInstanceIds_;
     BASE_NS::vector<IImportFinalize::Ptr> finalizes_;
 
@@ -90,6 +93,7 @@ private:
     BASE_NS::vector<DeferredUriResolve> deferred_;
     CORE_NS::IResourceManager::Ptr resources_;
     IObject::Ptr userContext_;
+    SerMetadata metadata_;
 };
 
 class ImportContext : public IntroduceInterfaces<IImportContext> {
@@ -114,6 +118,7 @@ public:
     ReturnError SubstituteThis(IObject::Ptr) override;
 
     BASE_NS::string GetName() const override;
+    SerMetadata GetMetadata() const override;
 
     IObject::Ptr GetObject() const
     {

@@ -60,7 +60,7 @@ IObject::Ptr Importer::Import(const ISerNode::ConstPtr& tree)
 {
     IObject::Ptr object;
     if (auto root = interface_cast<IRootNode>(tree)) {
-        importVersion_ = root->GetSerializerVersion();
+        metadata_ = root->GetMetadata();
         object = ImportObject(root->GetObject());
         if (object) {
             // resolve deferred ref uris
@@ -553,6 +553,10 @@ ReturnError ImportContext::SubstituteThis(IObject::Ptr obj)
 BASE_NS::string ImportContext::GetName() const
 {
     return name_;
+}
+SerMetadata ImportContext::GetMetadata() const
+{
+    return importer_.GetMetadata();
 }
 } // namespace Serialization
 META_END_NAMESPACE()

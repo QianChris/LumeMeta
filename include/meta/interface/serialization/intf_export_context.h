@@ -75,6 +75,8 @@ public:
     virtual META_NS::IObject::Ptr UserContext() const = 0;
     /// Substitute serialisation of the current object with given node (all exports for this object are discarded)
     virtual ReturnError SubstituteThis(ISerNode::Ptr) = 0;
+    /// Get Metadata
+    virtual SerMetadata GetMetadata() const = 0;
 };
 
 META_INTERFACE_TYPE(META_NS::IExportContext)

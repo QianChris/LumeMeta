@@ -76,25 +76,25 @@ BASE_NS::vector<ISerTransformation::Ptr> JsonImporter::GetTransformations() cons
 {
     return transformations_;
 }
-
 void JsonImporter::SetTransformations(BASE_NS::vector<ISerTransformation::Ptr> t)
 {
     transformations_ = BASE_NS::move(t);
 }
-
 BASE_NS::unordered_map<InstanceId, InstanceId> JsonImporter::GetInstanceIdMapping() const
 {
     return imp_.GetInstanceIdMapping();
 }
-
 void JsonImporter::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
 {
     imp_.SetResourceManager(BASE_NS::move(p));
 }
-
 void JsonImporter::SetUserContext(IObject::Ptr p)
 {
     imp_.SetUserContext(BASE_NS::move(p));
+}
+SerMetadata JsonImporter::GetMetadata() const
+{
+    return imp_.GetMetadata();
 }
 
 } // namespace Serialization

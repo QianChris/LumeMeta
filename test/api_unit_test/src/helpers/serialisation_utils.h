@@ -22,6 +22,7 @@
 #include <core/log.h>
 #include <core/resources/intf_resource_manager.h>
 
+#include <meta/ext/object.h>
 #include <meta/interface/intf_object.h>
 #include <meta/interface/serialization/intf_global_serialization_data.h>
 
@@ -78,12 +79,16 @@ struct TestSerialiser {
 
     void SetResourceManager(CORE_NS::IResourceManager::Ptr);
 
+    void SetMetadata(SerMetadata);
+    SerMetadata GetMetadata() const;
+
 private:
     MemFile data_;
     std::size_t writePos_ {};
     std::size_t readPos_ {};
     BASE_NS::unordered_map<InstanceId, InstanceId> mapping_;
     CORE_NS::IResourceManager::Ptr resources_;
+    SerMetadata metadata_;
 };
 
 void WriteToFile(const BASE_NS::vector<uint8_t>&, BASE_NS::string_view file);

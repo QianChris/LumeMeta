@@ -262,6 +262,7 @@ target_sources(${META_PLUGIN}API PUBLIC
     include/meta/interface/serialization/intf_ser_transformation.h
     include/meta/interface/serialization/intf_serializable.h
     include/meta/interface/serialization/intf_value_serializer.h
+    include/meta/interface/serialization/ser_metadata.h
     include/meta/interface/simple_event.h
     include/meta/interface/static_object_metadata.h
     include/meta/interface/threading/primitive_api.h

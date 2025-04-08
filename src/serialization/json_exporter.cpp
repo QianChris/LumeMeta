@@ -38,6 +38,10 @@ void JsonExporter::SetUserContext(IObject::Ptr p)
 {
     exp_.SetUserContext(BASE_NS::move(p));
 }
+void JsonExporter::SetMetadata(SerMetadata m)
+{
+    exp_.SetMetadata(BASE_NS::move(m));
+}
 
 } // namespace Serialization
 META_END_NAMESPACE()

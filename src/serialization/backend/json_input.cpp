@@ -134,7 +134,7 @@ ISerNode::Ptr JsonInput::Import(const json::value& value)
 
 bool JsonInput::ReadMetadata(const json::value& value)
 {
-    if (auto v = value.find("version")) {
+    if (auto v = value.find("meta-version")) {
         if (v->is_string()) {
             auto ver = Version(CORE_NS::json::unescape(v->string_));
             if (ver == Version()) {
@@ -142,12 +142,21 @@ bool JsonInput::ReadMetadata(const json::value& value)
                     "Invalid file version: %s != %s", ver.ToString().c_str(), CURRENT_JSON_VERSION.ToString().c_str());
                 return false;
             }
-            version_ = ver;
+            metaVersion_ = ver;
         }
     }
-    if (auto v = value.find("exporter-version")) {
-        if (v->is_string()) {
-            exporterVersion_ = Version(CORE_NS::json::unescape(v->string_));
+    if (metaVersion_ != Version()) {
+        for (auto&& v : value.object_) {
+            if (v.value.is_string()) {
+                metadata_.push_back(
+                    SerMetadataEntity { BASE_NS::string(v.key), CORE_NS::json::unescape(v.value.string_) });
+            }
+        }
+    } else {
+        if (auto v = value.find("version")) {
+            if (v->is_string() && Version(CORE_NS::json::unescape(v->string_)) == Version(1, 0)) {
+                metaVersion_ = Version(1, 0);
+            }
         }
     }
     return true;
@@ -165,20 +174,20 @@ ISerNode::Ptr JsonInput::ImportRootObject(const json::value& value)
     json::value root;
 
     // is it legacy version?
-    if (version_ == Version {}) {
-        version_ = Version { 1, 0 };
+    if (metaVersion_ == Version {}) {
+        metaVersion_ = Version { 1, 0 };
         root = value;
     } else if (auto v = value.find("$root")) {
         if (v->is_object()) {
             root = *v;
         }
     }
-    if (version_ < Version(2, 0)) {
+    if (metaVersion_ < Version(2, 0)) {
         SetMetaV1Compatibility();
     }
 
     auto obj = Import(root);
-    return obj ? ISerNode::Ptr(new RootNode(obj, version_, exporterVersion_)) : nullptr;
+    return obj ? ISerNode::Ptr(new RootNode(obj, metadata_)) : nullptr;
 }
 
 ISerNode::Ptr JsonInput::Process(BASE_NS::string_view data)

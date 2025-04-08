@@ -44,15 +44,15 @@ public:
 
     Version GetVersion() const
     {
-        return version_;
+        return metaVersion_;
     }
 
 private:
     void SetMetaV1Compatibility();
 
 private:
-    Version version_;
-    Version exporterVersion_;
+    Version metaVersion_;
+    SerMetadata metadata_;
 };
 
 } // namespace Serialization

@@ -49,9 +49,7 @@ using BasicTypes = TypeList<
     BASE_NS::Math::Quat,
     BASE_NS::Math::Mat3X3,
     BASE_NS::Math::Mat4X4,
-    TimeSpan,
-    StartableState,
-    StartBehavior
+    TimeSpan
     >;
 using ObjectTypes = TypeList<
     SharedPtrIInterface,
@@ -113,6 +111,9 @@ void RegisterAnys(IObjectRegistry& registry)
     auto& pr = registry.GetPropertyRegister();
     RegisterTypes(pr, BasicTypes {});
     RegisterTypes(pr, ObjectTypes {});
+
+    RegisterTypeForBuiltinAny<StartableState>();
+    RegisterTypeForBuiltinAny<StartBehavior>();
 }
 
 void UnRegisterAnys(IObjectRegistry& registry)
@@ -120,6 +121,9 @@ void UnRegisterAnys(IObjectRegistry& registry)
     auto& pr = registry.GetPropertyRegister();
     UnregisterTypes(pr, ObjectTypes {});
     UnregisterTypes(pr, BasicTypes {});
+
+    UnregisterTypeForBuiltinAny<StartableState>();
+    UnregisterTypeForBuiltinAny<StartBehavior>();
 }
 
 } // namespace Internal

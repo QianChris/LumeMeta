@@ -84,6 +84,8 @@ public:
     virtual ReturnError SubstituteThis(IObject::Ptr) = 0;
     /// Get the entity name
     virtual BASE_NS::string GetName() const = 0;
+    /// Get Metadata
+    virtual SerMetadata GetMetadata() const = 0;
 };
 
 META_END_NAMESPACE()

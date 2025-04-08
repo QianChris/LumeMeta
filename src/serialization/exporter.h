@@ -38,6 +38,7 @@ public:
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>) override;
     void SetResourceManager(CORE_NS::IResourceManager::Ptr p) override;
     void SetUserContext(IObject::Ptr) override;
+    void SetMetadata(SerMetadata m) override;
 
     ReturnError ExportValue(const IAny& entity, ISerNode::Ptr&);
     ReturnError ExportAny(const IAny::ConstPtr& any, ISerNode::Ptr&);
@@ -55,6 +56,10 @@ public:
     META_NS::IObject::Ptr GetUserContext() const
     {
         return userContext_;
+    }
+    const SerMetadata& GetMetadata() const
+    {
+        return metadata_;
     }
 
 private:
@@ -89,6 +94,7 @@ private:
     BASE_NS::vector<DeferredWeakPtrResolve> deferred_;
     CORE_NS::IResourceManager::Ptr resources_;
     IObject::Ptr userContext_;
+    SerMetadata metadata_;
 };
 
 class ExportContext : public IntroduceInterfaces<IExportContext> {
@@ -107,6 +113,7 @@ public:
     CORE_NS::IInterface* Context() const override;
     META_NS::IObject::Ptr UserContext() const override;
     ReturnError SubstituteThis(ISerNode::Ptr) override;
+    SerMetadata GetMetadata() const override;
 
     ISerNode::Ptr GetSubstitution() const
     {

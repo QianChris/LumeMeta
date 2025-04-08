@@ -38,6 +38,10 @@ public:
      * Set User context object
      */
     virtual void SetUserContext(IObject::Ptr) = 0;
+    /**
+     * Set metadata
+     */
+    virtual void SetMetadata(SerMetadata) = 0;
 };
 
 /// File export interface to export object hierarchy directly to file

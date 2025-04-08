@@ -22,6 +22,7 @@ public:
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>) override;
     void SetResourceManager(CORE_NS::IResourceManager::Ptr) override;
     void SetUserContext(IObject::Ptr) override;
+    void SetMetadata(SerMetadata m) override;
 
 private:
     Exporter exp_;

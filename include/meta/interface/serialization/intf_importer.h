@@ -39,6 +39,10 @@ public:
      * Set User context object
      */
     virtual void SetUserContext(IObject::Ptr) = 0;
+    /**
+     * Get metadata after importing
+     */
+    virtual SerMetadata GetMetadata() const = 0;
 };
 
 /// Interface to import objects from file

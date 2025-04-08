@@ -162,30 +162,20 @@ class RootNode : public IntroduceInterfaces<BaseObject, IRootNode> {
     META_OBJECT(RootNode, ClassId::RootNode, IntroduceInterfaces)
 public:
     RootNode() = default;
-    RootNode(ISerNode::Ptr obj, const Version& ver, const Version& serVer)
-        : object(BASE_NS::move(obj)), version(ver), serializerVersion(serVer)
-    {}
+    RootNode(ISerNode::Ptr obj, SerMetadata m) : object(BASE_NS::move(obj)), metadata(BASE_NS::move(m)) {}
 
-    Version GetSerializerVersion() const override
+    SerMetadata GetMetadata() const override
     {
-        return serializerVersion;
-    }
-    Version GetVersion() const override
-    {
-        return version;
+        return metadata;
     }
     ISerNode::Ptr GetObject() const override
     {
         return object;
     }
 
-    void SetVersion(Version v) override
+    void SetMetadata(SerMetadata v) override
     {
-        version = BASE_NS::move(v);
-    }
-    void SetSerializerVersion(Version v) override
-    {
-        serializerVersion = BASE_NS::move(v);
+        metadata = BASE_NS::move(v);
     }
     void SetObject(ISerNode::Ptr obj) override
     {
@@ -199,8 +189,7 @@ public:
 
 public:
     ISerNode::Ptr object;
-    Version version {};
-    Version serializerVersion {};
+    SerMetadata metadata {};
 };
 
 template<typename Type, const META_NS::ClassInfo& ClassInfo>
