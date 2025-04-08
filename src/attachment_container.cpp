@@ -123,9 +123,7 @@ bool AttachmentContainer::Attach(
             return true;
         }
         if (auto i = interface_pointer_cast<IAttachable>(attachment)) {
-            // If no data context given, use this as the data context
-            const auto context = dataContext ? dataContext : interface_pointer_cast<IObject>(owner);
-            if (i->Attaching(owner, context)) {
+            if (i->Attaching(owner, dataContext)) {
                 result = Super::Insert(pos, attachment);
                 if (!result) {
                     i->Detaching(owner);
