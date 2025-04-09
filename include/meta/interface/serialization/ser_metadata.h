@@ -22,45 +22,42 @@ struct SerMetadataValues : SerMetadata {
     SerMetadataValues() = default;
     SerMetadataValues(SerMetadata m) : SerMetadata(BASE_NS::move(m)) {}
 
-    SerMetadataValues& SetVersion(const Version& ver)
+    SerMetadataValues& Set(BASE_NS::string_view key, BASE_NS::string_view data)
     {
         for (auto&& v : *this) {
-            if (v.key == "version") {
-                v.data = ver.ToString();
+            if (v.key == key) {
+                v.data = data;
                 return *this;
             }
         }
-        push_back({ "version", ver.ToString() });
+        push_back({ BASE_NS::string(key), BASE_NS::string(data) });
         return *this;
     }
-    Version GetVersion() const
+    BASE_NS::string_view Get(BASE_NS::string_view key) const
     {
         for (auto&& v : *this) {
-            if (v.key == "version") {
-                return Version(v.data);
-            }
-        }
-        return {};
-    }
-    SerMetadataValues& SetType(BASE_NS::string_view type)
-    {
-        for (auto&& v : *this) {
-            if (v.key == "type") {
-                v.data = type;
-                return *this;
-            }
-        }
-        push_back({ "type", BASE_NS::string(type) });
-        return *this;
-    }
-    BASE_NS::string GetType() const
-    {
-        for (auto&& v : *this) {
-            if (v.key == "type") {
+            if (v.key == key) {
                 return v.data;
             }
         }
         return {};
+    }
+    SerMetadataValues& SetVersion(const Version& ver)
+    {
+        return Set("version", ver.ToString());
+    }
+    Version GetVersion() const
+    {
+        auto res = Get("version");
+        return !res.empty() ? Version(res) : Version();
+    }
+    SerMetadataValues& SetType(BASE_NS::string_view type)
+    {
+        return Set("type", type);
+    }
+    BASE_NS::string GetType() const
+    {
+        return BASE_NS::string(Get("type"));
     }
 };
 

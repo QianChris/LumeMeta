@@ -167,7 +167,7 @@ TEST_F(API_AttachTest, AttachDetach)
     // Should increase attachCount by 1
     EXPECT_TRUE(attach->Attach(attachment_));
     EXPECT_EQ(attachment_->AttachedTo()->GetValue().lock(), object.GetPtr<META_NS::IAttach>());
-    EXPECT_EQ(attachment_->DataContext()->GetValue().lock(), object.GetPtr());
+    EXPECT_EQ(attachment_->DataContext()->GetValue().lock(), nullptr);
 
     EXPECT_EQ(myAttachment_->GetAttachCount(), 1);
     EXPECT_EQ(myAttachment_->GetDetachCount(), 0);

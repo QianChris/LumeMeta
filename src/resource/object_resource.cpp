@@ -66,15 +66,19 @@ bool ObjectResourceType::SaveResource(const CORE_NS::IResource::ConstPtr& p, con
 {
     bool res = true;
     if (s.payload) {
+        auto i = interface_cast<CORE_NS::IResource>(p);
+        if (!i || i->GetResourceType() != type_.ToUid()) {
+            CORE_LOG_W("Invalid resource");
+            return false;
+        }
         if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {
             exporter->SetUserContext(
                 interface_pointer_cast<IObject>(CORE_NS::IResource::Ptr(p, const_cast<CORE_NS::IResource*>(p.get()))));
             exporter->SetResourceManager(s.self);
-            auto i = interface_cast<CORE_NS::IResource>(p);
-            if (!i || i->GetResourceType() != type_.ToUid()) {
-                CORE_LOG_W("Invalid resource");
-                return false;
-            }
+            exporter->SetMetadata(META_NS::SerMetadataValues()
+                                      .SetVersion({ 1, 0 })
+                                      .SetType("ObjectResource")
+                                      .Set("sub-type", type_.ToString()));
             res = exporter->Export(*s.payload, interface_pointer_cast<IObject>(p));
         }
     }
@@ -113,6 +117,7 @@ bool ObjectResourceOptions::Save(CORE_NS::IFile& options, const CORE_NS::Resourc
     bool res = false;
     if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {
         exporter->SetResourceManager(rman);
+        exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("ObjectResourceOptions"));
         res = exporter->Export(options, GetSelf());
     }
     return res;
