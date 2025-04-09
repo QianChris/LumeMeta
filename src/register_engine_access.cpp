@@ -45,6 +45,7 @@ using SingleAndArrayTypes = TypeList<
     >;
 using VectorTypes = TypeList<
     BASE_NS::vector<float>,
+    BASE_NS::vector<BASE_NS::string>,
     BASE_NS::vector<BASE_NS::Math::Mat4X4>,
     BASE_NS::vector<CORE_NS::EntityReference>
     >;

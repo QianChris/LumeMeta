@@ -17,6 +17,12 @@
 
 #include <meta/base/type_traits.h>
 
+CORE_BEGIN_NAMESPACE()
+
+DECLARE_PROPERTY_TYPE(BASE_NS::vector<BASE_NS::string>);
+
+CORE_END_NAMESPACE()
+
 META_BEGIN_NAMESPACE()
 
 template<typename t>
