@@ -517,6 +517,15 @@ TEST(API_TaskQueueTest, ApiFuture)
         },
         queue);
     EXPECT_EQ(t3.GetResult(), 4);
+
+    auto t4 = t3.Then([](int v) { return v + 1; });
+    EXPECT_EQ(t4.GetResult(), 5);
+
+    auto t5 = t4.Then([i = 0](int v) mutable {
+        i = 1;
+        return v + 1;
+    });
+    EXPECT_EQ(t5.GetResult(), 6);
 }
 
 TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly)

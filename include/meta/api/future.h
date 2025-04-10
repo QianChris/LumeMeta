@@ -79,28 +79,41 @@ public:
     using StateType = IFuture::StateType;
 
     Future(IFuture::Ptr fut = nullptr) : fut_(BASE_NS::move(fut)) {}
-
+    /// @see IFuture::GetState
     StateType GetState() const
     {
         return fut_ ? fut_->GetState() : IFuture::ABANDONED;
     }
+    /// @see IFuture::Wait
     StateType Wait() const
     {
         return fut_ ? fut_->Wait() : IFuture::ABANDONED;
     }
+    /// @see IFuture::WaitFor
     StateType WaitFor(const TimeSpan& time) const
     {
         return fut_ ? fut_->WaitFor(time) : IFuture::ABANDONED;
     }
+    /// @see IFuture::Then
     IFuture::Ptr Then(const IFutureContinuation::Ptr& func, const BASE_NS::shared_ptr<ITaskQueue>& queue)
     {
         return fut_ ? fut_->Then(func, queue) : nullptr;
     }
+    /**
+     * @see IFuture::Then
+     * @note Runs the continuation function in the same task queue where the future is processed.
+     */
+    IFuture::Ptr Then(const IFutureContinuation::Ptr& func)
+    {
+        return Then(func, nullptr);
+    }
+    /// Helper function which enables specifying the continuation task as a lambda function
     template<typename Func, typename = EnableIfCanInvokeWithArguments<Func, IFutureContinuation::FunctionType>>
     auto Then(Func func, const BASE_NS::shared_ptr<ITaskQueue>& queue)
     {
         return Future<decltype(func(nullptr))>(fut_->Then(CreateContinuation(func), queue));
     }
+    /// Helper function which enables specifying the continuation task as a lambda function
     template<typename Func, typename = EnableIfCanInvokeWithArguments<Func, ContinuationTypedFuntionType<Type>>>
     auto Then(Func func, const BASE_NS::shared_ptr<ITaskQueue>& queue, int = 0)
     {
@@ -118,7 +131,13 @@ public:
         }),
             queue));
     }
-
+    /// Helper function which enables specifying the continuation task as a lambda function
+    template<typename Func>
+    auto Then(Func func)
+    {
+        return Then(BASE_NS::move(func), nullptr);
+    }
+    /// Returns the result of the future
     Type GetResult() const
     {
         if (fut_) {
@@ -126,16 +145,15 @@ public:
         }
         return Type {};
     }
+    /// Returns the underlying IFuture object
     IFuture::Ptr GetFuture() const
     {
         return fut_;
     }
-
     operator IFuture::Ptr() const
     {
         return fut_;
     }
-
     explicit operator bool() const
     {
         return fut_ != nullptr;

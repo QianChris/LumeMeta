@@ -132,6 +132,8 @@ int RunGoogleTest(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     ::testing::AddGlobalTestEnvironment(new ::META_NS::UTest::TestRunnerEnv(argc, argv));
+    // Uncomment the following for filtering tests at runtime
+    // ::testing::GTEST_FLAG(filter) = "API_TaskQueueTest.ApiFuture";
     int result = RUN_ALL_TESTS();
     return result;
 }
