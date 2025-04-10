@@ -553,16 +553,23 @@ if(META_UNIT_TESTS_ENABLED)
 
     # Sanitizers
     if(META_UNIT_TESTS_WITH_SANITIZERS AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND NOT ANDROID AND NOT OHOS)
-        target_compile_options(AGPEngine PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(AGPEngine PRIVATE -fsanitize=address -fsanitize=undefined)
+        target_compile_options(${META_PLUGIN} PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(${META_PLUGIN} PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(${META_PLUGIN}Base PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(${META_PLUGIN}Base PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(${META_PLUGIN}API PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(${META_PLUGIN}API PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(${META_PLUGIN}HighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(${META_PLUGIN}HighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(${META_PLUGIN}ExtAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(${META_PLUGIN}ExtAPI PRIVATE -fsanitize=address -fsanitize=undefined)
     endif()
 
     enable_testing()
 
     # API unit tests
     add_subdirectory(test/api_unit_test)
-    add_test(NAME ${META_PLUGIN}API COMMAND ${META_PLUGIN}APITestRunner)
-    #add_test(NAME ${META_PLUGIN} COMMAND ${META_PLUGIN}TestRunner --gtest_filter=*)
+    add_test(NAME LumeMetaAPI COMMAND LumeMetaAPITestRunner)
 
     # SRC unit tests
 endif()
@@ -577,7 +584,7 @@ if (META_VISUAL_STUDIO_TIDY AND NOT META_SUBMODULE_ENABLED)
     message("Creating VS ExecTidyMeta in ${META_PLUGIN} cmakelists.txt")
     add_custom_target(ExecTidyMeta DEPENDS thatMetaTidy.txt
         OUTPUT  thatMetaTidy.txt
-        COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_UNIT_TESTS_ENABLED=${META_UNIT_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
+        COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_UNIT_TESTS_ENABLED=${META_UNIT_TESTS_ENABLED} -DMETA_BENCHMARK_TESTS_ENABLED=${META_BENCHMARK_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/TidyMetaTask --target TidyMeta_For_CI
         DEPENDS  thisMetaTidy.txt
     )

@@ -592,7 +592,7 @@ TEST(API_AttachmentTest, DuplicateAttachmentFromSerialization)
         ASSERT_TRUE(ser.Export(obj));
     }
 
-    ser.Dump("file://./attachment.json");
+    ser.Dump("app://attachment.json");
 
     auto obj = ser.Import<IAttach>();
     ASSERT_TRUE(obj);

@@ -196,7 +196,7 @@ TYPED_TEST(API_BasicSerialisationTest, ExportImportValue)
         obj->SetVector(this->GetVector1());
 
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IBasicSerType<TypeParam>>();
     ASSERT_TRUE(obj);
@@ -210,7 +210,7 @@ TEST(API_SerializationTest, AutoSerialisationIMetadata)
     TestSerialiser ser;
     {
         ASSERT_TRUE(ser.Export(original));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);
@@ -227,7 +227,7 @@ TEST(API_SerializationTest, AutoSerialisationIContainer)
         original->Add(CreateTestType<IObject>("Test3"));
         original->Add(CreateTestType<IObject>("Test4"));
         ASSERT_TRUE(ser.Export(original));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IContainer>();
     ASSERT_TRUE(obj);
@@ -246,7 +246,7 @@ TEST(API_SerializationTest, AutoSerialisationIAttach)
         // use non-iattachment object
         original.Attach(other);
         ASSERT_TRUE(ser.Export(Object(original)));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IAttach>();
     ASSERT_TRUE(obj);
@@ -270,7 +270,7 @@ TEST(API_SerializationTest, AutoSerialisationIObjectFlags)
         auto flags = interface_cast<IObjectFlags>(obj)->GetObjectFlags();
         TestSerialiser ser;
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
         auto imp = ser.Import<IObjectFlags>();
         ASSERT_TRUE(imp);
         EXPECT_EQ(imp->GetObjectFlags(), flags);
@@ -370,8 +370,8 @@ TEST(API_SerializationTest, InstanceIdMapping)
         EXPECT_TRUE(revMap.count(v.second));
     }
 
-    // ser1.Dump("file://./ids1.json");
-    // ser2.Dump("file://./ids2.json");
+    // ser1.Dump("app://ids1.json");
+    // ser2.Dump("app://ids2.json");
 }
 
 META_REGISTER_CLASS(TestMetadata, "95d0b30e-5c77-4d4f-8741-04a7b2b11ad2", ObjectCategoryBits::NO_CATEGORY)

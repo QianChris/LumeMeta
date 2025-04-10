@@ -150,7 +150,7 @@ void AndroidApp::SetGtestEnv()
         BASE_NS::string gtestFilterVal = GetIntentExtra(m_env, m_state->activity->clazz, "gtest_filter");
         BASE_NS::string gtestOutputVal = GetIntentExtra(m_env, m_state->activity->clazz, "gtest_output");
 
-        m_testData.gtestArgs.emplace_back(new char[20] { "CoreTestRunner" });
+        m_testData.gtestArgs.emplace_back(new char[20] { "MetaTestRunner" });
         BASE_NS::string tmpStr = "--gtest_filter=*";
         if (!gtestFilterVal.empty()) {
             tmpStr = "--gtest_filter=" + gtestFilterVal;
@@ -176,7 +176,7 @@ void AndroidApp::SetGtestEnv()
             m_testData.gtestArgs.reserve((unsigned int)(argc + 1));
 
             // Add the app name as the first parameter.
-            m_testData.gtestArgs.emplace_back(strdup("CoreTestRunner"));
+            m_testData.gtestArgs.emplace_back(strdup("MetaTestRunner"));
 
             for (int i = 0; i < argc; i++) {
                 jobject element = m_env->GetObjectArrayElement(m_arguments, i);
@@ -280,24 +280,7 @@ void android_main(struct android_app* state)
     Test::g_androidApp->Terminate();
 }
 
-extern "C" JNIEXPORT jint JNICALL Java_com_huawei_core_1api_1test_1runner_test_NativeTestRunner_onSurfaceCreatedNative(
-    JNIEnv* env, jobject thiz, jobject context, jobject surface, jstring outputFile, jobjectArray arguments)
-{
-    // Set up AndroidApp
-    BASE_NS::unique_ptr<Test::TestApp> app =
-        BASE_NS::make_unique<Test::AndroidApp>(env, thiz, context, surface, outputFile, arguments);
-    // WARN: No dynamic_cast since it requires RTTI
-    Test::g_androidApp = static_cast<Test::AndroidApp*>(app.get());
-
-    Test::g_androidApp->Init();
-    Test::g_androidApp->Run();
-    int result = Test::g_androidApp->GetGTestResult();
-    Test::g_androidApp->Terminate();
-
-    return result;
-}
-
-extern "C" JNIEXPORT jint JNICALL Java_com_huawei_core_1src_1test_1runner_test_NativeTestRunner_onSurfaceCreatedNative(
+extern "C" JNIEXPORT jint JNICALL Java_com_huawei_meta_1api_1test_1runner_test_NativeTestRunner_onSurfaceCreatedNative(
     JNIEnv* env, jobject thiz, jobject context, jobject surface, jstring outputFile, jobjectArray arguments)
 {
     // Set up AndroidApp

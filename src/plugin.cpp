@@ -87,9 +87,9 @@ _declspec(dllexport)
 #else
 __attribute__((visibility("default")))
 #endif
-// NOLINTNEXTLINE(readability-identifier-naming) to keep LumeEngine convention
-CORE_NS::IPlugin gPluginData { { IPlugin::UID }, "MetaObject",
-    /** Version information of the plugin. */
-    CORE_NS::Version { META_NS::META_OBJECT_PLUGIN_UID, META_NS::VersionString }, META_NS::RegisterInterfaces,
-    META_NS::UnregisterInterfaces, {} /*plugin_deps*/ };
+    // NOLINTNEXTLINE(readability-identifier-naming) to keep LumeEngine convention
+    CORE_NS::IPlugin gPluginData { { IPlugin::UID }, "MetaObject",
+        /** Version information of the plugin. */
+        CORE_NS::Version { META_NS::META_OBJECT_PLUGIN_UID, META_NS::VersionString }, META_NS::RegisterInterfaces,
+        META_NS::UnregisterInterfaces, {} /*plugin_deps*/ };
 }

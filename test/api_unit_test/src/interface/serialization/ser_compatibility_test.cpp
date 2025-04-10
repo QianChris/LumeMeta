@@ -150,7 +150,7 @@ TEST(API_SerializationCompatTest, LocalStringProperties)
 //         object->First()->Set(2);
 //         object->Second()->Set("Hipshops");
 //         ASSERT_TRUE(ser.Export(object));
-//         ser.Dump("file://./test_type.json");
+//         ser.Dump("app://test_type.json");
 //     }
 
 //     {
@@ -166,7 +166,7 @@ TEST(API_SerializationCompatTest, LocalStringProperties)
 //         att->Attach(obj);
 
 //         ASSERT_TRUE(ser.Export(object));
-//         ser.Dump("file://./test_type_with_attachment.json");
+//         ser.Dump("app://test_type_with_attachment.json");
 //     }
 
 //     {
@@ -174,7 +174,7 @@ TEST(API_SerializationCompatTest, LocalStringProperties)
 //         Object object;
 //         object.AddProperty(ConstructProperty<IObject::Ptr>(GetObjectRegistry(), "Test", nullptr));
 //         ASSERT_TRUE(ser.Export(object));
-//         ser.Dump("file://./obj1.json");
+//         ser.Dump("app://obj1.json");
 //     }
 
 //     {
@@ -185,7 +185,7 @@ TEST(API_SerializationCompatTest, LocalStringProperties)
 //         p->Set(object2);
 //         object1.AddProperty(p);
 //         ASSERT_TRUE(ser.Export(object1));
-//         ser.Dump("file://./obj2.json");
+//         ser.Dump("app://obj2.json");
 //     }
 
 //     {
@@ -198,7 +198,7 @@ TEST(API_SerializationCompatTest, LocalStringProperties)
 //         object.AddProperty(p1);
 //         object.AddProperty(p2);
 //         ASSERT_TRUE(ser.Export(object));
-//         ser.Dump("file://./bind.json");
+//         ser.Dump("app://bind.json");
 //     }
 // }
 

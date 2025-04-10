@@ -427,7 +427,7 @@ TEST(API_MetadataTest, StaticDataWithForwardingSerialise)
         obj->Value()->SetValue(1);
         ASSERT_TRUE(ser.Export(obj));
     }
-    ser.Dump("file://./forwarded_static.json");
+    ser.Dump("app://forwarded_static.json");
 
     auto meta = ser.Import<IMetadata>();
     ASSERT_TRUE(meta);

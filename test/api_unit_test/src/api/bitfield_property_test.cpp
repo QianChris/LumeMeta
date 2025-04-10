@@ -132,7 +132,7 @@ TEST_F(API_BitfieldPropertyTest, Serialisation)
     TestSerialiser ser;
     object_->Flags()->SetValue(TestFlagBits::FLAG4);
     ASSERT_TRUE(ser.Export(object_));
-    ser.Dump("file://./bitfield.json");
+    ser.Dump("app://bitfield.json");
     auto obj = ser.Import<ITestFlagsInterface>();
     ASSERT_TRUE(obj);
     EXPECT_EQ(obj->Flags()->GetValue(), TestFlagBits::FLAG4);

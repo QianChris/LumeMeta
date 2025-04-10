@@ -24,6 +24,8 @@
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/loaders/intf_file_content_loader.h>
 
+#include "test_runner.h"
+
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
@@ -67,7 +69,7 @@ protected:
     void CheckTranslations(
         const BASE_NS::string& path, const BASE_NS::vector<BASE_NS::string>& keys, const CsvContentType& content)
     {
-        loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path));
+        loader_->SetFile(GetTestEnv()->engine->GetFileManager().OpenFile(path));
         Object object(loader_->Create({}));
         ASSERT_TRUE(object);
         ASSERT_NE(object.GetPtr(), nullptr);
@@ -169,15 +171,15 @@ TEST_F(API_CsvLoaderTest, CsvInvalid)
 
     loader_->ContentChanged()->AddHandler(META_NS::MakeCallback<META_NS::IOnChanged>([&changed] { changed++; }));
 
-    loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path1));
+    loader_->SetFile(GetTestEnv()->engine->GetFileManager().OpenFile(path1));
     EXPECT_EQ(loader_->Create({}), nullptr);
-    loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path2));
+    loader_->SetFile(GetTestEnv()->engine->GetFileManager().OpenFile(path2));
     EXPECT_EQ(loader_->Create({}), nullptr);
-    loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path3));
+    loader_->SetFile(GetTestEnv()->engine->GetFileManager().OpenFile(path3));
     EXPECT_EQ(loader_->Create({}), nullptr);
-    loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path4));
+    loader_->SetFile(GetTestEnv()->engine->GetFileManager().OpenFile(path4));
     EXPECT_EQ(loader_->Create({}), nullptr);
-    loader_->SetFile(CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path5));
+    loader_->SetFile(GetTestEnv()->engine->GetFileManager().OpenFile(path5));
     EXPECT_EQ(loader_->Create({}), nullptr);
 
     EXPECT_EQ(changed, 5);

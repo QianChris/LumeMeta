@@ -173,7 +173,7 @@ TEST(API_FunctionTest, SerialiseConnector)
         ASSERT_TRUE(ser.Export(object));
     }
 
-    ser.Dump("file://./connector.json");
+    ser.Dump("app://connector.json");
 
     auto object = ser.Import();
     ASSERT_TRUE(object);
@@ -210,7 +210,7 @@ TEST(API_FunctionTest, Serialization)
         ASSERT_TRUE(ser.Export(object));
     }
 
-    ser.Dump("file://./func_ser.json");
+    ser.Dump("app://func_ser.json");
 
     auto obj = ser.Import();
     ASSERT_TRUE(obj);

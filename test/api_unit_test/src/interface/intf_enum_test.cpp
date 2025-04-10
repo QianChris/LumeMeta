@@ -190,7 +190,7 @@ TEST(API_EnumTest, Serialise)
         Metadata(obj).AddProperty(ConstructProperty<MyEnum>("test"));
         ASSERT_TRUE(ser.Export(obj));
     }
-    ser.Dump("file://./enum.json");
+    ser.Dump("app://enum.json");
 
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);
@@ -217,7 +217,7 @@ TEST(API_EnumTest, SerialiseBitField)
         Metadata(obj).AddProperty(p);
         ASSERT_TRUE(ser.Export(obj));
     }
-    ser.Dump("file://./enum_bitfield.json");
+    ser.Dump("app://enum_bitfield.json");
 
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);

@@ -25,6 +25,8 @@
 #include <meta/interface/serialization/intf_exporter.h>
 #include <meta/interface/serialization/intf_importer.h>
 
+#include "test_runner.h"
+
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
@@ -124,7 +126,7 @@ IObject::Ptr TestSerialiser::Import()
 
 bool TestSerialiser::LoadFile(BASE_NS::string_view path)
 {
-    auto f = CORE_NS::GetPluginRegister().GetFileManager().OpenFile(path);
+    auto f = GetTestEnv()->engine->GetFileManager().OpenFile(path);
     if (!f) {
         return false;
     }
@@ -175,7 +177,7 @@ SerMetadata TestSerialiser::GetMetadata() const
 
 void WriteToFile(const BASE_NS::vector<uint8_t>& vec, BASE_NS::string_view file)
 {
-    auto f = CORE_NS::GetPluginRegister().GetFileManager().CreateFile(file);
+    auto f = GetTestEnv()->engine->GetFileManager().CreateFile(file);
     if (f) {
         f->Write(vec.data(), vec.size());
         f->Close();

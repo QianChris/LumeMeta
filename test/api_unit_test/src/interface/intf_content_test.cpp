@@ -130,7 +130,7 @@ TEST(API_ContentTest, Serialization)
         co.SetContent(CreateTestType<IObject>("Content"));
         ASSERT_TRUE(ser.Export(co));
 
-        ser.Dump("file://./content_test.json");
+        ser.Dump("app://content_test.json");
 
         auto imp = ser.Import<IContent>();
         ASSERT_TRUE(imp);

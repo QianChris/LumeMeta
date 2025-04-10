@@ -26,10 +26,9 @@ TestEnvironment* GetTestEnv()
     return g_testEnv.get();
 }
 
-void RegisterPaths(CORE_NS::IEngine& engine)
+void RegisterPaths(CORE_NS::IFileManager& fileManager, CORE_NS::IEngine& engine)
 {
     // Register filesystems/paths used in the tests.
-    CORE_NS::IFileManager& fileManager = engine.GetFileManager();
 #if defined(__ANDROID__)
     // Android specific paths.
     auto& androidPlatform = static_cast<const CORE_NS::IPlatformAndroid&>(engine.GetPlatform());
@@ -109,7 +108,8 @@ CORE_NS::IEngine::Ptr CreateEngine()
     auto factory = CORE_NS::GetInstance<CORE_NS::IEngineFactory>(CORE_NS::UID_ENGINE_FACTORY);
     auto engine = factory->Create(engineCreateInfo);
 
-    RegisterPaths(*engine);
+    // Register paths and protocols (using engine FileManager)
+    RegisterPaths(engine->GetFileManager(), *engine);
     RegisterTestFileProtocol(engine->GetFileManager());
 
     engine->Init();

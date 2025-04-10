@@ -1,0 +1,41 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    // This property can be defined to collect all android build files under one shared root dir to
+    // reduce clutter.
+    if (gradle.ext.properties.containsKey("sharedBuildDir")) {
+        buildDir = new File(gradle.sharedBuildDir, project.name)
+
+        afterEvaluate {
+            if (project.plugins.findPlugin("com.android.base") != null) {
+            // This is an Android project.
+            // Modify native build dir in the same way (it cannot be inside the android build dir).
+                // Android plugin in this project
+                def nativeBuildDir = new File(gradle.sharedBuildDir, "/.cxx/${project.name}")
+                android.externalNativeBuild.cmake.buildStagingDirectory nativeBuildDir
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

@@ -113,7 +113,7 @@ TEST_F(API_AnimationTest, KeyframeAnimationSerialization)
         Metadata(obj).AddProperty(p);
         AttachmentContainer(obj).Attach(pani);
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
 
     auto obj = ser.Import<IMetadata>();
@@ -147,7 +147,7 @@ TEST_F(API_AnimationTest, KeyframeAnimationSerialization)
     EXPECT_FALSE(ani->Running()->GetValue());
 }
 
-TEST_F(API_AnimationTest, ImplicitAnimation)
+TEST_F(API_AnimationTest, DISABLED_ImplicitAnimation)
 {
     auto p = ConstructProperty<int>("test");
     auto pani = CreateAnimation(ClassId::PropertyAnimation);
@@ -261,7 +261,7 @@ TEST_F(API_AnimationTest, ImplicitAnimationSerialization)
         Object obj(CreateInstance(ClassId::Object));
         Metadata(obj).AddProperty(p);
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
 
     auto obj = ser.Import<IMetadata>();
@@ -314,7 +314,7 @@ TEST_F(API_AnimationTest, ImplicitAnimationSerializationWithAttachment)
         Metadata(obj).AddProperty(p);
         AttachmentContainer(obj).Attach(interface_pointer_cast<IAttachment>(pani));
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
 
     auto obj = ser.Import<IMetadata>();

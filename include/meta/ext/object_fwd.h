@@ -28,7 +28,8 @@ inline T DefaultResult()
     return T {};
 }
 template<>
-inline void DefaultResult<void>() {}
+inline void DefaultResult<void>()
+{}
 #define META_IMPL_CALL_BASE(Interface, Function)                \
     [&] {                                                       \
         auto b = Super::template GetBaseAs<Interface>();        \

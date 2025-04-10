@@ -38,6 +38,7 @@
 #include <test_runner_windows.h>
 #undef OPTIONAL
 #undef CreateDirectory
+#undef CreateFile
 #elif defined(__linux__)
 #include <test_runner_linux.h>
 #endif
@@ -53,25 +54,15 @@ namespace UTest {
 struct TestEnvironment {
     CORE_NS::PlatformCreateInfo platformCreateInfo;
     BASE_NS::string appAssetPath;
-    CORE_NS::IFileManager::Ptr fileManager;
     CORE_NS::IEngine::Ptr engine;
 };
 
 TestEnvironment* GetTestEnv();
-void RegisterPaths(CORE_NS::IEngine& engine);
+void RegisterPaths(CORE_NS::IFileManager& fileManager, CORE_NS::IEngine& engine);
 void RegisterTestFileProtocol(CORE_NS::IFileManager& fileManager);
 CORE_NS::IEngine::Ptr CreateEngine();
 
 namespace {
-
-CORE_NS::IFileManager::Ptr CreateFileManager()
-{
-    auto factory = CORE_NS::GetInstance<CORE_NS::IFileSystemApi>(CORE_NS::UID_FILESYSTEM_API_FACTORY);
-    auto fileManager = factory->CreateFilemanager();
-    fileManager->RegisterFilesystem("file", factory->CreateStdFileSystem());
-    fileManager->RegisterFilesystem("memory", factory->CreateMemFileSystem());
-    return fileManager;
-}
 
 std::unique_ptr<TestEnvironment> g_testEnv {};
 
@@ -110,10 +101,8 @@ public:
         g_testEnv->platformCreateInfo = info;
         g_testEnv->appAssetPath = appAssetPath;
         g_testEnv->engine = CreateEngine();
-        g_testEnv->fileManager = CORE_NS::IFileManager::Ptr(&g_testEnv->engine->GetFileManager());
 
         RegisterTestTypes();
-        RegisterTestFileProtocol(CORE_NS::GetPluginRegister().GetFileManager());
     }
 
     void TearDown() override

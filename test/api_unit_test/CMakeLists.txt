@@ -19,7 +19,7 @@ find_package(AGPBaseAPI REQUIRED)
 find_package(AGPEngine REQUIRED)
 
 if(NOT TARGET gtest)
-    add_subdirectory(${LUMEBASE_PATH}/test/3rdparty/googletest test/3rdparty/googletest EXCLUDE_FROM_ALL)
+    add_subdirectory(${BASE_ROOT_DIRECTORY}/test/3rdparty/googletest test/3rdparty/googletest EXCLUDE_FROM_ALL)
 endif()
 
 # Platform interface

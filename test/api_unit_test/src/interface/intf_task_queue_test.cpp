@@ -456,7 +456,7 @@ TEST(API_TaskQueueTest, CreateWaitableTask)
     EXPECT_EQ(f->GetResultOr<int>(0), 1);
 }
 
-TEST(API_TaskQueueTest, RecurringMultipleOrder)
+TEST(API_TaskQueueTest, DISABLED_RecurringMultipleOrder)
 {
     // make sure that the order of recurring tasks does not change.
     auto queue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);

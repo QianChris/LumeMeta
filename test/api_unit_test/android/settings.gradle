@@ -1,0 +1,30 @@
+rootProject.name = 'MetaAPITestRunner'
+
+// Define/load some project wide properties.
+gradle.ext {
+    baseDir = file('../../../submodules/LumeBase')
+    engineDir = file('../../../submodules/LumeEngine')
+    metaDir = file('../../../')
+
+    // Use one shared build dir for all projects.
+    sharedBuildDir = new File(metaDir, 'build/android')
+    unpackedLibDir = new File(metaDir, 'build/unpacked')
+    nativeImportDir = new File(metaDir, 'build/android/.cxx/cmake-import')
+
+    // Load common engine properties from '<engineDir>/android/common.properties'.
+    def engineCommonPropertiesFile = new File(engineDir, 'android/common.properties')
+    if (!engineCommonPropertiesFile.exists()) {
+        throw new GradleException('Could not find common engine properties from:' + engineCommonPropertiesFile)
+    }
+    engine = new Properties()
+    engine.load(engineCommonPropertiesFile.newReader())
+}
+
+include ':meta_api_test_runner'
+project(':meta_api_test_runner').projectDir = file('meta_api_test_runner')
+
+include ':agp_core'
+project(':agp_core').projectDir = new File(gradle.engineDir, 'android/agp_core')
+gradle.ext.agpCoreImportDir = new File(gradle.nativeImportDir, 'agp_core')
+
+

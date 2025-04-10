@@ -243,7 +243,7 @@ TEST_F(API_StaggeredAnimationTest, ParallelSerialization)
         obj.AddProperty(t1_->Vec3Property3());
         AttachmentContainer(obj).Attach(staggered);
         ASSERT_TRUE(ser.Export(Object(obj)));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
 
     auto obj = ser.Import<IMetadata>();
@@ -656,7 +656,7 @@ TEST_F(API_StaggeredAnimationTest, SequentialSerialization)
         obj.AddProperty(t1_->Vec3Property3());
         AttachmentContainer(obj).Attach(staggered);
         ASSERT_TRUE(ser.Export(Object(obj)));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
 
     auto obj = ser.Import<IMetadata>();

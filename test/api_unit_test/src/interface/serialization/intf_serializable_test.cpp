@@ -129,7 +129,7 @@ TEST(API_SerializationTest, EnumValueSer)
         obj->SetValue(2);
 
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<ISerType>();
     ASSERT_TRUE(obj);
@@ -153,7 +153,7 @@ TEST(API_SerializationTest, JsonExportExplicitSer)
         obj->IntProp()->SetValue(3);
 
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<ISerType>();
     ASSERT_TRUE(obj);
@@ -180,7 +180,7 @@ TEST(API_SerializationTest, JsonExportAutoSer)
         obj->IntProp()->SetValue(3);
 
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<ISerType>();
     ASSERT_TRUE(obj);

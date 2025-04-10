@@ -492,7 +492,7 @@ TEST_F(API_TrackAnimationTest, KeyframeCurves)
     // Export&import our animation, run it again and check that also imported animation works as expected
     TestSerialiser serializer;
     ASSERT_TRUE(serializer.Export(animation));
-    serializer.Dump("file://./test.json");
+    serializer.Dump("app://test.json");
 
     META_NS::TrackAnimation<BASE_NS::Math::Vec3> imported(serializer.Import());
     ASSERT_TRUE(imported);

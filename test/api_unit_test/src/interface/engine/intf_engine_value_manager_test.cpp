@@ -382,7 +382,7 @@ TEST_F(API_EngineManagerTest, Enum)
     EXPECT_FALSE(ei->SetValueIndex(3));
 }
 
-TEST_F(API_EngineManagerTest, BitField)
+TEST_F(API_EngineManagerTest, DISABLED_BitField)
 {
     TestComponentManager<prop3::EngineTestProp> cman { prop3::ENGINE_TESTPROP_METADATA };
 

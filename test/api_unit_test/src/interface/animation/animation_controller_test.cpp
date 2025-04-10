@@ -186,7 +186,7 @@ TEST_F(API_AnimationControllerTest, Serialization)
         AttachmentContainer(object).Attach(controller);
 
         ASSERT_TRUE(ser.Export(object));
-        ser.Dump("file://animation_ser.ui");
+        ser.Dump("app://animation_ser.ui");
     }
 
     auto obj = ser.Import();

@@ -50,7 +50,7 @@ TEST(API_SerializationTest, ExportImportWeakPtrPropertyDefault)
         meta->AddProperty(prop2);
 
         ASSERT_TRUE(ser.Export(cont));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);
@@ -79,7 +79,7 @@ TEST(API_SerializationTest, ExportImportWeakPtrPropertyValue)
         meta->AddProperty(prop2);
 
         ASSERT_TRUE(ser.Export(cont));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);
@@ -107,7 +107,7 @@ TEST(API_SerializationTest, DISABLED_ExportImportWeakPtrPropertyWithGlobalAnchor
         Metadata(object).AddProperty(prop2);
 
         ASSERT_TRUE(ser.Export(object));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);
@@ -133,7 +133,7 @@ TEST(API_SerializationTest, PropertyBind)
         Metadata(obj).AddProperty(p);
         Metadata(obj).AddProperty(source);
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./test.json");
+        ser.Dump("app://test.json");
     }
     auto obj = ser.Import<IMetadata>();
     ASSERT_TRUE(obj);
@@ -168,7 +168,7 @@ TEST(API_SerializationTest, SerialiseBind)
         EXPECT_EQ(p2->GetValue(), 2);
 
         ASSERT_TRUE(ser.Export(obj));
-        ser.Dump("file://./bind_ser_test.json");
+        ser.Dump("app://bind_ser_test.json");
     }
 
     auto nobj = ser.Import<IMetadata>();
