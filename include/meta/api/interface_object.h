@@ -176,32 +176,30 @@ protected:
 // InterfaceObject default interface function call wrapper
 #define META_INTERFACE_OBJECT_CALL_PTR(Function) CallPtr<InterfaceType>([&](auto& p) { return p.Function; })
 
-#define META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(Name)  \
-private:                                               \
-    auto Get##Name##Property() const                   \
-    {                                                  \
-        return META_INTERFACE_OBJECT_CALL_PTR(Name()); \
-    }                                                  \
-                                                       \
-public:
+#define META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(PropertyName)  \
+public:                                                        \
+    auto PropertyName() const                                  \
+    {                                                          \
+        return META_INTERFACE_OBJECT_CALL_PTR(PropertyName()); \
+    }
 
 // InterfaceObject default readonly property wrapper
-#define META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name)    \
-    META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(Name)              \
-    auto Get##Name() const                                     \
-    {                                                          \
-        return Type(META_NS::GetValue(Get##Name##Property())); \
+#define META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, PropertyName) \
+    META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(PropertyName)           \
+    auto Get##PropertyName() const                                  \
+    {                                                               \
+        return Type(META_NS::GetValue(PropertyName()));             \
     }
 
 // InterfaceObject default property wrapper
-#define META_INTERFACE_OBJECT_PROPERTY(Type, Name)      \
-    META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, Name) \
-    auto& Set##Name(const Type& value)                  \
-    {                                                   \
-        if (auto pr = Get##Name##Property()) {          \
-            pr->SetValue(value);                        \
-        }                                               \
-        return *this;                                   \
+#define META_INTERFACE_OBJECT_PROPERTY(Type, PropertyName)      \
+    META_INTERFACE_OBJECT_READONLY_PROPERTY(Type, PropertyName) \
+    auto& Set##PropertyName(const Type& value)                  \
+    {                                                           \
+        if (auto pr = PropertyName()) {                         \
+            pr->SetValue(value);                                \
+        }                                                       \
+        return *this;                                           \
     }
 
 // InterfaceObject default readonly array property wrapper
@@ -209,19 +207,19 @@ public:
     META_INTERFACE_OBJECT_PROPERTY_ACCESSOR(PropertyName)                                                 \
     auto Get##PropertyName() const                                                                        \
     {                                                                                                     \
-        auto pr = Get##PropertyName##Property();                                                          \
+        auto pr = PropertyName();                                                                         \
         using ReturnType = decltype(pr->GetValue());                                                      \
         auto value = pr ? pr->GetValue() : ReturnType {};                                                 \
         return META_NS::Internal::ArrayCast<Type, typename ReturnType::value_type>(BASE_NS::move(value)); \
     }                                                                                                     \
     auto Get##AccessorName##Count() const                                                                 \
     {                                                                                                     \
-        auto pr = Get##PropertyName##Property();                                                          \
+        auto pr = PropertyName();                                                                         \
         return pr ? pr->GetSize() : 0;                                                                    \
     }                                                                                                     \
     auto Get##AccessorName##At(size_t index) const                                                        \
     {                                                                                                     \
-        auto pr = Get##PropertyName##Property();                                                          \
+        auto pr = PropertyName();                                                                         \
         return Type(pr ? pr->GetValueAt(index) : decltype(pr->GetValueAt(index)) {});                     \
     }
 
@@ -230,14 +228,14 @@ public:
     META_INTERFACE_OBJECT_READONLY_ARRAY_PROPERTY(Type, PropertyName, AccessorName) \
     auto& Set##PropertyName(BASE_NS::array_view<const Type> value)                  \
     {                                                                               \
-        if (auto pr = Get##PropertyName##Property()) {                              \
+        if (auto pr = PropertyName()) {                                             \
             pr->SetValue(value);                                                    \
         }                                                                           \
         return *this;                                                               \
     }                                                                               \
     auto& Set##AccessorName##At(size_t index, const Type& value)                    \
     {                                                                               \
-        if (auto pr = Get##PropertyName##Property()) {                              \
+        if (auto pr = PropertyName()) {                                             \
             pr->SetValueAt(index, value);                                           \
         }                                                                           \
         return *this;                                                               \
