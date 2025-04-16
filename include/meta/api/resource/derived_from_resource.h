@@ -38,14 +38,24 @@ public:
         std::shared_lock lock { mutex_ };
         return resource_;
     }
+
+    static void CloneToDefaultWithoutReadonly(const IMetadata& in, IMetadata& out)
+    {
+        for (auto&& p : in.GetProperties()) {
+            if (!in.GetMetadata(META_NS::MetadataType::PROPERTY, p->GetName()).readOnly) {
+                CloneToDefault(p, out);
+            }
+        }
+    }
+
     CORE_NS::IResource::Ptr CreateResource() const override
     {
-        auto res = META_NS::GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
-        if (auto ores = interface_cast<META_NS::IObjectResource>(res)) {
+        auto res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
+        if (auto ores = interface_cast<IObjectResource>(res)) {
             ores->SetResourceType(resourceType_);
-            if (auto i = interface_cast<META_NS::IMetadata>(res)) {
-                if (auto m = interface_cast<META_NS::IMetadata>(this)) {
-                    CloneToDefault(*m, *i);
+            if (auto i = interface_cast<IMetadata>(res)) {
+                if (auto m = interface_cast<IMetadata>(this)) {
+                    CloneToDefaultWithoutReadonly(*m, *i);
                 }
             }
         }
@@ -69,7 +79,7 @@ inline CORE_NS::IResource::Ptr CreateObjectResource(const META_NS::ObjectId& ins
     if (auto ores = interface_cast<META_NS::IObjectResource>(res)) {
         ores->SetResourceType(subid);
         if (auto i = interface_cast<META_NS::IMetadata>(res)) {
-            META_NS::CreatePropertiesFromStaticMeta(instance, *i);
+            META_NS::CreatePropertiesFromStaticMeta(instance, *i, false);
         }
     }
     return res;

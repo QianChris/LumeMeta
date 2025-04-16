@@ -107,6 +107,7 @@ inline IProperty::Ptr PropertyFromEngineValue(BASE_NS::string_view name, const I
         }
         if (auto i = interface_cast<IStackProperty>(ret)) {
             i->PushValue(value);
+            i->SetDefaultValue(value->GetValue());
         }
     }
     return ret;

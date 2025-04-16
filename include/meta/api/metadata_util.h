@@ -146,7 +146,7 @@ inline void CopyToDefaultAndReset(const IMetadata& in, IMetadata& out)
     }
 }
 
-inline bool CreatePropertiesFromStaticMeta(const ObjectId& id, IMetadata& out)
+inline bool CreatePropertiesFromStaticMeta(const ObjectId& id, IMetadata& out, bool includeReadOnly = true)
 {
     auto& r = META_NS::GetObjectRegistry();
     auto fac = r.GetObjectFactory(id);
@@ -155,10 +155,12 @@ inline bool CreatePropertiesFromStaticMeta(const ObjectId& id, IMetadata& out)
     }
     if (auto sm = fac->GetClassStaticMetadata()) {
         for (auto&& v : GetAllStaticMetadata(*sm, MetadataType::PROPERTY)) {
-            if (v.data && v.data->runtimeValue) {
-                if (auto def = v.data->runtimeValue()) {
-                    if (auto p = ConstructPropertyAny(v.data->name, *def)) {
-                        out.AddProperty(p);
+            if(!v.readOnly || includeReadOnly) {
+                if (v.data && v.data->runtimeValue) {
+                    if (auto def = v.data->runtimeValue()) {
+                        if (auto p = ConstructPropertyAny(v.data->name, *def)) {
+                            out.AddProperty(p);
+                        }
                     }
                 }
             }
