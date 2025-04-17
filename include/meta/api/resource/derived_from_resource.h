@@ -39,14 +39,14 @@ public:
         return resource_;
     }
 
-    static void CloneToDefaultWithoutReadonly(const IMetadata& in, IMetadata& out)
-    {
-        for (auto&& p : in.GetProperties()) {
-            if (!in.GetMetadata(META_NS::MetadataType::PROPERTY, p->GetName()).readOnly) {
-                CloneToDefault(p, out);
-            }
-        }
-    }
+    // static void CloneToDefaultWithoutReadonly(const IMetadata& in, IMetadata& out)
+    // {
+    //     for (auto&& p : in.GetProperties()) {
+    //         if (!in.GetMetadata(META_NS::MetadataType::PROPERTY, p->GetName()).readOnly) {
+    //             CloneToDefault(p, out);
+    //         }
+    //     }
+    // }
 
     CORE_NS::IResource::Ptr CreateResource() const override
     {
@@ -55,7 +55,8 @@ public:
             ores->SetResourceType(resourceType_);
             if (auto i = interface_cast<IMetadata>(res)) {
                 if (auto m = interface_cast<IMetadata>(this)) {
-                    CloneToDefaultWithoutReadonly(*m, *i);
+                    //CloneToDefaultWithoutReadonly(*m, *i);
+                    CloneToDefault(*m, *i);
                 }
             }
         }
@@ -79,7 +80,7 @@ inline CORE_NS::IResource::Ptr CreateObjectResource(const META_NS::ObjectId& ins
     if (auto ores = interface_cast<META_NS::IObjectResource>(res)) {
         ores->SetResourceType(subid);
         if (auto i = interface_cast<META_NS::IMetadata>(res)) {
-            META_NS::CreatePropertiesFromStaticMeta(instance, *i, false);
+            META_NS::CreatePropertiesFromStaticMeta(instance, *i, true);
         }
     }
     return res;
