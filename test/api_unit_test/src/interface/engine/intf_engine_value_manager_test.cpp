@@ -63,7 +63,11 @@ TEST_F(API_EngineManagerTest, Values)
     ASSERT_TRUE(p);
     EXPECT_EQ(p->GetValue(), 0);
 
-    auto info = interface_cast<IInfo>(&p->GetValueAny());
+    auto ev = interface_cast<IValue>(GetEngineValueFromProperty(p));
+    ASSERT_TRUE(ev);
+    auto& any = ev->GetValue();
+
+    auto info = interface_cast<IInfo>(&any);
     ASSERT_TRUE(info);
     EXPECT_EQ(info->GetName(), "value");
     EXPECT_EQ(info->GetDescription(), "Value it is");
@@ -345,8 +349,12 @@ TEST_F(API_EngineManagerTest, Enum)
     auto p = manager->ConstructProperty<EngineTestEnum>("enum1");
     ASSERT_TRUE(p);
 
-    auto v = p->GetValueAny().Clone();
-    ASSERT_TRUE(interface_cast<IEnum>(&p->GetValueAny()));
+    auto ev = interface_cast<IValue>(GetEngineValueFromProperty(p));
+    ASSERT_TRUE(ev);
+    auto& any = ev->GetValue();
+
+    auto v = any.Clone();
+    ASSERT_TRUE(interface_cast<IEnum>(&any));
     auto ei = interface_cast<IEnum>(v);
     ASSERT_TRUE(ei);
     ASSERT_TRUE(interface_cast<IInfo>(v));

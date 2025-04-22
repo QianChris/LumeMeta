@@ -101,7 +101,7 @@ bool EngineValue::SetPropertyParams(const EnginePropertyParams& p)
 }
 IAny::Ptr EngineValue::CreateAny() const
 {
-    return access_->CreateAny(params_.property);
+    return access_ ? access_->CreateSerializableAny() : nullptr;
 }
 bool EngineValue::ResetPendingNotify()
 {
