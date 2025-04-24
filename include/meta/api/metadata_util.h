@@ -155,7 +155,7 @@ inline bool CreatePropertiesFromStaticMeta(const ObjectId& id, IMetadata& out, b
     }
     if (auto sm = fac->GetClassStaticMetadata()) {
         for (auto&& v : GetAllStaticMetadata(*sm, MetadataType::PROPERTY)) {
-            if(!v.readOnly || includeReadOnly) {
+            if (!v.readOnly || includeReadOnly) {
                 if (v.data && v.data->runtimeValue) {
                     if (auto def = v.data->runtimeValue()) {
                         if (auto p = ConstructPropertyAny(v.data->name, *def)) {

@@ -2,6 +2,7 @@
 #ifndef META_API_RESOURCE_DERIVED_FROM_RESOURCE_H
 #define META_API_RESOURCE_DERIVED_FROM_RESOURCE_H
 
+#include <mutex>
 #include <shared_mutex>
 
 #include <meta/api/metadata_util.h>
@@ -55,7 +56,7 @@ public:
             ores->SetResourceType(resourceType_);
             if (auto i = interface_cast<IMetadata>(res)) {
                 if (auto m = interface_cast<IMetadata>(this)) {
-                    //CloneToDefaultWithoutReadonly(*m, *i);
+                    // CloneToDefaultWithoutReadonly(*m, *i);
                     CloneToDefault(*m, *i);
                 }
             }
