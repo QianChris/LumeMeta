@@ -67,7 +67,7 @@ inline void AddEngineValuesRecursively(
  * @param value The engine value to be added
  * @return True on success
  */
-inline bool SetEngineValueToProperty(const IProperty::Ptr& p, const IEngineValue::Ptr& value)
+inline bool SetEngineValueToProperty(const IProperty::Ptr& p, const IEngineValue::Ptr& value, bool setAsDefault = true)
 {
     if (p && value && value->IsCompatible(p->GetTypeId())) {
         if (auto i = interface_cast<IStackProperty>(p)) {
@@ -77,6 +77,9 @@ inline bool SetEngineValueToProperty(const IProperty::Ptr& p, const IEngineValue
                 i->RemoveValue(v);
             }
             i->PushValue(value);
+            if (setAsDefault) {
+                i->SetDefaultValue(value->GetValue());
+            }
             return true;
         }
     } else {
