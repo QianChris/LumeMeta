@@ -287,6 +287,7 @@ bool AnimationState::SetState(IAnimationInternal::AnimationTargetState state)
                 ResetClock();
                 break;
         }
+
         SetRunning(state == AnimationTargetState::RUNNING);
 
         state_.animationState_ = state;

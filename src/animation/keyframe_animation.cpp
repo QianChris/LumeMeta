@@ -69,6 +69,10 @@ void KeyframeAnimation::Evaluate()
         META_ACCESS_PROPERTY_VALUE(To), META_ACCESS_PROPERTY_VALUE(Progress), META_ACCESS_PROPERTY_VALUE(Curve) };
     if (GetState().EvaluateValue(data) == AnyReturn::SUCCESS) {
         NotifyChanged();
+        if (auto prop = GetTargetProperty()) {
+            PropertyLock lock { prop.property };
+            prop.stack->EvaluateAndStore();
+        }
     }
 }
 

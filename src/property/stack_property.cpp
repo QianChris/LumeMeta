@@ -39,27 +39,35 @@ void StackProperty::CleanUp()
     values_.clear();
 }
 
+AnyReturnValue StackProperty::TryToSetToValue(const IAny& v, IValue::Ptr& value)
+{
+    AnyReturnValue res = AnyReturn::FAIL;
+
+    auto noti = interface_cast<INotifyOnChange>(value);
+    InterfaceUniqueLock lock { value };
+    if (noti) {
+        noti->OnChanged()->EnableHandler(uintptr_t(this), false);
+    }
+    res = value->SetValue(v);
+    if (res) {
+        if (noti) {
+            noti->OnChanged()->EnableHandler(uintptr_t(this), true);
+        }
+    }
+    return res;
+}
+
 AnyReturnValue StackProperty::SetValueInValueStack(const IAny& value)
 {
     AnyReturnValue res = AnyReturn::FAIL;
     // find first value that accepts the new value, all non-accepting values are removed
     for (int i = int(values_.size()) - 1; i >= 0; --i) {
-        {
-            auto noti = interface_cast<INotifyOnChange>(values_[i]);
-            InterfaceUniqueLock lock { values_[i] };
-            if (noti) {
-                noti->OnChanged()->EnableHandler(uintptr_t(this), false);
-            }
-            res = values_[i]->SetValue(value);
-            if (res) {
-                if (noti) {
-                    noti->OnChanged()->EnableHandler(uintptr_t(this), true);
-                }
-                break;
-            }
-            if (noti) {
-                noti->OnChanged()->RemoveHandler(uintptr_t(this), true);
-            }
+        res = TryToSetToValue(value, values_[i]);
+        if (res) {
+            break;
+        }
+        if (auto noti = interface_cast<INotifyOnChange>(values_[i])) {
+            noti->OnChanged()->RemoveHandler(uintptr_t(this), true);
         }
         values_.pop_back();
     }
@@ -178,7 +186,15 @@ const IAny& StackProperty::RawGetValue() const
     evaluating_ = false;
     return res;
 }
-
+void StackProperty::EvaluateAndStore()
+{
+    // evaluate
+    const IAny& res = RawGetValue();
+    // store
+    if (auto v = TopValue()) {
+        TryToSetToValue(res, v);
+    }
+}
 const IAny& StackProperty::GetValue() const
 {
     bool isActive = false;

@@ -139,6 +139,10 @@ void TrackAnimation::Evaluate()
     UpdateCurrentTrack(trackState.first);
     if (status == AnyReturn::SUCCESS) {
         NotifyChanged();
+        if (auto prop = GetTargetProperty()) {
+            PropertyLock lock { prop.property };
+            prop.stack->EvaluateAndStore();
+        }
     }
 }
 

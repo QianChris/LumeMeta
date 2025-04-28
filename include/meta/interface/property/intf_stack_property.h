@@ -73,6 +73,8 @@ public:
     virtual AnyReturnValue SetDefaultValue(const IAny& value) = 0;
     /// Get default value of this property
     virtual const IAny& GetDefaultValue() const = 0;
+    /// Evaluate property value (as if calling GetValue) and store the result to top most value.
+    virtual void EvaluateAndStore() = 0;
 };
 
 META_REGISTER_CLASS(StackProperty, "14366762-0c46-4225-8bfc-1240aba457c6", ObjectCategoryBits::NO_CATEGORY)

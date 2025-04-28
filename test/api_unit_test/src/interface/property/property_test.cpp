@@ -22,6 +22,7 @@
 #include <meta/api/property/array_element_bind.h>
 #include <meta/api/util.h>
 #include <meta/ext/implementation_macros.h>
+#include <meta/ext/minimal_object.h>
 #include <meta/ext/object_fwd.h>
 #include <meta/interface/property/array_property.h>
 #include <meta/interface/property/construct_array_property.h>
@@ -687,6 +688,43 @@ TEST(API_PropertyTest, IsDefault)
     prop->ResetValue();
     EXPECT_TRUE(prop->IsDefaultValue());
     EXPECT_EQ(prop->GetValue(), 1);
+}
+
+META_REGISTER_CLASS(StaticValueTestMod, "3aff3770-0681-45b7-ab56-fe4487883a7a", ObjectCategory::NO_CATEGORY)
+
+class StaticValueTestMod : public IntroduceInterfaces<MinimalObject, IModifier> {
+    META_IMPLEMENT_OBJECT_TYPE_INTERFACE(ClassId::StaticValueTestMod)
+public:
+    EvaluationResult ProcessOnGet(IAny& value) override
+    {
+        value.SetValue<uint32_t>(4);
+        return EVAL_VALUE_CHANGED;
+    }
+    EvaluationResult ProcessOnSet(IAny& value, const IAny& current) override
+    {
+        return EVAL_CONTINUE;
+    }
+    bool IsCompatible(const TypeId& id) const override
+    {
+        return id == TypeId(UidFromType<uint32_t>());
+    }
+};
+
+TEST(API_PropertyTest, EvaluateAndStore)
+{
+    auto p = ConstructProperty<uint32_t>("test");
+    auto stack = interface_cast<IStackProperty>(p->GetProperty());
+    ASSERT_TRUE(stack);
+
+    p->SetValue(2);
+
+    ASSERT_TRUE(stack->AddModifier(IModifier::Ptr(new StaticValueTestMod)));
+    EXPECT_EQ(p->GetValue(), 4);
+    stack->EvaluateAndStore();
+
+    auto v = stack->TopValue();
+    ASSERT_TRUE(v);
+    EXPECT_EQ(GetValue<uint32_t>(v->GetValue()), 4);
 }
 
 } // namespace UTest

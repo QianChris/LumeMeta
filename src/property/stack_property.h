@@ -15,7 +15,7 @@ META_BEGIN_NAMESPACE()
 namespace Internal {
 
 class StackProperty : public IntroduceInterfaces<GenericProperty, IStackProperty, ISerializable> {
-    using Super = IntroduceInterfaces<GenericProperty, IStackProperty, ISerializable>;
+    using Super = IntroduceInterfaces;
 
 public:
     META_NO_COPY_MOVE(StackProperty)
@@ -50,7 +50,10 @@ public:
     ReturnError Export(IExportContext&) const override;
     ReturnError Import(IImportContext&) override;
 
+    void EvaluateAndStore() override;
+
 protected:
+    AnyReturnValue TryToSetToValue(const IAny& v, IValue::Ptr& value);
     AnyReturnValue SetValueInValueStack(const IAny& value);
     AnyReturnValue SetValueToStack(const IAny::Ptr& internal);
     const IAny& GetValueFromStack() const;
