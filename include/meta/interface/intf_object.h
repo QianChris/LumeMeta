@@ -92,6 +92,21 @@ public:
     }
 };
 
+/**
+ * @brief The IResetableObject interface can be implemented by objects whose state can be reset to a default state.
+ *        Usually this means that any properties are reset to a default value and the object's state is returned
+ *        to an initial state.
+ * @note  Depending on the implementation, the default state may be different between calls.
+ */
+class IResetableObject : public CORE_NS::IInterface {
+    META_INTERFACE(CORE_NS::IInterface, IResetableObject, "1f4954f7-6823-4a9f-b9c7-b5d62b231791")
+public:
+    /**
+     * @brief Resets the target object to a default state.
+     */
+    virtual void ResetObject() = 0;
+};
+
 inline IObject::Ptr IObject::Resolve(const RefUri& uri) const
 {
     if (auto oi = GetInterface<IObjectInstance>()) {

@@ -64,6 +64,15 @@ public:
     }
 };
 
+class ResetableObject : public META_NS::Object {
+public:
+    META_INTERFACE_OBJECT(ResetableObject, META_NS::Object, IResetableObject)
+    void ResetObject()
+    {
+        META_INTERFACE_OBJECT_CALL_PTR(ResetObject());
+    }
+};
+
 /**
  * @brief Wrapper class for objects which implement IMetadata.
  */
