@@ -1,6 +1,7 @@
 #include <base/math/matrix.h>
 #include <base/math/quaternion.h>
 #include <base/math/vector.h>
+#include <base/util/color.h>
 
 #include <meta/base/ids.h>
 #include <meta/base/meta_types.h>
@@ -49,6 +50,7 @@ using BasicTypes = TypeList<
     BASE_NS::Math::Quat,
     BASE_NS::Math::Mat3X3,
     BASE_NS::Math::Mat4X4,
+    BASE_NS::Color,
     TimeSpan
     >;
 using ObjectTypes = TypeList<

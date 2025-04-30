@@ -76,6 +76,16 @@ void RegisterValueSerializers(IObjectRegistry& registry)
     RegisterSerializer<BASE_NS::Math::Mat3X3>(data, matExport, matImport);
     RegisterSerializer<BASE_NS::Math::Mat4X4>(data, matExport, matImport);
 
+    auto colorExport = [](IExportFunctions& f, const auto& v) {
+        constexpr size_t size = sizeof(v.data) / sizeof(v.data[0]); /*NOLINT(bugprone-sizeof-expression)*/
+        return ExportVector(f, v.data, size);
+    };
+    auto colorImport = [](IImportFunctions& f, const ISerNode::ConstPtr& node, auto& out) {
+        return ImportVector(f, node, out.data);
+    };
+
+    RegisterSerializer<BASE_NS::Color>(data, colorExport, colorImport);
+
     auto idExport = [](IExportFunctions& f, const auto& v) {
         return f.ExportToNode(Any<BASE_NS::string>(v.ToString()));
     };

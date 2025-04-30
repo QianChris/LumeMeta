@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include <base/namespace.h>
+#include <base/util/color.h>
 #include <base/util/compile_time_hashes.h>
 #include <base/util/uid.h>
 #include <core/plugin/intf_interface.h>
@@ -225,6 +226,7 @@ META_TYPE(BASE_NS::Math::IVec4);
 META_TYPE(BASE_NS::Math::Quat);
 META_TYPE(BASE_NS::Math::Mat3X3);
 META_TYPE(BASE_NS::Math::Mat4X4);
+META_TYPE(BASE_NS::Color);
 META_TYPE(CORE_NS::Entity);
 META_TYPE(CORE_NS::EntityReference);
 
