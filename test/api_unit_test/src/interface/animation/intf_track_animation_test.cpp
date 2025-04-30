@@ -553,6 +553,7 @@ TEST_F(API_TrackAnimationTest, SeekingPaused)
 
     animation.Start();
     StepAnimations({ animation }, 10, [](uint32_t frame) {});
+    animation.Stop();
     animation.Pause();
 
     int count = 0;
@@ -577,6 +578,43 @@ TEST_F(API_TrackAnimationTest, SeekingPaused)
     animation.Seek(0.3f);
     EXPECT_EQ(property->GetValue(), 3);
     EXPECT_EQ(count, 3);
+}
+
+TEST_F(API_TrackAnimationTest, BeyondLastFrame)
+{
+    static BASE_NS::vector<float> timestamps = { 0.5f, 0.6f, 0.7f };
+    static BASE_NS::vector<uint32_t> keyframes = { 5, 7, 10 };
+
+    auto property = ConstructProperty<uint32_t>("Prop");
+
+    META_NS::TrackAnimation<uint32_t> animation(CreateInstance(META_NS::ClassId::TrackAnimation));
+    animation.SetKeyframes(keyframes)
+        .SetTimestamps(timestamps)
+        .SetProperty(property)
+        .SetDuration(TimeSpan::Milliseconds(30));
+
+    ASSERT_TRUE(animation.GetValid());
+
+    animation.Pause();
+    animation.Seek(0.1);
+    EXPECT_EQ(property->GetValue(), 5);
+    animation.Stop();
+
+    animation.Start();
+    animation.Step(this->GetTestClock());
+    EXPECT_TRUE(animation.GetRunning());
+    this->StepAnimations({ animation }, 3, [&](uint32_t frame) {});
+
+    EXPECT_EQ(animation.GetProgress(), 1.f);
+    EXPECT_EQ(property->GetValue(), 10);
+
+    animation.Pause();
+    animation.Seek(0.7);
+    EXPECT_EQ(property->GetValue(), 10);
+    animation.Seek(0.1);
+    EXPECT_EQ(property->GetValue(), 5);
+    animation.Seek(0.9);
+    EXPECT_EQ(property->GetValue(), 10);
 }
 
 } // namespace UTest

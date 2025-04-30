@@ -73,6 +73,20 @@ void TrackAnimation::OnAnimationStateChanged(const IAnimationInternal::Animation
                 // Add ourselves to the target property's stack
                 p.stack->AddModifier(GetSelf<IModifier>());
                 break;
+            case AnimationTargetState::PAUSED: {
+                // Evaluate current value
+                Evaluate();
+                // Make sure we are in the target property's stack
+                auto mymod = GetSelf<IModifier>();
+                for (auto&& v : p.stack->GetModifiers({ ITrackAnimation::UID }, false)) {
+                    if (v == mymod) {
+                        mymod.reset();
+                    }
+                }
+                if (mymod) {
+                    p.stack->AddModifier(mymod);
+                }
+            } break;
             default:
                 break;
         }
