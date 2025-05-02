@@ -393,14 +393,14 @@ bool FileResourceManager::ReloadResource(
             CORE_LOG_W("No such resource: %s", resource->GetResourceId().ToString().c_str());
             return false;
         }
-        if (!res->path.empty()) {
+        path = res->path;
+        if (!path.empty()) {
             f = fileManager_->OpenFile(path);
             if (!f) {
                 CORE_LOG_W("Failed to open resource file: %s", path.c_str());
                 return false;
             }
         }
-        path = res->path;
         opts = MemFile(res->optionData);
     }
     CORE_NS::IResourceType::StorageInfo info { &opts, f.get(), resource->GetResourceId(), path,
