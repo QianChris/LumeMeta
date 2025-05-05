@@ -33,7 +33,7 @@ public: // IModifier
     EvaluationResult ProcessOnSet(IAny& value, const IAny& current) override;
 
 private:
-    void OnAnimationStateChanged(const IAnimationInternal::AnimationStateChangedInfo& info);
+    void OnAnimationStateChanged(const IAnimationInternal::AnimationStateChangedInfo& info) override;
     void Evaluate() override;
     AnimationState::AnimationStateParams GetParams() override;
     void OnPropertyChanged(const TargetProperty& property, const IStackProperty::Ptr& previous) override;
