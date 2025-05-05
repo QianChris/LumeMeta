@@ -340,14 +340,13 @@ void ObjectHierarchyObserver::AddSubscription(
     const IObject::Ptr& object, HierarchyChangeObjectType type, const IObject::WeakPtr& parent)
 {
     auto listener = BASE_NS::make_unique<ObjectChangeListener>(object, type, parent, this, mode_);
-
     {
         std::unique_lock lock(mutex_);
-        if (subscriptions_.find(listener.get()) != subscriptions_.end()) {
+        auto* ptr = listener.get();
+        if (!subscriptions_.insert({ ptr, Subscription(object, BASE_NS::move(listener)) }).second) {
             CORE_LOG_E(
                 "Duplicate event subscription for %s:%s", object->GetClassName().data(), object->GetName().data());
         }
-        subscriptions_.insert({ listener.get(), Subscription(object, BASE_NS::move(listener)) });
     }
 }
 
