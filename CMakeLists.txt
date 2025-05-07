@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.19)
 
 project (LumeMeta LANGUAGES CXX)
 
-set(META_PLUGIN LumeMeta) # plugin name
 set(LUMEBASE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeBase CACHE PATH "Path to lume base sources")
 set(LUMEENGINE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeEngine CACHE PATH "Path to lume engine sources")
 set(CORE_UNPACKED_LIB_DIR ${CMAKE_BINARY_DIR}/unpacked CACHE PATH "Path where to extract 3rd party library sources.")
@@ -22,7 +21,7 @@ cmake_policy(SET CMP0117 NEW)
 # Options
 #
 option(META_VISUAL_STUDIO_TIDY  "Create hackish targets to run clang-tidy steps in visual studio" OFF)
-option(META_SUBMODULE_ENABLED "Use ${META_PLUGIN} as submodule" OFF)
+option(META_SUBMODULE_ENABLED "Use ${PROJECT_NAME} as submodule" OFF)
 if(DEFINED ENV{LUME_PACKAGE_CACHE})
     set(PACKAGE_CACHE_PATH $ENV{LUME_PACKAGE_CACHE} CACHE PATH "Path to lume package cache")
 else()
@@ -36,13 +35,13 @@ else()
     set(HAS_PACKAGE_CACHE false)
 endif()
 option(BUILD_DEPS "Try to build deps from submodules" ${HAS_NO_PACKAGE_CACHE})
-option(META_UNIT_TESTS_ENABLED "Build ${META_PLUGIN} unit tests" ON)
+option(META_UNIT_TESTS_ENABLED "Build ${PROJECT_NAME} unit tests" ON)
 if(META_UNIT_TESTS_ENABLED)
-    option(META_UNIT_TESTS_WITH_SANITIZERS "Build ${META_PLUGIN} unit tests with sanitizers" OFF)
+    option(META_UNIT_TESTS_WITH_SANITIZERS "Build ${PROJECT_NAME} unit tests with sanitizers" OFF)
 else()
     unset(META_UNIT_TESTS_WITH_SANITIZERS CACHE)
 endif()
-option(META_BENCHMARK_TESTS_ENABLED "Build ${META_PLUGIN} benchmark tests" OFF)
+option(META_BENCHMARK_TESTS_ENABLED "Build ${PROJECT_NAME} benchmark tests" OFF)
 
 #
 # Lib config.
@@ -93,8 +92,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif()
 
-include(LumeMetaTargetCodeInspection)
-
 if (BUILD_DEPS AND NOT META_SUBMODULE_ENABLED)
     # Find_package macro will workaround the findpackage issues (ie. if the target exists, then do nothing)
     # do this and that, since well.. typos.
@@ -119,432 +116,11 @@ if (BUILD_DEPS AND NOT META_SUBMODULE_ENABLED)
     unset(CMAKE_FOLDER)
 endif()
 
-find_package(AGPEngineAPI REQUIRED)
-find_package(AGPEngineDLL QUIET)
-
-add_library(${META_PLUGIN}Base INTERFACE)
-target_sources(${META_PLUGIN}Base PUBLIC
-    include/meta/base/algorithms.h
-    include/meta/base/bit_field.h
-    include/meta/base/capture.h
-    include/meta/base/expected.h
-    include/meta/base/ids.h
-    include/meta/base/interface_macros.h
-    include/meta/base/interface_traits.h
-    include/meta/base/interface_utils.h
-    include/meta/base/macros.h
-    include/meta/base/meta_types.h
-    include/meta/base/namespace.h
-    include/meta/base/object_traits.h
-    include/meta/base/plugin.h
-    include/meta/base/ref_uri.h
-    include/meta/base/time_span.h
-    include/meta/base/type_traits.h
-    include/meta/base/types.h
-    include/meta/base/version.h
-    )
-
-target_include_directories(${META_PLUGIN}Base INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(${META_PLUGIN}Base INTERFACE AGPBase::AGPBaseAPI AGPEngine::AGPEngineAPI)
-
-# meta object interface (for users of meta objects)
-add_library(${META_PLUGIN}API INTERFACE)
-add_library(${META_PLUGIN}::API ALIAS ${META_PLUGIN}API)
-target_sources(${META_PLUGIN}API PUBLIC
-    include/meta/interface/animation/builtin_animations.h
-    include/meta/interface/animation/intf_animation.h
-    include/meta/interface/animation/intf_animation_controller.h
-    include/meta/interface/animation/intf_animation_modifier.h
-    include/meta/interface/animation/intf_interpolator.h
-    include/meta/interface/animation/modifiers/intf_loop.h
-    include/meta/interface/animation/modifiers/intf_speed.h
-    include/meta/interface/builtin_objects.h
-    include/meta/interface/curves/intf_bezier.h
-    include/meta/interface/curves/intf_curve.h
-    include/meta/interface/curves/intf_curve_1d.h
-    include/meta/interface/curves/intf_curve_2d.h
-    include/meta/interface/curves/intf_easing_curve.h
-    include/meta/interface/detail/any.h
-    include/meta/interface/detail/any_pointer_compatibility.h
-    include/meta/interface/detail/array_property.h
-    include/meta/interface/detail/enum.h
-    include/meta/interface/detail/multi_type_any.h
-    include/meta/interface/detail/property.h
-    include/meta/interface/engine/intf_engine_data.h
-    include/meta/interface/engine/intf_engine_input_property_manager.h
-    include/meta/interface/engine/intf_engine_type.h
-    include/meta/interface/engine/intf_engine_value.h
-    include/meta/interface/engine/intf_engine_value_manager.h
-    include/meta/interface/enum_macros.h
-    include/meta/interface/event.h
-    include/meta/interface/interface_helpers.h
-    include/meta/interface/interface_macros.h
-    include/meta/interface/intf_any.h
-    include/meta/interface/intf_attach.h
-    include/meta/interface/intf_attachment.h
-    include/meta/interface/intf_attachment_container.h
-    include/meta/interface/intf_call_context.h
-    include/meta/interface/intf_callable.h
-    include/meta/interface/intf_class_registry.h
-    include/meta/interface/intf_clock.h
-    include/meta/interface/intf_cloneable.h
-    include/meta/interface/intf_comparable.h
-    include/meta/interface/intf_connector.h
-    include/meta/interface/intf_containable.h
-    include/meta/interface/intf_container.h
-    include/meta/interface/intf_container_observer.h
-    include/meta/interface/intf_container_query.h
-    include/meta/interface/intf_content.h
-    include/meta/interface/intf_derived.h
-    include/meta/interface/intf_enum.h
-    include/meta/interface/intf_event.h
-    include/meta/interface/intf_function.h
-    include/meta/interface/intf_future.h
-    include/meta/interface/intf_iterable.h
-    include/meta/interface/intf_lifecycle.h
-    include/meta/interface/intf_lockable.h
-    include/meta/interface/intf_manual_clock.h
-    include/meta/interface/intf_meta_object_lib.h
-    include/meta/interface/intf_metadata.h
-    include/meta/interface/intf_named.h
-    include/meta/interface/intf_notify_on_change.h
-    include/meta/interface/intf_object.h
-    include/meta/interface/intf_object_context.h
-    include/meta/interface/intf_object_factory.h
-    include/meta/interface/intf_object_flags.h
-    include/meta/interface/intf_object_hierarchy_observer.h
-    include/meta/interface/intf_object_registry.h
-    include/meta/interface/intf_promise.h
-    include/meta/interface/intf_proxy_object.h
-    include/meta/interface/intf_recyclable.h
-    include/meta/interface/intf_required_interfaces.h
-    include/meta/interface/intf_startable.h
-    include/meta/interface/intf_startable_controller.h
-    include/meta/interface/intf_static_metadata.h
-    include/meta/interface/intf_task_queue.h
-    include/meta/interface/intf_task_queue_extend.h
-    include/meta/interface/intf_task_queue_registry.h
-    include/meta/interface/intf_tickable.h
-    include/meta/interface/intf_tickable_controller.h
-    include/meta/interface/intf_value.h
-    include/meta/interface/loaders/intf_class_content_loader.h
-    include/meta/interface/loaders/intf_content_loader.h
-    include/meta/interface/loaders/intf_dynamic_content_loader.h
-    include/meta/interface/loaders/intf_file_content_loader.h
-    include/meta/interface/metadata_query.h
-    include/meta/interface/model/data_model_index.h
-    include/meta/interface/model/intf_data_model.h
-    include/meta/interface/model/intf_object_provider.h
-    include/meta/interface/object_macros.h
-    include/meta/interface/object_type_info.h
-    include/meta/interface/property/array_property.h
-    include/meta/interface/property/construct_array_property.h
-    include/meta/interface/property/construct_property.h
-    include/meta/interface/property/intf_bind.h
-    include/meta/interface/property/intf_modifier.h
-    include/meta/interface/property/intf_property.h
-    include/meta/interface/property/intf_property_internal.h
-    include/meta/interface/property/intf_property_register.h
-    include/meta/interface/property/intf_stack_property.h
-    include/meta/interface/property/intf_stack_resetable.h
-    include/meta/interface/property/property.h
-    include/meta/interface/property/property_events.h
-    include/meta/interface/resource/intf_dynamic_resource.h
-    include/meta/interface/resource/intf_resource.h
-    include/meta/interface/serialization/intf_export_context.h
-    include/meta/interface/serialization/intf_exporter.h
-    include/meta/interface/serialization/intf_global_serialization_data.h
-    include/meta/interface/serialization/intf_import_context.h
-    include/meta/interface/serialization/intf_importer.h
-    include/meta/interface/serialization/intf_ser_input.h
-    include/meta/interface/serialization/intf_ser_node.h
-    include/meta/interface/serialization/intf_ser_output.h
-    include/meta/interface/serialization/intf_ser_transformation.h
-    include/meta/interface/serialization/intf_serializable.h
-    include/meta/interface/serialization/intf_value_serializer.h
-    include/meta/interface/serialization/ser_metadata.h
-    include/meta/interface/simple_event.h
-    include/meta/interface/static_object_metadata.h
-    include/meta/interface/threading/primitive_api.h
-    )
-
-target_include_directories(${META_PLUGIN}API INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(${META_PLUGIN}API INTERFACE ${META_PLUGIN}Base)
-
-# Meta object helper implementations. (for implementers of meta objects)
-add_library(${META_PLUGIN}HighLevelAPI INTERFACE)
-add_library(${META_PLUGIN}::HighLevelAPI ALIAS ${META_PLUGIN}HighLevelAPI)
-target_sources(${META_PLUGIN}HighLevelAPI PUBLIC
-    include/meta/api/animation.h
-    include/meta/api/array_util.h
-    include/meta/api/call_context.h
-    include/meta/api/compatible_value_util.h
-    include/meta/api/connector.h
-    include/meta/api/container/find_cache.h
-    include/meta/api/container/find_containers.h
-    include/meta/api/container/observer.h
-    include/meta/api/curves.h
-    include/meta/api/deferred_callback.h
-    include/meta/api/engine/util.h
-    include/meta/api/event_handler.h
-    include/meta/api/function.h
-    include/meta/api/future.h
-    include/meta/api/internal/breadth_first_iteration.h
-    include/meta/api/internal/depth_first_iteration.h
-    include/meta/api/internal/iteration.h
-    include/meta/api/internal/iteration_types.h
-    include/meta/api/interface_object.h
-    include/meta/api/iteration.h
-    include/meta/api/locking.h
-    include/meta/api/make_callback.h
-    include/meta/api/number.h
-    include/meta/api/object.h
-    include/meta/api/property/array_element_bind.h
-    include/meta/api/property/array_property_changes_recognizer.h
-    include/meta/api/property/array_property_event_handler.h
-    include/meta/api/property/binding.h
-    include/meta/api/property/custom_value.h
-    include/meta/api/property/default_value_bind.h
-    include/meta/api/property/property_event_handler.h
-    include/meta/api/property/property_info.h
-    include/meta/api/task.h
-    include/meta/api/task_queue.h
-    include/meta/api/threading/mutex.h
-    include/meta/api/threading/primitive_api.h
-    include/meta/api/timer.h
-    include/meta/api/util.h
-    )
-
-target_include_directories(${META_PLUGIN}HighLevelAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(${META_PLUGIN}HighLevelAPI INTERFACE ${META_PLUGIN}API)
-
-# Meta object helper implementations. (for implementers of meta objects)
-add_library(${META_PLUGIN}ExtAPI INTERFACE)
-add_library(${META_PLUGIN}::ExtAPI ALIAS ${META_PLUGIN}ExtAPI)
-target_sources(${META_PLUGIN}ExtAPI PUBLIC
-    include/meta/ext/animation/interpolator.h
-    include/meta/ext/any_builder.h
-    include/meta/ext/attachment/attachment.h
-    include/meta/ext/attachment/behavior.h
-    include/meta/ext/base_object.h
-    include/meta/ext/base_object_fwd.h
-    include/meta/ext/engine/core_any.h
-    include/meta/ext/engine/core_enum_any.h
-    include/meta/ext/engine/internal_access.h
-    include/meta/ext/event_impl.h
-    include/meta/ext/event_util.h
-    include/meta/ext/implementation_macros.h
-    include/meta/ext/metadata_helpers.h
-    include/meta/ext/minimal_object.h
-    include/meta/ext/object.h
-    include/meta/ext/object_container.h
-    include/meta/ext/object_factory.h
-    include/meta/ext/object_fwd.h
-    include/meta/ext/resolve_helper.h
-    include/meta/ext/serialization/common_value_serializers.h
-    include/meta/ext/serialization/serializer.h
-    include/meta/ext/serialization/value_serializer.h
-    include/meta/ext/task_queue.h
-    )
-
-target_include_directories(${META_PLUGIN}ExtAPI INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include/>)
-target_link_libraries(${META_PLUGIN}ExtAPI INTERFACE ${META_PLUGIN}API ${META_PLUGIN}HighLevelAPI)
-
-# Meta object plugin
-add_library(${META_PLUGIN} SHARED)
-add_library(${META_PLUGIN}::Plugin ALIAS ${META_PLUGIN})
-set_property(TARGET ${META_PLUGIN} PROPERTY CXX_STANDARD 17)
-set_property(TARGET ${META_PLUGIN} PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET ${META_PLUGIN} PROPERTY CXX_EXTENSIONS off)
-target_sources(${META_PLUGIN} PRIVATE
-    src/animation/animation.h
-    src/animation/animation_controller.cpp
-    src/animation/animation_controller.h
-    src/animation/animation_modifier.h
-    src/animation/animation_state.cpp
-    src/animation/animation_state.h
-    src/animation/interpolator.cpp
-    src/animation/interpolator.h
-    src/animation/intf_animation_internal.h
-    src/animation/keyframe_animation.cpp
-    src/animation/keyframe_animation.h
-    src/animation/modifiers/loop.cpp
-    src/animation/modifiers/loop.h
-    src/animation/modifiers/reverse.cpp
-    src/animation/modifiers/reverse.h
-    src/animation/modifiers/speed.cpp
-    src/animation/modifiers/speed.h
-    src/animation/parallel_animation.cpp
-    src/animation/parallel_animation.h
-    src/animation/property_animation.cpp
-    src/animation/property_animation.h
-    src/animation/sequential_animation.cpp
-    src/animation/sequential_animation.h
-    src/animation/staggered_animation_state.cpp
-    src/animation/staggered_animation_state.h
-    src/animation/track_animation.cpp
-    src/animation/track_animation.h
-    src/animation/track_animation_state.cpp
-    src/animation/track_animation_state.h
-    src/attachment_container.cpp
-    src/attachment_container.h
-    src/base_object.h
-    src/call_context.cpp
-    src/call_context.h
-    src/class_registry.cpp
-    src/class_registry.h
-    src/connector.cpp
-    src/connector.h
-    src/container/container.cpp
-    src/container/container.h
-    src/container/container_base.cpp
-    src/container/container_base.h
-    src/container/flat_container.cpp
-    src/container/flat_container.h
-    src/container/object_container.cpp
-    src/container/object_container.h
-    src/container/object_flat_container.cpp
-    src/container/object_flat_container.h
-    src/container_observer.cpp
-    src/container_observer.h
-    src/content_object.cpp
-    src/curves/bezier_curve.cpp
-    src/curves/bezier_curve.h
-    src/curves/easing_curve.cpp
-    src/curves/easing_curve.h
-    src/engine/engine_input_property_manager.cpp
-    src/engine/engine_input_property_manager.h
-    src/engine/engine_value.cpp
-    src/engine/engine_value.h
-    src/engine/engine_value_manager.cpp
-    src/engine/engine_value_manager.h
-    src/functions.cpp
-    src/functions.h
-    src/future.cpp
-    src/future.h
-    src/loaders/class_content_loader.cpp
-    src/loaders/class_content_loader.h
-    src/loaders/csv_parser.cpp
-    src/loaders/csv_parser.h
-    src/loaders/csv_string_resource_loader.cpp
-    src/loaders/csv_string_resource_loader.h
-    src/loaders/json_content_loader.cpp
-    src/loaders/json_content_loader.h
-    src/manual_clock.cpp
-    src/meta_object_lib.cpp
-    src/meta_object_lib.h
-    src/model/composite_object_provider.cpp
-    src/model/composite_object_provider.h
-    src/model/container_data_model.cpp
-    src/model/container_data_model.h
-    src/model/content_loader_object_provider.cpp
-    src/model/content_loader_object_provider.h
-    src/model/instantiating_object_provider.cpp
-    src/model/instantiating_object_provider.h
-    src/model/object_provider_base.cpp
-    src/model/object_provider_base.h
-    src/number.cpp
-    src/number.h
-    src/object.h
-    src/object_context.cpp
-    src/object_context.h
-    src/object_data_container.cpp
-    src/object_data_container.h
-    src/object_hierarchy_observer.cpp
-    src/object_hierarchy_observer.h
-    src/object_name.h
-    src/object_registry.cpp
-    src/object_registry.h
-    src/plugin.cpp
-    src/polling_task_queue.cpp
-    src/property/bind.cpp
-    src/property/bind.h
-    src/property/dependencies.cpp
-    src/property/dependencies.h
-    src/property/property.cpp
-    src/property/property.h
-    src/property/stack_property.cpp
-    src/property/stack_property.h
-    src/proxy_object.cpp
-    src/proxy_object.h
-    src/random.cpp
-    src/random.h
-    src/ref_uri_util.cpp
-    src/ref_uri_util.h
-    src/register_anys.cpp
-    src/register_default_anims.cpp
-    src/register_default_objs.cpp
-    src/register_engine_access.cpp
-    src/register_entities.cpp
-    src/register_value_serializers.cpp
-    src/serialization/backend/debug_output.cpp
-    src/serialization/backend/debug_output.h
-    src/serialization/backend/json_input.cpp
-    src/serialization/backend/json_input.h
-    src/serialization/backend/json_output.cpp
-    src/serialization/backend/json_output.h
-    src/serialization/exporter.cpp
-    src/serialization/exporter.h
-    src/serialization/importer.cpp
-    src/serialization/importer.h
-    src/serialization/json_exporter.cpp
-    src/serialization/json_exporter.h
-    src/serialization/json_importer.cpp
-    src/serialization/json_importer.h
-    src/serialization/metav1_compat.cpp
-    src/serialization/metav1_compat.h
-    src/startable_object_controller.cpp
-    src/startable_object_controller.h
-    src/system_clock.cpp
-    src/task_queue.h
-    src/threaded_task_queue.cpp
-    src/resource/file_resource_manager.h
-    src/resource/file_resource_manager.cpp
-    src/resource/object_resource.h
-    src/resource/object_resource.cpp
-    )
-
-set_source_files_properties(src/register_default_props.cpp PROPERTIES COMPILE_FLAGS $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/bigobj>)
-
-target_compile_definitions(${META_PLUGIN} PRIVATE CORE_PLUGIN=1 INTERFACE CORE_DYNAMIC=1)
-
-set_target_properties(${META_PLUGIN} PROPERTIES
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN 1
-    OUTPUT_NAME Plugin${META_PLUGIN}
-    )
-
-# Utilize common linker flags from Base
-include(${BASE_ROOT_DIRECTORY}/cmake/cmake_tools.cmake)
-append_link_flags(${META_PLUGIN} "${BASE_SO_LINK_FLAGS}")
-
-if(MSVC)
-    target_compile_options(${META_PLUGIN} PRIVATE /GR-)
-    if(CMAKE_CXX_FLAGS MATCHES "/EHs ")
-      string(REPLACE "/EHs" "/EHs-c- /D_HAS_EXCEPTIONS=0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    endif()
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_compile_options(${META_PLUGIN} PRIVATE -Oz -fno-exceptions -fno-rtti)
-endif()
-
-target_link_libraries(${META_PLUGIN} PRIVATE ${META_PLUGIN}API ${META_PLUGIN}ExtAPI ${META_PLUGIN}HighLevelAPI)
-
-get_target_property(IMPL_SOURCES ${META_PLUGIN} SOURCES)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX src FILES ${IMPL_SOURCES})
-
-get_target_property(BASE_SOURCES ${META_PLUGIN}Base INTERFACE_SOURCES)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/base PREFIX base FILES ${BASE_SOURCES})
-
-get_target_property(API_SOURCES ${META_PLUGIN}API INTERFACE_SOURCES)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/interface PREFIX interface FILES ${API_SOURCES})
-
-get_target_property(HIGHLEVEL_API_SOURCES ${META_PLUGIN}HighLevelAPI INTERFACE_SOURCES)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/api PREFIX api FILES ${HIGHLEVEL_API_SOURCES})
-
-get_target_property(EXT_API_SOURCES ${META_PLUGIN}ExtAPI INTERFACE_SOURCES)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/meta/ext PREFIX ext FILES ${EXT_API_SOURCES})
-
-meta_object_target_code_inspection(${META_PLUGIN})
+#
+# API and Plugin projects
+#
+add_subdirectory(include)
+add_subdirectory(src)
 
 #
 # Testing projects
@@ -553,16 +129,16 @@ if(META_UNIT_TESTS_ENABLED)
 
     # Sanitizers
     if(META_UNIT_TESTS_WITH_SANITIZERS AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND NOT ANDROID AND NOT OHOS)
-        target_compile_options(${META_PLUGIN} PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(${META_PLUGIN} PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(${META_PLUGIN}Base PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(${META_PLUGIN}Base PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(${META_PLUGIN}API PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(${META_PLUGIN}API PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(${META_PLUGIN}HighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(${META_PLUGIN}HighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(${META_PLUGIN}ExtAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(${META_PLUGIN}ExtAPI PRIVATE -fsanitize=address -fsanitize=undefined)
+        target_compile_options(LumeMeta PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(LumeMeta PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(LumeMetaBase PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(LumeMetaBase PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(LumeMetaAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(LumeMetaAPI PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(LumeMetaHighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(LumeMetaHighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined)
+		target_compile_options(LumeMetaExtAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+        target_link_options(LumeMetaExtAPI PRIVATE -fsanitize=address -fsanitize=undefined)
     endif()
 
     enable_testing()
@@ -579,9 +155,12 @@ if(META_BENCHMARK_TESTS_ENABLED AND NOT ANDROID AND NOT OHOS)
     add_subdirectory(test/benchmark)
 endif()
 
+#
+# Clang-tidy
+#
 if (META_VISUAL_STUDIO_TIDY AND NOT META_SUBMODULE_ENABLED)
     # Somewhat hackish way to run the clang-tidy step from visual studio...
-    message("Creating VS ExecTidyMeta in ${META_PLUGIN} cmakelists.txt")
+    message("Creating VS ExecTidyMeta in ${PROJECT_NAME} cmakelists.txt")
     add_custom_target(ExecTidyMeta DEPENDS thatMetaTidy.txt
         OUTPUT  thatMetaTidy.txt
         COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_UNIT_TESTS_ENABLED=${META_UNIT_TESTS_ENABLED} -DMETA_BENCHMARK_TESTS_ENABLED=${META_BENCHMARK_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
