@@ -312,7 +312,7 @@ bool ContainsObject(const META_NS::IContainer::ConstPtr& container, const T& chi
     bool found = false;
     if (const auto object = interface_pointer_cast<IObject>(child); container && object) {
         IterateShared(container, [&](const IObject::Ptr& o) {
-            if (o == object) {
+            if (IObject::ConstPtr(o) == object) {
                 found = true;
             }
             return !found;

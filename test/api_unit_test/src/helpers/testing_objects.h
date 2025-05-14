@@ -223,6 +223,8 @@ public:
 
     META_ARRAY_PROPERTY(int, MyIntArray)
     META_READONLY_ARRAY_PROPERTY(int, MyConstIntArray)
+
+    META_ARRAY_PROPERTY(IObject::Ptr, MyObjectArray)
     //    META_PROPERTY(int, NonSerialized)
 
     META_PROPERTY(string, Name)

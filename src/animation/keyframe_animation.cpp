@@ -128,5 +128,12 @@ EvaluationResult KeyframeAnimation::ProcessOnGet(IAny& value)
     return EvaluationResult::EVAL_CONTINUE;
 }
 
+ReturnError KeyframeAnimation::Finalize(IImportFunctions& f)
+{
+    GetState().UpdateTotalDuration();
+    PropertyChanged();
+    return GenericError::SUCCESS;
+}
+
 } // namespace Internal
 META_END_NAMESPACE()

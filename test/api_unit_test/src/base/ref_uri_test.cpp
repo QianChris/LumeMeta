@@ -129,6 +129,36 @@ TEST(API_RefUriTest, StringConstruction)
             EXPECT_EQ(n.type, RefUri::Node::OBJECT);
         }
     }
+    {
+        RefUri u { "ref://this/!and/@/$that" };
+        EXPECT_TRUE(u.IsValid());
+        EXPECT_TRUE(!u.IsEmpty());
+        EXPECT_EQ(u.ToString(), "ref://this/!and/@/$that");
+        EXPECT_TRUE(u.StartsFromRoot());
+        EXPECT_TRUE(u.ReferencesProperty());
+        EXPECT_TRUE(!u.ReferencesObject());
+        EXPECT_EQ(u.ReferencedName(), "that");
+        {
+            auto n = u.TakeFirstNode();
+            EXPECT_EQ(n.name, "this");
+            EXPECT_EQ(n.type, RefUri::Node::OBJECT);
+        }
+        {
+            auto n = u.TakeFirstNode();
+            EXPECT_EQ(n.name, "and");
+            EXPECT_EQ(n.type, RefUri::Node::ATTACHMENT);
+        }
+        {
+            auto n = u.TakeFirstNode();
+            EXPECT_EQ(n.name, "@");
+            EXPECT_EQ(n.type, RefUri::Node::SPECIAL);
+        }
+        {
+            auto n = u.TakeFirstNode();
+            EXPECT_EQ(n.name, "that");
+            EXPECT_EQ(n.type, RefUri::Node::PROPERTY);
+        }
+    }
 }
 
 TEST(API_RefUriTest, Setters)
@@ -330,6 +360,41 @@ TEST(API_RefUriTest, IObjectResolveAndSelf)
     EXPECT_EQ(obj.GetPtr<IObject>()->GetSelf(), obj.GetPtr<IObject>());
     EXPECT_EQ(Resolve(obj.GetPtr<IObject>(), RefUri("ref:/$prop")), obj2.GetPtr<IObject>());
     EXPECT_EQ(GetSelf(obj.GetPtr<IObject>()), obj.GetPtr<IObject>());
+}
+
+TEST(API_RefUriTest, Attachment)
+{
+    auto obj = CreateInstance(META_NS::ClassId::Object);
+    auto att = CreateTestType();
+    att->SetName("test");
+
+    auto i = interface_cast<IAttach>(obj);
+    ASSERT_TRUE(i);
+    i->Attach(att);
+
+    RefUri uri("ref:/!test/$First");
+    uri.SetAbsoluteInterpretation(true);
+
+    EXPECT_EQ(obj->Resolve(uri), interface_pointer_cast<IObject>(att->First().GetProperty()));
+}
+
+TEST(API_RefUriTest, Subscripting)
+{
+    auto aobj = CreateTestType();
+    auto obj = CreateInstance(META_NS::ClassId::Object);
+    auto att = CreateTestType();
+    att->SetName("test");
+    att->MyObjectArray()->SetValue({ nullptr, interface_pointer_cast<IObject>(aobj), nullptr });
+
+    auto i = interface_cast<IAttach>(obj);
+    ASSERT_TRUE(i);
+    i->Attach(att);
+
+    {
+        RefUri uri("ref:/!test/$MyObjectArray[1]/$First");
+        uri.SetAbsoluteInterpretation(true);
+        EXPECT_EQ(obj->Resolve(uri), interface_pointer_cast<IObject>(aobj->First().GetProperty()));
+    }
 }
 
 } // namespace UTest

@@ -246,6 +246,8 @@ public:
     META_STATIC_ARRAY_PROPERTY_DATA(ITestType, int, MyIntArray)
     META_STATIC_ARRAY_PROPERTY_DATA(ITestType, int, MyConstIntArray, (BASE_NS::vector<int> { 1, 2, 3, 4, 5 }))
 
+    META_STATIC_ARRAY_PROPERTY_DATA(ITestType, IObject::Ptr, MyObjectArray)
+
     META_STATIC_FUNCTION_DATA(ITestType, NormalMember)
     META_STATIC_FUNCTION_DATA(ITestType, OtherNormalMember, "value", "some")
 
@@ -272,6 +274,8 @@ public:
     META_IMPLEMENT_ARRAY_PROPERTY(int, MyIntArray)
     META_IMPLEMENT_READONLY_ARRAY_PROPERTY(int, MyConstIntArray)
     //    META_IMPLEMENT_PROPERTY(int, NonSerialized, 1)
+
+    META_IMPLEMENT_ARRAY_PROPERTY(IObject::Ptr, MyObjectArray);
 
     META_IMPLEMENT_PROPERTY(string, Name)
 

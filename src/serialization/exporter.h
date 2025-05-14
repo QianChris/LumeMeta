@@ -34,7 +34,7 @@ public:
     Exporter() : registry_(GetObjectRegistry()), globalData_(registry_.GetGlobalSerializationData()) {}
     explicit Exporter(IObjectRegistry& reg, IGlobalSerializationData& data) : registry_(reg), globalData_(data) {}
 
-    ISerNode::Ptr Export(const IObject::ConstPtr& object) override;
+    ISerNode::Ptr Export(const IObject::ConstPtr& object, ExportOptions options) override;
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>) override;
     void SetResourceManager(CORE_NS::IResourceManager::Ptr p) override;
     void SetUserContext(IObject::Ptr) override;
@@ -82,7 +82,7 @@ private:
     ISerNode::Ptr CreateObjectRefNode(const RefUri& ref);
     ISerNode::Ptr CreateObjectRefNode(const IObject::ConstPtr& object);
     ISerNode::Ptr AutoExportObject(const IObject::ConstPtr& object);
-    IObject::Ptr ResolveUriSegment(const IObject::ConstPtr& ptr, RefUri& uri) const;
+    IObject::Ptr ResolveUriSegment(const IObject::ConstPtr& ptr, RefUri& uri, const IObject::ConstPtr& previous) const;
     ISerNode::Ptr ExportIContainer(const IContainer& cont);
     ReturnError ResolveDeferredWeakPtr(const DeferredWeakPtrResolve& d);
 
@@ -95,6 +95,7 @@ private:
     CORE_NS::IResourceManager::Ptr resources_;
     IObject::Ptr userContext_;
     SerMetadata metadata_;
+    ExportOptions options_;
 };
 
 class ExportContext : public IntroduceInterfaces<IExportContext> {

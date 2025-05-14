@@ -42,6 +42,8 @@ public: // IModifier
 protected: // IAnimationInternal
     void OnAnimationStateChanged(const AnimationStateChangedInfo& info) override;
 
+    ReturnError Finalize(IImportFunctions&) override;
+
 private:
     void Evaluate() override;
     AnimationState::AnimationStateParams GetParams() override;

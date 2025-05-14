@@ -68,10 +68,11 @@ bool Exporter::HasBeenExported(const InstanceId& id) const
     return exported_.find(id) != exported_.end();
 }
 
-ISerNode::Ptr Exporter::Export(const IObject::ConstPtr& object)
+ISerNode::Ptr Exporter::Export(const IObject::ConstPtr& object, ExportOptions options)
 {
     BASE_NS::shared_ptr<RootNode> res;
     if (object) {
+        options_ = BASE_NS::move(options);
         ISerNode::Ptr node;
         auto r = ExportObject(object, node);
         if (r) {
@@ -322,23 +323,47 @@ ReturnError Exporter::ExportAny(const IAny::ConstPtr& any, ISerNode::Ptr& res)
     return err;
 }
 
-IObject::Ptr Exporter::ResolveUriSegment(const IObject::ConstPtr& ptr, RefUri& uri) const
+IObject::Ptr Exporter::ResolveUriSegment(
+    const IObject::ConstPtr& ptr, RefUri& uri, const IObject::ConstPtr& previous) const
 {
-    if (auto instance = interface_cast<IObjectInstance>(ptr)) {
-        if (auto context = interface_cast<IObjectContext>(ptr)) {
-            uri.PushObjectContextSegment();
-        } else {
-            uri.PushObjectSegment(instance->GetName());
-        }
-        return ptr->Resolve(RefUri::ParentUri());
-    }
     if (auto property = interface_cast<IProperty>(ptr)) {
-        uri.PushPropertySegment(property->GetName());
+        uint32_t index = -1;
+        if (ArrayPropertyLock lock { property }) {
+            for (size_t i = 0; i != lock->GetSize(); ++i) {
+                if (interface_pointer_cast<IObject>(GetConstPointer(lock->GetAnyAt(i))) == previous) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        uri.PushPropertySegment(property->GetName(), index);
         auto owner = interface_pointer_cast<IObject>(property->GetOwner());
         if (!owner) {
             CORE_LOG_E("No Owner for property '%s' when exporting weak ptr", property->GetName().c_str());
         }
         return owner;
+    }
+    if (auto instance = interface_cast<IObjectInstance>(ptr)) {
+        auto parent = ptr->Resolve(RefUri::ParentUri());
+
+        if (auto i = interface_cast<META_NS::IProperty>(parent)) {
+            return parent;
+        }
+
+        if (auto i = interface_cast<IAttach>(parent)) {
+            if (auto cont = i->GetAttachmentContainer(false)) {
+                if (ContainsObject(cont, ptr)) {
+                    uri.PushAttachmentSegment(instance->GetName());
+                    return parent;
+                }
+            }
+        }
+        if (auto context = interface_cast<IObjectContext>(ptr)) {
+            uri.PushObjectContextSegment();
+        } else {
+            uri.PushObjectSegment(instance->GetName());
+        }
+        return parent;
     }
     return nullptr;
 }
@@ -346,18 +371,29 @@ IObject::Ptr Exporter::ResolveUriSegment(const IObject::ConstPtr& ptr, RefUri& u
 ReturnError Exporter::ResolveDeferredWeakPtr(const DeferredWeakPtrResolve& d)
 {
     if (auto p = d.ptr.lock()) {
+        auto userContext = GetUserContext();
         auto original = p;
+        IObject::ConstPtr previous;
         RefUri uri;
         while (p) {
             if (auto obj = interface_cast<IObjectInstance>(p)) {
                 auto iid = ConvertInstanceId(obj->GetInstanceId());
+                if (userContext && options_.useRelativeRefuriIfContextSet) {
+                    if (userContext.get() == obj) {
+                        uri.SetStartsFromRoot(true);
+                        d.node->SetValue(uri);
+                        return GenericError::SUCCESS;
+                    }
+                }
                 if (HasBeenExported(iid) || globalData_.GetGlobalObject(obj->GetInstanceId())) {
                     uri.SetBaseObjectUid(iid.ToUid());
                     d.node->SetValue(uri);
                     return GenericError::SUCCESS;
                 }
             }
-            p = ResolveUriSegment(p, uri);
+            auto newp = ResolveUriSegment(p, uri, previous);
+            previous = p;
+            p = newp;
         }
         CORE_LOG_E("Could not find suitable anchor object when exporting weak ptr [%s, %s, %s]",
             BASE_NS::string(original->GetClassName()).c_str(), original->GetName().c_str(),
