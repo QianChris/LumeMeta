@@ -1,11 +1,23 @@
-/**
- *  Copyright (C) 2021 Huawei Technologies Co, Ltd.
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 #ifndef META_SRC_RESOURCE_MEMFILE_HEADER
 #define META_SRC_RESOURCE_MEMFILE_HEADER
 
 #include <algorithm>
 #include <cstring>
+#include <securec.h>
 
 #include <base/containers/vector.h>
 #include <core/io/intf_file.h>
@@ -28,7 +40,7 @@ struct MemFile : public CORE_NS::IFile {
     {
         size_t read = std::min<size_t>(count, data_.size() - pos_);
         if (read) {
-            std::memcpy(buffer, &data_[pos_], read);
+            memcpy_s(buffer, read, &data_[pos_], read);
             pos_ += read;
         }
         return read;
@@ -38,7 +50,7 @@ struct MemFile : public CORE_NS::IFile {
         if (data_.size() < pos_ + count) {
             data_.resize(pos_ + count);
         }
-        std::memcpy(&data_[pos_], buffer, count);
+        memcpy_s(&data_[pos_], count, buffer, count);
         pos_ += count;
         return count;
     }
@@ -47,7 +59,7 @@ struct MemFile : public CORE_NS::IFile {
         if (data_.size() < pos_ + count) {
             data_.resize(pos_ + count);
         }
-        std::memcpy(&data_[pos_], buffer, count);
+        memcpy_s(&data_[pos_], count, buffer, count);
         pos_ += count;
         return count;
     }

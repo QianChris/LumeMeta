@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "file_resource_manager.h"
 
@@ -258,8 +272,8 @@ FileResourceManager::Result FileResourceManager::SaveResourceData(const Resource
     }
     if (!r.path.empty()) {
         MemFile data;
-        if (!it->second->SaveResource(r.object,
-                CORE_NS::IResourceType::StorageInfo { nullptr, &data, r.id, r.path, GetSelf<IResourceManager>() })) {
+        if (!it->second->SaveResource(r.object, CORE_NS::IResourceType::StorageInfo{nullptr, &data, r.id, r.path,
+                                                                                    GetSelf<IResourceManager>()})) {
             CORE_LOG_W("Failed to save resource: %s", r.id.ToString().c_str());
             return Result::EXPORT_FAILURE;
         }
@@ -283,8 +297,8 @@ bool FileResourceManager::UpdateOptions(ResourceData& r)
             return false;
         }
         MemFile opts;
-        if (!it->second->SaveResource(r.object,
-                CORE_NS::IResourceType::StorageInfo { &opts, nullptr, r.id, r.path, GetSelf<IResourceManager>() })) {
+        if (!it->second->SaveResource(r.object, CORE_NS::IResourceType::StorageInfo{&opts, nullptr, r.id, r.path,
+                                                                                    GetSelf<IResourceManager>()})) {
             CORE_LOG_W("Failed to save resource options");
             return false;
         }
@@ -337,8 +351,8 @@ bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource, B
         d.id = id;
         d.path = path;
         MemFile opts;
-        if (!it->second->SaveResource(resource,
-                CORE_NS::IResourceType::StorageInfo { &opts, nullptr, d.id, d.path, GetSelf<IResourceManager>() })) {
+        if (!it->second->SaveResource(resource, CORE_NS::IResourceType::StorageInfo{&opts, nullptr, d.id, d.path,
+                                                                                    GetSelf<IResourceManager>()})) {
             CORE_LOG_W("Failed to save resource options");
             return false;
         }

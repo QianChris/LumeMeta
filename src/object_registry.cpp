@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
- * Description: Object registry implementation
- * Author: Lauri Jaaskela
- * Create: 2021-09-07
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "object_registry.h"
@@ -25,7 +33,6 @@
 #include "random.h"
 #include "ref_uri_util.h"
 
-// #define OBJ_REG_LOG(...) CORE_LOG_F(__VA_ARGS__)
 #define OBJ_REG_LOG(...)
 
 /*
@@ -60,7 +67,6 @@ ObjectRegistry::~ObjectRegistry()
     classRegistry_.Clear();
     // Just for sanity.
     GC();
-    // serializationContext_.Uninitialize();
     //  And to make sure all "objects" are unregistered. (we have some that never un-register)
     //  doing it one at a time, because unregister will modify the list..
     bool first = true;

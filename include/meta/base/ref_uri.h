@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
- * Description: Serialization reference uri
- * Author: Mikael Kilpeläinen
- * Create: 2022-11-22
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef META_BASE_REF_URI_H
@@ -491,10 +499,10 @@ inline bool RefUri::ParseUid(BASE_NS::string_view& path)
 inline bool RefUri::Parse(BASE_NS::string_view uri)
 {
     // we check the header and size must be at least 5 (at least / after the header)
-    if (uri.size() < 5 || uri.substr(0, 4) != "ref:") {
+    if (uri.size() < 5 || uri.substr(0, 4) != "ref:") { // 5: size, 4: size
         return false;
     }
-    uri.remove_prefix(4);
+    uri.remove_prefix(4); // 4: size
     // see if it is path or valid uid
     if (uri[0] != SEPARATOR_CHAR && !ParseUid(uri)) {
         return false;

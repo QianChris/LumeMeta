@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2024-2024. All rights reserved.
- * Description: Helper to register engine internal accesses
- * Author: Mikael Kilpeläinen
- * Create: 2024-02-29
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef META_EXT_ENGINE_INTERNAL_ACCESS_H
@@ -77,10 +85,10 @@ public:
     AnyReturnValue SyncToEngine(const IAny& value, const EnginePropertyParams& params) const override
     {
         if (CORE_NS::ScopedHandle<Type> guard { params.handle.Handle() }) {
-            uintptr_t offset = (uintptr_t) & *guard + params.Offset();
+            uintptr_t offset = (uintptr_t)(&(*guard)) + params.Offset();
             auto cont = params.containerMethods;
             if (cont) {
-                auto arroffset = (uintptr_t) & *guard + params.arraySubsOffset;
+                auto arroffset = (uintptr_t)(&(*guard)) + params.arraySubsOffset;
                 if (params.index >= cont->size(arroffset)) {
                     return AnyReturn::FAIL;
                 }
@@ -94,10 +102,10 @@ public:
     AnyReturnValue SyncFromEngine(const EnginePropertyParams& params, IAny& out) const override
     {
         if (CORE_NS::ScopedHandle<const Type> guard { params.handle.Handle() }) {
-            uintptr_t offset = (uintptr_t) & *guard + params.Offset();
+            uintptr_t offset = (uintptr_t)(&(*guard)) + params.Offset();
             auto cont = params.containerMethods;
             if (cont) {
-                auto arroffset = (uintptr_t) & *guard + params.arraySubsOffset;
+                auto arroffset = (uintptr_t)(&(*guard)) + params.arraySubsOffset;
                 if (params.index >= cont->size(arroffset)) {
                     return AnyReturn::FAIL;
                 }
@@ -139,13 +147,13 @@ public:
                 if (params.property.type.isArray) {
                     size_t size = params.property.count < vec.size() ? params.property.count : vec.size();
                     for (size_t i = 0; i != size; ++i) {
-                        ((Type*)((uintptr_t) & *guard + params.Offset()))[i] = vec[i];
+                        ((Type*)((uintptr_t)(&(*guard)) + params.Offset()))[i] = vec[i];
                     }
                 } else {
                     auto cont = params.property.metaData.containerMethods;
-                    cont->resize((uintptr_t) & *guard + params.Offset(), vec.size());
+                    cont->resize((uintptr_t)(&(*guard)) + params.Offset(), vec.size());
                     for (size_t i = 0; i != vec.size(); ++i) {
-                        *((Type*)cont->get((uintptr_t) & *guard + params.Offset(), i)) = vec[i];
+                        *((Type*)cont->get((uintptr_t)(&(*guard)) + params.Offset(), i)) = vec[i];
                     }
                 }
             }
@@ -161,13 +169,13 @@ public:
             if (params.property.type.isArray) {
                 vec.resize(params.property.count);
                 for (size_t i = 0; i != vec.size(); ++i) {
-                    vec[i] = ((const Type*)((uintptr_t) & *guard + params.Offset()))[i];
+                    vec[i] = ((const Type*)((uintptr_t)(&(*guard)) + params.Offset()))[i];
                 }
             } else {
                 auto cont = params.property.metaData.containerMethods;
-                vec.resize(cont->size((uintptr_t) & *guard + params.Offset()));
+                vec.resize(cont->size((uintptr_t)(&(*guard)) + params.Offset()));
                 for (size_t i = 0; i != vec.size(); ++i) {
-                    vec[i] = *((const Type*)cont->get((uintptr_t) & *guard + params.Offset(), i));
+                    vec[i] = *((const Type*)cont->get((uintptr_t)(&(*guard)) + params.Offset(), i));
                 }
             }
             res = out.SetData(UidFromType<InternalType>(), &vec, sizeof(InternalType));

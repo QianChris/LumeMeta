@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2023-2024. All rights reserved.
- * Description: Exporter
- * Author: Mikael Kilpeläinen
- * Create: 2024-01-03
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef META_SRC_SERIALIZATION_SER_NODES_H
@@ -258,18 +266,18 @@ struct SupportedType {
 
 // clang-format off
 using SupportedBuiltins = TypeList<
-    SupportedType<bool           , BoolNode>,
-    SupportedType<double         , DoubleNode>,
-    SupportedType<uint8_t        , UIntNode>,
-    SupportedType<uint16_t       , UIntNode>,
-    SupportedType<uint32_t       , UIntNode>,
-    SupportedType<uint64_t       , UIntNode>,
-    SupportedType<int8_t         , IntNode>,
-    SupportedType<int16_t        , IntNode>,
-    SupportedType<int32_t        , IntNode>,
-    SupportedType<int64_t        , IntNode>,
+    SupportedType<bool, BoolNode>,
+    SupportedType<double, DoubleNode>,
+    SupportedType<uint8_t, UIntNode>,
+    SupportedType<uint16_t, UIntNode>,
+    SupportedType<uint32_t, UIntNode>,
+    SupportedType<uint64_t, UIntNode>,
+    SupportedType<int8_t, IntNode>,
+    SupportedType<int16_t, IntNode>,
+    SupportedType<int32_t, IntNode>,
+    SupportedType<int64_t, IntNode>,
     SupportedType<BASE_NS::string, StringNode>,
-    SupportedType<RefUri         , RefNode>
+    SupportedType<RefUri, RefNode>
     >;
 // clang-format on
 

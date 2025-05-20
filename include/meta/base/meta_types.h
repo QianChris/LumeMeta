@@ -1,8 +1,16 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2021-2023. All rights reserved.
- * Description: Base property types
- * Author: Jani Kattelus
- * Create: 2022-05-25
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 #ifndef META_BASE_META_TYPES_H
 #define META_BASE_META_TYPES_H
@@ -82,7 +90,8 @@ inline constexpr uint64_t CombineHash(uint64_t hash)
 {
     static_assert(HasUid_v<Type>, "META_TYPE missing for given type");
     return hash ^
-           (BASE_NS::CompileTime::FNV1aHash(MetaType<Type>::name) + 0x9e3779b97f4a7c15LLU + (hash << 12) + (hash >> 4));
+            (BASE_NS::CompileTime::FNV1aHash(MetaType<Type>::name) + 0x9e3779b97f4a7c15LLU + (hash << 12) + // 12: bits
+            (hash >> 4));                                                                                   //  4: bits
 }
 
 /**
