@@ -42,6 +42,7 @@ target_sources(${PLUGIN_NAME}Base PUBLIC
 
 target_include_directories(${PLUGIN_NAME}Base INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
 target_link_libraries(${PLUGIN_NAME}Base INTERFACE AGPBase::AGPBaseAPI AGPEngine::AGPEngineAPI)
+add_dependencies(${PLUGIN_NAME}Base AGPBase::AGPBaseAPI AGPEngine::AGPEngineAPI)
 
 # Meta object interface (for users of meta objects)
 add_library(${PLUGIN_NAME}API INTERFACE)
@@ -166,6 +167,7 @@ target_sources(${PLUGIN_NAME}API PUBLIC
 
 target_include_directories(${PLUGIN_NAME}API INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
 target_link_libraries(${PLUGIN_NAME}API INTERFACE ${PLUGIN_NAME}Base)
+add_dependencies(${PLUGIN_NAME}API ${PLUGIN_NAME}Base)
 
 # Meta object helper implementations. (for implementers of meta objects)
 add_library(${PLUGIN_NAME}HighLevelAPI INTERFACE)
@@ -213,6 +215,7 @@ target_sources(${PLUGIN_NAME}HighLevelAPI PUBLIC
 
 target_include_directories(${PLUGIN_NAME}HighLevelAPI INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
 target_link_libraries(${PLUGIN_NAME}HighLevelAPI INTERFACE ${PLUGIN_NAME}API)
+add_dependencies(${PLUGIN_NAME}HighLevelAPI ${PLUGIN_NAME}API)
 
 # Meta object helper implementations. (for implementers of meta objects)
 add_library(${PLUGIN_NAME}ExtAPI INTERFACE)
@@ -245,6 +248,7 @@ target_sources(${PLUGIN_NAME}ExtAPI PUBLIC
 
 target_include_directories(${PLUGIN_NAME}ExtAPI INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
 target_link_libraries(${PLUGIN_NAME}ExtAPI INTERFACE ${PLUGIN_NAME}API ${PLUGIN_NAME}HighLevelAPI)
+add_dependencies(${PLUGIN_NAME}ExtAPI ${PLUGIN_NAME}API ${PLUGIN_NAME}HighLevelAPI)
 
 set_target_properties(${PLUGIN_NAME}Base PROPERTIES
     CXX_STANDARD 17

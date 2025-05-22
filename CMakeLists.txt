@@ -126,28 +126,8 @@ add_subdirectory(src)
 # Testing projects
 #
 if(META_UNIT_TESTS_ENABLED)
-
-    # Sanitizers
-    if(META_UNIT_TESTS_WITH_SANITIZERS AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND NOT ANDROID AND NOT OHOS)
-        target_compile_options(LumeMeta PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(LumeMeta PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(LumeMetaBase PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(LumeMetaBase PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(LumeMetaAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(LumeMetaAPI PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(LumeMetaHighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(LumeMetaHighLevelAPI PRIVATE -fsanitize=address -fsanitize=undefined)
-		target_compile_options(LumeMetaExtAPI PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
-        target_link_options(LumeMetaExtAPI PRIVATE -fsanitize=address -fsanitize=undefined)
-    endif()
-
-    enable_testing()
-
     # API unit tests
     add_subdirectory(test/api_unit_test)
-    add_test(NAME LumeMetaAPI COMMAND LumeMetaAPITestRunner)
-
-    # SRC unit tests
 endif()
 
 if(META_BENCHMARK_TESTS_ENABLED AND NOT ANDROID AND NOT OHOS)

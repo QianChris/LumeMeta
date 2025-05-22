@@ -14,9 +14,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(LumeMetaAPI REQUIRED)
 find_package(LumeMetaExtAPI REQUIRED)
 find_package(LumeMetaHighLevelAPI REQUIRED)
-find_package(LumeMeta QUIET)
-find_package(AGPBaseAPI REQUIRED)
-find_package(AGPEngine REQUIRED)
+find_package(LumeMeta REQUIRED)
+find_package(AGPEngineDLL REQUIRED)
 
 if(NOT TARGET gtest)
     add_subdirectory(${BASE_ROOT_DIRECTORY}/test/3rdparty/googletest test/3rdparty/googletest EXCLUDE_FROM_ALL)
@@ -196,6 +195,12 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}"
     endif()
 endif()
 
+# Sanitizers
+if(META_UNIT_TESTS_WITH_SANITIZERS AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND NOT ANDROID AND NOT OHOS)
+    target_compile_options(LumeMeta PRIVATE -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -fsanitize-recover=address)
+    target_link_options(LumeMeta PRIVATE -fsanitize=address -fsanitize=undefined)
+endif()
+
 # XCB server for Linux platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     #Include XCB for surface creation on X11
@@ -205,15 +210,16 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 target_link_libraries(${executableName}
-    AGPBase::AGPBaseAPI
-    AGPEngine::AGPEngineAPI
-    AGPEngine::AGPEngineDLL
-    LumeMeta::API
+    AGPEngine::AGPEngineDLL # to avoid manual dll loading
     LumeMeta::ExtAPI
-    LumeMeta::HighLevelAPI
     gtest
     gmock
 )
+
+#
+# Add plugin dependencies
+#
+add_dependencies(${executableName} LumeMeta::Plugin)
 
 if(MINGW)
     # Linking mingw and c/c++ standard libs statically for easier usage.
@@ -294,6 +300,14 @@ endif()
 set_target_properties(${executableName} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${executableName}>")
 
 set_target_properties(${executableName} PROPERTIES FOLDER Testing)
+
+#
+# Add CTest
+#
+if(NOT ANDROID AND NOT OHOS)
+    enable_testing()
+    add_test(NAME ${PROJECT_NAME} COMMAND ${executableName})
+endif()
 
 #
 # Clang format target
