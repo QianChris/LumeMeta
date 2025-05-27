@@ -42,6 +42,10 @@ else()
     unset(META_UNIT_TESTS_WITH_SANITIZERS CACHE)
 endif()
 option(META_BENCHMARK_TESTS_ENABLED "Build ${PROJECT_NAME} benchmark tests" OFF)
+option(META_CLANG_FORMAT_CHECK "Build clang-format check" OFF)
+if(META_CLANG_FORMAT_CHECK)
+    include("${LUMEBASE_PATH}/cmake/clang_format_check.cmake")
+endif()
 
 #
 # Lib config.

@@ -199,3 +199,10 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
 #
 get_target_property(IMPL_SOURCES ${PLUGIN_NAME} SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${IMPL_SOURCES})
+
+#
+# Clang code format
+#
+if(META_CLANG_FORMAT_CHECK)
+    clang_format_check(${PLUGIN_NAME} ${CMAKE_CURRENT_LIST_DIR} "${IMPL_SOURCES}")
+endif()

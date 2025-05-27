@@ -27,8 +27,7 @@
 
 META_BEGIN_NAMESPACE()
 
-struct SerializationSettings {
-};
+struct SerializationSettings {};
 
 /// Interface to access global serialization data
 class IGlobalSerializationData : public CORE_NS::IInterface {
