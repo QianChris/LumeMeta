@@ -44,10 +44,12 @@ inline bool IsValueSame(const IProperty& p1, const IProperty& p2)
     return false;
 }
 
-inline void CloneToDefaultIfSet(const IProperty::ConstPtr& p, IMetadata& out, BASE_NS::string_view name = {})
+inline bool CloneToDefaultIfSet(const IProperty::ConstPtr& p, IMetadata& out, BASE_NS::string_view name = {})
 {
+    bool res = false;
     if (PropertyLock lock { p }) {
-        if (IsValueSet(*p)) {
+        res = IsValueSet(*p);
+        if (res) {
             if (auto copy = DuplicatePropertyType(GetObjectRegistry(), p, name)) {
                 if (auto sc = interface_cast<IStackProperty>(copy)) {
                     sc->SetDefaultValue(p->GetValue());
@@ -56,6 +58,7 @@ inline void CloneToDefaultIfSet(const IProperty::ConstPtr& p, IMetadata& out, BA
             }
         }
     }
+    return res;
 }
 
 inline void CloneToDefault(const IProperty::ConstPtr& p, IMetadata& out, BASE_NS::string_view name = {})
