@@ -390,7 +390,7 @@ TEST_F(API_EngineManagerTest, Enum)
     EXPECT_FALSE(ei->SetValueIndex(3));
 }
 
-TEST_F(API_EngineManagerTest, DISABLED_BitField)
+TEST_F(API_EngineManagerTest, BitField)
 {
     TestComponentManager<prop3::EngineTestProp> cman { prop3::ENGINE_TESTPROP_METADATA };
 
@@ -403,8 +403,12 @@ TEST_F(API_EngineManagerTest, DISABLED_BitField)
     auto p = manager->ConstructProperty<EngineTestBitField>("enum2");
     ASSERT_TRUE(p);
 
-    auto v = p->GetValueAny().Clone();
-    ASSERT_TRUE(interface_cast<IEnum>(&p->GetValueAny()));
+    auto ev = interface_cast<IValue>(GetEngineValueFromProperty(p));
+    ASSERT_TRUE(ev);
+    auto& any = ev->GetValue();
+
+    auto v = any.Clone();
+    ASSERT_TRUE(interface_cast<IEnum>(&any));
     auto ei = interface_cast<IEnum>(v);
     ASSERT_TRUE(ei);
     ASSERT_TRUE(interface_cast<IInfo>(v));
