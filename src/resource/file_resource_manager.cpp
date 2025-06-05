@@ -639,4 +639,28 @@ IResourceGroupHandle::Ptr FileResourceManager::GetGroupHandle(BASE_NS::string_vi
     return res;
 }
 
+uint32_t FileResourceManager::GetAliveCount(
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) const
+{
+    return FindAliveResources(selection).size();
+}
+
+BASE_NS::vector<CORE_NS::IResource::Ptr> FileResourceManager::FindAliveResources(
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) const
+{
+    BASE_NS::vector<CORE_NS::IResource::Ptr> res;
+    std::shared_lock lock { mutex_ };
+    for (auto&& g : resources_) {
+        for (auto&& v : g.second) {
+            auto& r = *v.second;
+            if (ResourceMatches(selection, r.id)) {
+                if (r.object) {
+                    res.push_back(r.object);
+                }
+            }
+        }
+    }
+    return res;
+}
+
 META_END_NAMESPACE()

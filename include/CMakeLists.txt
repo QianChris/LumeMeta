@@ -147,7 +147,10 @@ target_sources(${PLUGIN_NAME}API PUBLIC
     meta/interface/property/property.h
     meta/interface/property/property_events.h
     meta/interface/resource/intf_dynamic_resource.h
+    meta/interface/resource/intf_owned_resource_groups.h
     meta/interface/resource/intf_resource.h
+    meta/interface/resource/intf_resource_group_handle.h
+    meta/interface/resource/intf_resource_query.h
     meta/interface/serialization/intf_export_context.h
     meta/interface/serialization/intf_exporter.h
     meta/interface/serialization/intf_global_serialization_data.h

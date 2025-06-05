@@ -26,6 +26,7 @@
 #include <meta/ext/implementation_macros.h>
 #include <meta/ext/object.h>
 #include <meta/interface/resource/intf_owned_resource_groups.h>
+#include <meta/interface/resource/intf_resource_query.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -33,7 +34,8 @@ struct ResourceData : CORE_NS::ResourceInfo {
     CORE_NS::IResource::Ptr object;
 };
 
-class FileResourceManager : public IntroduceInterfaces<MetaObject, CORE_NS::IResourceManager, IOwnedResourceGroups> {
+class FileResourceManager
+    : public IntroduceInterfaces<MetaObject, CORE_NS::IResourceManager, IOwnedResourceGroups, IResourceQuery> {
     META_OBJECT(FileResourceManager, ClassId::FileResourceManager, IntroduceInterfaces)
 public:
     FileResourceManager();
@@ -75,6 +77,10 @@ public:
     void SetFileManager(CORE_NS::IFileManager::Ptr fileManager) override;
 
     IResourceGroupHandle::Ptr GetGroupHandle(BASE_NS::string_view group) override;
+
+    uint32_t GetAliveCount(const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) const override;
+    BASE_NS::vector<CORE_NS::IResource::Ptr> FindAliveResources(
+        const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection) const override;
 
 private:
     CORE_NS::IResource::Ptr ConstructResource(
