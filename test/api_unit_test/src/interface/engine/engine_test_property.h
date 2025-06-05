@@ -126,7 +126,7 @@ PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "
 namespace prop3 {
 struct EngineTestProp {
     EngineTestEnum enum1 = EngineTestEnum::MY_VALUE_1;
-    EngineTestBitField enum2;
+    EngineTestBitField enum2 = EngineTestBitField(0);
 };
 
 constexpr size_t TEST_PROPERTY_COUNT = 2;
