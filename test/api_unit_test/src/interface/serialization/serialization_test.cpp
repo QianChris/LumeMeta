@@ -410,5 +410,35 @@ TEST(API_SerializationTest, Metadata)
     reg.UnregisterObjectType<TestMetadata>();
 }
 
+TEST(API_SerializationTest, NonSerializablePropertyInProperty)
+{
+    TestSerialiser ser;
+    {
+        Object obj(CreateInstance(META_NS::ClassId::Object));
+
+        auto p1 = ConstructProperty<int>("p1");
+        auto p2 = ConstructProperty<int>("p2");
+        auto vp2 = interface_pointer_cast<IValue>(p2.GetProperty());
+        ASSERT_TRUE(vp2);
+
+        SetObjectFlags(p2.GetProperty(), ObjectFlagBits::SERIALIZE, false);
+
+        p1->SetValue(3);
+        EXPECT_TRUE(p1->PushValue(vp2));
+        p1->SetValue(4);
+        EXPECT_EQ(p1->GetValue(), 4);
+
+        Metadata md(obj);
+        md.AddProperty(p1);
+
+        ASSERT_TRUE(ser.Export(obj));
+        ser.Dump("app://test.json");
+    }
+    auto obj = ser.Import<IMetadata>();
+
+    auto p = obj->GetProperty<int>("p1");
+    EXPECT_EQ(p->GetValue(), 3);
+}
+
 } // namespace UTest
 META_END_NAMESPACE()
