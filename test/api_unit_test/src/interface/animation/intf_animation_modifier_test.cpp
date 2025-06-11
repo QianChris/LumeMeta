@@ -296,9 +296,12 @@ TEST_P(API_ReverseAnimationModifierTest, ReversedAnimationIsPlayedBackward)
 
 static IObject::Ptr GetAnimAttachment(IAnimation::Ptr anim)
 {
-    auto attach = interface_pointer_cast<IAttach>(anim);
-    auto vec = attach->GetAttachments<IAnimationModifier>();
-    return vec.empty() ? nullptr : interface_pointer_cast<IObject>(vec[0]);
+    IObject::Ptr attachment;
+    META_NS::Animation animation(anim);
+    if (auto mod = animation.GetModifiers(); !mod.empty()) {
+        attachment = interface_pointer_cast<IObject>(mod.front());
+    }
+    return attachment;
 }
 
 TEST_P(API_LoopAnimationModifierTest, LoopCountModifiesDuration)
