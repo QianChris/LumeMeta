@@ -526,6 +526,10 @@ TEST(API_TaskQueueTest, ApiFuture)
         return v + 1;
     });
     EXPECT_EQ(t5.GetResult(), 6);
+
+    Future<void> vf = queue->AddWaitableTask(CreateWaitableTask([] {}));
+    ASSERT_TRUE(vf);
+    EXPECT_EQ(vf.Wait(), IFuture::COMPLETED);
 }
 
 TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly)
