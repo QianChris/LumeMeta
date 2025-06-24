@@ -77,7 +77,8 @@ public:
      * @brief The FindOptions struct defines a set of options that can be used to find objects from a container.
      */
     struct FindOptions {
-        /** Name of the object to find. If name is empty, only the uids are taken into account. */
+        /** Name of the object to find. If name is empty and strictName is false, only the uids are taken into account.
+         */
         BASE_NS::string name;
         /** Search mode */
         TraversalType behavior { TraversalType::BREADTH_FIRST_ORDER };
@@ -86,6 +87,8 @@ public:
         /** If true, the found object must implement all of the uids.
          *  If false, any uid is enough to consider the object as a match */
         bool strict { false };
+        /** Set to true so that also empty name is considered as valid name */
+        bool strictName { false };
     };
     /**
      * @brief Returns the contained children.
@@ -232,7 +235,8 @@ public:
     template<class T>
     typename T::Ptr FindAnyFromHierarchy(BASE_NS::string_view name) const
     {
-        return FindAny<T>(name, TraversalType::BREADTH_FIRST_ORDER);
+        return interface_pointer_cast<T>(
+            FindAny({ BASE_NS::string(name), TraversalType::BREADTH_FIRST_ORDER, { T::UID }, false, true }));
     }
     /**
      * @brief Typed helper for IContainer::GetAll, returns all children which implement T.

@@ -135,6 +135,8 @@ TEST_P(API_ContainerCommonTest, IsAncestorOf)
     EXPECT_TRUE(container_->IsAncestorOf(object));
     EXPECT_FALSE(container_->IsAncestorOf(nullptr));
 
+    EXPECT_FALSE(container1_1_->FindAnyFromHierarchy<IObject>(""));
+
     auto object2 = CreateTestType<IObject>("NotThere");
     ASSERT_NE(object2, nullptr);
     EXPECT_FALSE(container_->IsAncestorOf(object2));
