@@ -1,0 +1,129 @@
+apply plugin: 'com.android.application'
+
+android {
+
+    namespace 'com.huawei.meta_api_test_runner'
+    testNamespace 'com.huawei.meta_api_test_runner.test'
+
+    buildFeatures {
+        // No need for buildConfig as there are no Java classes in this project.
+        buildConfig = false
+    }
+
+    // Compile options are defined in the <engineDir>/android/common.properties file (by default).
+    compileSdk gradle.engine.compileSdkVersion.toInteger()
+    ndkVersion gradle.engine.ndkVersion
+
+    defaultConfig {
+        applicationId 'com.huawei.meta_api_test_runner'
+        //minSdkVersion
+        minSdkVersion gradle.engine.minSdkVersion.toInteger()
+		//targetSdkVersion
+        targetSdkVersion gradle.engine.targetSdkVersion.toInteger()
+		//versionCode
+        versionCode 1
+		//versionName
+        versionName '1.0'
+
+        // Set the output APK filename.
+        setProperty('archivesBaseName', 'MetaAPITestRunner')
+
+        // Test instrumentation 
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        // The following argument makes the Android Test Orchestrator run its
+        // "pm clear" command after each test invocation. This command ensures
+        // that the app's state is completely cleared between tests.
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+
+        externalNativeBuild {
+            cmake {
+                // Add any cmake options here.
+                arguments.add('-DANDROID_STL=c++_static')
+                arguments.add('-DBASE_ROOT_DIRECTORY=' + gradle.baseDir)
+                arguments.add('-DCORE_ROOT_DIRECTORY=' + gradle.engineDir)
+                
+                arguments.add('-DCORE_UNPACKED_LIB_DIR=' + file(gradle.unpackedLibDir).absolutePath.replaceAll("\\\\", "/"))
+                arguments.add('-DCORE_IMPORTED_PROJECTS=' + gradle.ext.agpCoreImportDir)
+
+                arguments.add('-DMETA_UNIT_TESTS_ENABLED=1')
+
+                arguments.add('-DCORE_VALIDATION_ENABLED=1')
+                arguments.add('-DCORE_DEV_ENABLED=0')
+
+                arguments.add('-DCORE_HIDE_SYMBOLS=OFF')
+
+                targets = ['LumeMetaAPITestRunner']
+            }
+        }
+
+        ndk {
+            // Abi filters are defined in the <engineDir>/android/common.properties file (by default).
+            abiFilters = []
+            abiFilters.addAll(gradle.engine.abiFilters.split(',').collect{it as String})
+        }
+    }
+
+    sourceSets {
+        main.assets.srcDirs = ['../../../../../assets', '../../../../assets']
+    }
+
+    buildTypes {
+        release {
+            // Use debug credentials to sign the release apk 
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+        }
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    packagingOptions {
+        // These libraries are import libraries in cmake an currently gradle always tries to add
+        // them to the package even though they are provided by the platform.
+        exclude '**/libc++_shared.so'
+        exclude '**/libandroid.so'
+        exclude '**/liblog.so'
+
+        // Only package .so libs for the ABIs that are defined in ndk { abiFilters } block above
+        // (Otherwise unnecessary validation layers for unused ABIs will be packaged in the AAR).
+        for (abi in ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', 'mips', 'mips64']) {
+            if (!defaultConfig.ndk.abiFilters.contains(abi)) {
+                exclude "**/${abi}/*.so"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            // A new enough cmake must be found from the path or bundled with the android SDK.
+            version '3.18.0+'
+            path '../../../../../CMakeLists.txt'
+        }
+    }
+    
+    // The tests need to be run with the orchestrator because it runs each test in a separate
+    // process (googletest can only be initialized once).
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+
+}
+
+dependencies {
+    // Core library
+    androidTestImplementation 'androidx.test:core:1.6.1'
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.6.1'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+
+    // Assertions
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    
+    // Test Orchestrator
+    androidTestUtil 'androidx.test:orchestrator:1.5.0'
+
+    runtimeOnly project(':agp_core')
+}

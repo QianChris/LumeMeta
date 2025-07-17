@@ -14,7 +14,13 @@
 import("//build/ohos.gni")
 import("//foundation/graphic/graphic_3d/lume/lume_config.gni")
 
-config("lume_metaobject_config") {
+config("lume_meta_api_config") {
+  include_dirs = [
+    "include",
+  ]
+}
+
+config("lume_meta_src_config") {
   include_dirs = [
     "3rdparty/",
     "src/",
@@ -52,9 +58,9 @@ config("lume_metaobject_config") {
   ]
 }
 
-ohos_source_set("lume_metaobject_src") {
+ohos_source_set("lume_meta_src") {
   public_configs = [
-    ":lume_metaobject_config",
+    ":lume_meta_src_config",
     "${LUME_RENDER_PATH}:lume_render_api",
     "${LUME_CORE_PATH}:lume_base_api",
     "${LUME_CORE_PATH}:lume_engine_api",
@@ -92,6 +98,7 @@ ohos_source_set("lume_metaobject_src") {
     "src/animation/track_animation.h",
     "src/animation/track_animation_state.cpp",
     "src/animation/track_animation_state.h",
+    "src/any.h",
     "src/attachment_container.cpp",
     "src/attachment_container.h",
     "src/base_object.h",
@@ -155,11 +162,12 @@ ohos_source_set("lume_metaobject_src") {
     "src/object_context.cpp",
     "src/object_context.h",
     "src/object_data_container.cpp",
+    "src/object_data_container.h",
     "src/object_hierarchy_observer.cpp",
     "src/object_hierarchy_observer.h",
+    "src/object_name.h",
     "src/object_registry.cpp",
     "src/object_registry.h",
-    "src/pbj_data_container.h",
     "src/plugin.cpp",
     "src/polling_task_queue.cpp",
     "src/property/bind.cpp",
@@ -182,6 +190,12 @@ ohos_source_set("lume_metaobject_src") {
     "src/register_engine_access.cpp",
     "src/register_entities.cpp",
     "src/register_value_serializers.cpp",
+    "src/resource/file_resource_manager.cpp",
+    "src/resource/file_resource_manager.h",
+    "src/resource/memfile.h",
+    "src/resource/object_resource.cpp",
+    "src/resource/object_resource.h",
+    "src/resource/resource_placeholder.h",
     "src/serialization/backend/debug_output.cpp",
     "src/serialization/backend/debug_output.h",
     "src/serialization/backend/json_input.cpp",
@@ -198,6 +212,7 @@ ohos_source_set("lume_metaobject_src") {
     "src/serialization/json_importer.h",
     "src/serialization/metav1_compat.cpp",
     "src/serialization/metav1_compat.h",
+    "src/serialization/ser_nodes.h",
     "src/startable_object_controller.cpp",
     "src/startable_object_controller.h",
     "src/system_clock.cpp",
@@ -210,8 +225,17 @@ ohos_source_set("lume_metaobject_src") {
   subsystem_name = "graphic"
 }
 
+ohos_shared_library("AGPMetaApi") {
+  public_configs = [
+    ":lume_meta_api_config",
+  ]
+
+  part_name = "graphic_3d"
+  subsystem_name = "graphic"
+}
+
 ohos_static_library("libMetaObject") {
-  public_deps = [ ":lume_metaobject_src" ]
+  public_deps = [ ":lume_meta_src" ]
   part_name = "graphic_3d"
   subsystem_name = "graphic"
 }

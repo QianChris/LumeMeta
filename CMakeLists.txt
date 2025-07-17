@@ -131,12 +131,12 @@ add_subdirectory(src)
 #
 if(META_UNIT_TESTS_ENABLED)
     # API unit tests
-    add_subdirectory(test/api_unit_test)
+    add_subdirectory(test/unittest/api_unit_test)
 endif()
 
 if(META_BENCHMARK_TESTS_ENABLED AND NOT ANDROID AND NOT OHOS)
     # Benchmark tests
-    add_subdirectory(test/benchmark)
+    add_subdirectory(test/unittest/benchmark)
 endif()
 
 #
