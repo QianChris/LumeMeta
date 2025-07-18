@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-
-#include "test_framework.h"
-
 #include <meta/api/util.h>
 #include <meta/base/bit_field.h>
 #include <meta/ext/object_fwd.h>
 #include <meta/interface/intf_object.h>
 #include <meta/interface/intf_object_registry.h>
+
+#include "test_framework.h"
 
 enum TestFlagBits : uint32_t {
     FLAG1 = 1,

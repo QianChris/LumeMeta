@@ -17,11 +17,11 @@
 #include "helpers/testing_objects.h"
 // clang-format on
 
-#include "test_framework.h"
-
 #include <meta/api/property/custom_value.h>
 #include <meta/ext/implementation_macros.h>
 #include <meta/ext/object.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 

@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/api/number.h>
 #include <meta/interface/detail/any.h>
 
 #include "helpers/testing_objects.h"
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 

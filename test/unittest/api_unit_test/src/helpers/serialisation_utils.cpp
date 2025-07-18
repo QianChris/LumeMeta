@@ -31,7 +31,6 @@
 #include "test_runner.h"
 #endif
 
-
 META_BEGIN_NAMESPACE()
 namespace UTest {
 

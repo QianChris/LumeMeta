@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/api/deferred_callback.h>
 #include <meta/api/property/property_event_handler.h>
 #include <meta/ext/object_fwd.h>
@@ -23,6 +21,7 @@
 #include <meta/interface/property/intf_property.h>
 
 #include "helpers/util.h"
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 

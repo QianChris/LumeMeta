@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/api/animation.h>
 #include <meta/api/object_name.h>
 
 #include "helpers/serialisation_utils.h"
 #include "helpers/testing_objects.h"
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 
@@ -340,7 +339,8 @@ UNIT_TEST(API_ObjectTest, AssignmentUserApiObjectContainsPointerToOriginalObject
     EXPECT_THAT(assignedPtr, Eq(originPtr));
 }
 
-UNIT_TEST(API_ObjectTest, MoveConstructedObjectContainsPointerFromOriginAndRemovesContentFromIt, testing::ext::TestSize.Level1)
+UNIT_TEST(API_ObjectTest, MoveConstructedObjectContainsPointerFromOriginAndRemovesContentFromIt,
+testing::ext::TestSize.Level1)
 {
     // given
     auto origin = PropertyAnimation();
@@ -360,7 +360,8 @@ UNIT_TEST(API_ObjectTest, MoveConstructedObjectContainsPointerFromOriginAndRemov
     EXPECT_THAT(movedPtr, Eq(originRawPtr));
 }
 
-UNIT_TEST(API_ObjectTest, MoveAssignedObjectContainsPointerFromOriginAndRemovesContentFromIt, testing::ext::TestSize.Level1)
+UNIT_TEST(API_ObjectTest, MoveAssignedObjectContainsPointerFromOriginAndRemovesContentFromIt,
+testing::ext::TestSize.Level1)
 {
     // given
     auto origin = PropertyAnimation();
@@ -384,7 +385,8 @@ UNIT_TEST(API_ObjectTest, MoveAssignedObjectContainsPointerFromOriginAndRemovesC
     EXPECT_THAT(movedPtr, Eq(originRawPtr));
 }
 
-UNIT_TEST(API_ObjectTest, NotCompatibileMoveAssignedObjectIsEmptyAndMovedObjectIsEmptyAlso, testing::ext::TestSize.Level1)
+UNIT_TEST(API_ObjectTest, NotCompatibileMoveAssignedObjectIsEmptyAndMovedObjectIsEmptyAlso,
+testing::ext::TestSize.Level1)
 {
     // given
     auto sequentialAnimation = SequentialAnimation();

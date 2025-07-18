@@ -18,12 +18,12 @@
 #include "helpers/test_utils.h"
 // clang-format on
 
-#include "test_framework.h"
-
 #include <meta/api/property/property_info.h>
 #include <meta/interface/detail/enum.h>
 #include <meta/interface/enum_macros.h>
 #include <meta/interface/property/construct_property.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 enum class MyPropEnum {

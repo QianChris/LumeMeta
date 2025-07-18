@@ -15,9 +15,8 @@
 
 #include <atomic>
 #include <chrono>
-#include <thread>
-
 #include <test_framework.h>
+#include <thread>
 
 #include <meta/api/future.h>
 #include <meta/api/make_callback.h>

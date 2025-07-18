@@ -18,10 +18,10 @@
 #include "helpers/util.h"
 // clang-format on
 
-#include "test_framework.h"
-
 #include <meta/api/property/array_property_event_handler.h>
 #include <meta/interface/property/construct_array_property.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 

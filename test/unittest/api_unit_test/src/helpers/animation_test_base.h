@@ -16,11 +16,11 @@
 #ifndef META_TEST_ANIMATION_TEST_BASE_H
 #define META_TEST_ANIMATION_TEST_BASE_H
 
-#include "test_framework.h"
-
 #include <meta/base/time_span.h>
 #include <meta/interface/animation/intf_animation.h>
 #include <meta/interface/intf_manual_clock.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/api/threading/mutex.h>
 
 #include "helpers/testing_objects.h"
+#include "test_framework.h"
 
 using namespace testing;
 

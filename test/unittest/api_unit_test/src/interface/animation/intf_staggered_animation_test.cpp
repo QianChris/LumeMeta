@@ -17,7 +17,6 @@
 #include <bitset>
 #include <limits>
 #include <numeric>
-
 #include <test_framework.h>
 
 #include <meta/api/animation.h>

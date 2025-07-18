@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/base/version.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

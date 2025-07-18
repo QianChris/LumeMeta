@@ -304,7 +304,8 @@ UNIT_TEST_F(API_ProxyObjectTest, SetPropertyTarget, testing::ext::TestSize.Level
     EXPECT_FALSE(proxy_->GetOverride(Prop1));
 }
 
-UNIT_TEST_F(API_ProxyObjectTest, InternalBindingIsScheduledForCreatingBeforeGettinProxyProperty, testing::ext::TestSize.Level1)
+UNIT_TEST_F(
+    API_ProxyObjectTest, InternalBindingIsScheduledForCreatingBeforeGettinProxyProperty, testing::ext::TestSize.Level1)
 {
     proxy_->AddInternalProxy(Prop2, Prop1);
 
@@ -327,7 +328,8 @@ UNIT_TEST_F(API_ProxyObjectTest, InternalBindingIsScheduledForCreatingBeforeGett
     EXPECT_THAT(internalProxyProp2->GetValue(), testing::FloatEq(1000.0F));
 }
 
-UNIT_TEST_F(API_ProxyObjectTest, InternalBindingRemovesBindToTargetAndBindToInternalProperty, testing::ext::TestSize.Level1)
+UNIT_TEST_F(
+    API_ProxyObjectTest, InternalBindingRemovesBindToTargetAndBindToInternalProperty, testing::ext::TestSize.Level1)
 {
     auto objectProp1 = Metadata(object_).GetProperty<float>(Prop1);
     auto objectProp2 = Metadata(object_).GetProperty<float>(Prop2);
@@ -368,7 +370,8 @@ UNIT_TEST_F(API_ProxyObjectTest, InternalBindWorksAfterChangingProxyTarget, test
     EXPECT_THAT(internalProxyProp2->GetValue(), testing::FloatEq(300.0F));
 }
 
-UNIT_TEST_F(API_ProxyObjectTest, InternalBindIsRemovedWhenNewTargetDoesNotHaveSourceProperty, testing::ext::TestSize.Level1)
+UNIT_TEST_F(
+    API_ProxyObjectTest, InternalBindIsRemovedWhenNewTargetDoesNotHaveSourceProperty, testing::ext::TestSize.Level1)
 {
     proxy_->AddInternalProxy(Prop2, Prop1);
 

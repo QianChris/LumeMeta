@@ -17,11 +17,11 @@
 #include <thread>
 #include <vector>
 
-#include "test_framework.h"
-
 #include <base/containers/atomics.h>
 
 #include <meta/base/namespace.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

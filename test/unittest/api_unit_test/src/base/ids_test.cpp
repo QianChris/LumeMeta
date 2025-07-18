@@ -15,9 +15,9 @@
 
 #include <functional>
 
-#include "test_framework.h"
-
 #include <meta/base/ids.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

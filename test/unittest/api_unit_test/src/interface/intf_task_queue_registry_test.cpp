@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include <type_traits>
-
 #include <test_framework.h>
+#include <type_traits>
 
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/intf_object_registry.h>

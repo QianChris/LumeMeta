@@ -86,4 +86,3 @@ CORE_NS::IEngine::Ptr CreateEngine()
 META_END_NAMESPACE()
 
 testing::Environment* const env = ::testing::AddGlobalTestEnvironment(new META_NS::UTest::TestRunnerEnv);
-

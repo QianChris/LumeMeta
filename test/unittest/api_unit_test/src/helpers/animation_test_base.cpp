@@ -15,10 +15,10 @@
 
 #include "animation_test_base.h"
 
-#include "test_framework.h"
-
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/intf_object_registry.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

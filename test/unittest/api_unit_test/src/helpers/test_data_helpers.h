@@ -19,12 +19,12 @@
 #include <tuple>
 #include <type_traits>
 
-#include "test_framework.h"
-
 #include <base/containers/type_traits.h>
 #include <base/containers/vector.h>
 
 #include <meta/base/namespace.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

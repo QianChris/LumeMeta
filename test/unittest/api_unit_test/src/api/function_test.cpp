@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/api/connector.h>
 #include <meta/api/function.h>
 #include <meta/ext/any_builder.h>
@@ -26,6 +24,7 @@
 #include "helpers/serialisation_utils.h"
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 

@@ -19,16 +19,15 @@
 #include <base/util/uid.h>
 #include <core/intf_engine.h>
 #include <core/io/intf_filesystem_api.h>
+#include <core/log.h>
 #include <core/os/intf_platform.h>
 #include <core/os/platform_create_info.h>
 #include <core/plugin/intf_plugin.h>
-#include <core/log.h>
 
 #include <meta/base/namespace.h>
 #include <meta/base/plugin.h>
 
 #include "helpers/testing_objects.h"
-
 #include "test_framework.h"
 
 // Just making sure that RTTI is disabled. Remove this if we decide to enable RTTI at some point.
@@ -77,7 +76,7 @@ void RegisterTestFileProtocol(CORE_NS::IFileManager& fileManager);
 CORE_NS::IEngine::Ptr CreateEngine();
 
 namespace {
-  
+
 CORE_NS::IFileManager::Ptr CreateFileManager()
 {
     auto factory = CORE_NS::GetInstance<CORE_NS::IFileSystemApi>(CORE_NS::UID_FILESYSTEM_API_FACTORY);
@@ -122,4 +121,3 @@ public:
 META_END_NAMESPACE()
 
 #endif // META_TEST_RUNNER
-

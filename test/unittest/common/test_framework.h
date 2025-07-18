@@ -16,9 +16,9 @@
 #ifndef TEST_FRAMEWORK
 #define TEST_FRAMEWORK
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <gmock/gmock-matchers.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 // Switch between HPPTest and GTest macros
 #if defined(UNIT_TESTS_USE_HCPPTEST)

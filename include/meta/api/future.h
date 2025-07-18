@@ -122,7 +122,8 @@ public:
         return fut_ ? fut_->Then(CreateContinuation(func), queue) : nullptr;
     }
     /// Helper function which enables specifying the continuation task as a lambda function
-    template<typename Func, typename ParamType = Type, typename = EnableIfCanInvokeWithArguments<Func, ContinuationTypedFuntionType<ParamType>>>
+    template<typename Func, typename ParamType = Type,
+        typename = EnableIfCanInvokeWithArguments<Func, ContinuationTypedFuntionType<ParamType>>>
     auto Then(Func func, const BASE_NS::shared_ptr<ITaskQueue>& queue, int = 0) -> Future<decltype(func(ParamType {}))>
     {
         using ReturnType = decltype(func(ParamType {}));

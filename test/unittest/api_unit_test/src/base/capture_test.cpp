@@ -15,8 +15,6 @@
 
 #include <functional>
 
-#include "test_framework.h"
-
 #include <meta/api/make_callback.h>
 #include <meta/api/object.h>
 #include <meta/base/capture.h>
@@ -25,6 +23,7 @@
 
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {
@@ -85,7 +84,8 @@ UNIT_TEST(API_CaptureBindTest, LambdaNotThrowsWhenCapturedSharedPointerIsRelease
     }
 }
 
-UNIT_TEST(API_CaptureBindTest, LambdaNotThrowsWhenCapturedWeakPointerPointsToInvalidResource, testing::ext::TestSize.Level1)
+UNIT_TEST(
+    API_CaptureBindTest, LambdaNotThrowsWhenCapturedWeakPointerPointsToInvalidResource, testing::ext::TestSize.Level1)
 {
     {
         BASE_NS::shared_ptr<int> sp(new int {});

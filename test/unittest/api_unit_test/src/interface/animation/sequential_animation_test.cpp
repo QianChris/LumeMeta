@@ -29,7 +29,8 @@ class API_SequentialAnimationTest : public API_AnimationTestBase {
 protected:
 };
 
-UNIT_TEST_F(API_SequentialAnimationTest, SeekingSequentialAnimationNeedsToBeStartedToUpdateAnimatedPropertyValues, testing::ext::TestSize.Level1)
+UNIT_TEST_F(API_SequentialAnimationTest, SeekingSequentialAnimationNeedsToBeStartedToUpdateAnimatedPropertyValues,
+    testing::ext::TestSize.Level1)
 {
     // given
     auto property1 = ConstructProperty("Property1", 0.0F);

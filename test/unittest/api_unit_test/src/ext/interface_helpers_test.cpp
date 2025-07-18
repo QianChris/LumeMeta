@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <base/util/uid_util.h>
 
 #include <meta/interface/interface_helpers.h>
 #include <meta/interface/intf_metadata.h>
 #include <meta/interface/object_macros.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

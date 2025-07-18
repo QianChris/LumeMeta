@@ -16,8 +16,6 @@
 #ifndef META_TEST_RUNNER
 #define META_TEST_RUNNER
 
-#include "test_framework.h"
-
 #include <base/util/uid.h>
 #include <core/intf_engine.h>
 #include <core/io/intf_filesystem_api.h>
@@ -29,6 +27,7 @@
 #include <meta/base/plugin.h>
 
 #include "helpers/testing_objects.h"
+#include "test_framework.h"
 
 #if defined(__ANDROID__)
 #include <test_runner_android.h>

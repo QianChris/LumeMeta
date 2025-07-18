@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <meta/ext/metadata_helpers.h>
 #include <meta/ext/object_fwd.h>
 #include <meta/interface/intf_attach.h>
 #include <meta/interface/intf_derived.h>
 #include <meta/interface/intf_object.h>
 #include <meta/interface/intf_object_registry.h>
+
+#include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
 

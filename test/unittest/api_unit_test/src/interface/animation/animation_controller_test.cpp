@@ -86,7 +86,8 @@ UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListContainsStartedAnim
     EXPECT_THAT(runningAnimations[0].lock(), testing::Eq(anim));
 }
 
-UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWereStopped, testing::ext::TestSize.Level1)
+UNIT_TEST_F(
+    API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWereStopped, testing::ext::TestSize.Level1)
 {
     // given
     auto anim = CreateAnimation();
@@ -117,7 +118,8 @@ UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListContainsResumedAnim
     EXPECT_THAT(runningAnimations[0].lock(), testing::Eq(anim));
 }
 
-UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWereFinished, testing::ext::TestSize.Level1)
+UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWereFinished,
+    testing::ext::TestSize.Level1)
 {
     // given
     auto anim = CreateAnimation();
@@ -133,7 +135,8 @@ UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnima
     EXPECT_TRUE(sutAnimationCtrl_->GetRunning().empty());
 }
 
-UNIT_TEST_F(API_AnimationControllerTest, AnimationControllerUpdatesControllerPropOfAddedAnimation, testing::ext::TestSize.Level1)
+UNIT_TEST_F(API_AnimationControllerTest, AnimationControllerUpdatesControllerPropOfAddedAnimation,
+    testing::ext::TestSize.Level1)
 {
     // given
     auto anim = CreateAnimation();

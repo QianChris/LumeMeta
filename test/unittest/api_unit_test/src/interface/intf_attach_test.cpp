@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "test_framework.h"
-
 #include <base/containers/unordered_map.h>
 
 #include <meta/api/object.h>
@@ -24,6 +22,7 @@
 
 #include "helpers/serialisation_utils.h"
 #include "helpers/testing_objects.h"
+#include "test_framework.h"
 
 constexpr auto DataContextPropertyName = "FloatProp";
 

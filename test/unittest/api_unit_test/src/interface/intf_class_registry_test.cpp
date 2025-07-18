@@ -15,9 +15,8 @@
 
 #include <bitset>
 #include <limits>
-#include <type_traits>
-
 #include <test_framework.h>
+#include <type_traits>
 
 #include <base/util/uid_util.h>
 
