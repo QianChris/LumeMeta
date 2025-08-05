@@ -687,6 +687,16 @@ UNIT_TEST(API_PropertyTest, IsDefault, testing::ext::TestSize.Level1)
     prop->ResetValue();
     EXPECT_TRUE(prop->IsDefaultValue());
     EXPECT_EQ(prop->GetValue(), 1);
+
+    int count = 0;
+    prop->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&] {
+        ++count;
+    }));
+
+    prop->SetValue(1);
+    EXPECT_FALSE(prop->IsDefaultValue());
+    EXPECT_EQ(prop->GetValue(), 1);
+    EXPECT_EQ(count, 1);
 }
 
 META_REGISTER_CLASS(StaticValueTestMod, "3aff3770-0681-45b7-ab56-fe4487883a7a", ObjectCategory::NO_CATEGORY)
