@@ -65,6 +65,8 @@ else()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    # disable RTTI
+    add_compile_options(/GR-)
     # enable multi-processor compilation.
     add_compile_options(/MP)
     # also make sure the external/system include path definition extension is enabled! (if available)
@@ -92,7 +94,19 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(WIN32)
-        add_compile_options(-Wall -Wreturn-type -Werror=return-type -fdiagnostics-color=auto -Wno-deprecated-declarations -Wno-unused -Wno-overloaded-virtual -Wno-unqualified-std-cast-call)
+        add_compile_options(
+            -fno-rtti
+            -fno-exceptions
+            -Wall
+            -Wreturn-type
+            -Werror=return-type
+            -fdiagnostics-color=auto
+            -Wno-deprecated-declarations
+            -Wno-unused
+            -Wno-overloaded-virtual
+            -Wno-unqualified-std-cast-call
+            -Wno-nested-anon-types
+            -Wno-gnu-anonymous-struct)
     endif()
 endif()
 

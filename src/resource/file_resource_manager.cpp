@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+// disabled exceptions for msvc iomanip
+#define _HAS_EXCEPTIONS 0
+
 #include "file_resource_manager.h"
 
 #include <iomanip>

@@ -170,10 +170,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
 )
 
 if(MSVC)
-    target_compile_options(${PLUGIN_NAME} PRIVATE /GR-)
-    if(CMAKE_CXX_FLAGS MATCHES "/EHs ")
-      string(REPLACE "/EHs" "/EHs-c- /D_HAS_EXCEPTIONS=0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    endif()
+    string(REGEX REPLACE "/EH[a-z]+" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
     # std::mutex on msvc is 80 bytes and much slower than std::shared_mutex
     target_compile_definitions(${PLUGIN_NAME} PUBLIC META_USE_SHARED_MUTEX)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

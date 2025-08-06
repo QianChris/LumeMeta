@@ -35,7 +35,7 @@ UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedSharedPtr, testing::ext::T
         auto f = CaptureSafe([](auto p) { *p = 1; }, sp);
 
         EXPECT_EQ(*sp, 6);
-        EXPECT_NO_THROW(f());
+        f();
         EXPECT_EQ(*sp, 1);
     }
 
@@ -44,7 +44,7 @@ UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedSharedPtr, testing::ext::T
         auto f = CaptureSafe([](auto p) { *p = 1; }, sp);
 
         EXPECT_EQ(*sp, 6);
-        EXPECT_NO_THROW(f());
+        f();
         EXPECT_EQ(*sp, 1);
     }
 }
@@ -57,7 +57,7 @@ UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedWeakPtr, testing::ext::Tes
         auto f = CaptureSafe([](auto p) { *p = 1; }, wp);
 
         EXPECT_EQ(*sp, 6);
-        EXPECT_NO_THROW(f());
+        f();
         EXPECT_EQ(*sp, 1);
     }
 
@@ -67,7 +67,7 @@ UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedWeakPtr, testing::ext::Tes
         auto f = CaptureSafe([](auto p) { *p = 1; }, wp);
 
         EXPECT_EQ(*sp, 6);
-        EXPECT_NO_THROW(f());
+        f();
         EXPECT_EQ(*sp, 1);
     }
 }
@@ -80,7 +80,7 @@ UNIT_TEST(API_CaptureBindTest, LambdaNotThrowsWhenCapturedSharedPointerIsRelease
         auto f = CaptureSafe([](auto p) { *p = 1; }, p);
         p.reset();
 
-        EXPECT_NO_THROW(f());
+        f();
     }
 }
 
@@ -93,7 +93,7 @@ UNIT_TEST(
         auto f = CaptureSafe([](auto p) { *p = 1; }, BASE_NS::weak_ptr(sp));
         sp.reset();
 
-        EXPECT_NO_THROW(f());
+        f();
     }
 
     {
@@ -103,7 +103,7 @@ UNIT_TEST(
         auto f = CaptureSafe([](auto p) { *p = 1; }, wp);
         sp.reset();
 
-        EXPECT_NO_THROW(f());
+        f();
     }
 }
 

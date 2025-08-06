@@ -689,9 +689,7 @@ UNIT_TEST(API_PropertyTest, IsDefault, testing::ext::TestSize.Level1)
     EXPECT_EQ(prop->GetValue(), 1);
 
     int count = 0;
-    prop->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&] {
-        ++count;
-    }));
+    prop->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&] { ++count; }));
 
     prop->SetValue(1);
     EXPECT_FALSE(prop->IsDefaultValue());
