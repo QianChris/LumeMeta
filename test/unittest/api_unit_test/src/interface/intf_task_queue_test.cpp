@@ -547,6 +547,23 @@ UNIT_TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly, testing::ext::TestSize.
     EXPECT_EQ(value, 1);
 }
 
+UNIT_TEST(API_TaskQueueTest, CancelRunningTask, testing::ext::TestSize.Level1)
+{
+    std::atomic<bool> start {};
+    std::atomic<bool> done {};
+    auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
+    auto h = queue->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        start = true;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        done = true;
+        return false;
+    }));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    queue->CancelTask(h);
+    EXPECT_TRUE(start);
+    EXPECT_TRUE(done);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     API_TaskQueueTest, API_TaskQueueTest, ::testing::Values(ClassId::PollingTaskQueue, ClassId::ThreadedTaskQueue));
 
