@@ -200,6 +200,7 @@ const IAny& StackProperty::RawGetValue() const
     evaluating_ = false;
     return res;
 }
+
 void StackProperty::EvaluateAndStore()
 {
     // evaluate
@@ -209,6 +210,7 @@ void StackProperty::EvaluateAndStore()
         TryToSetToValue(res, v);
     }
 }
+
 const IAny& StackProperty::GetValue() const
 {
     bool isActive = false;

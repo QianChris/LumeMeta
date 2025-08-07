@@ -155,9 +155,9 @@ public:
                 auto& task = *it;
                 if (task.delay > TimeSpan()) {
                     // calculate the next executeTime in phase.. (ie. how many events missed)
-                    uint64_t dt = task.delay.ToMicroseconds();
-                    uint64_t et = task.executeTime.ToMicroseconds();
-                    uint64_t ct = curTime.ToMicroseconds();
+                    uint64_t dt = static_cast<uint64_t>(task.delay.ToMicroseconds());
+                    uint64_t et = static_cast<uint64_t>(task.executeTime.ToMicroseconds());
+                    uint64_t ct = static_cast<uint64_t>(curTime.ToMicroseconds());
                     // calculate the next executeTime in phase..
                     et += dt;
                     if (et <= ct) {

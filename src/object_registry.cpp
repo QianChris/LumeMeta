@@ -53,7 +53,7 @@ static BASE_NS::Uid GenerateInstanceId(uint64_t random)
     auto high = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed.time_since_epoch()).count();
 
     BASE_NS::Uid uid;
-    uid.data[0] = high;
+    uid.data[0] = static_cast<uint64_t>(high);
     uid.data[1] = random;
     return uid;
 }
