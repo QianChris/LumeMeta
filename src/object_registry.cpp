@@ -575,10 +575,114 @@ bool ObjectRegistry::UnregisterAllTaskQueues()
     return true;
 }
 
+#if __ANDROID__
+namespace {
+static thread_local ITaskQueue::WeakPtr* CurrentTaskQueueStorage = nullptr;
+std::mutex gInstanceLock;
+struct link {
+    ITaskQueue::WeakPtr* data {};
+    link* next {};
+};
+link* gInstances = nullptr;
+} // namespace
+
+void __attribute__((destructor)) ObjectRegistryCalledAtExit()
+{
+    // we HOPE that no one is still trying to use anything, as full shutdown is in progress.
+    link* cur {};
+    link* next = gInstances;
+    gInstances = nullptr;
+    while (next) {
+        cur = next;
+        delete cur->data;
+        cur->data = nullptr;
+
+        next = cur->next;
+        cur->next = nullptr;
+        delete cur;
+    }
+}
+static void RemoveNode(link* prev, link* cur, link* next)
+{
+    delete cur->data;
+    if (prev == nullptr) {
+        gInstances = cur->next;
+    } else {
+        prev->next = next;
+    }
+    delete cur;
+}
+static void FlushTaskQueueTLS()
+{
+    std::unique_lock lock { gInstanceLock };
+    link* prev {};
+    link* cur {};
+    link* next = gInstances;
+    while (next) {
+        cur = next;
+        next = cur->next;
+        if (cur->data->expired()) {
+            RemoveNode(prev, cur, next);
+        } else {
+            prev = cur;
+        }
+    }
+}
+static void RemoveTaskQueueTLS(META_NS::ITaskQueue::WeakPtr* remove)
+{
+    std::unique_lock lock { gInstanceLock };
+    link* prev {};
+    link* cur {};
+    link* next = gInstances;
+    while (next) {
+        cur = next;
+        next = cur->next;
+        if (cur->data == remove) {
+            RemoveNode(prev, cur, next);
+            return;
+        }
+        prev = cur;
+    }
+}
+
 static ITaskQueue::WeakPtr& GetCurrentTaskQueueImpl()
 {
-    static thread_local ITaskQueue::WeakPtr q;
-    return q;
+    if (!CurrentTaskQueueStorage) {
+        CurrentTaskQueueStorage = new ITaskQueue::WeakPtr();
+        std::unique_lock lock { gInstanceLock };
+        gInstances = new link { CurrentTaskQueueStorage, gInstances };
+    }
+    return *CurrentTaskQueueStorage;
+}
+
+ITaskQueue::Ptr ObjectRegistry::GetCurrentTaskQueue() const
+{
+    return CurrentTaskQueueStorage ? CurrentTaskQueueStorage->lock() : nullptr;
+}
+ITaskQueue::WeakPtr ObjectRegistry::SetCurrentTaskQueue(ITaskQueue::WeakPtr q)
+{
+    ITaskQueue::WeakPtr ret = CurrentTaskQueueStorage ? *CurrentTaskQueueStorage : nullptr;
+    if (q.expired()) {
+        if (CurrentTaskQueueStorage) {
+            CurrentTaskQueueStorage->reset();
+            RemoveTaskQueueTLS(CurrentTaskQueueStorage);
+            CurrentTaskQueueStorage = nullptr;
+        }
+    } else {
+        if (!CurrentTaskQueueStorage) {
+            CurrentTaskQueueStorage = new ITaskQueue::WeakPtr();
+            std::unique_lock lock { gInstanceLock };
+            gInstances = new link { CurrentTaskQueueStorage, gInstances };
+        }
+        *CurrentTaskQueueStorage = q;
+    }
+    return ret;
+}
+#else
+static ITaskQueue::WeakPtr& GetCurrentTaskQueueImpl()
+{
+    static thread_local ITaskQueue::WeakPtr CurrentTaskQueueStorage;
+    return CurrentTaskQueueStorage;
 }
 
 ITaskQueue::Ptr ObjectRegistry::GetCurrentTaskQueue() const
@@ -592,6 +696,8 @@ ITaskQueue::WeakPtr ObjectRegistry::SetCurrentTaskQueue(ITaskQueue::WeakPtr q)
     impl = q;
     return res;
 }
+#endif
+
 IPromise::Ptr ObjectRegistry::ConstructPromise()
 {
     return IPromise::Ptr(new Promise);

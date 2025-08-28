@@ -77,11 +77,51 @@ bool Dependencies::HasDependency(const IProperty* p) const
     return false;
 }
 
-Dependencies& GetDeps()
+#if __ANDROID__
+#include <mutex>
+
+namespace {
+static thread_local Dependencies* deps = nullptr;
+std::mutex gInstanceLock;
+struct link {
+    Dependencies* data {};
+    link* next {};
+};
+link* gInstances = nullptr;
+} // namespace
+
+void __attribute__((destructor)) DependenciesCalledAtExit()
 {
-    thread_local Dependencies deps;
-    return deps;
+    // we HOPE that no one is still trying to use anything, as full shutdown is in progress.
+    link* cur {};
+    link* next = gInstances;
+    gInstances = nullptr;
+    while (next) {
+        cur = next;
+        delete cur->data;
+        cur->data = nullptr;
+
+        next = cur->next;
+        cur->next = nullptr;
+        delete cur;
+    }
 }
 
+Dependencies& GetDeps()
+{
+    if (!deps) {
+        deps = new Dependencies;
+        std::unique_lock lock { gInstanceLock };
+        gInstances = new link { deps, gInstances };
+    }
+    return *deps;
+}
+#else
+Dependencies& GetDeps()
+{
+    static thread_local Dependencies deps;
+    return deps;
+}
+#endif
 } // namespace Internal
 META_END_NAMESPACE()
