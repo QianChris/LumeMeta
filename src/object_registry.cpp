@@ -575,7 +575,25 @@ bool ObjectRegistry::UnregisterAllTaskQueues()
     return true;
 }
 
-#if __ANDROID__
+#ifdef WIN32
+static ITaskQueue::WeakPtr& GetCurrentTaskQueueImpl()
+{
+    static thread_local ITaskQueue::WeakPtr CurrentTaskQueueStorage;
+    return CurrentTaskQueueStorage;
+}
+
+ITaskQueue::Ptr ObjectRegistry::GetCurrentTaskQueue() const
+{
+    return GetCurrentTaskQueueImpl().lock();
+}
+ITaskQueue::WeakPtr ObjectRegistry::SetCurrentTaskQueue(ITaskQueue::WeakPtr q)
+{
+    auto& impl = GetCurrentTaskQueueImpl();
+    auto res = impl;
+    impl = q;
+    return res;
+}
+#else
 namespace {
 static thread_local ITaskQueue::WeakPtr* CurrentTaskQueueStorage = nullptr;
 std::mutex gInstanceLock;
@@ -677,24 +695,6 @@ ITaskQueue::WeakPtr ObjectRegistry::SetCurrentTaskQueue(ITaskQueue::WeakPtr q)
         *CurrentTaskQueueStorage = q;
     }
     return ret;
-}
-#else
-static ITaskQueue::WeakPtr& GetCurrentTaskQueueImpl()
-{
-    static thread_local ITaskQueue::WeakPtr CurrentTaskQueueStorage;
-    return CurrentTaskQueueStorage;
-}
-
-ITaskQueue::Ptr ObjectRegistry::GetCurrentTaskQueue() const
-{
-    return GetCurrentTaskQueueImpl().lock();
-}
-ITaskQueue::WeakPtr ObjectRegistry::SetCurrentTaskQueue(ITaskQueue::WeakPtr q)
-{
-    auto& impl = GetCurrentTaskQueueImpl();
-    auto res = impl;
-    impl = q;
-    return res;
 }
 #endif
 

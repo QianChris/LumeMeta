@@ -77,7 +77,13 @@ bool Dependencies::HasDependency(const IProperty* p) const
     return false;
 }
 
-#if __ANDROID__
+#ifdef WIN32
+Dependencies& GetDeps()
+{
+    static thread_local Dependencies deps;
+    return deps;
+}
+#else
 #include <mutex>
 
 namespace {
@@ -115,12 +121,6 @@ Dependencies& GetDeps()
         gInstances = new link { deps, gInstances };
     }
     return *deps;
-}
-#else
-Dependencies& GetDeps()
-{
-    static thread_local Dependencies deps;
-    return deps;
 }
 #endif
 } // namespace Internal
