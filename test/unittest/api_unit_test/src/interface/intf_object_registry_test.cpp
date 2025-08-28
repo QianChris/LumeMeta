@@ -709,5 +709,29 @@ UNIT_TEST(API_ObjectRegistryTest, GetInterface, testing::ext::TestSize.Level1)
     }
 }
 
+UNIT_TEST(API_ObjectRegistryTest, SameObjectInstanceId, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+
+    InstanceId id("4aa8aaf4-c42f-4aa5-8482-fa6d8602574a");
+
+    auto obj1 = r.Create(META_NS::ClassId::Object, IObjectRegistry::CreateInfo { id, true });
+    ASSERT_TRUE(obj1);
+
+    ASSERT_EQ(r.GetObjectInstanceByInstanceId(id), obj1);
+    obj1.reset();
+
+    auto obj2 = r.Create(META_NS::ClassId::Object, IObjectRegistry::CreateInfo { id, true });
+    ASSERT_TRUE(obj2);
+
+    // destroy some objects so that the registry "auto" disposal kicks in
+    for (size_t i = 0; i != 120; ++i) {
+        auto v = r.Create(META_NS::ClassId::Object);
+        ASSERT_TRUE(v);
+    }
+
+    ASSERT_EQ(r.GetObjectInstanceByInstanceId(id), obj2);
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

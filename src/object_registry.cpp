@@ -398,10 +398,15 @@ void ObjectRegistry::DoDisposal(const BASE_NS::vector<InstanceId>& uids) const
     for (auto&& v : uids) {
         auto it = instancesByUid_.find(v);
         if (it != instancesByUid_.end()) {
-            instancesByUid_.erase(it);
+            // check if the instance id was already reused and don't touch if so
+            if (it->second.ptr.expired()) {
+                instancesByUid_.erase(it);
+            }
             auto it = singletons_.find(v);
             if (it != singletons_.end()) {
-                singletons_.erase(it);
+                if (it->second.expired()) {
+                    singletons_.erase(it);
+                }
             }
         }
     }
@@ -425,9 +430,12 @@ BASE_NS::vector<IObject::Ptr> ObjectRegistry::GetAllObjectInstances() const
     BASE_NS::vector<IObject::Ptr> result;
     std::shared_lock lock { mutex_ };
     result.reserve(instancesByUid_.size());
-    for (const auto& v : instancesByUid_) {
+    for (auto& v : instancesByUid_) {
         if (auto strong = v.second.ptr.lock()) {
             result.emplace_back(strong);
+        } else {
+            // release the control block already
+            v.second.ptr.reset();
         }
     }
     return result;
@@ -440,9 +448,12 @@ BASE_NS::vector<IObject::Ptr> ObjectRegistry::GetAllSingletonObjectInstances() c
     std::shared_lock lock { mutex_ };
     if (!singletons_.empty()) {
         result.reserve(singletons_.size());
-        for (const auto& s : singletons_) {
+        for (auto& s : singletons_) {
             if (auto strong = s.second.lock()) {
                 result.push_back(strong);
+            } else {
+                // release the control block already
+                s.second.reset();
             }
         }
     }
@@ -455,10 +466,13 @@ BASE_NS::vector<IObject::Ptr> ObjectRegistry::GetObjectInstancesByCategory(
     CheckGC();
     BASE_NS::vector<IObject::Ptr> result;
     std::shared_lock lock { mutex_ };
-    for (const auto& i : instancesByUid_) {
+    for (auto& i : instancesByUid_) {
         if (CheckCategoryBits(static_cast<ObjectCategoryBits>(i.second.category), category, strict)) {
             if (auto strong = i.second.ptr.lock()) {
                 result.emplace_back(strong);
+            } else {
+                // release the control block already
+                i.second.ptr.reset();
             }
         }
     }
@@ -493,6 +507,9 @@ IObject::Ptr ObjectRegistry::GetObjectInstanceByInstanceId(InstanceId uid) const
     if (it2 != instancesByUid_.end()) {
         if (auto strong = it2->second.ptr.lock()) {
             return strong;
+        } else {
+            // release the control block already
+            it2->second.ptr.reset();
         }
         CORE_LOG_D("The instance you are trying to find has already died");
     }
