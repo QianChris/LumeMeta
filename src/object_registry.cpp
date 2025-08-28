@@ -630,22 +630,6 @@ static void RemoveNode(link* prev, link* cur, link* next)
     }
     delete cur;
 }
-static void FlushTaskQueueTLS()
-{
-    std::unique_lock lock { gInstanceLock };
-    link* prev {};
-    link* cur {};
-    link* next = gInstances;
-    while (next) {
-        cur = next;
-        next = cur->next;
-        if (cur->data->expired()) {
-            RemoveNode(prev, cur, next);
-        } else {
-            prev = cur;
-        }
-    }
-}
 static void RemoveTaskQueueTLS(META_NS::ITaskQueue::WeakPtr* remove)
 {
     std::unique_lock lock { gInstanceLock };
