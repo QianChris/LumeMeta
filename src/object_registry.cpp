@@ -433,9 +433,6 @@ BASE_NS::vector<IObject::Ptr> ObjectRegistry::GetAllObjectInstances() const
     for (auto& v : instancesByUid_) {
         if (auto strong = v.second.ptr.lock()) {
             result.emplace_back(strong);
-        } else {
-            // release the control block already
-            v.second.ptr.reset();
         }
     }
     return result;
@@ -451,9 +448,6 @@ BASE_NS::vector<IObject::Ptr> ObjectRegistry::GetAllSingletonObjectInstances() c
         for (auto& s : singletons_) {
             if (auto strong = s.second.lock()) {
                 result.push_back(strong);
-            } else {
-                // release the control block already
-                s.second.reset();
             }
         }
     }
@@ -470,9 +464,6 @@ BASE_NS::vector<IObject::Ptr> ObjectRegistry::GetObjectInstancesByCategory(
         if (CheckCategoryBits(static_cast<ObjectCategoryBits>(i.second.category), category, strict)) {
             if (auto strong = i.second.ptr.lock()) {
                 result.emplace_back(strong);
-            } else {
-                // release the control block already
-                i.second.ptr.reset();
             }
         }
     }
@@ -507,9 +498,6 @@ IObject::Ptr ObjectRegistry::GetObjectInstanceByInstanceId(InstanceId uid) const
     if (it2 != instancesByUid_.end()) {
         if (auto strong = it2->second.ptr.lock()) {
             return strong;
-        } else {
-            // release the control block already
-            it2->second.ptr.reset();
         }
         CORE_LOG_D("The instance you are trying to find has already died");
     }
