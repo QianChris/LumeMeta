@@ -157,9 +157,11 @@ public:
     DummyRef ref;
     CORE_NS::EntityReference entityRef { ent, CORE_NS::IEntityReferenceCounter::Ptr(&ref) };
     Property tprop;
-    CORE_NS::PropertyApiImpl<Property> property;
+    BASE_NS::unique_ptr<CORE_NS::PropertyApiImpl<Property>> property;
 
-    TestComponentManager(BASE_NS::array_view<const CORE_NS::Property> prop) : property(&tprop, prop) {}
+    TestComponentManager(BASE_NS::array_view<const CORE_NS::Property> prop)
+        : property(new CORE_NS::PropertyApiImpl<Property>(&tprop, prop))
+    {}
 
     BASE_NS::string_view GetName() const override
     {
@@ -175,7 +177,7 @@ public:
     }
     const CORE_NS::IPropertyApi& GetPropertyApi() const override
     {
-        return property;
+        return *property;
     }
     CORE_NS::Entity GetEntity(IComponentManager::ComponentId index) const override
     {
@@ -196,6 +198,9 @@ public:
     void Create(CORE_NS::Entity entity) override {}
     bool Destroy(CORE_NS::Entity entity) override
     {
+        if (entity == ent) {
+            property.reset();
+        }
         return true;
     }
     void Gc() override {}
@@ -228,20 +233,32 @@ public:
     void SetData(CORE_NS::Entity entity, const CORE_NS::IPropertyHandle& data) override {}
     const CORE_NS::IPropertyHandle* GetData(CORE_NS::Entity entity) const override
     {
-        return entity == ent ? property.GetData() : nullptr;
+        if (!property) {
+            return nullptr;
+        }
+        return entity == ent ? property->GetData() : nullptr;
     }
     CORE_NS::IPropertyHandle* GetData(CORE_NS::Entity entity) override
     {
-        return entity == ent ? property.GetData() : nullptr;
+        if (!property) {
+            return nullptr;
+        }
+        return entity == ent ? property->GetData() : nullptr;
     }
     void SetData(ComponentId index, const CORE_NS::IPropertyHandle& data) override {}
     const CORE_NS::IPropertyHandle* GetData(ComponentId index) const override
     {
-        return index == 0 ? property.GetData() : nullptr;
+        if (!property) {
+            return nullptr;
+        }
+        return index == 0 ? property->GetData() : nullptr;
     }
     CORE_NS::IPropertyHandle* GetData(ComponentId index) override
     {
-        return index == 0 ? property.GetData() : nullptr;
+        if (!property) {
+            return nullptr;
+        }
+        return index == 0 ? property->GetData() : nullptr;
     }
     CORE_NS::IEcs& GetEcs() const override
     {

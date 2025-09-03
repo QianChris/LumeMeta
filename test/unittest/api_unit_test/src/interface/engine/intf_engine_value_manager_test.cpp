@@ -226,6 +226,38 @@ UNIT_TEST_F(API_EngineManagerTest, AddValuesRecursivelyWithHandle, testing::ext:
     EXPECT_EQ(array->GetValue(), (BASE_NS::vector<uint32_t> { 1, 1 }));
 }
 
+UNIT_TEST_F(API_EngineManagerTest, SyncWithInvalidParentHandle, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop1::EngineTestProp> cman1 { prop1::ENGINE_TESTPROP_METADATA };
+    TestComponentManager<prop2::EngineTestProp> cman2 { prop2::ENGINE_TESTPROP_METADATA };
+
+    EXPECT_TRUE(CORE_NS::SetPropertyValue(*cman1.GetData(0), "handle", cman2.GetData(0)));
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+
+    EngineValueOptions options;
+    options.recurseKnownStructs = true;
+    AddEngineValuesRecursively(manager, EnginePropertyHandle { &cman1, cman1.entityRef }, options);
+    EXPECT_EQ(manager->GetAllEngineValues().size(), prop1::TEST_RECURSIVE_PROPERTY_COUNT + prop2::TEST_PROPERTY_COUNT);
+
+    auto handle = manager->ConstructProperty<CORE_NS::IPropertyHandle*>("handle");
+    ASSERT_TRUE(handle);
+    EXPECT_EQ(handle->GetValue(), cman2.GetData(0));
+
+    auto value = manager->ConstructProperty<int>("handle.value");
+    ASSERT_TRUE(value);
+    EXPECT_EQ(value->GetValue(), 1);
+
+    // remove handles
+    cman1.Destroy(cman1.ent);
+    cman2.Destroy(cman2.ent);
+
+    EXPECT_FALSE(manager->Sync(EngineSyncDirection::AUTO));
+
+    EXPECT_EQ(value->GetValue(), 1);
+}
+
 UNIT_TEST_F(API_EngineManagerTest, ChangeHandle, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman1 { prop1::ENGINE_TESTPROP_METADATA };
