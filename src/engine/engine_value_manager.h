@@ -38,6 +38,7 @@ public:
 
     void SetNotificationQueue(const ITaskQueue::WeakPtr&) override;
     bool ConstructValues(EnginePropertyHandle handle, EngineValueOptions) override;
+    bool ConstructValues(CORE_NS::IPropertyHandle* handle, EngineValueOptions) override;
     bool ConstructValues(IValue::Ptr value, EngineValueOptions) override;
     bool ConstructValue(EnginePropertyParams property, EngineValueOptions) override;
     bool ConstructValue(EnginePropertyHandle handle, BASE_NS::string_view path, EngineValueOptions) override;
