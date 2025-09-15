@@ -69,6 +69,7 @@ public:
 class IFileImporter : public IImporter {
     META_INTERFACE(IImporter, IFileImporter, "97d96540-675c-48e0-8895-202bf8b9bf69")
 public:
+    using IImporter::Import;
     /// Import given input file as object
     virtual IObject::Ptr Import(CORE_NS::IFile& input, ImportOptions opts) = 0;
     IObject::Ptr Import(CORE_NS::IFile& input)

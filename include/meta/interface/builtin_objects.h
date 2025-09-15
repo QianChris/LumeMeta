@@ -143,6 +143,8 @@ META_REGISTER_CLASS(EngineInputPropertyManager, "10a81469-07c2-4cab-b8a5-3249e41
 META_REGISTER_CLASS(FileResourceManager, "ac0475e4-7f9d-4762-8c2a-1cfcc6a9b061", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(ObjectResource, "22d5ef8e-d625-4563-927f-435a460c3c90", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(ObjectResourceType, "8f9a3b1c-a4a1-4c68-b386-3eb9ac3c8e66", ObjectCategoryBits::NO_CATEGORY)
+META_REGISTER_CLASS(ObjectTemplate, "a2dc0dfc-8575-49f5-bd7f-ab82ad68b9b6", ObjectCategoryBits::NO_CATEGORY)
+META_REGISTER_CLASS(ObjectTemplateType, "ab7477e7-5595-439b-8af5-aca9fd5d3024", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(ResourcePlaceholder, "a83cf98c-1c51-4666-bed2-a806e9a69dbb", ObjectCategoryBits::NO_CATEGORY)
 
 META_END_NAMESPACE()

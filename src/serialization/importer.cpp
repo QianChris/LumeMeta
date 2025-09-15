@@ -76,16 +76,16 @@ IObject::Ptr Importer::Import(const ISerNode::ConstPtr& tree, ImportOptions opts
     if (auto root = interface_cast<IRootNode>(tree)) {
         metadata_ = root->GetMetadata();
         object = ImportObject(root->GetObject());
-        if (object) {
-            if (!opts.manualDeferredResolve) {
-                ResolveDeferred();
-            }
-        } else {
-            deferred_.clear();
-            finalizes_.clear();
+    } else {
+        object = ImportObject(tree);
+    }
+    if (object) {
+        if (!opts.manualDeferredResolve) {
+            ResolveDeferred();
         }
     } else {
-        CORE_LOG_W("Invalid serialisation tree, expected root node");
+        deferred_.clear();
+        finalizes_.clear();
     }
     return object;
 }

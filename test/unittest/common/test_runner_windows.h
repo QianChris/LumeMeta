@@ -16,8 +16,6 @@
 #ifndef TEST_RUNNER_WINDOWS
 #define TEST_RUNNER_WINDOWS
 
-#include <Windows.h> // window
-
 #include <base/containers/string.h>
 #include <base/containers/vector.h>
 
@@ -44,7 +42,7 @@ public:
 
     void DestroyNativeWindow();
 
-    HWND GetWindowHandle() const;
+    void* GetWindowHandle() const;
 
     int GetGTestResult() const;
 
@@ -75,8 +73,8 @@ private:
     BASE_NS::string m_lumeAppAssetPath { "./../../assets/test_data/" };
 
     // Window
-    HWND m_hWnd { nullptr };
-    HDC m_hDC { nullptr };
+    void* m_hWnd { nullptr };
+    void* m_hDC { nullptr };
 
     // GTest
     TestData m_testData;

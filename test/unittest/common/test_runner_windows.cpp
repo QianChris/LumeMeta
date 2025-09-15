@@ -21,6 +21,7 @@
 #include <intrin.h> // __cpuid
 #include <iostream>
 #include <memory>
+#include <Windows.h> // window
 
 #include <base/containers/unique_ptr.h>
 
@@ -133,20 +134,20 @@ void WindowsApp::CreateNativeWindow(uint32_t width, uint32_t height, const BASE_
     AdjustWindowRect(&rect, style, false);
     m_hWnd = CreateWindowEx(0, wc.lpszClassName, TEXT(title.c_str()), style, CW_USEDEFAULT, CW_USEDEFAULT,
         rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, hInstance, nullptr);
-    m_hDC = GetDC(m_hWnd);
+    m_hDC = GetDC((HWND)m_hWnd);
 }
 
 void WindowsApp::DestroyNativeWindow()
 {
     HINSTANCE hInstance = GetModuleHandle(nullptr);
-    ReleaseDC(m_hWnd, m_hDC);
-    DestroyWindow(m_hWnd);
+    ReleaseDC((HWND)m_hWnd, (HDC)m_hDC);
+    DestroyWindow((HWND)m_hWnd);
     UnregisterClass(TEXT("TestClass"), hInstance);
     m_hDC = nullptr;
     m_hWnd = nullptr;
 }
 
-HWND WindowsApp::GetWindowHandle() const
+void* WindowsApp::GetWindowHandle() const
 {
     return m_hWnd;
 }

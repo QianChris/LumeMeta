@@ -41,6 +41,7 @@
 #include "proxy_object.h"
 #include "resource/file_resource_manager.h"
 #include "resource/object_resource.h"
+#include "resource/object_template.h"
 #include "resource/resource_placeholder.h"
 #include "serialization/backend/debug_output.h"
 #include "serialization/backend/json_input.h"
@@ -93,7 +94,9 @@ static constexpr ObjectTypeInfo OBJECTS[] = {
     ObjectResource::OBJECT_INFO,
     ObjectResourceType::OBJECT_INFO,
     ObjectResourceOptions::OBJECT_INFO,
-    ResourcePlaceholder::OBJECT_INFO
+    ResourcePlaceholder::OBJECT_INFO,
+    ObjectTemplate::OBJECT_INFO,
+    ObjectTemplateType::OBJECT_INFO
 };
 // clang-format on
 

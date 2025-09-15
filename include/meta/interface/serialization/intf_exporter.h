@@ -64,6 +64,7 @@ public:
 class IFileExporter : public IExporter {
     META_INTERFACE(IExporter, IFileExporter, "e3575e71-ff5b-4a8c-838b-c7886f5689cf")
 public:
+    using IExporter::Export;
     /// Export object hierarchy to given output file
     virtual ReturnError Export(CORE_NS::IFile& output, const IObject::ConstPtr& object, ExportOptions options) = 0;
     ReturnError Export(CORE_NS::IFile& output, const IObject::ConstPtr& object)

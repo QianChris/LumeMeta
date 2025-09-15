@@ -80,8 +80,7 @@ bool ObjectResourceType::SaveResource(const CORE_NS::IResource::ConstPtr& p, con
 {
     bool res = true;
     if (s.payload) {
-        auto i = interface_cast<CORE_NS::IResource>(p);
-        if (!i || i->GetResourceType() != type_.ToUid()) {
+        if (!p || p->GetResourceType() != type_.ToUid()) {
             CORE_LOG_W("Invalid resource");
             return false;
         }

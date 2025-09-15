@@ -19,9 +19,11 @@
 
 #include <meta/api/object.h>
 #include <meta/base/meta_types.h>
+#include <meta/interface/builtin_objects.h>
 #include <meta/interface/detail/any.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/property/construct_property.h>
+#include <meta/interface/resource/intf_object_template.h>
 #include <meta/interface/resource/intf_resource.h>
 
 #include "helpers/serialisation_utils.h"
@@ -42,6 +44,9 @@ protected:
     {
         resources_ = GetObjectRegistry().Create<CORE_NS::IResourceManager>(ClassId::FileResourceManager);
         ASSERT_TRUE(resources_);
+
+        ASSERT_TRUE(resources_->AddResourceType(
+            GetObjectRegistry().Create<CORE_NS::IResourceType>(ClassId::ObjectTemplateType)));
 
         ASSERT_TRUE(resources_->AddResourceType(
             GetObjectRegistry().Create<CORE_NS::IResourceType>(ClassId::ObjectResourceType)));
@@ -112,6 +117,84 @@ UNIT_TEST_F(API_ResourceSerializationTest, ResourceManagerSerialisation, testing
     auto rp = resm->GetProperty<int>("prop");
     ASSERT_TRUE(rp);
     EXPECT_EQ(rp->GetValue(), 1);
+}
+
+META_REGISTER_CLASS(MyInstor, "627e2fa8-b8d4-45c5-92a7-a86a87711e05", META_NS::ObjectCategoryBits::NO_CATEGORY)
+
+class MyInstor : public IntroduceInterfaces<MetaObject, IObjectInstantiator> {
+    META_OBJECT(MyInstor, ClassId::MyInstor, IntroduceInterfaces)
+public:
+    IObject::Ptr Instantiate(const IObjectTemplate& templ, const SharedPtrIInterface& context) override
+    {
+        Object gen(CreateNew);
+        return Update(*gen.GetPtr(), templ, context);
+    }
+    META_NS::IObject::Ptr Update(
+        IObject& gen, const IObjectTemplate& templ, const SharedPtrIInterface& context) override
+    {
+        META_NS::IObject::Ptr res;
+        if (auto obj = GetValue(templ.Content())) {
+            Metadata md(obj);
+            if (auto count = md.GetProperty<int>("count")) {
+                if (auto genmd = interface_cast<IMetadata>(&gen)) {
+                    for (int i = 0; i != GetValue(count); ++i) {
+                        BASE_NS::string name { BASE_NS::to_string(i) };
+                        if (!genmd->GetProperty(name)) {
+                            genmd->AddProperty(ConstructProperty<BASE_NS::string>(BASE_NS::to_string(i)));
+                        }
+                    }
+                    res = gen.GetSelf();
+                }
+            }
+        }
+        return res;
+    }
+};
+
+UNIT_TEST_F(API_ResourceSerializationTest, ObjectTemplate, testing::ext::TestSize.Level1)
+{
+    GetObjectRegistry().RegisterObjectType<MyInstor>();
+    {
+        auto res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectTemplate);
+        ASSERT_TRUE(res);
+        if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
+            i->SetResourceId("myobject");
+        }
+
+        Object obj(CreateNew);
+        Metadata md(obj);
+        md.AddProperty<int>("count", 6, ObjectFlagBits::SERIALIZE);
+
+        auto ot = interface_cast<IObjectTemplate>(res);
+        ASSERT_TRUE(ot);
+
+        ot->Instantiator()->SetValue(ClassId::MyInstor);
+        ot->SetContent(obj);
+
+        ASSERT_TRUE(resources_->AddResource(res, "app://test_template.json"));
+
+        ASSERT_EQ(resources_->Export("app://test_template.resources"), CORE_NS::IResourceManager::Result::OK);
+        resources_->RemoveAllResources();
+    }
+
+    ASSERT_EQ(resources_->Import("app://test_template.resources"), CORE_NS::IResourceManager::Result::OK);
+    auto res = interface_pointer_cast<IObjectTemplate>(resources_->GetResource("myobject"));
+    ASSERT_TRUE(res);
+
+    auto obj = res->Instantiate(nullptr);
+    ASSERT_TRUE(obj);
+    Metadata md(obj);
+    EXPECT_EQ(md.GetProperties().size(), 6);
+
+    auto to = res->Content()->GetValue();
+    Metadata tomd(to);
+    auto p = tomd.GetProperty<int>("count");
+    ASSERT_TRUE(p);
+    p->SetValue(8);
+    EXPECT_TRUE(res->Update(*obj, nullptr));
+    EXPECT_EQ(md.GetProperties().size(), 8);
+
+    GetObjectRegistry().UnregisterObjectType<MyInstor>();
 }
 
 } // namespace UTest

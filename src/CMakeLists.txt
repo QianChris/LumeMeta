@@ -132,6 +132,12 @@ target_sources(${PLUGIN_NAME} PRIVATE
     register_engine_access.cpp
     register_entities.cpp
     register_value_serializers.cpp
+    resource/file_resource_manager.cpp
+    resource/file_resource_manager.h
+    resource/object_resource.cpp
+    resource/object_resource.h
+    resource/object_template.cpp
+    resource/object_template.h
     serialization/backend/debug_output.cpp
     serialization/backend/debug_output.h
     serialization/backend/json_input.cpp
@@ -153,10 +159,6 @@ target_sources(${PLUGIN_NAME} PRIVATE
     system_clock.cpp
     task_queue.h
     threaded_task_queue.cpp
-    resource/file_resource_manager.h
-    resource/file_resource_manager.cpp
-    resource/object_resource.h
-    resource/object_resource.cpp
 )
 
 set_source_files_properties(register_default_props.cpp PROPERTIES COMPILE_FLAGS $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/bigobj>)
