@@ -42,6 +42,8 @@ class API_EngineValueTest : public ::testing::Test {};
 
 UNIT_TEST_F(API_EngineValueTest, Values, testing::ext::TestSize.Level1)
 {
+    // The purpose of this test case is to cover as many branches of CoreAny and ArrayCoreAny as possible
+
     auto& data = GetObjectRegistry().GetEngineData();
 
     auto accesses = data.GetAllRegisteredValueAccess();
@@ -94,9 +96,9 @@ static PropertyHandle* CurrentTestingProperty {};
 
 class PropertyHandle : public CORE_NS::IPropertyHandle {
 public:
-    PropertyHandle(const CORE_NS::PropertyTypeDecl& decl) : byteSize_(decl.byteSize)
+    PropertyHandle(const CORE_NS::PropertyTypeDecl& decl) : decl_(decl)
     {
-        data_.resize(byteSize_);
+        data_.resize(decl_.byteSize, 0);
         api_.size = [](uintptr_t container) { return Internal::CurrentTestingProperty->size_; };
         api_.resize = [](uintptr_t container, size_t newSize) {
             auto& ph = *Internal::CurrentTestingProperty;
@@ -146,25 +148,159 @@ public:
 
     size_t GetDataIndex(size_t index)
     {
-        return index * byteSize_;
+        return index * decl_.byteSize;
+    }
+
+    const CORE_NS::PropertyTypeDecl& GetPropertyTypeDecl() const
+    {
+        return decl_;
     }
 
 private:
     CORE_NS::ContainerApi api_;
-    size_t byteSize_;
     size_t size_ { 1 };
     BASE_NS::vector<uint8_t> data_;
+    CORE_NS::PropertyTypeDecl decl_;
+};
+
+class EngineValueTestComponentManager final : public CORE_NS::IComponentManager {
+public:
+    EngineValueTestComponentManager(const CORE_NS::PropertyTypeDecl& decl)
+    {
+        handle_ = BASE_NS::make_unique<PropertyHandle>(decl);
+        Internal::CurrentTestingProperty = handle_.get();
+    }
+    ~EngineValueTestComponentManager() override
+    {
+        Internal::CurrentTestingProperty = nullptr;
+        handle_.reset();
+    }
+    BASE_NS::string_view GetName() const override
+    {
+        return "EngineValueTestComponentManager";
+    }
+    BASE_NS::Uid GetUid() const override
+    {
+        return {};
+    }
+    size_t GetComponentCount() const override
+    {
+        return 1;
+    }
+    const CORE_NS::IPropertyApi& GetPropertyApi() const override
+    {
+        assert(false);
+        abort();
+        return *(CORE_NS::IPropertyApi*)nullptr;
+    }
+    CORE_NS::Entity GetEntity(IComponentManager::ComponentId index) const override
+    {
+        return CORE_NS::Entity {};
+    }
+    uint32_t GetComponentGeneration(IComponentManager::ComponentId index) const override
+    {
+        return 0;
+    }
+    bool HasComponent(CORE_NS::Entity entity) const override
+    {
+        return true;
+    }
+    IComponentManager::ComponentId GetComponentId(CORE_NS::Entity entity) const override
+    {
+        return 0;
+    }
+    void Create(CORE_NS::Entity entity) override {}
+    bool Destroy(CORE_NS::Entity entity) override
+    {
+        return true;
+    }
+    void Gc() override {}
+    void Destroy(BASE_NS::array_view<const CORE_NS::Entity> gcList) override {}
+    BASE_NS::vector<CORE_NS::Entity> GetAddedComponents() override
+    {
+        return {};
+    }
+    BASE_NS::vector<CORE_NS::Entity> GetRemovedComponents() override
+    {
+        return {};
+    }
+    BASE_NS::vector<CORE_NS::Entity> GetUpdatedComponents() override
+    {
+        return {};
+    }
+    BASE_NS::vector<CORE_NS::Entity> GetMovedComponents() override
+    {
+        return {};
+    }
+    CORE_NS::ComponentManagerModifiedFlags GetModifiedFlags() const override
+    {
+        return 0;
+    }
+    void ClearModifiedFlags() override {}
+    uint32_t GetGenerationCounter() const override
+    {
+        return 0;
+    }
+    void SetData(CORE_NS::Entity entity, const CORE_NS::IPropertyHandle& data) override {}
+    const CORE_NS::IPropertyHandle* GetData(CORE_NS::Entity entity) const override
+    {
+        returnValidCounter_--;
+        return returnValidCounter_ ? handle_.get() : nullptr;
+    }
+    CORE_NS::IPropertyHandle* GetData(CORE_NS::Entity entity) override
+    {
+        returnValidCounter_--;
+        return returnValidCounter_ ? handle_.get() : nullptr;
+    }
+    void SetData(ComponentId index, const CORE_NS::IPropertyHandle& data) override {}
+    const CORE_NS::IPropertyHandle* GetData(ComponentId index) const override
+    {
+        returnValidCounter_--;
+        return returnValidCounter_ ? handle_.get() : nullptr;
+    }
+    CORE_NS::IPropertyHandle* GetData(ComponentId index) override
+    {
+        returnValidCounter_--;
+        return returnValidCounter_ ? handle_.get() : nullptr;
+    }
+    CORE_NS::IEcs& GetEcs() const override
+    {
+        assert(false);
+        abort();
+        return *(CORE_NS::IEcs*)nullptr;
+    }
+
+public:
+    PropertyHandle* GetPropertyHandle()
+    {
+        return handle_.get();
+    }
+    void SetReturnInvalidCount(int count)
+    {
+        returnValidCounter_ = count;
+    }
+    void ResetReturnInvalidCount()
+    {
+        returnValidCounter_ = std::numeric_limits<int>::max();
+    }
+
+private:
+    BASE_NS::unique_ptr<PropertyHandle> handle_;
+    mutable int returnValidCounter_ { std::numeric_limits<int>::max() };
 };
 
 UNIT_TEST_F(API_EngineValueTest, Access, testing::ext::TestSize.Level1)
 {
+    // The purpose of this test case is to cover as many branches of EngineInternalValueAccess and
+    // EngineInternalArrayValueAccess as possible
+
     auto& data = GetObjectRegistry().GetEngineData();
 
     auto accesses = data.GetAllRegisteredValueAccess();
     EXPECT_FALSE(accesses.empty());
 
     auto testAccess = [](const IEngineInternalValueAccess::Ptr& access, const EnginePropertyParams& params,
-                          const IAny::Ptr& any) {
+                          EngineValueTestComponentManager& manager, const IAny::Ptr& any) {
         ASSERT_TRUE(any);
         access->SyncFromEngine(params, *any);
         access->SyncToEngine(*any, params);
@@ -172,26 +308,60 @@ UNIT_TEST_F(API_EngineValueTest, Access, testing::ext::TestSize.Level1)
         auto invalid = Any<InvalidType> {};
         access->SyncFromEngine(params, invalid);
         access->SyncToEngine(invalid, params);
+
+        auto sync = [&](int failCounter) {
+            manager.SetReturnInvalidCount(failCounter);
+            access->SyncToEngine(*any, params);
+            manager.SetReturnInvalidCount(failCounter);
+            access->SyncToEngine(invalid, params);
+            manager.SetReturnInvalidCount(failCounter);
+            access->SyncFromEngine(params, *any);
+            manager.SetReturnInvalidCount(failCounter);
+            access->SyncFromEngine(params, *any);
+        };
+
+        // Make SyncToEngine fail after it has first internally run successful SyncFromEngine
+        sync(3);
+        sync(2);
+        sync(1);
+        sync(0);
+        manager.ResetReturnInvalidCount();
     };
 
-    auto verifyAny = [&](const IEngineInternalValueAccess::Ptr& access, PropertyHandle& ph, CORE_NS::Property& property,
-                         const IAny::Ptr& any) {
-        auto* ca = ph.GetContainerApi();
+    auto verifyAny = [&](const IEngineInternalValueAccess::Ptr& access, EngineValueTestComponentManager& manager,
+                         std::function<IAny::Ptr(CORE_NS::Property&)>&& createAny) {
+        auto* ph = manager.GetPropertyHandle();
+        ASSERT_TRUE(ph);
+        auto* ca = ph->GetContainerApi();
+        ASSERT_TRUE(ca);
+        const auto& decl = ph->GetPropertyTypeDecl();
+        CORE_NS::Property property;
+        property.type = decl;
+        property.metaData.containerMethods = ca;
+        property.count = 0;
+        property.size = decl.byteSize;
+        property.offset = 0;
+        property.flags = 0;
+        ca->property = property;
+
+        auto any = createAny(property);
+
         EnginePropertyParams params;
         params.property = property;
         // Invalid handle
-        testAccess(access, params, any);
+        testAccess(access, params, manager, any);
         // Set handle
         EnginePropertyHandle handle;
-        handle.handle = &ph;
+        handle.manager = &manager;
+        handle.entity = CORE_NS::Entity { 1 }; // Any valid value is ok here
         params.handle = handle;
-        testAccess(access, params, any);
+        testAccess(access, params, manager, any);
         // Set container methods
         params.containerMethods = ca;
-        testAccess(access, params, any);
+        testAccess(access, params, manager, any);
         // Set size to 0
         ca->resize(0, 0);
-        testAccess(access, params, any);
+        testAccess(access, params, manager, any);
     };
 
     // Go through all registered InternalValueAccess types and verify methods
@@ -204,26 +374,18 @@ UNIT_TEST_F(API_EngineValueTest, Access, testing::ext::TestSize.Level1)
         EXPECT_FALSE(access->IsCompatible({})) << type.c_str();
 
         // Create a dummy property for calling IInternalValueAccess methods
-        auto ph = BASE_NS::make_unique<PropertyHandle>(decl);
-        Internal::CurrentTestingProperty = ph.get(); // Store PropertyHandle* for ContainerApi
-        auto* ca = ph->GetContainerApi();
-        CORE_NS::Property property;
-        property.type = decl;
-        property.metaData.containerMethods = ph->GetContainerApi();
-        property.count = 0;
-        property.size = decl.byteSize;
-        property.offset = 0;
-        property.flags = 0;
-        ca->property = property;
-        auto any = access->CreateAny(property);
-        verifyAny(access, *ph, property, any);
-        AnyCloneOptions opt;
-        opt.value = CloneValueType::COPY_VALUE;
-        opt.role = TypeIdRole::ITEM;
-        verifyAny(access, *ph, property, any->Clone(opt));
-        opt.role = TypeIdRole::ARRAY;
-        verifyAny(access, *ph, property, any->Clone(opt));
-        Internal::CurrentTestingProperty = nullptr;
+        auto manager = EngineValueTestComponentManager(decl);
+        AnyCloneOptions cloneItem { CloneValueType::COPY_VALUE, TypeIdRole::ITEM };
+        AnyCloneOptions cloneArray { CloneValueType::COPY_VALUE, TypeIdRole::ARRAY };
+
+        IAny::Ptr baseAny;
+        verifyAny(access, manager, [&](CORE_NS::Property& p) {
+            baseAny = access->CreateAny(p);
+            return baseAny;
+        });
+        ASSERT_TRUE(baseAny);
+        verifyAny(access, manager, [&](CORE_NS::Property&) { return baseAny->Clone(cloneItem); });
+        verifyAny(access, manager, [&](CORE_NS::Property&) { return baseAny->Clone(cloneArray); });
     }
 }
 
