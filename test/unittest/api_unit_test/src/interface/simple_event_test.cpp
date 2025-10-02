@@ -15,9 +15,16 @@
 
 #include <test_framework.h>
 
+#include <meta/api/make_callback.h>
+#include <meta/interface/builtin_objects.h>
+#include <meta/interface/intf_cloneable.h>
+#include <meta/interface/intf_container.h>
+#include <meta/interface/intf_object_registry.h>
+#include <meta/interface/property/property_events.h>
 #include <meta/interface/simple_event.h>
 
 META_BEGIN_NAMESPACE()
+
 namespace UTest {
 namespace {
 
@@ -45,5 +52,29 @@ UNIT_TEST(API_EventTest, CreateSimpleEvent, testing::ext::TestSize.Level1)
     EXPECT_EQ(Event2::UID, test2Info::UID);
 }
 
+UNIT_TEST(API_EventTest, Methods, testing::ext::TestSize.Level1)
+{
+    auto c = GetObjectRegistry().Create<IContainer>(ClassId::ObjectFlatContainer);
+    ASSERT_TRUE(c);
+    auto event = c->OnContainerChanged();
+    EXPECT_EQ(event->GetHandlers().size(), 0);
+    ChildChangedInfo info;
+    META_NS::Invoke<META_NS::IOnChildChanged>(event, info);
+    META_NS::Invoke<META_NS::IOnChanged>(event); // Wrong type
+    event->AddHandler(META_NS::MakeCallback<META_NS::IOnChildChanged>([](const ChildChangedInfo&) {}));
+    EXPECT_EQ(event->GetHandlers().size(), 1);
+    EXPECT_TRUE(event->HasHandlers());
+    EXPECT_FALSE(event->GetEventTypeName().empty());
+    EXPECT_NE(event->GetCallableUid(), BASE_NS::Uid {});
+    auto object = interface_pointer_cast<META_NS::IObject>(event.GetEvent());
+    ASSERT_TRUE(object);
+    EXPECT_EQ(object->GetClassId(), BASE_NS::Uid {});
+    EXPECT_EQ(object->GetClassName(), "Event");
+    EXPECT_FALSE(object->GetInterfaces().empty());
+    auto cloneable = interface_pointer_cast<ICloneable>(object);
+    ASSERT_TRUE(cloneable);
+    EXPECT_TRUE(cloneable->GetClone());
+}
 } // namespace UTest
+
 META_END_NAMESPACE()

@@ -317,7 +317,7 @@ UNIT_TEST_F(API_EngineValueTest, Access, testing::ext::TestSize.Level1)
             manager.SetReturnInvalidCount(failCounter);
             access->SyncFromEngine(params, *any);
             manager.SetReturnInvalidCount(failCounter);
-            access->SyncFromEngine(params, *any);
+            access->SyncFromEngine(params, invalid);
         };
 
         // Make SyncToEngine fail after it has first internally run successful SyncFromEngine
