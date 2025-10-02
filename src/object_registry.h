@@ -112,6 +112,7 @@ public:
     void RegisterInternalValueAccess(const CORE_NS::PropertyTypeDecl& type, IEngineInternalValueAccess::Ptr) override;
     void UnregisterInternalValueAccess(const CORE_NS::PropertyTypeDecl& type) override;
     IEngineData& GetEngineData() override;
+    BASE_NS::vector<CORE_NS::PropertyTypeDecl> GetAllRegisteredValueAccess() const override;
 
     IObject::Ptr DefaultResolveObject(const IObjectInstance::Ptr& base, const RefUri& uri) const override;
     IMetadata::Ptr ConstructObjectDataContainer() override;

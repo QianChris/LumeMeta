@@ -895,6 +895,18 @@ IEngineData& ObjectRegistry::GetEngineData()
 {
     return *this;
 }
+BASE_NS::vector<CORE_NS::PropertyTypeDecl> ObjectRegistry::GetAllRegisteredValueAccess() const
+{
+    BASE_NS::vector<CORE_NS::PropertyTypeDecl> all;
+    {
+        std::unique_lock lock { mutex_ };
+        all.reserve(engineInternalAccess_.size());
+        for (auto&& v : engineInternalAccess_) {
+            all.push_back(v.first);
+        }
+    }
+    return all;
+}
 IObject::Ptr ObjectRegistry::DefaultResolveObject(const IObjectInstance::Ptr& base, const RefUri& uri) const
 {
     return META_NS::DefaultResolveObject(base, uri);

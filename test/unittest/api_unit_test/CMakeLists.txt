@@ -118,9 +118,12 @@ set(test_sources
     src/interface/animation/intf_staggered_animation_test.cpp
     src/interface/animation/intf_track_animation_test.cpp
     src/interface/animation/sequential_animation_test.cpp
+    src/interface/animation/interpolator_test.cpp
+    src/interface/animation/easing_curve_test.cpp
     src/interface/engine/engine_test_property.h
     src/interface/engine/intf_engine_input_property_manager_test.cpp
     src/interface/engine/intf_engine_value_manager_test.cpp
+    src/interface/engine/engine_value_test.cpp
     src/interface/intf_any_test.cpp
     src/interface/intf_attach_test.cpp
     src/interface/intf_call_context_test.cpp

@@ -91,6 +91,52 @@ UNIT_TEST_F(API_AnimationTest, KeyframeAnimation, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetFinishedCalledCount(), 1);
 }
 
+UNIT_TEST_F(API_AnimationTest, KeyframeAnimationFinish, testing::ext::TestSize.Level1)
+{
+    auto p = ConstructProperty<int>("test");
+    auto pani = CreateAnimation(ClassId::KeyframeAnimation);
+    META_NS::SetValue(pani->Property(), p);
+
+    auto ani = interface_cast<IKeyframeAnimation>(pani);
+    ASSERT_TRUE(ani);
+    SetValue(ani->From(), IAny::Ptr(new Any<int>(0)));
+    SetValue(ani->To(), IAny::Ptr(new Any<int>(10)));
+    SetValue(ani->Duration(), TimeSpan::Milliseconds(100));
+
+    auto st = interface_cast<IStartableAnimation>(pani);
+
+    st->Start();
+    EXPECT_TRUE(GetValue(ani->Running()));
+    st->Finish();
+    EXPECT_FALSE(GetValue(ani->Running()));
+
+    EXPECT_EQ(GetStartedCalledCount(), 1);
+    EXPECT_EQ(GetFinishedCalledCount(), 1);
+}
+
+UNIT_TEST_F(API_AnimationTest, KeyframeAnimationChangeProperty, testing::ext::TestSize.Level1)
+{
+    auto p1 = ConstructProperty<int>("test");
+    auto p2 = ConstructProperty<int>("test2");
+    auto pani = CreateAnimation(ClassId::KeyframeAnimation);
+    META_NS::SetValue(pani->Property(), p1);
+    auto ani = interface_cast<IKeyframeAnimation>(pani);
+    auto st = interface_cast<IStartableAnimation>(pani);
+    ASSERT_TRUE(ani);
+    ASSERT_TRUE(st);
+    SetValue(ani->From(), IAny::Ptr(new Any<int>(0)));
+    SetValue(ani->To(), IAny::Ptr(new Any<int>(10)));
+    SetValue(ani->Duration(), TimeSpan::Milliseconds(100));
+    META_NS::SetValue(pani->Property(), p2);
+    META_NS::SetValue(pani->Property(), nullptr);
+    META_NS::SetValue(pani->Property(), p1);
+    st->Start();
+    META_NS::SetValue(pani->Property(), p2);
+    META_NS::SetValue(pani->Property(), nullptr);
+    META_NS::SetValue(pani->Property(), p1);
+    st->Stop();
+}
+
 UNIT_TEST_F(API_AnimationTest, KeyframeAnimationSerialization, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;

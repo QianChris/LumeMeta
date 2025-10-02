@@ -161,6 +161,17 @@ TEST_P(API_ContainerCommonTest, AddChild)
     EXPECT_EQ(addedCalls_[0], expected);
 }
 
+TEST_P(API_ContainerCommonTest, ContainsObject)
+{
+    const auto object = CreateTestType();
+    const auto notFound = CreateTestType();
+    EXPECT_TRUE(container_->Add(object));
+    EXPECT_FALSE(ContainsObject(nullptr, object));
+    EXPECT_FALSE(ContainsObject(container_, IObject::Ptr {}));
+    EXPECT_TRUE(ContainsObject(container_, object));
+    EXPECT_FALSE(ContainsObject(container_, notFound));
+}
+
 TEST_P(API_ContainerCommonTest, Insert)
 {
     auto all = container_->GetAll();
@@ -240,6 +251,12 @@ TEST_P(API_ContainerCommonTest, RemoveChild)
     ASSERT_THAT(removedCalls_, testing::SizeIs(NumDirectChildren));
     ASSERT_THAT(movedCalls_, testing::SizeIs(0));
     EXPECT_THAT(removedCalls_, testing::ElementsAreArray(removed));
+
+    // Templated Add/Remove
+    auto child = CreateTestType();
+    EXPECT_TRUE(container_->Add(child));
+    EXPECT_TRUE(container_->Remove(child));
+    EXPECT_EQ(container_->GetSize(), 0);
 }
 
 TEST_P(API_ContainerCommonTest, RemoveIndex)
@@ -1093,6 +1110,72 @@ UNIT_TEST_F(API_ContainerTest, IterationSupport, testing::ext::TestSize.Level1)
         }),
             IterateStrategy { TraversalType::BREADTH_FIRST_ORDER, LockType::UNIQUE_LOCK });
         EXPECT_EQ(count, NumChildContainers + NumChildTestTypes);
+    }
+}
+
+UNIT_TEST_F(API_ContainerTest, IterationSupportNonIterable, testing::ext::TestSize.Level1)
+{
+    auto nonContainer = GetObjectRegistry().Create(ClassId::Object);
+    int count = 0;
+    auto fnv = [&](const IObject::Ptr&) { ++count; };
+    auto fnr = [&](const IObject::Ptr&) {
+        ++count;
+        return true;
+    };
+
+    {
+        auto f = fnv;
+        ForEachShared(nonContainer, BASE_NS::move(f));
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        IterateShared(nonContainer, BASE_NS::move(f));
+        EXPECT_EQ(count, 0);
+    }
+
+    {
+        auto f = fnr;
+        ForEachShared(nonContainer, BASE_NS::move(f), TraversalType::DEPTH_FIRST_PRE_ORDER);
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        IterateShared(nonContainer, BASE_NS::move(f), TraversalType::DEPTH_FIRST_PRE_ORDER);
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        ForEachUnique(nonContainer, BASE_NS::move(f), TraversalType::DEPTH_FIRST_PRE_ORDER);
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        IterateUnique(nonContainer, BASE_NS::move(f), TraversalType::DEPTH_FIRST_PRE_ORDER);
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        IterateShared(nonContainer, BASE_NS::move(f), TraversalType::DEPTH_FIRST_PRE_ORDER);
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        ConstIterate(nonContainer, MakeIterationConstCallable(BASE_NS::move(f)),
+            IterateStrategy { TraversalType::DEPTH_FIRST_PRE_ORDER, LockType::NO_LOCK });
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        ConstIterate(nonContainer, MakeIterationConstCallable(BASE_NS::move(f)),
+            IterateStrategy { TraversalType::FULL_HIERARCHY, LockType::UNIQUE_LOCK });
+        EXPECT_EQ(count, 0);
+    }
+    {
+        auto f = fnr;
+        ConstIterate(nonContainer, MakeIterationConstCallable(BASE_NS::move(f)),
+            IterateStrategy { TraversalType::BREADTH_FIRST_ORDER, LockType::UNIQUE_LOCK });
+        EXPECT_EQ(count, 0);
     }
 }
 

@@ -114,7 +114,7 @@ void KeyframeAnimation::OnPropertyChanged(const TargetProperty& property, const 
     auto me = GetSelf<IModifier>();
     if (previous) {
         previous->RemoveModifier(me);
-        if (auto p = interface_cast<IProperty>(previous)) {
+        if (auto p = interface_cast<IProperty>(previous); p && currentValue_) {
             p->SetValue(*currentValue_);
         }
         Stop();

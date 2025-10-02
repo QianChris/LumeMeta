@@ -1113,6 +1113,50 @@ UNIT_TEST_F(API_StaggeredAnimationTest, Name, testing::ext::TestSize.Level1)
     EXPECT_EQ(a2.GetPtr()->GetName(), n2.GetName());
 }
 
+UNIT_TEST_F(API_StaggeredAnimationTest, ParallelMove, testing::ext::TestSize.Level1)
+{
+    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+
+    staggered.Add(anim1).Add(anim2).Add(anim3);
+
+    auto c = META_NS::Container(staggered);
+    ASSERT_TRUE(c);
+    EXPECT_TRUE(c.Move(anim1, 2));
+
+    EXPECT_TRUE(c.Move(0, 2));
+    EXPECT_TRUE(c.Move(2, 1));
+
+    c.Remove(anim1);
+    c.Remove(anim2);
+    c.Remove(anim3);
+    EXPECT_EQ(c.GetSize(), 0);
+}
+
+UNIT_TEST_F(API_StaggeredAnimationTest, SequentialMove, testing::ext::TestSize.Level1)
+{
+    auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
+    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+
+    staggered.Add(anim1).Add(anim2).Add(anim3);
+
+    auto c = META_NS::Container(staggered);
+    ASSERT_TRUE(c);
+    EXPECT_TRUE(c.Move(anim1, 2));
+
+    EXPECT_TRUE(c.Move(0, 2));
+    EXPECT_TRUE(c.Move(2, 1));
+
+    c.Remove(anim1);
+    c.Remove(anim2);
+    c.Remove(anim3);
+    EXPECT_EQ(c.GetSize(), 0);
+}
+
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelWithTrackAnimationSeeking, testing::ext::TestSize.Level1)
 {
     static BASE_NS::vector<float> trackTimestamps = { 0.0f, 1.f };

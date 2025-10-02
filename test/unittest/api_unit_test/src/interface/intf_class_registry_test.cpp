@@ -85,6 +85,13 @@ class MyObject2 : public META_NS::ObjectFwd {
     META_OBJECT(MyObject2, ClassId::MyObject2, ObjectFwd, META_NS::ClassId::Object)
 };
 
+UNIT_TEST_F(API_ClassRegistryTest, Invalid, testing::ext::TestSize.Level1)
+{
+    auto& reg = META_NS::GetObjectRegistry();
+    EXPECT_FALSE(reg.RegisterObjectType(nullptr));
+    EXPECT_FALSE(reg.UnregisterObjectType(nullptr));
+}
+
 UNIT_TEST_F(API_ClassRegistryTest, Events, testing::ext::TestSize.Level1)
 {
     auto& objReg = META_NS::GetObjectRegistry();
