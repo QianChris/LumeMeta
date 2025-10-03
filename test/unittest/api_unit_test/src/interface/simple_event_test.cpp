@@ -16,6 +16,7 @@
 #include <test_framework.h>
 
 #include <meta/api/make_callback.h>
+#include <meta/ext/event_impl.h>
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/intf_cloneable.h>
 #include <meta/interface/intf_container.h>
@@ -75,6 +76,26 @@ UNIT_TEST(API_EventTest, Methods, testing::ext::TestSize.Level1)
     ASSERT_TRUE(cloneable);
     EXPECT_TRUE(cloneable->GetClone());
 }
+
+UNIT_TEST(API_EventTest, DestroyAtInvoke, testing::ext::TestSize.Level1)
+{
+    constexpr auto name = "DestroyedEvent";
+    size_t callCount = 0;
+    BASE_NS::shared_ptr<EventImpl<IOnChanged>> event { new EventImpl<IOnChanged>(name) };
+    auto* ptr = event.get();
+    event->AddHandler(META_NS::MakeCallback<META_NS::IOnChanged>([&]() {
+        event.reset();
+        callCount++;
+    }));
+    event->AddHandler(META_NS::MakeCallback<META_NS::IOnChanged>([&]() {
+        callCount++;
+        EXPECT_EQ(ptr->GetName(), name);
+    }));
+    event->Invoke();
+    EXPECT_EQ(callCount, 2);
+    EXPECT_FALSE(event);
+}
+
 } // namespace UTest
 
 META_END_NAMESPACE()
