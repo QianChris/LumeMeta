@@ -299,6 +299,10 @@ public:
 
     void Invoke(ARG... args) override
     {
+        // Make sure event stays alive while we are invoking (a handler may lead to the event's refcount decreasing,
+        // this makes sure that it stays >0 until the end of the function)
+        auto self = BASE_NS::refcnt_ptr<EventImpl>(this);
+        // Take lock after refcnt_ptr to make sure that if we get destroyed at the end, the lock is released first
         CORE_NS::UniqueLock lock { GenericEvent::mutex_ };
         GenericEvent::InvokeData invoke;
         if (GenericEvent::BeginInvoke(invoke)) {
