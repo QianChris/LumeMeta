@@ -823,6 +823,17 @@ void ObjectRegistry::UnregisterAny(const ObjectId& id)
     std::unique_lock lock { mutex_ };
     anyBuilders_.erase(id);
 }
+BASE_NS::vector<ObjectId> ObjectRegistry::GetAllRegisteredAnyTypes() const
+{
+    BASE_NS::vector<ObjectId> all;
+    std::unique_lock lock { mutex_ };
+    all.reserve(anyBuilders_.size());
+    for (auto&& b : anyBuilders_) {
+        all.push_back(b.first);
+    }
+    return all;
+}
+
 IGlobalSerializationData& ObjectRegistry::GetGlobalSerializationData()
 {
     return *this;

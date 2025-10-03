@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <base/containers/unordered_map.h>
+
 #include <meta/interface/detail/any.h>
 #include <meta/interface/intf_object_registry.h>
 
@@ -291,6 +293,121 @@ UNIT_TEST(API_AnyArrayTest, GetSetTypes, testing::ext::TestSize.Level1)
     EXPECT_TRUE(any.SetData(arrayUid, vectorArr.data(), sizeof(uint32_t) * vectorArr.size()));
     EXPECT_TRUE(any.GetData(arrayUid, values, valuesSize));
     EXPECT_THAT(values, testing::ElementsAreArray(vectorArr));
+}
+
+UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
+{
+    auto& reg = GetObjectRegistry().GetPropertyRegister();
+    auto types = reg.GetAllRegisteredAnyTypes();
+    const auto& invalid = reg.InvalidAny();
+
+    BASE_NS::unordered_map<TypeId, IAny::Ptr> allTypes;
+    // Instantiate all anys to a map for searching with type id
+    for (auto&& id : types) {
+        auto any = reg.ConstructAny(id);
+        ASSERT_TRUE(any);
+        allTypes.insert_or_assign(any->GetTypeId(), BASE_NS::move(any));
+    }
+
+    auto getAny = [&](TypeId id) {
+        // Return a clone of any with given type id
+        if (auto it = allTypes.find(id); it != allTypes.end()) {
+            return it->second->Clone();
+        }
+        return IAny::Ptr {};
+    };
+
+    auto testAny = [&](const IAny::Ptr& any, TypeId t) {
+        AnyCloneOptions opt;
+        opt.value = CloneValueType::DEFAULT_VALUE;
+        opt.role = TypeIdRole::CURRENT;
+        auto clone = any->Clone(opt);
+        ASSERT_TRUE(clone);
+        auto cv = interface_cast<IValue>(clone);
+        auto av = interface_cast<IValue>(any);
+        if (cv && av) {
+            EXPECT_TRUE(av->SetValue(cv->GetValue()));
+            EXPECT_TRUE(any->ResetValue());
+            EXPECT_TRUE(any->CopyFrom(cv->GetValue()));
+            EXPECT_TRUE(av->IsCompatible(any->GetTypeId()));
+            EXPECT_FALSE(av->IsCompatible({}));
+        }
+        EXPECT_FALSE(clone->CopyFrom(invalid));
+        if (auto array = interface_cast<IArrayAny>(any)) {
+            auto item = any->Clone({ CloneValueType::DEFAULT_VALUE, TypeIdRole::ITEM });
+            EXPECT_EQ(array->GetSize(), 0);
+            EXPECT_FALSE(array->SetAnyAt(0, *item));
+            EXPECT_FALSE(array->InsertAnyAt(0, invalid));
+            EXPECT_TRUE(array->InsertAnyAt(0, *item));
+            EXPECT_TRUE(array->GetAnyAt(0, *item));
+            EXPECT_GT(array->GetSize(), 0);
+            EXPECT_TRUE(array->SetAnyAt(0, *item));
+            EXPECT_TRUE(array->InsertAnyAt(0, *item));
+            EXPECT_FALSE(array->RemoveAt(10));
+            EXPECT_TRUE(array->RemoveAt(0));
+            array->RemoveAll();
+            EXPECT_EQ(array->GetSize(), 0);
+        }
+
+        EXPECT_TRUE(any->ResetValue());
+        EXPECT_FALSE(any->GetTypeIdString().empty());
+        EXPECT_NE(any->GetClassId(), ObjectId {});
+        EXPECT_NE(any->GetTypeId(), TypeId {});
+        EXPECT_NE(any->GetTypeId(TypeIdRole::ARRAY), TypeId {});
+        EXPECT_NE(any->GetTypeId(TypeIdRole::ITEM), TypeId {});
+        EXPECT_NE(any->GetTypeId(TypeIdRole::CURRENT), TypeId {});
+        // valid type, invalid ptr
+        EXPECT_FALSE(any->GetData(t, nullptr, 0));
+        EXPECT_FALSE(any->SetData(t, nullptr, 0));
+        uint8_t d;
+        // invalid type, valid ptr
+        EXPECT_FALSE(any->GetData(TypeId {}, &d, 0));
+        EXPECT_FALSE(any->SetData(TypeId {}, &d, 0));
+        EXPECT_FALSE(any->CopyFrom(invalid));
+    };
+
+    auto testType = [&](const IAny::Ptr& v, CompatibilityDirection dir) {
+        auto against = v->GetCompatibleTypes(dir);
+        EXPECT_FALSE(against.empty());
+        bool foundCompatible {};
+        for (auto&& t : against) {
+            if (auto any = getAny(t)) {
+                foundCompatible = true;
+                testAny(any, t);
+            }
+            AnyCloneOptions opt;
+            opt.value = CloneValueType::DEFAULT_VALUE;
+            opt.role = TypeIdRole::ARRAY;
+            if (auto any = v->Clone(opt)) {
+                foundCompatible = true;
+                testAny(any, t);
+            }
+            opt.role = TypeIdRole::ITEM;
+            if (auto any = v->Clone(opt)) {
+                foundCompatible = true;
+                any = v->Clone(opt);
+            }
+        }
+        EXPECT_TRUE(foundCompatible);
+    };
+
+    ASSERT_FALSE(types.empty());
+    for (auto&& id : types) {
+        auto any = reg.ConstructAny(id);
+        ASSERT_TRUE(any);
+        testAny(any, any->GetTypeId());
+        AnyCloneOptions opt;
+        opt.value = CloneValueType::DEFAULT_VALUE;
+        opt.role = TypeIdRole::ARRAY;
+        auto array = any->Clone(opt);
+        testAny(array, array->GetTypeId());
+        opt.role = TypeIdRole::ITEM;
+        auto item = any->Clone(opt);
+        testAny(item, item->GetTypeId());
+        testType(any, CompatibilityDirection::GET);
+        testType(any, CompatibilityDirection::SET);
+        testType(any, CompatibilityDirection::BOTH);
+    }
 }
 
 UNIT_TEST(API_AnyArrayTest, GetSet, testing::ext::TestSize.Level1)

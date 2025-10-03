@@ -91,6 +91,7 @@ public:
     bool IsAnyRegistered(const ObjectId& id) const override;
     void RegisterAny(BASE_NS::shared_ptr<AnyBuilder> builder) override;
     void UnregisterAny(const ObjectId& id) override;
+    BASE_NS::vector<ObjectId> GetAllRegisteredAnyTypes() const override;
 
     // Interpolators
     void RegisterInterpolator(TypeId propertyTypeUid, BASE_NS::Uid interpolatorClassUid) override;
