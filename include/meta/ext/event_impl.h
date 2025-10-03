@@ -209,6 +209,7 @@ class EventImpl<BaseClass, R(ARG...)> final : public IntroduceInterfaces<BaseCla
                                               public GenericEvent {
     static_assert(BASE_NS::is_void_v<R>, "EventHandler callable must return void");
 
+    using Super = IntroduceInterfaces<BaseClass, IObject, IEvent, ICloneable>;
     using Token = GenericEvent::Token;
     using Traits = EventImplTraits<BaseClass>;
 
@@ -289,7 +290,7 @@ public:
     }
     BASE_NS::vector<BASE_NS::Uid> GetInterfaces() const override
     {
-        return GetInterfacesVector();
+        return Super::GetInterfacesVector();
     }
 
     BASE_NS::string GetEventTypeName() const override
