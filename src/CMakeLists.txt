@@ -180,8 +180,12 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}"
 endif()
 
 # Utilize common linker flags from Base
-include(${BASE_ROOT_DIRECTORY}/cmake/cmake_tools.cmake)
+include("${BASE_ROOT_DIRECTORY}/cmake/cmake_tools.cmake")
 append_link_flags(${PLUGIN_NAME} "${BASE_SO_LINK_FLAGS}")
+
+# Disable RTTI and exceptions
+disable_rtti(${PLUGIN_NAME})
+disable_exceptions(${PLUGIN_NAME})
 
 # Code inspection
 include(LumeMetaTargetCodeInspection)
