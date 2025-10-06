@@ -41,13 +41,15 @@ TEST_P(API_ObjectRegistryAPI, GetAllCategories)
     auto categories = objectRegistry.GetAllCategories();
     EXPECT_TRUE(categories.size() > 0);
 
-    // Make sure that given category is found in category list
-    bool found = false;
-    for (auto& c : categories) {
-        if (c.category == category)
-            found = true;
+    if (category != ObjectCategoryBits::ANY) {
+        // Make sure that given category is found in category list
+        bool found = false;
+        for (auto& c : categories) {
+            if (c.category == category)
+                found = true;
+        }
+        EXPECT_TRUE(found);
     }
-    EXPECT_TRUE(found);
 }
 
 TEST_P(API_ObjectRegistryAPI, GetAllTypes)
@@ -70,7 +72,11 @@ TEST_P(API_ObjectRegistryAPI, GetAllTypesAllCategories)
 
     // List of all types regardless of category should always be
     // larger than list of types for any one category.
-    EXPECT_TRUE(allTypes.size() > types.size());
+    if (GetParam() != ObjectCategoryBits::ANY) {
+        EXPECT_GT(allTypes.size(), types.size());
+    } else {
+        EXPECT_EQ(allTypes.size(), types.size());
+    }
 }
 
 TEST_P(API_ObjectRegistryAPI, Create)
@@ -83,17 +89,30 @@ TEST_P(API_ObjectRegistryAPI, Create)
     // Make sure that all objects of given category can be successfully created
     // and that class id of the created object matches the objectId of the type info.
     for (auto& t : types) {
-        auto o = objectRegistry.Create(t->GetClassInfo());
-        ASSERT_TRUE(o);
-        EXPECT_EQ(o->GetClassId(), t->GetClassInfo());
-        if (o->GetClassId() != t->GetClassInfo()) {
+        IObject::Ptr o;
+        BASE_NS::weak_ptr<IObject> weak;
+        CORE_NS::IInterface* oo {};
+        {
+            o = objectRegistry.Create(t->GetClassInfo());
+            ASSERT_TRUE(o);
+            EXPECT_EQ(o->GetClassId(), t->GetClassInfo());
+            weak = o;
+            oo = interface_cast<CORE_NS::IInterface>(o.get());
+            ASSERT_TRUE(oo);
+            oo->Ref(); // +1
         }
+        oo->Ref();                    // +1
+        EXPECT_FALSE(weak.expired()); // Still alive
+        o.reset();
+        oo->Unref();                 // -1
+        EXPECT_TRUE(weak.expired()); // shared_ptr died
+        oo->Unref();                 // -1
     }
 }
 
 INSTANTIATE_TEST_SUITE_P(API_ObjectRegistryTest, API_ObjectRegistryAPI,
     ::testing::Values(META_NS::ObjectCategoryBits::NO_CATEGORY, META_NS::ObjectCategoryBits::ANIMATION,
-        META_NS::ObjectCategoryBits::INTERNAL, META_NS::ObjectCategoryBits::CURVE));
+        META_NS::ObjectCategoryBits::INTERNAL, META_NS::ObjectCategoryBits::CURVE, META_NS::ObjectCategoryBits::ANY));
 
 UNIT_TEST(API_ObjectRegistryTest, Singleton, testing::ext::TestSize.Level1)
 {
