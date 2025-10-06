@@ -20,6 +20,7 @@
 
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
+#include "meta/interface/engine/intf_engine_data.h"
 #include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
@@ -301,20 +302,45 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
     auto types = reg.GetAllRegisteredAnyTypes();
     const auto& invalid = reg.InvalidAny();
 
-    BASE_NS::unordered_map<TypeId, IAny::Ptr> allTypes;
+    BASE_NS::unordered_map<TypeId, BASE_NS::vector<IAny::Ptr>> allTypes;
     // Instantiate all anys to a map for searching with type id
     for (auto&& id : types) {
         auto any = reg.ConstructAny(id);
         ASSERT_TRUE(any);
-        allTypes.insert_or_assign(any->GetTypeId(), BASE_NS::move(any));
+        auto& vec = allTypes[any->GetTypeId()];
+        vec.push_back(any);
     }
 
-    auto getAny = [&](TypeId id) {
+    auto& data = GetObjectRegistry().GetEngineData();
+    auto accesses = data.GetAllRegisteredValueAccess();
+    ASSERT_FALSE(accesses.empty());
+    for (auto&& access : accesses) {
+        auto v = data.GetInternalValueAccess(access);
+        CORE_NS::Property p;
+        p.type = access;
+        auto any = v->CreateAny(p);
+        auto& vec = allTypes[any->GetTypeId()];
+        vec.push_back(any);
+    }
+
+    auto getAllTypes = [&]() {
+        BASE_NS::vector<TypeId> ids;
+        ids.reserve(allTypes.size());
+        for (auto&& t : allTypes) {
+            ids.push_back(t.first);
+        }
+        return ids;
+    };
+
+    auto getAny = [&](TypeId id) -> BASE_NS::vector<IAny::Ptr> {
+        BASE_NS::vector<IAny::Ptr> anys;
         // Return a clone of any with given type id
         if (auto it = allTypes.find(id); it != allTypes.end()) {
-            return it->second->Clone();
+            for (auto&& a : it->second) {
+                anys.push_back(a->Clone());
+            }
         }
-        return IAny::Ptr {};
+        return anys;
     };
 
     auto testAny = [&](const IAny::Ptr& any, TypeId t) {
@@ -340,9 +366,12 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
             EXPECT_FALSE(array->InsertAnyAt(0, invalid));
             EXPECT_TRUE(array->InsertAnyAt(0, *item));
             EXPECT_TRUE(array->GetAnyAt(0, *item));
+            EXPECT_FALSE(array->InsertAnyAt(10, invalid));
+            EXPECT_TRUE(array->InsertAnyAt(10, *item));
             EXPECT_GT(array->GetSize(), 0);
             EXPECT_TRUE(array->SetAnyAt(0, *item));
             EXPECT_TRUE(array->InsertAnyAt(0, *item));
+            EXPECT_FALSE(array->SetAnyAt(10, *item));
             EXPECT_FALSE(array->RemoveAt(10));
             EXPECT_TRUE(array->RemoveAt(0));
             array->RemoveAll();
@@ -371,7 +400,8 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
         EXPECT_FALSE(against.empty());
         bool foundCompatible {};
         for (auto&& t : against) {
-            if (auto any = getAny(t)) {
+            auto anys = getAny(t);
+            for (const auto& any : anys) {
                 foundCompatible = true;
                 testAny(any, t);
             }
