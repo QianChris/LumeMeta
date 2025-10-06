@@ -18,6 +18,7 @@
 #include <meta/interface/detail/any.h>
 #include <meta/interface/intf_object_registry.h>
 
+#include "helpers/test_data_helpers.h"
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
 #include "meta/interface/engine/intf_engine_data.h"
@@ -301,6 +302,7 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
     auto& reg = GetObjectRegistry().GetPropertyRegister();
     auto types = reg.GetAllRegisteredAnyTypes();
     const auto& invalid = reg.InvalidAny();
+    auto invalidTarget = invalid.Clone();
 
     BASE_NS::unordered_map<TypeId, BASE_NS::vector<IAny::Ptr>> allTypes;
     // Instantiate all anys to a map for searching with type id
@@ -372,8 +374,15 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
             EXPECT_TRUE(array->SetAnyAt(0, *item));
             EXPECT_TRUE(array->InsertAnyAt(0, *item));
             EXPECT_FALSE(array->SetAnyAt(10, *item));
+            EXPECT_FALSE(array->SetAnyAt(0, invalid));
+            EXPECT_FALSE(array->SetAnyAt(10, invalid));
+            EXPECT_FALSE(array->GetAnyAt(0, *invalidTarget));
+            EXPECT_FALSE(array->GetAnyAt(10, *invalidTarget));
             EXPECT_FALSE(array->RemoveAt(10));
             EXPECT_TRUE(array->RemoveAt(0));
+            EXPECT_FALSE(array->GetItemCompatibleTypes(CompatibilityDirection::GET).empty());
+            EXPECT_FALSE(array->GetItemCompatibleTypes(CompatibilityDirection::SET).empty());
+            EXPECT_FALSE(array->GetItemCompatibleTypes(CompatibilityDirection::BOTH).empty());
             array->RemoveAll();
             EXPECT_EQ(array->GetSize(), 0);
         }
@@ -393,6 +402,7 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
         EXPECT_FALSE(any->GetData(TypeId {}, &d, 0));
         EXPECT_FALSE(any->SetData(TypeId {}, &d, 0));
         EXPECT_FALSE(any->CopyFrom(invalid));
+        EXPECT_FALSE(invalidTarget->CopyFrom(*any));
     };
 
     auto testType = [&](const IAny::Ptr& v, CompatibilityDirection dir) {
@@ -479,6 +489,226 @@ UNIT_TEST(API_AnyArrayTest, GetSet, testing::ext::TestSize.Level1)
 
     ArrayAny<float> otherType;
     EXPECT_FALSE(otherType.CopyFrom(any));
+}
+
+// clang-format off
+
+const TestTypes AnyTestData(
+    TType<bool> { true, false },
+    TType<int8_t> { 2, -100 },
+    TType<int16_t> { 4012, -10 },
+    TType<int32_t> { 111111, -45114 },
+    TType<int64_t> { 1234567890LL, -5555555LL },
+    TType<uint8_t> { 2, 200 },
+    TType<uint16_t> { 4012, 56000 },
+    TType<uint32_t> { 115111, 455647114 },
+    TType<uint64_t> { 5, 99999999999ULL },
+    TType<float> { 1.0f, 2.33333f },
+    TType<double> { 3.0, -4363.12455 },
+    TType<BASE_NS::Math::Vec2> { BASE_NS::Math::Vec2 { 1.3f, 5.0f },  BASE_NS::Math::Vec2 { -3.1f, 13.0f } },
+    TType<BASE_NS::Math::Vec3> { BASE_NS::Math::Vec3 { 1.f, 2.f, 3.f }, BASE_NS::Math::Vec3 { 4.f, 1.2f, 0.88f } },
+    TType<BASE_NS::Math::Vec4> { BASE_NS::Math::Vec4 { 4.f, 5.f, 6.f, 7.f }, BASE_NS::Math::Vec4 { -0.005f, 0.13f, 13.f, 100.f } },
+    TType<BASE_NS::Math::UVec2> { BASE_NS::Math::UVec2 { 1, 2 }, BASE_NS::Math::UVec2 { 6, 7 } },
+    TType<BASE_NS::Math::UVec3> { BASE_NS::Math::UVec3 { 1, 2, 3 }, BASE_NS::Math::UVec3 { 6, 7, 8 } },
+    TType<BASE_NS::Math::UVec4> { BASE_NS::Math::UVec4 { 1, 2, 3, 4 }, BASE_NS::Math::UVec4 { 6, 7, 8, 9 } },
+    TType<BASE_NS::Math::IVec2> { BASE_NS::Math::IVec2 { -1, 1 }, BASE_NS::Math::IVec2 { 60, -50 } },
+    TType<BASE_NS::Math::IVec3> { BASE_NS::Math::IVec3 { -1, 1, 0 }, BASE_NS::Math::IVec3 { 60, -50, 1 } },
+    TType<BASE_NS::Math::IVec4> { BASE_NS::Math::IVec4 { -1, 1, 9, -50 }, BASE_NS::Math::IVec4 { 60, -50, 2, 3 } },
+    TType<BASE_NS::Math::Quat> { BASE_NS::Math::Quat { 4.f, 5.f, 6.f, 7.f }, BASE_NS::Math::Quat { -0.005f, 0.13f, 13.f, 100.f } },
+    TType<BASE_NS::Math::Mat3X3> { BASE_NS::Math::Mat3X3 { BASE_NS::Math::Vec3 { 1.f, 2.f, 3.f }, BASE_NS::Math::Vec3 { 4.f, 5.f, 6.f }, BASE_NS::Math::Vec3 { 7.f, 8.f, 9.f } }, BASE_NS::Math::Mat3X3 { 3.3f } },
+    TType<BASE_NS::Math::Mat4X4> { BASE_NS::Math::Mat4X4 { 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f, 10.f, 11.f, 12.f, 13.f, 14.f, 15.f, 16.f }, BASE_NS::Math::Mat4X4 { 2.2f } },
+    TType<SharedPtrIInterface> { SharedPtrIInterface{}, SharedPtrIInterface {} },
+    TType<SharedPtrConstIInterface> { SharedPtrConstIInterface{}, SharedPtrConstIInterface {} },
+    TType<IObject::Ptr> { IObject::Ptr{}, IObject::Ptr {} },
+    TType<IObject::ConstPtr> { IObject::ConstPtr{}, IObject::ConstPtr {} },
+    TType<IAttach::Ptr> { IAttach::Ptr{}, IAttach::Ptr {} },
+    TType<IAttach::ConstPtr> { IAttach::ConstPtr{}, IAttach::ConstPtr {} }
+);
+// clang-format on
+
+template<typename Type>
+class API_TypedAnyTest : public ::testing::Test {
+public:
+    API_TypedAnyTest() : value1_(AnyTestData.GetValue<Type>(0)), value2_(AnyTestData.GetValue<Type>(1)) {}
+
+protected:
+    void SetUp() override
+    {
+        typeId_ = UidFromType<Type>();
+        vectorTypeId_ = UidFromType<BASE_NS::vector<Type>>();
+        arrayTypeId_ = ArrayUidFromType<Type>();
+
+        auto& reg = GetObjectRegistry();
+        if constexpr (IsKindOfPointer_v<Type>) {
+            object_ = reg.Create(ClassId::Object);
+        }
+    }
+    Type GetDefValue() const
+    {
+        return {};
+    }
+    Type GetValue1() const
+    {
+        if constexpr (IsKindOfPointer_v<Type>) {
+            return interface_pointer_cast<typename Type::element_type>(object_);
+        }
+        return value1_;
+    }
+    Type GetValue2() const
+    {
+        return value2_;
+    }
+    TypeId GetTypeId() const
+    {
+        return typeId_;
+    }
+    TypeId GetVectorTypeId() const
+    {
+        return vectorTypeId_;
+    }
+    TypeId GetArrayTypeId() const
+    {
+        return arrayTypeId_;
+    }
+    size_t GetDataSize() const
+    {
+        return sizeof(Type);
+    }
+
+private:
+    Type value1_;
+    Type value2_;
+    TypeId typeId_;
+    TypeId vectorTypeId_;
+    TypeId arrayTypeId_;
+    BASE_NS::shared_ptr<CORE_NS::IInterface> object_;
+};
+
+TYPED_TEST_SUITE(API_TypedAnyTest, decltype(AnyTestData)::Types);
+
+TYPED_TEST(API_TypedAnyTest, GetSetData)
+{
+    auto& reg = GetObjectRegistry().GetPropertyRegister();
+    auto types = reg.GetAllRegisteredAnyTypes();
+    const auto& invalid = reg.InvalidAny();
+
+    const auto typeId = this->GetTypeId();
+    const auto value1 = this->GetValue1();
+    const auto value2 = this->GetValue2();
+    const auto dataSize = this->GetDataSize();
+    auto any = ConstructAny<TypeParam>();
+    ASSERT_TRUE(any) << "Item " << BASE_NS::to_string(typeId.ToUid()).c_str();
+
+    EXPECT_FALSE(any->SetData({}, nullptr, 0));
+    EXPECT_FALSE(any->SetData({}, &value1, dataSize));
+    EXPECT_FALSE(any->SetData(typeId, nullptr, dataSize));
+    EXPECT_FALSE(any->SetData({}, nullptr, dataSize));
+    EXPECT_FALSE(any->SetData(typeId, &value1, 0));
+    EXPECT_FALSE(any->SetData({}, &value1, 0));
+    EXPECT_FALSE(any->SetData(typeId, &value1, dataSize + 1));
+    EXPECT_EQ(any->SetData(typeId, &value1, dataSize), AnyReturn::SUCCESS);
+    EXPECT_EQ(any->SetData(typeId, &value1, dataSize), AnyReturn::NOTHING_TO_DO);
+
+    auto target = TypeParam {};
+    EXPECT_FALSE(any->GetData({}, nullptr, 0));
+    EXPECT_FALSE(any->GetData({}, &target, dataSize));
+    EXPECT_FALSE(any->GetData(typeId, nullptr, dataSize));
+    EXPECT_FALSE(any->GetData({}, nullptr, dataSize));
+    EXPECT_FALSE(any->GetData(typeId, &target, 0));
+    EXPECT_FALSE(any->GetData({}, &target, 0));
+    EXPECT_FALSE(any->GetData(typeId, &target, dataSize + 1));
+    EXPECT_TRUE(any->GetData(typeId, &target, dataSize));
+
+    auto defaultValue = TypeParam {};
+    EXPECT_EQ(any->SetData(typeId, &defaultValue, dataSize), AnyReturn::SUCCESS);
+
+    auto testArray = [&](TypeId arrayTypeId, auto& arrayAny, auto& arrayValue1, auto& arraySize, auto* arrayTarget,
+                         const auto* defaultArrayValue) {
+        const bool isCArray = arrayTypeId == this->GetArrayTypeId();
+        AnyReturnValue expectedSetSame =
+            arrayTypeId == this->GetArrayTypeId() ? AnyReturn::SUCCESS : AnyReturn::NOTHING_TO_DO;
+        AnyReturnValue expectedAccessTooBigSize =
+            arrayTypeId == this->GetArrayTypeId() ? AnyReturn::SUCCESS : AnyReturn::INVALID_ARGUMENT;
+        EXPECT_FALSE(arrayAny->SetData({}, &arrayValue1, arraySize));
+        EXPECT_FALSE(arrayAny->SetData(arrayTypeId, nullptr, arraySize));
+        EXPECT_FALSE(arrayAny->SetData({}, nullptr, arraySize));
+        // array setter accepts any
+        EXPECT_FALSE(arrayAny->SetData(arrayTypeId, &arrayValue1, 0));
+        EXPECT_FALSE(arrayAny->SetData({}, &arrayValue1, 0));
+        EXPECT_EQ(arrayAny->SetData(arrayTypeId, &arrayValue1, arraySize + 1), expectedAccessTooBigSize);
+        EXPECT_TRUE(arrayAny->SetData(arrayTypeId, &arrayValue1, arraySize));
+        EXPECT_EQ(arrayAny->SetData(arrayTypeId, &arrayValue1, arraySize), expectedSetSame);
+
+        EXPECT_FALSE(arrayAny->GetData({}, arrayTarget, arraySize));
+        EXPECT_FALSE(arrayAny->GetData(arrayTypeId, nullptr, arraySize));
+        EXPECT_FALSE(arrayAny->GetData({}, nullptr, arraySize));
+        EXPECT_FALSE(arrayAny->GetData(arrayTypeId, arrayTarget, 0));
+        EXPECT_FALSE(arrayAny->GetData({}, arrayTarget, 0));
+        EXPECT_EQ(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize + 1), expectedAccessTooBigSize);
+        EXPECT_TRUE(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize));
+
+        EXPECT_FALSE(arrayAny->SetDataAt(0, {}, &value1, dataSize));
+        EXPECT_FALSE(arrayAny->SetDataAt(0, typeId, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->SetDataAt(0, {}, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->SetDataAt(0, typeId, &value1, 0));
+        EXPECT_FALSE(arrayAny->SetDataAt(0, {}, &value1, 0));
+        EXPECT_FALSE(arrayAny->SetDataAt(0, typeId, &value1, dataSize + 1));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, {}, &value1, dataSize));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, typeId, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, {}, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, typeId, &value1, 0));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, {}, &value1, 0));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, typeId, &value1, dataSize + 1));
+        EXPECT_FALSE(arrayAny->SetDataAt(2, typeId, &value2, dataSize));
+        EXPECT_EQ(arrayAny->SetDataAt(0, typeId, &value2, dataSize), AnyReturn::SUCCESS);
+
+        EXPECT_FALSE(arrayAny->GetDataAt(0, {}, arrayTarget, dataSize));
+        EXPECT_FALSE(arrayAny->GetDataAt(0, arrayTypeId, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->GetDataAt(0, {}, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->GetDataAt(0, arrayTypeId, arrayTarget, 0));
+        EXPECT_FALSE(arrayAny->GetDataAt(0, {}, arrayTarget, 0));
+        EXPECT_FALSE(arrayAny->GetDataAt(0, arrayTypeId, arrayTarget, dataSize + 1));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, {}, arrayTarget, dataSize));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, arrayTypeId, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, {}, nullptr, dataSize));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, arrayTypeId, arrayTarget, 0));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, {}, arrayTarget, 0));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, arrayTypeId, arrayTarget, dataSize + 1));
+        EXPECT_FALSE(arrayAny->GetDataAt(2, typeId, &target, dataSize));
+        EXPECT_TRUE(arrayAny->GetDataAt(0, typeId, &target, dataSize));
+
+        EXPECT_TRUE(arrayAny->template SetValueAt<TypeParam>(0, value1));
+        EXPECT_FALSE(arrayAny->template SetValueAt<TypeParam>(2, value1));
+        EXPECT_TRUE(arrayAny->template GetValueAt<TypeParam>(0, target));
+        EXPECT_FALSE(arrayAny->template GetValueAt<TypeParam>(2, target));
+
+        if (defaultArrayValue) {
+            EXPECT_TRUE(arrayAny->SetData(arrayTypeId, defaultArrayValue, arraySize));
+        }
+    };
+
+    AnyCloneOptions opt;
+    opt.value = CloneValueType::DEFAULT_VALUE;
+    opt.role = TypeIdRole::ARRAY;
+    auto arrayAny = interface_pointer_cast<IArrayAny>(any->Clone(opt));
+
+    ASSERT_TRUE(arrayAny) << "Array " << BASE_NS::to_string(typeId.ToUid()).c_str();
+
+    BASE_NS::vector<TypeParam> vectorValue1 = { value1 };
+    const auto vectorSize = sizeof(vectorValue1);
+    const auto vectorTypeId = this->GetVectorTypeId();
+    BASE_NS::vector<TypeParam> defaultVectorValue {};
+    auto vectorTarget = BASE_NS::vector<TypeParam> {};
+    testArray(vectorTypeId, arrayAny, vectorValue1, vectorSize, &vectorTarget, &defaultVectorValue);
+
+    const TypeParam arrayValue1[] = { value1 };
+    const auto arrayTypeId = this->GetArrayTypeId();
+    TypeParam arrayTarget[] = { {} };
+    const auto arraySize = sizeof(TypeParam);
+
+    EXPECT_NE(vectorTypeId, arrayTypeId);
+
+    testArray(arrayTypeId, arrayAny, arrayValue1, arraySize, &arrayTarget[0], static_cast<TypeParam*>(nullptr));
 }
 
 } // namespace UTest

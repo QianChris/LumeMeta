@@ -73,6 +73,23 @@ UNIT_TEST(API_CallContextTest, Parameters, testing::ext::TestSize.Level1)
     EXPECT_TRUE(context->Succeeded());
 }
 
+UNIT_TEST(API_CallContextTest, Clone, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    auto context = r.ConstructDefaultCallContext();
+    auto cloneable = interface_cast<ICloneable>(context);
+    ASSERT_TRUE(cloneable);
+    ASSERT_TRUE(cloneable->GetClone());
+
+    auto result = ConstructAny<bool>();
+    EXPECT_TRUE(context->DefineResult(ConstructAny<bool>()));
+    EXPECT_TRUE(context->SetResult(*result));
+    auto param = ConstructAny<uint32_t>();
+    EXPECT_TRUE(context->DefineParameter("param", ConstructAny<uint32_t>()));
+    EXPECT_TRUE(context->Set("param", *param));
+    ASSERT_TRUE(cloneable->GetClone());
+}
+
 namespace {
 struct TestClass : IntroduceInterfaces<IObjectInstance> {
     int TestFunc(int a, int b, BASE_NS::string c)

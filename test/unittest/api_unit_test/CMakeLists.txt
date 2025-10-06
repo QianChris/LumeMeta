@@ -189,7 +189,7 @@ target_include_directories(${executableName} PRIVATE
 )
 
 if(MSVC)
-    target_compile_options(${executableName} PRIVATE /GR-)
+    target_compile_options(${executableName} PRIVATE /GR- /bigobj)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(${executableName} PRIVATE -fno-rtti)
     if(META_UNIT_TESTS_WITH_SANITIZERS AND NOT ANDROID AND NOT OHOS)
