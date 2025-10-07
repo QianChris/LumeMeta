@@ -215,6 +215,7 @@ endif()
 target_link_libraries(${executableName}
     AGPEngine::AGPEngineDLL # to avoid manual dll loading
     LumeMeta::ExtAPI
+    LumeMeta::Plugin
     gtest
     gmock
 )

@@ -15,8 +15,10 @@
 #ifndef META_API_METADATA_UTIL_H
 #define META_API_METADATA_UTIL_H
 
+#include <meta/ext/metadata_helpers.h>
 #include <meta/interface/intf_metadata.h>
 #include <meta/interface/intf_object_flags.h>
+#include <meta/interface/property/construct_property.h>
 #include <meta/interface/property/property.h>
 
 META_BEGIN_NAMESPACE()
@@ -129,9 +131,7 @@ inline void CopyToDefaultAndReset(const IProperty::ConstPtr& p, IProperty& out)
 {
     if (PropertyLock plock { p }) {
         if (PropertyLock lock { &out }) {
-            if (auto sc = interface_cast<IStackProperty>(&out)) {
-                sc->SetDefaultValue(p->GetValue());
-            }
+            lock->SetDefaultValueAny(p->GetValue());
             out.ResetValue();
         }
     }

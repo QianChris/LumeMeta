@@ -27,8 +27,11 @@
 
 META_BEGIN_NAMESPACE()
 
+class IRefUriBuilder;
+
 struct ExportOptions {
     bool useRelativeRefuriIfContextSet { true };
+    IRefUriBuilder* refUriBuilder {};
 };
 
 /// Exporter interface to turn object hierarchy to serialisation node hierarchy

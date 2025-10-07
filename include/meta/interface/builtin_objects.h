@@ -119,6 +119,8 @@ META_REGISTER_CLASS(DebugOutput, "cfb42445-363f-40d2-a231-1623b8028392", ObjectC
 META_REGISTER_CLASS(JsonOutput, "dd4f3444-bc9d-436b-90c7-312793dc38f2", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(JsonInput, "0b4587d2-af0d-4c67-bd6b-0386fa2de094", ObjectCategoryBits::NO_CATEGORY)
 
+META_REGISTER_CLASS(RefUriBuilder, "df6b7b4a-5cd2-431d-8a55-d2753b9f8e1b", ObjectCategoryBits::NO_CATEGORY)
+
 META_REGISTER_CLASS(RootNode, "776bd8ab-a135-4108-bae3-233ce615b900", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(NilNode, "776bd8ab-a135-4108-bae3-233ce615b901", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(ObjectNode, "776bd8ab-a135-4108-bae3-233ce615b902", ObjectCategoryBits::NO_CATEGORY)

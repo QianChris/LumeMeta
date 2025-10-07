@@ -299,6 +299,9 @@ void TrackAnimation::UpdateCurrentTrack(uint32_t index)
 
 ReturnError TrackAnimation::Export(IExportContext& c) const
 {
+    if (this->GetResourceId().IsValid() && this->SerialiseAsResourceId(c)) {
+        return this->ExportResourceId(c);
+    }
     return Serializer(c) & AutoSerialize() & NamedValue("Keyframes", keyframes_);
 }
 ReturnError TrackAnimation::Import(IImportContext& c)

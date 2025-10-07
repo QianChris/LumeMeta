@@ -359,7 +359,13 @@ BASE_NS::vector<IModifier::Ptr> StackProperty::GetModifiers(
 }
 AnyReturnValue StackProperty::SetDefaultValue(const IAny& value)
 {
-    CORE_ASSERT_MSG(defaultValue_, "SetInternalAny not called");
+    if (!defaultValue_) {
+        CORE_LOG_D("Initializing internal any with SetDefaultValue");
+        auto res = SetInternalAny(value.Clone(false));
+        if (!res) {
+            return res;
+        }
+    }
     AnyReturnValue res = defaultValue_->CopyFrom(value);
     if (res && values_.empty()) {
         NotifyChange();

@@ -132,6 +132,8 @@ target_sources(${PLUGIN_NAME} PRIVATE
     register_engine_access.cpp
     register_entities.cpp
     register_value_serializers.cpp
+    resource/animation_resource.cpp
+    resource/animation_resource.h
     resource/file_resource_manager.cpp
     resource/file_resource_manager.h
     resource/object_resource.cpp
@@ -154,6 +156,8 @@ target_sources(${PLUGIN_NAME} PRIVATE
     serialization/json_importer.h
     serialization/metav1_compat.cpp
     serialization/metav1_compat.h
+    serialization/refuri_builder.cpp
+    serialization/refuri_builder.h
     startable_object_controller.cpp
     startable_object_controller.h
     system_clock.cpp

@@ -47,6 +47,11 @@ protected: // IStartableAnimation
 public: // IModifier
     EvaluationResult ProcessOnGet(IAny& value) override;
 
+    META_NS::ObjectId GetDefaultAccess() const override
+    {
+        return ClassId::KeyframeAnimationTemplateAccess;
+    }
+
 protected: // IAnimationInternal
     void OnAnimationStateChanged(const AnimationStateChangedInfo& info) override;
 

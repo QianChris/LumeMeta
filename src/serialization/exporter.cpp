@@ -63,6 +63,11 @@ InstanceId Exporter::ConvertInstanceId(const InstanceId& id) const
     return it != mapInstanceIds_.end() ? it->second : id;
 }
 
+bool Exporter::IsGlobalObject(const InstanceId& id) const
+{
+    return globalData_.GetGlobalObject(id) != nullptr;
+}
+
 bool Exporter::MarkExported(const IObject::ConstPtr& object)
 {
     bool res = false;
@@ -87,6 +92,9 @@ ISerNode::Ptr Exporter::Export(const IObject::ConstPtr& object, ExportOptions op
     BASE_NS::shared_ptr<RootNode> res;
     if (object) {
         options_ = BASE_NS::move(options);
+        if (options_.refUriBuilder) {
+            refUriBuilder_ = options_.refUriBuilder;
+        }
         ISerNode::Ptr node;
         auto r = ExportObject(object, node);
         if (r) {
@@ -337,85 +345,20 @@ ReturnError Exporter::ExportAny(const IAny::ConstPtr& any, ISerNode::Ptr& res)
     return err;
 }
 
-IObject::Ptr Exporter::ResolveUriSegment(
-    const IObject::ConstPtr& ptr, RefUri& uri, const IObject::ConstPtr& previous) const
-{
-    if (auto property = interface_cast<IProperty>(ptr)) {
-        uint32_t index = -1;
-        if (ArrayPropertyLock lock { property }) {
-            for (size_t i = 0; i != lock->GetSize(); ++i) {
-                if (interface_pointer_cast<IObject>(GetConstPointer(lock->GetAnyAt(i))) == previous) {
-                    index = i;
-                    break;
-                }
-            }
-        }
-        uri.PushPropertySegment(property->GetName(), index);
-        auto owner = interface_pointer_cast<IObject>(property->GetOwner());
-        if (!owner) {
-            CORE_LOG_E("No Owner for property '%s' when exporting weak ptr", property->GetName().c_str());
-        }
-        return owner;
-    }
-    if (auto instance = interface_cast<IObjectInstance>(ptr)) {
-        auto parent = ptr->Resolve(RefUri::ParentUri());
-
-        if (auto i = interface_cast<META_NS::IProperty>(parent)) {
-            return parent;
-        }
-
-        if (auto i = interface_cast<IAttach>(parent)) {
-            if (auto cont = i->GetAttachmentContainer(false)) {
-                if (ContainsObject(cont, ptr)) {
-                    uri.PushAttachmentSegment(instance->GetName());
-                    return parent;
-                }
-            }
-        }
-        if (auto context = interface_cast<IObjectContext>(ptr)) {
-            uri.PushObjectContextSegment();
-        } else {
-            uri.PushObjectSegment(instance->GetName());
-        }
-        return parent;
-    }
-    return nullptr;
-}
-
 ReturnError Exporter::ResolveDeferredWeakPtr(const DeferredWeakPtrResolve& d)
 {
+    ReturnError res = GenericError::FAIL;
     if (auto p = d.ptr.lock()) {
-        auto userContext = GetUserContext();
-        auto original = p;
-        IObject::ConstPtr previous;
-        RefUri uri;
-        while (p) {
-            if (auto obj = interface_cast<IObjectInstance>(p)) {
-                auto iid = ConvertInstanceId(obj->GetInstanceId());
-                if (userContext && options_.useRelativeRefuriIfContextSet) {
-                    if (userContext.get() == obj) {
-                        uri.SetStartsFromRoot(true);
-                        d.node->SetValue(uri);
-                        return GenericError::SUCCESS;
-                    }
-                }
-                if (HasBeenExported(iid) || globalData_.GetGlobalObject(obj->GetInstanceId())) {
-                    uri.SetBaseObjectUid(iid.ToUid());
-                    d.node->SetValue(uri);
-                    return GenericError::SUCCESS;
-                }
-            }
-            auto newp = ResolveUriSegment(p, uri, previous);
-            previous = p;
-            p = newp;
+        auto uri = refUriBuilder_->BuildRefUri(*this, p);
+        if (uri.IsValid() && !uri.IsEmpty()) {
+            d.node->SetValue(uri);
+            res = GenericError::SUCCESS;
+        } else {
+            CORE_LOG_E("Failed to create refuri when serializing weak_ptr [%s, %s, %s]",
+                BASE_NS::string(p->GetClassName()).c_str(), p->GetName().c_str(), p->GetClassId().ToString().c_str());
         }
-        CORE_LOG_E("Could not find suitable anchor object when exporting weak ptr [%s, %s, %s]",
-            BASE_NS::string(original->GetClassName()).c_str(), original->GetName().c_str(),
-            original->GetClassId().ToString().c_str());
-    } else {
-        CORE_LOG_E("Weak ptr is null when doing deferred resolve");
     }
-    return GenericError::FAIL;
+    return res;
 }
 
 ReturnError Exporter::ExportWeakPtr(const IObject::ConstWeakPtr& ptr, ISerNode::Ptr& res)
@@ -498,14 +441,11 @@ ReturnError ExportContext::ExportToNode(const IAny& entity, ISerNode::Ptr& res)
     return exporter_.ExportToNode(entity, res);
 }
 
-CORE_NS::IInterface* ExportContext::Context() const
+IExporterState& ExportContext::Context() const
 {
-    return exporter_.GetInterface(CORE_NS::IInterface::UID);
+    return exporter_;
 }
-META_NS::IObject::Ptr ExportContext::UserContext() const
-{
-    return exporter_.GetUserContext();
-}
+
 ReturnError ExportContext::SubstituteThis(ISerNode::Ptr n)
 {
     ReturnError res = GenericError::FAIL;
@@ -523,6 +463,7 @@ ReturnError ExportContext::SubstituteThis(ISerNode::Ptr n)
     }
     return res;
 }
+
 SerMetadata ExportContext::GetMetadata() const
 {
     return exporter_.GetMetadata();
