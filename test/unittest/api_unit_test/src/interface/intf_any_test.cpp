@@ -15,13 +15,16 @@
 
 #include <base/containers/unordered_map.h>
 
+#include <meta/interface/animation/builtin_animations.h>
+#include <meta/interface/animation/intf_animation.h>
+#include <meta/interface/builtin_objects.h>
 #include <meta/interface/detail/any.h>
+#include <meta/interface/engine/intf_engine_data.h>
 #include <meta/interface/intf_object_registry.h>
 
 #include "helpers/test_data_helpers.h"
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
-#include "meta/interface/engine/intf_engine_data.h"
 #include "test_framework.h"
 
 META_BEGIN_NAMESPACE()
@@ -505,6 +508,11 @@ const TestTypes AnyTestData(
     TType<uint64_t> { 5, 99999999999ULL },
     TType<float> { 1.0f, 2.33333f },
     TType<double> { 3.0, -4363.12455 },
+    TType<TypeId> { TypeId{"00000000-0000-0000-0000-000000000000"}, TypeId{"10000000-0000-0000-0000-000000000000"} },
+    TType<ObjectId> {ObjectId{"00000000-0000-0000-0000-000000000000"}, ObjectId{"10000000-0000-0000-0000-000000000000"} },
+    TType<InstanceId> { InstanceId{"00000000-0000-0000-0000-000000000000"}, InstanceId{"10000000-0000-0000-0000-000000000000"} },
+    TType<BASE_NS::Uid> { BASE_NS::Uid{"00000000-0000-0000-0000-000000000000"}, BASE_NS::Uid{"10000000-0000-0000-0000-000000000000"} },
+    TType<BASE_NS::string> { "1", "2" },
     TType<BASE_NS::Math::Vec2> { BASE_NS::Math::Vec2 { 1.3f, 5.0f },  BASE_NS::Math::Vec2 { -3.1f, 13.0f } },
     TType<BASE_NS::Math::Vec3> { BASE_NS::Math::Vec3 { 1.f, 2.f, 3.f }, BASE_NS::Math::Vec3 { 4.f, 1.2f, 0.88f } },
     TType<BASE_NS::Math::Vec4> { BASE_NS::Math::Vec4 { 4.f, 5.f, 6.f, 7.f }, BASE_NS::Math::Vec4 { -0.005f, 0.13f, 13.f, 100.f } },
@@ -517,12 +525,32 @@ const TestTypes AnyTestData(
     TType<BASE_NS::Math::Quat> { BASE_NS::Math::Quat { 4.f, 5.f, 6.f, 7.f }, BASE_NS::Math::Quat { -0.005f, 0.13f, 13.f, 100.f } },
     TType<BASE_NS::Math::Mat3X3> { BASE_NS::Math::Mat3X3 { BASE_NS::Math::Vec3 { 1.f, 2.f, 3.f }, BASE_NS::Math::Vec3 { 4.f, 5.f, 6.f }, BASE_NS::Math::Vec3 { 7.f, 8.f, 9.f } }, BASE_NS::Math::Mat3X3 { 3.3f } },
     TType<BASE_NS::Math::Mat4X4> { BASE_NS::Math::Mat4X4 { 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f, 10.f, 11.f, 12.f, 13.f, 14.f, 15.f, 16.f }, BASE_NS::Math::Mat4X4 { 2.2f } },
+    // Ptr types
     TType<SharedPtrIInterface> { SharedPtrIInterface{}, SharedPtrIInterface {} },
     TType<SharedPtrConstIInterface> { SharedPtrConstIInterface{}, SharedPtrConstIInterface {} },
     TType<IObject::Ptr> { IObject::Ptr{}, IObject::Ptr {} },
     TType<IObject::ConstPtr> { IObject::ConstPtr{}, IObject::ConstPtr {} },
     TType<IAttach::Ptr> { IAttach::Ptr{}, IAttach::Ptr {} },
-    TType<IAttach::ConstPtr> { IAttach::ConstPtr{}, IAttach::ConstPtr {} }
+    TType<IAttach::ConstPtr> { IAttach::ConstPtr{}, IAttach::ConstPtr {} },
+    TType<IAny::Ptr> { IAny::Ptr {}, IAny::Ptr {} },
+    TType<IAny::ConstPtr> { IAny::ConstPtr {}, IAny::ConstPtr {} },
+    TType<IValue::Ptr> { IValue::Ptr {}, IValue::Ptr {} },
+    TType<IValue::ConstPtr> { IValue::ConstPtr {}, IValue::ConstPtr {} },
+    TType<IFunction::Ptr> { IFunction::Ptr {}, IFunction::Ptr {} },
+    TType<IFunction::ConstPtr> { IFunction::ConstPtr {}, IFunction::ConstPtr {} },
+    TType<IProperty::Ptr> { IProperty::Ptr {}, IProperty::Ptr {} },
+    TType<IProperty::ConstPtr> { IProperty::ConstPtr {}, IProperty::ConstPtr {} }
+    // Weak ptr types
+    // TType<WeakPtrIInterface> { WeakPtrIInterface{}, WeakPtrIInterface {} },
+    // TType<WeakPtrConstIInterface> { WeakPtrConstIInterface{}, WeakPtrConstIInterface {} },
+    // TType<IObject::WeakPtr> { IObject::WeakPtr{}, IObject::WeakPtr {} },
+    // TType<IObject::ConstWeakPtr> { IObject::ConstWeakPtr{}, IObject::ConstWeakPtr {} },
+    // TType<IAttach::WeakPtr> { IAttach::WeakPtr{}, IAttach::WeakPtr {} },
+    // TType<IAttach::ConstWeakPtr> { IAttach::ConstWeakPtr{}, IAttach::ConstWeakPtr {} },
+    // TType<IFunction::WeakPtr> { IFunction::WeakPtr {}, IFunction::WeakPtr {} },
+    // TType<IFunction::ConstWeakPtr> { IFunction::ConstWeakPtr {}, IFunction::ConstWeakPtr {} },
+    // TType<IProperty::WeakPtr> { IProperty::WeakPtr {}, IProperty::WeakPtr {} },
+    // TType<IProperty::ConstWeakPtr> { IProperty::ConstWeakPtr {}, IProperty::ConstWeakPtr {} }
 );
 // clang-format on
 
@@ -530,6 +558,8 @@ template<typename Type>
 class API_TypedAnyTest : public ::testing::Test {
 public:
     API_TypedAnyTest() : value1_(AnyTestData.GetValue<Type>(0)), value2_(AnyTestData.GetValue<Type>(1)) {}
+
+    static constexpr bool IS_PTR_TYPE = IsSharedOrWeakPtr_v<Type>;
 
 protected:
     void SetUp() override
@@ -539,9 +569,37 @@ protected:
         arrayTypeId_ = ArrayUidFromType<Type>();
 
         auto& reg = GetObjectRegistry();
-        if constexpr (IsKindOfPointer_v<Type>) {
-            object_ = reg.Create(ClassId::Object);
+        if constexpr (IS_PTR_TYPE) {
+            if constexpr (BASE_NS::is_same_v<typename Type::element_type, IAny> ||
+                          BASE_NS::is_same_v<typename Type::element_type, IValue>) {
+                auto classId = Any<int>::StaticGetClassId();
+                object1_ = reg.GetPropertyRegister().ConstructAny(classId);
+                object2_ = reg.GetPropertyRegister().ConstructAny(classId);
+            } else if constexpr (BASE_NS::is_same_v<typename Type::element_type, IProperty>) {
+                object1_ = reg.GetPropertyRegister().Create(ClassId::StackProperty, "");
+                object2_ = reg.GetPropertyRegister().Create(ClassId::StackProperty, "");
+            } else {
+                ObjectId classId = ClassId::Object;
+                if constexpr (BASE_NS::is_same_v<typename Type::element_type, IFunction>) {
+                    classId = ClassId::SettableFunction;
+                }
+                object1_ = reg.Create(classId);
+                object2_ = reg.Create(classId);
+            }
+            ASSERT_TRUE(object1_);
+            ASSERT_TRUE(object2_);
         }
+    }
+    void TearDown() override
+    {
+        // Make sure we don't leave anything alive which would interfere with other tests
+        object1_.reset();
+        object2_.reset();
+        if constexpr (IS_PTR_TYPE) {
+            value1_.reset();
+            value2_.reset();
+        }
+        META_NS::GetObjectRegistry().Purge();
     }
     Type GetDefValue() const
     {
@@ -549,13 +607,16 @@ protected:
     }
     Type GetValue1() const
     {
-        if constexpr (IsKindOfPointer_v<Type>) {
-            return interface_pointer_cast<typename Type::element_type>(object_);
+        if constexpr (IS_PTR_TYPE) {
+            return interface_pointer_cast<typename Type::element_type>(object1_);
         }
         return value1_;
     }
     Type GetValue2() const
     {
+        if constexpr (IS_PTR_TYPE) {
+            return interface_pointer_cast<typename Type::element_type>(object2_);
+        }
         return value2_;
     }
     TypeId GetTypeId() const
@@ -581,7 +642,8 @@ private:
     TypeId typeId_;
     TypeId vectorTypeId_;
     TypeId arrayTypeId_;
-    BASE_NS::shared_ptr<CORE_NS::IInterface> object_;
+    BASE_NS::shared_ptr<CORE_NS::IInterface> object1_;
+    BASE_NS::shared_ptr<CORE_NS::IInterface> object2_;
 };
 
 TYPED_TEST_SUITE(API_TypedAnyTest, decltype(AnyTestData)::Types);
@@ -596,8 +658,13 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
     const auto value1 = this->GetValue1();
     const auto value2 = this->GetValue2();
     const auto dataSize = this->GetDataSize();
-    auto any = ConstructAny<TypeParam>();
+    constexpr auto anyObjectId = Any<TypeParam>::StaticGetClassId();
+    auto any = reg.ConstructAny(anyObjectId);
+    auto any2 = reg.ConstructAny(anyObjectId);
+    auto defaultAny = reg.ConstructAny(anyObjectId);
     ASSERT_TRUE(any) << "Item " << BASE_NS::to_string(typeId.ToUid()).c_str();
+    ASSERT_TRUE(any2);
+    ASSERT_TRUE(defaultAny);
 
     EXPECT_FALSE(any->SetData({}, nullptr, 0));
     EXPECT_FALSE(any->SetData({}, &value1, dataSize));
@@ -606,8 +673,10 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
     EXPECT_FALSE(any->SetData(typeId, &value1, 0));
     EXPECT_FALSE(any->SetData({}, &value1, 0));
     EXPECT_FALSE(any->SetData(typeId, &value1, dataSize + 1));
-    EXPECT_EQ(any->SetData(typeId, &value1, dataSize), AnyReturn::SUCCESS);
-    EXPECT_EQ(any->SetData(typeId, &value1, dataSize), AnyReturn::NOTHING_TO_DO);
+    EXPECT_EQ(any->SetData(typeId, &value1, dataSize), AnyReturnValue { AnyReturn::SUCCESS });
+    EXPECT_EQ(any->SetData(typeId, &value1, dataSize), AnyReturnValue { AnyReturn::NOTHING_TO_DO });
+
+    EXPECT_TRUE(any2->SetValue(value2));
 
     auto target = TypeParam {};
     EXPECT_FALSE(any->GetData({}, nullptr, 0));
@@ -619,8 +688,20 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
     EXPECT_FALSE(any->GetData(typeId, &target, dataSize + 1));
     EXPECT_TRUE(any->GetData(typeId, &target, dataSize));
 
+    EXPECT_TRUE(any->CopyFrom(*any2));
+    EXPECT_TRUE(any->CopyFrom(*defaultAny));
+    EXPECT_TRUE(any->CopyFrom(*any2));
+    EXPECT_TRUE(any->ResetValue());
+    EXPECT_TRUE(any->CopyFrom(*any2));
+
     auto defaultValue = TypeParam {};
-    EXPECT_EQ(any->SetData(typeId, &defaultValue, dataSize), AnyReturn::SUCCESS);
+    EXPECT_TRUE(any->SetValue(value1));
+    EXPECT_TRUE(any->SetValue(value2));
+    EXPECT_TRUE(any->SetValue(defaultValue));
+    EXPECT_TRUE(any->SetValue(value2));
+    EXPECT_TRUE(any->SetValue(defaultValue));
+
+    EXPECT_EQ(any->SetData(typeId, &defaultValue, dataSize), AnyReturnValue { AnyReturn::SUCCESS });
 
     auto testArray = [&](TypeId arrayTypeId, auto& arrayAny, auto& arrayValue1, auto& arraySize, auto* arrayTarget,
                          const auto* defaultArrayValue) {
@@ -629,10 +710,11 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
             arrayTypeId == this->GetArrayTypeId() ? AnyReturn::SUCCESS : AnyReturn::NOTHING_TO_DO;
         AnyReturnValue expectedAccessTooBigSize =
             arrayTypeId == this->GetArrayTypeId() ? AnyReturn::SUCCESS : AnyReturn::INVALID_ARGUMENT;
+        AnyReturnValue expectedAccessTooSmallSize =
+            arrayTypeId == this->GetArrayTypeId() ? AnyReturn::INVALID_ARGUMENT : AnyReturn::SUCCESS;
         EXPECT_FALSE(arrayAny->SetData({}, &arrayValue1, arraySize));
         EXPECT_FALSE(arrayAny->SetData(arrayTypeId, nullptr, arraySize));
         EXPECT_FALSE(arrayAny->SetData({}, nullptr, arraySize));
-        // array setter accepts any
         EXPECT_FALSE(arrayAny->SetData(arrayTypeId, &arrayValue1, 0));
         EXPECT_FALSE(arrayAny->SetData({}, &arrayValue1, 0));
         EXPECT_EQ(arrayAny->SetData(arrayTypeId, &arrayValue1, arraySize + 1), expectedAccessTooBigSize);
@@ -677,10 +759,16 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
         EXPECT_FALSE(arrayAny->GetDataAt(2, typeId, &target, dataSize));
         EXPECT_TRUE(arrayAny->GetDataAt(0, typeId, &target, dataSize));
 
+        // Add 2
+        EXPECT_TRUE(arrayAny->InsertAnyAt(0, *any));
+        EXPECT_TRUE(arrayAny->InsertAnyAt(0, *any));
+        // GetData to 1 size array
+        EXPECT_EQ(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize), expectedAccessTooSmallSize);
+
         EXPECT_TRUE(arrayAny->template SetValueAt<TypeParam>(0, value1));
-        EXPECT_FALSE(arrayAny->template SetValueAt<TypeParam>(2, value1));
+        EXPECT_FALSE(arrayAny->template SetValueAt<TypeParam>(10, value1));
         EXPECT_TRUE(arrayAny->template GetValueAt<TypeParam>(0, target));
-        EXPECT_FALSE(arrayAny->template GetValueAt<TypeParam>(2, target));
+        EXPECT_FALSE(arrayAny->template GetValueAt<TypeParam>(10, target));
 
         if (defaultArrayValue) {
             EXPECT_TRUE(arrayAny->SetData(arrayTypeId, defaultArrayValue, arraySize));

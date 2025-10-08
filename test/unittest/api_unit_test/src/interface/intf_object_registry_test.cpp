@@ -86,6 +86,20 @@ TEST_P(API_ObjectRegistryAPI, Create)
 
     ASSERT_TRUE(types.size() > 0);
 
+    auto testBaseInterfaces = [](const IObject::Ptr& o) {
+        if (auto instance = interface_cast<IObjectInstance>(o)) {
+            EXPECT_NE(instance->GetInstanceId(), BASE_NS::Uid {});
+            EXPECT_TRUE(instance->GetSelf());
+            EXPECT_NE(instance->GetClassId(), BASE_NS::Uid {});
+            EXPECT_FALSE(instance->GetInterfaces().empty());
+            EXPECT_FALSE(instance->GetName().empty());
+        }
+        if (auto meta = interface_cast<IStaticMetadata>(o)) {
+            ASSERT_TRUE(meta->GetStaticMetadata());
+            EXPECT_NE(meta->GetStaticMetadata()->classInfo, nullptr);
+        }
+    };
+
     // Make sure that all objects of given category can be successfully created
     // and that class id of the created object matches the objectId of the type info.
     for (auto& t : types) {
