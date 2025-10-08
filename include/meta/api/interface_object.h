@@ -162,23 +162,22 @@ protected:
 };
 
 // InterfaceObject definition
-#define META_INTERFACE_OBJECT(Class, BaseClass, Interface)                                   \
-    using ClassType = Class;                                                                 \
-    using BaseClassType = BaseClass;                                                         \
-    using InterfaceType = Interface;                                                         \
-    Class() = delete;                                                                        \
-    ~Class() override = default;                                                             \
-    explicit Class(const IInterfacePtr& p) : BaseClass(interface_pointer_cast<Interface>(p)) \
-    {}                                                                                       \
-    META_DEFAULT_COPY_MOVE(Class)                                                            \
-    operator InterfaceType::Ptr() const noexcept                                             \
-    {                                                                                        \
-        return GetPtr<InterfaceType>();                                                      \
-    }                                                                                        \
-    auto& operator=(const InterfaceType::Ptr& p) noexcept                                    \
-    {                                                                                        \
-        ptr_ = interface_pointer_cast<UnderlyingType>(p);                                    \
-        return *this;                                                                        \
+#define META_INTERFACE_OBJECT(Class, BaseClass, Interface)                                      \
+    using ClassType = Class;                                                                    \
+    using BaseClassType = BaseClass;                                                            \
+    using InterfaceType = Interface;                                                            \
+    Class() = delete;                                                                           \
+    ~Class() override = default;                                                                \
+    explicit Class(const IInterfacePtr& p) : BaseClass(interface_pointer_cast<Interface>(p)) {} \
+    META_DEFAULT_COPY_MOVE(Class)                                                               \
+    operator InterfaceType::Ptr() const noexcept                                                \
+    {                                                                                           \
+        return GetPtr<InterfaceType>();                                                         \
+    }                                                                                           \
+    auto& operator=(const InterfaceType::Ptr& p) noexcept                                       \
+    {                                                                                           \
+        ptr_ = interface_pointer_cast<UnderlyingType>(p);                                       \
+        return *this;                                                                           \
     }
 
 // InterfaceObject default interface function call wrapper
@@ -262,9 +261,8 @@ struct InitializationType {};
  */
 constexpr InitializationType CreateNew;
 
-#define META_INTERFACE_OBJECT_INSTANTIATE(Class, ClassId)                                                 \
-    Class(const META_NS::InitializationType& t) : BaseClassType(::META_NS::CreateObjectInstance(ClassId)) \
-    {}
+#define META_INTERFACE_OBJECT_INSTANTIATE(Class, ClassId) \
+    Class(const META_NS::InitializationType& t) : BaseClassType(::META_NS::CreateObjectInstance(ClassId)) {}
 
 /// Some methods support specifying whether the call should be asynchronous or synchronous through AsyncCallType
 /// template parameter.
@@ -279,16 +277,14 @@ constexpr AsyncCallType Async { true };
 #define META_API_ASYNC template<const META_NS::AsyncCallType& CallType = META_NS::Sync>
 
 #define META_INTERFACE_OBJECT_ASYNC_CALL_PTR(SyncReturnType, Function) \
-    [&]() -> auto                                                      \
-    {                                                                  \
+    [&]() -> auto {                                                    \
         auto f = META_INTERFACE_OBJECT_CALL_PTR(Function);             \
         if constexpr (CallType.async) {                                \
             return f;                                                  \
         } else {                                                       \
             return SyncReturnType(f.GetResult());                      \
         }                                                              \
-    }                                                                  \
-    ()
+    }()
 
 META_END_NAMESPACE()
 

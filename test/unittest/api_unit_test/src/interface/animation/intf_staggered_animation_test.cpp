@@ -913,34 +913,45 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelWithSameAnimation, testing::ext:
 
 UNIT_TEST_F(API_StaggeredAnimationTest, DurationParallelModified, testing::ext::TestSize.Level1)
 {
-    auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
-    auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
-    auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
-    auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+    for (int loopCount = 1; loopCount != 4; ++loopCount) {
+        auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
+        auto anim1 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+        auto anim2 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
+        auto anim3 = META_NS::KeyframeAnimation<BASE_NS::Math::Vec3>(CreateInstance(ClassId::KeyframeAnimation));
 
-    const int loopCount = 3;
-    auto loop =
-        META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
-    AttachmentContainer(staggered).Attach(loop);
+        auto loop =
+            META_NS::AnimationModifiers::Loop(CreateInstance(ClassId::LoopAnimationModifier)).SetLoopCount(loopCount);
+        AttachmentContainer(staggered).Attach(loop);
 
-    BASE_NS::Math::Vec3 from { 0, 0, 0 };
-    BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
-    TimeSpan baseDuration = TimeSpan::Milliseconds(50);
+        BASE_NS::Math::Vec3 from { 0, 0, 0 };
+        BASE_NS::Math::Vec3 to[3] = { { 100, 50, 0 }, { 20, 20, 100 }, { 200, 200, 0 } };
+        TimeSpan baseDuration = TimeSpan::Milliseconds(50);
 
-    // Last animation has the longest duration
-    std::vector<TimeSpan> duration = { baseDuration, baseDuration, baseDuration * 12 };
+        // Last animation has the longest duration
+        std::vector<TimeSpan> duration = { baseDuration, baseDuration, baseDuration * 12 };
 
-    SetProperties(anim1, t1_->Vec3Property1(), from, to[0], duration[0]);
-    SetProperties(anim2, t1_->Vec3Property2(), from, to[1], duration[1]);
-    SetProperties(anim3, t1_->Vec3Property3(), from, to[2], duration[2]);
+        SetProperties(anim1, t1_->Vec3Property1(), from, to[0], duration[0]);
+        SetProperties(anim2, t1_->Vec3Property2(), from, to[1], duration[1]);
+        SetProperties(anim3, t1_->Vec3Property3(), from, to[2], duration[2]);
 
-    Container c(staggered);
-    c.Add(anim1);
-    c.Add(anim2);
-    c.Add(anim3);
+        Container c(staggered);
+        c.Add(anim1);
+        c.Add(anim2);
+        c.Add(anim3);
 
-    auto staggeredDuration = *std::max_element(duration.begin(), duration.end());
-    EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration * loopCount);
+        auto staggeredDuration = *std::max_element(duration.begin(), duration.end());
+        EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration * loopCount);
+
+        anim1.SetDuration(staggeredDuration - TimeSpan::Milliseconds(10));
+
+        staggeredDuration = *std::max_element(duration.begin(), duration.end());
+        EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration * loopCount);
+
+        staggeredDuration += TimeSpan::Milliseconds(10);
+        anim2.SetDuration(staggeredDuration);
+
+        EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration * loopCount);
+    }
 }
 
 UNIT_TEST_F(API_StaggeredAnimationTest, DurationSequential, testing::ext::TestSize.Level1)

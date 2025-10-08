@@ -98,7 +98,7 @@ void StaggeredAnimationState::ChildAdded(const ChildChangedInfo& info)
     }
 
     AnimationSegment segment { animation, controller };
-    if (inContainerCount == 1) {
+    if (inContainerCount == 0) {
         segment.durationChanged_.Subscribe(animation->TotalDuration(), childrenChanged_);
         segment.validChanged_.Subscribe(animation->Valid(), childrenChanged_);
     }
