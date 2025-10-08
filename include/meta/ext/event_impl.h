@@ -244,7 +244,7 @@ public:
     using IEvent::AddHandler;
     Token AddHandler(const ICallable::Ptr& p, Token userToken) override
     {
-        if (Traits::IsCompatibleInterface(p)) {
+        if (p && Traits::IsCompatibleInterface(p)) {
             return GenericEvent::AddEventHandler(p, userToken);
         }
         CORE_LOG_F("%s: Tried to add a non-matching handler", GenericEvent::name_.c_str());
@@ -309,7 +309,7 @@ public:
         if (GenericEvent::BeginInvoke(invoke)) {
             auto& handlers = invoke.handlers;
             for (auto it = handlers.begin();
-                it != handlers.end() && invoke.currentCallCount == GenericEvent::callCount_; ++it) {
+                 it != handlers.end() && invoke.currentCallCount == GenericEvent::callCount_; ++it) {
                 if (auto callable = it->lock()) {
                     lock.Unlock();
                     Traits::Call(callable, args...);

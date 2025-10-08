@@ -25,9 +25,7 @@
 META_BEGIN_NAMESPACE()
 namespace Internal {
 
-StackProperty::StackProperty(BASE_NS::string name)
-    : Super(BASE_NS::move(name)), onChangedCallback_(MakeCallback<IOnChanged>([this] { InternalOnChanged(); }))
-{}
+StackProperty::StackProperty(BASE_NS::string name) : Super(BASE_NS::move(name)) {}
 
 StackProperty::~StackProperty()
 {
