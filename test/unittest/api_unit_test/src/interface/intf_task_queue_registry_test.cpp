@@ -116,6 +116,17 @@ UNIT_TEST(API_TaskQueueRegistryTest, UnRegister, testing::ext::TestSize.Level1)
     EXPECT_TRUE(taskqRegistry.UnregisterAllTaskQueues());
 }
 
+/**
+ * @tc.name: ConstructPromise
+ * @tc.desc: Test promise object construction
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueRegistryTest, ConstructPromise, testing::ext::TestSize.Level1)
+{
+    auto& t = GetTaskQueueRegistry();
+    EXPECT_TRUE(t.ConstructPromise());
+}
+
 } // namespace UTest
 
 META_END_NAMESPACE()

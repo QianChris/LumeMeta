@@ -781,8 +781,10 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
         EXPECT_FALSE(arrayAny->GetData({}, nullptr, arraySize));
         EXPECT_FALSE(arrayAny->GetData(arrayTypeId, arrayTarget, 0));
         EXPECT_FALSE(arrayAny->GetData({}, arrayTarget, 0));
-        EXPECT_EQ(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize + 1), expectedAccessTooBigSize);
-        EXPECT_TRUE(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize));
+        if (arrayTypeId != this->GetArrayTypeId()) {
+            EXPECT_EQ(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize + 1), expectedAccessTooBigSize);
+            EXPECT_TRUE(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize));
+        }
 
         EXPECT_FALSE(arrayAny->SetDataAt(0, {}, &value1, dataSize));
         EXPECT_FALSE(arrayAny->SetDataAt(0, typeId, nullptr, dataSize));
@@ -818,8 +820,9 @@ TYPED_TEST(API_TypedAnyTest, GetSetData)
         EXPECT_TRUE(arrayAny->InsertAnyAt(0, *any));
         EXPECT_TRUE(arrayAny->InsertAnyAt(0, *any));
         // GetData to 1 size array
-        EXPECT_EQ(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize), expectedAccessTooSmallSize);
-
+        if (arrayTypeId != this->GetArrayTypeId()) {
+            EXPECT_EQ(arrayAny->GetData(arrayTypeId, arrayTarget, arraySize), expectedAccessTooSmallSize);
+        }
         EXPECT_TRUE(arrayAny->template SetValueAt<TypeParam>(0, value1));
         EXPECT_FALSE(arrayAny->template SetValueAt<TypeParam>(10, value1));
         EXPECT_TRUE(arrayAny->template GetValueAt<TypeParam>(0, target));

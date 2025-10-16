@@ -25,6 +25,7 @@
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/curves/intf_easing_curve.h>
 #include <meta/interface/intf_object_registry.h>
+#include <meta/interface/intf_task_queue_registry.h>
 
 #include "helpers/util.h"
 
@@ -854,6 +855,119 @@ UNIT_TEST(API_ObjectRegistryTest, SameObjectInstanceId, testing::ext::TestSize.L
     }
 
     ASSERT_EQ(r.GetObjectInstanceByInstanceId(id), obj2);
+}
+
+/**
+ * @tc.name: InvalidFactory
+ * @tc.desc: Test invalid class factory
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, InvalidFactory, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    EXPECT_FALSE(r.RegisterObjectType({}));
+    EXPECT_FALSE(r.UnregisterObjectType({}));
+}
+
+/**
+ * @tc.name: GetAllInstances
+ * @tc.desc: Test instance list getters
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, GetInstances, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    auto object = r.Create(META_NS::ClassId::Object);
+    ASSERT_TRUE(object);
+    auto all = r.GetAllObjectInstances();
+    EXPECT_FALSE(all.empty());
+    EXPECT_THAT(all, ::testing::Contains(object));
+
+    all = r.GetAllSingletonObjectInstances();
+    EXPECT_TRUE(all.empty());
+
+    auto singleton = r.Create(META_NS::ClassId::FloatInterpolator);
+    ASSERT_TRUE(singleton);
+    all = r.GetAllSingletonObjectInstances();
+    auto singletonInstanceId = interface_cast<IObjectInstance>(singleton)->GetInstanceId();
+    EXPECT_FALSE(all.empty());
+    EXPECT_THAT(all, ::testing::Contains(singleton));
+    static constexpr auto invalidInstanceId = InstanceId { "11111111-1111-1111-1111-111111111111" };
+
+    EXPECT_FALSE(r.GetObjectInstanceByInstanceId({}));
+    EXPECT_TRUE(r.GetObjectInstanceByInstanceId(singletonInstanceId));
+    EXPECT_FALSE(r.GetObjectInstanceByInstanceId(invalidInstanceId));
+}
+
+/**
+ * @tc.name: GetImplementedInterface
+ * @tc.desc: Test object registry IInterface implementation
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, GetImplementedInterface, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    r.Ref();
+    r.Unref();
+
+    EXPECT_TRUE(r.GetInterface(CORE_NS::IInterface::UID));
+    EXPECT_TRUE(r.GetInterface(IObjectRegistry::UID));
+    EXPECT_TRUE(r.GetInterface(ITaskQueueRegistry::UID));
+
+    const auto& cr = r;
+    EXPECT_TRUE(cr.GetInterface(CORE_NS::IInterface::UID));
+    EXPECT_TRUE(cr.GetInterface(IObjectRegistry::UID));
+    EXPECT_TRUE(cr.GetInterface(ITaskQueueRegistry::UID));
+}
+
+/**
+ * @tc.name: HasInterpolator
+ * @tc.desc: Test object registry interfaces
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, HasInterpolator, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    EXPECT_TRUE(r.HasInterpolator(UidFromType<float>()));
+    EXPECT_FALSE(r.HasInterpolator(TypeId {}));
+}
+
+/**
+ * @tc.name: GetGlobalSerializationData
+ * @tc.desc: Test global serialization data APIs
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, GetGlobalSerializationData, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    auto& s = r.GetGlobalSerializationData();
+
+    auto defaults = s.GetDefaultSettings();
+    s.SetDefaultSettings(defaults);
+
+    auto object = r.Create(META_NS::ClassId::Object);
+    auto instanceId = interface_cast<IObjectInstance>(object)->GetInstanceId();
+    ASSERT_TRUE(object);
+    s.RegisterGlobalObject({});
+    s.RegisterGlobalObject(object);
+    EXPECT_EQ(s.GetGlobalObject(instanceId), object);
+    s.UnregisterGlobalObject({});
+    s.UnregisterGlobalObject(object);
+    EXPECT_FALSE(s.GetGlobalObject(instanceId));
+}
+
+/**
+ * @tc.name: DefaultObjectContext
+ * @tc.desc: Test default object context getter
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, DefaultObjectContext, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    auto ctx = r.GetDefaultObjectContext();
+    EXPECT_TRUE(ctx);
+    EXPECT_EQ(r.GetDefaultObjectContext(), ctx);
+    EXPECT_EQ(r.GetDefaultObjectContext(), ctx);
 }
 
 } // namespace UTest
