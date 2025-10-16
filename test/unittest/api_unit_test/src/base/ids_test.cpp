@@ -48,14 +48,29 @@ void IdTest()
     EXPECT_TRUE(id4.Compare(id2) > 0);
 }
 
+/**
+ * @tc.name: TypeId
+ * @tc.desc: Tests for Type Id. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_IdTests, TypeId, testing::ext::TestSize.Level1)
 {
     IdTest<TypeId>();
 }
+/**
+ * @tc.name: ObjectId
+ * @tc.desc: Tests for Object Id. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_IdTests, ObjectId, testing::ext::TestSize.Level1)
 {
     IdTest<ObjectId>();
 }
+/**
+ * @tc.name: InstanceId
+ * @tc.desc: Tests for Instance Id. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_IdTests, InstanceId, testing::ext::TestSize.Level1)
 {
     IdTest<InstanceId>();

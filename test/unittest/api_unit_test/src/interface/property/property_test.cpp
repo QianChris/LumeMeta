@@ -43,6 +43,11 @@ META_TYPE(TestType);
 
 namespace UTest {
 
+/**
+ * @tc.name: Interfaces
+ * @tc.desc: Tests for Interfaces. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, Interfaces, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -53,6 +58,11 @@ UNIT_TEST(API_PropertyTest, Interfaces, testing::ext::TestSize.Level1)
     EXPECT_TRUE(interface_cast<IStackProperty>(p.GetProperty()));
 }
 
+/**
+ * @tc.name: Values
+ * @tc.desc: Tests for Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, Values, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -67,6 +77,11 @@ UNIT_TEST(API_PropertyTest, Values, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), 2);
 }
 
+/**
+ * @tc.name: Misc
+ * @tc.desc: Tests for Misc. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, Misc, testing::ext::TestSize.Level1)
 {
     Object owner(CreateNew);
@@ -80,6 +95,11 @@ UNIT_TEST(API_PropertyTest, Misc, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetOwner().lock(), interface_pointer_cast<IOwner>(owner));
 }
 
+/**
+ * @tc.name: OnChangedEvent
+ * @tc.desc: Tests for On Changed Event. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, OnChangedEvent, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -121,6 +141,11 @@ UNIT_TEST(API_PropertyTest, OnChangedEvent, testing::ext::TestSize.Level1)
     EXPECT_EQ(count, 6);
 }
 
+/**
+ * @tc.name: OnChangedEventWithBind
+ * @tc.desc: Tests for On Changed Event With Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, OnChangedEventWithBind, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -139,6 +164,11 @@ UNIT_TEST(API_PropertyTest, OnChangedEventWithBind, testing::ext::TestSize.Level
     EXPECT_EQ(p->GetValue(), 3);
 }
 
+/**
+ * @tc.name: OnChangedEventWithValues
+ * @tc.desc: Tests for On Changed Event With Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, OnChangedEventWithValues, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -158,6 +188,11 @@ UNIT_TEST(API_PropertyTest, OnChangedEventWithValues, testing::ext::TestSize.Lev
     EXPECT_EQ(count, 3);
 }
 
+/**
+ * @tc.name: PropertyBind
+ * @tc.desc: Tests for Property Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, PropertyBind, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -174,6 +209,11 @@ UNIT_TEST(API_PropertyTest, PropertyBind, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), 0);
 }
 
+/**
+ * @tc.name: FunctionBind
+ * @tc.desc: Tests for Function Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, FunctionBind, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -191,6 +231,11 @@ UNIT_TEST(API_PropertyTest, FunctionBind, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), 4);
 }
 
+/**
+ * @tc.name: LambdaBindMultiDep
+ * @tc.desc: Tests for Lambda Bind Multi Dep. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, LambdaBindMultiDep, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -211,6 +256,11 @@ UNIT_TEST(API_PropertyTest, LambdaBindMultiDep, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), 7);
 }
 
+/**
+ * @tc.name: LambdaBindInvalid
+ * @tc.desc: Tests for Lambda Bind Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, LambdaBindInvalid, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -228,6 +278,11 @@ UNIT_TEST(API_PropertyTest, LambdaBindInvalid, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), 4);
 }
 
+/**
+ * @tc.name: LambdaBind
+ * @tc.desc: Tests for Lambda Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, LambdaBind, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -238,6 +293,11 @@ UNIT_TEST(API_PropertyTest, LambdaBind, testing::ext::TestSize.Level1)
     EXPECT_TRUE(p->SetBind(CreateBindFunction([](auto...) mutable { return 5; })));
 }
 
+/**
+ * @tc.name: LambdaBindWithDependency
+ * @tc.desc: Tests for Lambda Bind With Dependency. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, LambdaBindWithDependency, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -250,6 +310,11 @@ UNIT_TEST(API_PropertyTest, LambdaBindWithDependency, testing::ext::TestSize.Lev
     EXPECT_EQ(p->GetValue(), 4);
 }
 
+/**
+ * @tc.name: MultipleBinds
+ * @tc.desc: Tests for Multiple Binds. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, MultipleBinds, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -269,6 +334,11 @@ UNIT_TEST(API_PropertyTest, MultipleBinds, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetStackProperty()->GetValues({}, false).size(), 1);
 }
 
+/**
+ * @tc.name: BindingBind
+ * @tc.desc: Tests for Binding Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, BindingBind, testing::ext::TestSize.Level1)
 {
     auto p1 = ConstructProperty<int>("p1", 0);
@@ -285,6 +355,11 @@ UNIT_TEST(API_PropertyTest, BindingBind, testing::ext::TestSize.Level1)
     EXPECT_EQ(p1->GetValue(), 2);
 }
 
+/**
+ * @tc.name: PropertyInProperty
+ * @tc.desc: Tests for Property In Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, PropertyInProperty, testing::ext::TestSize.Level1)
 {
     auto p1 = ConstructProperty<int>("p1");
@@ -303,6 +378,11 @@ UNIT_TEST(API_PropertyTest, PropertyInProperty, testing::ext::TestSize.Level1)
     EXPECT_EQ(p2->GetValue(), 5);
 }
 
+/**
+ * @tc.name: ResetInternalAny
+ * @tc.desc: Tests for Reset Internal Any. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ResetInternalAny, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -329,6 +409,11 @@ UNIT_TEST(API_PropertyTest, ResetInternalAny, testing::ext::TestSize.Level1)
     EXPECT_EQ(s->GetValue(), "xx");
 }
 
+/**
+ * @tc.name: RecursiveProperty
+ * @tc.desc: Tests for Recursive Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, RecursiveProperty, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -340,6 +425,11 @@ UNIT_TEST(API_PropertyTest, RecursiveProperty, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->PushValue(p2.GetProperty()).GetError(), GenericError::RECURSIVE_CALL);
 }
 
+/**
+ * @tc.name: Reset
+ * @tc.desc: Tests for Reset. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, Reset, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -354,6 +444,11 @@ UNIT_TEST(API_PropertyTest, Reset, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), 2);
 }
 
+/**
+ * @tc.name: ResetWithSharedPointer
+ * @tc.desc: Tests for Reset With Shared Pointer. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ResetWithSharedPointer, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<IObject::Ptr>("test");
@@ -366,6 +461,11 @@ UNIT_TEST(API_PropertyTest, ResetWithSharedPointer, testing::ext::TestSize.Level
     EXPECT_FALSE(w.lock());
 }
 
+/**
+ * @tc.name: UserType
+ * @tc.desc: Tests for User Type. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, UserType, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<TestType>("test");
@@ -374,6 +474,11 @@ UNIT_TEST(API_PropertyTest, UserType, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue().i, 1);
 }
 
+/**
+ * @tc.name: BindingMultiDep
+ * @tc.desc: Tests for Binding Multi Dep. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, BindingMultiDep, testing::ext::TestSize.Level1)
 {
     auto p1 = ConstructProperty<int>("test1");
@@ -396,6 +501,11 @@ UNIT_TEST(API_PropertyTest, BindingMultiDep, testing::ext::TestSize.Level1)
     EXPECT_EQ(p4->GetValue(), 6);
 }
 
+/**
+ * @tc.name: ObjectFlags
+ * @tc.desc: Tests for Object Flags. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ObjectFlags, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test", 0, ObjectFlagBits::INTERNAL);
@@ -408,6 +518,11 @@ UNIT_TEST(API_PropertyTest, ObjectFlags, testing::ext::TestSize.Level1)
         test->Second().GetProperty(), ObjectFlagBitsValue { ObjectFlagBits::INTERNAL } | ObjectFlagBits::NATIVE));
 }
 
+/**
+ * @tc.name: Conversions
+ * @tc.desc: Tests for Conversions. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, Conversions, testing::ext::TestSize.Level1)
 {
     Property<int> p = ConstructProperty<int>("test");
@@ -425,6 +540,11 @@ UNIT_TEST(API_PropertyTest, Conversions, testing::ext::TestSize.Level1)
     EXPECT_TRUE(interface_cast<IStackProperty>(p));
 }
 
+/**
+ * @tc.name: IncompatibleValue
+ * @tc.desc: Tests for Incompatible Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, IncompatibleValue, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -432,6 +552,11 @@ UNIT_TEST(API_PropertyTest, IncompatibleValue, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->PushValue(s.GetProperty()).GetError(), GenericError::INCOMPATIBLE_TYPES);
 }
 
+/**
+ * @tc.name: CompatiblePtrValue
+ * @tc.desc: Tests for Compatible Ptr Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, CompatiblePtrValue, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<IObject::Ptr>("test");
@@ -441,6 +566,11 @@ UNIT_TEST(API_PropertyTest, CompatiblePtrValue, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), interface_pointer_cast<IObject>(obj));
 }
 
+/**
+ * @tc.name: SetValueSafeInit
+ * @tc.desc: Tests for Set Value Safe Init. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, SetValueSafeInit, testing::ext::TestSize.Level1)
 {
     Property<int> p(NOCHECK, GetObjectRegistry().GetPropertyRegister().Create(META_NS::ClassId::StackProperty, "Test"));
@@ -453,6 +583,11 @@ UNIT_TEST(API_PropertyTest, SetValueSafeInit, testing::ext::TestSize.Level1)
     EXPECT_TRUE(Property<int>(p));
 }
 
+/**
+ * @tc.name: ValuePtr
+ * @tc.desc: Tests for Value Ptr. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ValuePtr, testing::ext::TestSize.Level1)
 {
     auto obj = GetObjectRegistry().Create<ITestPtrValue>(ClassId::TestPtrValue);
@@ -470,6 +605,11 @@ UNIT_TEST(API_PropertyTest, ValuePtr, testing::ext::TestSize.Level1)
     EXPECT_EQ(obj->Text()->GetValue()->GetString(), "Hoo'o");
 }
 
+/**
+ * @tc.name: ValuePtrBind
+ * @tc.desc: Tests for Value Ptr Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ValuePtrBind, testing::ext::TestSize.Level1)
 {
     auto obj = GetObjectRegistry().Create<ITestString>(ClassId::TestString);
@@ -493,6 +633,11 @@ UNIT_TEST(API_PropertyTest, ValuePtrBind, testing::ext::TestSize.Level1)
     EXPECT_EQ(strP->GetValue(), "hahah");
 }
 
+/**
+ * @tc.name: ValuePtrDefaultValue
+ * @tc.desc: Tests for Value Ptr Default Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ValuePtrDefaultValue, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<ValuePtr<ITestString, ClassId::TestString>>("Test", BASE_NS::string("hih"));
@@ -508,6 +653,11 @@ UNIT_TEST(API_PropertyTest, ValuePtrDefaultValue, testing::ext::TestSize.Level1)
     EXPECT_EQ(count, 1);
 }
 
+/**
+ * @tc.name: MultiOnChangedWithSameHandle
+ * @tc.desc: Tests for Multi On Changed With Same Handle. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, MultiOnChangedWithSameHandle, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -548,6 +698,11 @@ public:
     bool changed_ {};
 };
 
+/**
+ * @tc.name: PropertyOwner
+ * @tc.desc: Tests for Property Owner. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, PropertyOwner, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<PropertyOwnerTest>();
@@ -561,6 +716,11 @@ UNIT_TEST(API_PropertyTest, PropertyOwner, testing::ext::TestSize.Level1)
     UnregisterObjectType<PropertyOwnerTest>();
 }
 
+/**
+ * @tc.name: DisableEventHandler
+ * @tc.desc: Tests for Disable Event Handler. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, DisableEventHandler, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -581,6 +741,11 @@ UNIT_TEST(API_PropertyTest, DisableEventHandler, testing::ext::TestSize.Level1)
     EXPECT_EQ(count, 2);
 }
 
+/**
+ * @tc.name: PointerValueLifetime
+ * @tc.desc: Tests for Pointer Value Lifetime. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, PointerValueLifetime, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<IObject::Ptr>("test");
@@ -595,6 +760,11 @@ UNIT_TEST(API_PropertyTest, PointerValueLifetime, testing::ext::TestSize.Level1)
     EXPECT_FALSE(w.lock());
 }
 
+/**
+ * @tc.name: ValidPropertyLock
+ * @tc.desc: Tests for Valid Property Lock. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, ValidPropertyLock, testing::ext::TestSize.Level1)
 {
     {
@@ -633,6 +803,11 @@ UNIT_TEST(API_PropertyTest, ValidPropertyLock, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: PropertyHelpers
+ * @tc.desc: Tests for Property Helpers. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, PropertyHelpers, testing::ext::TestSize.Level1)
 {
     auto obj = CreateTestType<IObject>();
@@ -662,6 +837,11 @@ UNIT_TEST(API_PropertyTest, PropertyHelpers, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetConstPointer(cp), interface_pointer_cast<CORE_NS::IInterface>(some));
 }
 
+/**
+ * @tc.name: UnlockedOnChanged
+ * @tc.desc: Tests for Unlocked On Changed. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, UnlockedOnChanged, testing::ext::TestSize.Level1)
 {
     auto prop = ConstructProperty<int>("test");
@@ -676,6 +856,11 @@ UNIT_TEST(API_PropertyTest, UnlockedOnChanged, testing::ext::TestSize.Level1)
     p->SetValue(Any<int>(1));
 }
 
+/**
+ * @tc.name: IsDefault
+ * @tc.desc: Tests for Is Default. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, IsDefault, testing::ext::TestSize.Level1)
 {
     auto prop = ConstructProperty<int>("test", 1);
@@ -717,6 +902,11 @@ public:
     }
 };
 
+/**
+ * @tc.name: EvaluateAndStore
+ * @tc.desc: Tests for Evaluate And Store. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyTest, EvaluateAndStore, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<uint32_t>("test");

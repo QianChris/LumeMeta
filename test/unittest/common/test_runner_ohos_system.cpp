@@ -18,6 +18,11 @@
 #include <core/engine_info.h>
 #include <core/log.h>
 
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+CORE_NS::IPluginRegister& (*CORE_NS::GetPluginRegister)() { nullptr };
+void (*CORE_NS::CreatePluginRegistry)(const struct CORE_NS::PlatformCreateInfo& platformCreateInfo) { nullptr };
+#endif
+
 META_BEGIN_NAMESPACE()
 namespace UTest {
 

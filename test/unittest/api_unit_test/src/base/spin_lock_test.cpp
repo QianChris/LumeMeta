@@ -26,6 +26,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: LockUnlock
+ * @tc.desc: Tests for Lock Unlock. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SpinLockTest, LockUnlock, testing::ext::TestSize.Level1)
 {
     BASE_NS::SpinLock l;
@@ -45,6 +50,11 @@ UNIT_TEST(API_SpinLockTest, LockUnlock, testing::ext::TestSize.Level1)
     EXPECT_EQ(value, true);
 }
 
+/**
+ * @tc.name: MultiLockUnlock
+ * @tc.desc: Tests for Multi Lock Unlock. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SpinLockTest, MultiLockUnlock, testing::ext::TestSize.Level1)
 {
     BASE_NS::SpinLock l;

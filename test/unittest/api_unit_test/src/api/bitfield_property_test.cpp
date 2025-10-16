@@ -108,23 +108,44 @@ MATCHER_P(ExactBitsSet, n, "")
     return arg == n;
 }
 
+/**
+ * @tc.name: GetValue
+ * @tc.desc: Tests for Get Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BitfieldPropertyTest, GetValue, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(GetValue(object_->Flags()), TestFlagBits::FLAG2);
 }
 
+/**
+ * @tc.name: SetValue
+ * @tc.desc: Tests for Set Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BitfieldPropertyTest, SetValue, testing::ext::TestSize.Level1)
 {
     SetValue(object_->Flags(), TestFlagBits::FLAG1 | TestFlagBits::FLAG4);
     EXPECT_EQ(GetValue(object_->Flags()), TestFlagBits::FLAG1 | TestFlagBits::FLAG4);
 }
 
+/**
+ * @tc.name: SetValueOp
+ * @tc.desc: Tests for Set Value Op. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BitfieldPropertyTest, SetValueOp, testing::ext::TestSize.Level1)
 {
     TestFlags value1 = TestFlagBits::FLAG2;
     SetValue(object_->Flags(), value1 | TestFlagBits::FLAG1 | TestFlagBits::FLAG4);
     EXPECT_EQ(GetValue(object_->Flags()), TestFlagBits::FLAG1 | TestFlagBits::FLAG2 | TestFlagBits::FLAG4);
 }
+
+/**
+ * @tc.name: Serialisation
+ * @tc.desc: Tests for Serialisation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
 UNIT_TEST_F(API_BitfieldPropertyTest, Serialisation, testing::ext::TestSize.Level1)
 {
@@ -145,6 +166,11 @@ UNIT_TEST(API_BitfieldTest, Or, testing::ext::TestSize.Level1)
         (value1 | value2).GetValue(), ExactBitsSet(TestFlagBits::FLAG1 | TestFlagBits::FLAG2 | TestFlagBits::FLAG4));
 }
 
+/**
+ * @tc.name: And
+ * @tc.desc: Tests for And. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_BitfieldTest, And, testing::ext::TestSize.Level1)
 {
     EnumBitField<TestFlagBits> value1(TestFlagBits::FLAG1);
@@ -152,6 +178,11 @@ UNIT_TEST(API_BitfieldTest, And, testing::ext::TestSize.Level1)
     EXPECT_THAT((value1 & value2).GetValue(), ExactBitsSet(TestFlagBits::FLAG1));
 }
 
+/**
+ * @tc.name: Xor
+ * @tc.desc: Tests for Xor. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_BitfieldTest, Xor, testing::ext::TestSize.Level1)
 {
     EnumBitField<TestFlagBits> value1(TestFlagBits::FLAG1);
@@ -159,12 +190,22 @@ UNIT_TEST(API_BitfieldTest, Xor, testing::ext::TestSize.Level1)
     EXPECT_THAT((value1 ^ value2).GetValue(), ExactBitsSet(TestFlagBits::FLAG2 | TestFlagBits::FLAG4));
 }
 
+/**
+ * @tc.name: Not
+ * @tc.desc: Tests for Not. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_BitfieldTest, Not, testing::ext::TestSize.Level1)
 {
     EnumBitField<TestFlagBits> value1(TestFlagBits::FLAG1);
     EXPECT_THAT((~value1).GetValue(), ExactBitsSet(~TestFlagBits::FLAG1));
 }
 
+/**
+ * @tc.name: SetAndClear
+ * @tc.desc: Tests for Set And Clear. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_BitfieldTest, SetAndClear, testing::ext::TestSize.Level1)
 {
     EnumBitField<TestFlagBits> value(TestFlagBits::FLAG1);
@@ -185,6 +226,11 @@ enum ExtTestFlagBits : uint32_t {
 
 using ExtTestFlags = META_NS::SubEnumBitField<ExtTestFlagBits, TestFlags, 16, 16>;
 
+/**
+ * @tc.name: Value
+ * @tc.desc: Tests for Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, Value, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);
@@ -199,6 +245,11 @@ UNIT_TEST(API_SubBitfieldTest, Value, testing::ext::TestSize.Level1)
     EXPECT_THAT((ExtTestFlagBits)sub, ExactBitsSet(ExtTestFlagBits::FLAG2));
 }
 
+/**
+ * @tc.name: Or
+ * @tc.desc: Tests for Or. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, Or, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);
@@ -206,6 +257,11 @@ UNIT_TEST(API_SubBitfieldTest, Or, testing::ext::TestSize.Level1)
     EXPECT_THAT(base | ext, ExactBitsSet(TestFlagBits::FLAG1 | (ExtTestFlagBits::FLAG2 << 16)));
 }
 
+/**
+ * @tc.name: And
+ * @tc.desc: Tests for And. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, And, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);
@@ -215,6 +271,11 @@ UNIT_TEST(API_SubBitfieldTest, And, testing::ext::TestSize.Level1)
     EXPECT_THAT(res & base, ExactBitsSet(TestFlagBits::FLAG1));
 }
 
+/**
+ * @tc.name: Xor
+ * @tc.desc: Tests for Xor. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, Xor, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);
@@ -224,6 +285,11 @@ UNIT_TEST(API_SubBitfieldTest, Xor, testing::ext::TestSize.Level1)
     EXPECT_THAT(res ^ base, ExactBitsSet(ExtTestFlagBits::FLAG2 << 16));
 }
 
+/**
+ * @tc.name: Not
+ * @tc.desc: Tests for Not. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, Not, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);
@@ -233,6 +299,11 @@ UNIT_TEST(API_SubBitfieldTest, Not, testing::ext::TestSize.Level1)
     EXPECT_THAT(res & ~base, ExactBitsSet(ExtTestFlagBits::FLAG2 << 16));
 }
 
+/**
+ * @tc.name: SetAndClear
+ * @tc.desc: Tests for Set And Clear. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, SetAndClear, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);
@@ -256,6 +327,11 @@ UNIT_TEST(API_SubBitfieldTest, SetAndClear, testing::ext::TestSize.Level1)
     EXPECT_TRUE(ext2.IsSet(ExtTestFlagBits::FLAG1));
 }
 
+/**
+ * @tc.name: SetSubBits
+ * @tc.desc: Tests for Set Sub Bits. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SubBitfieldTest, SetSubBits, testing::ext::TestSize.Level1)
 {
     TestFlags base(TestFlagBits::FLAG1);

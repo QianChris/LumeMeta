@@ -98,6 +98,11 @@ protected:
 
 using namespace ::testing;
 
+/**
+ * @tc.name: StartAll
+ * @tc.desc: Tests for Start All. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, StartAll, testing::ext::TestSize.Level1)
 {
     using Operation = ITestStartable::Operation;
@@ -120,6 +125,11 @@ UNIT_TEST_F(API_StartableControllerTest, StartAll, testing::ext::TestSize.Level1
     EXPECT_THAT(test->StopRecording(), ElementsAre(Operation::START));
 }
 
+/**
+ * @tc.name: StopAll
+ * @tc.desc: Tests for Stop All. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, StopAll, testing::ext::TestSize.Level1)
 {
     AttachController();
@@ -138,6 +148,11 @@ UNIT_TEST_F(API_StartableControllerTest, StopAll, testing::ext::TestSize.Level1)
     EXPECT_THAT(test->StopRecording(), ElementsAre(Operation::START, Operation::STOP));
 }
 
+/**
+ * @tc.name: Lifecycle
+ * @tc.desc: Tests for Lifecycle. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, Lifecycle, testing::ext::TestSize.Level1)
 {
     AttachController();
@@ -154,6 +169,11 @@ UNIT_TEST_F(API_StartableControllerTest, Lifecycle, testing::ext::TestSize.Level
         test->StopRecording(), ElementsAre(Operation::ATTACH, Operation::START, Operation::STOP, Operation::DETACH));
 }
 
+/**
+ * @tc.name: GetAll
+ * @tc.desc: Tests for Get All. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, GetAll, testing::ext::TestSize.Level1)
 {
     AttachController();
@@ -165,6 +185,11 @@ UNIT_TEST_F(API_StartableControllerTest, GetAll, testing::ext::TestSize.Level1)
     EXPECT_THAT(controller_->GetAllStartables(), UnorderedElementsAre(startable1, startable2, startable3));
 }
 
+/**
+ * @tc.name: DynamicStart
+ * @tc.desc: Tests for Dynamic Start. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, DynamicStart, testing::ext::TestSize.Level1)
 {
     AttachController();
@@ -200,6 +225,11 @@ UNIT_TEST_F(API_StartableControllerTest, DynamicStart, testing::ext::TestSize.Le
     EXPECT_THAT(startable2->GetOps(), ElementsAre(Operation::ATTACH));
 }
 
+/**
+ * @tc.name: StartOrder
+ * @tc.desc: Tests for Start Order. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, StartOrder, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<uint32_t> startOrder;
@@ -251,6 +281,11 @@ UNIT_TEST_F(API_StartableControllerTest, StartOrder, testing::ext::TestSize.Leve
     EXPECT_THAT(stopOrder, ElementsAre(1, 2, 3, 4));
 }
 
+/**
+ * @tc.name: Tick
+ * @tc.desc: Tests for Tick. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, Tick, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<uint32_t> tickOrder;
@@ -326,6 +361,11 @@ UNIT_TEST_F(API_StartableControllerTest, Tick, testing::ext::TestSize.Level1)
     EXPECT_THAT(tickOrder, ElementsAre(1, 5, 2, 3, 4));
 }
 
+/**
+ * @tc.name: TickInterval
+ * @tc.desc: Tests for Tick Interval. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, TickInterval, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<uint32_t> tickOrder;
@@ -377,6 +417,11 @@ UNIT_TEST_F(API_StartableControllerTest, TickInterval, testing::ext::TestSize.Le
     EXPECT_THAT_TIMED(200, tickOrder, ElementsAre(1, 2, 3, 4, 1, 2, 3, 4));
 }
 
+/**
+ * @tc.name: Queue
+ * @tc.desc: Tests for Queue. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, Queue, testing::ext::TestSize.Level1)
 {
     auto startQueue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
@@ -448,6 +493,11 @@ UNIT_TEST_F(API_StartableControllerTest, Queue, testing::ext::TestSize.Level1)
     GetTaskQueueRegistry().UnregisterTaskQueue(stopQueueId.ToUid());
 }
 
+/**
+ * @tc.name: AddingInsideStart
+ * @tc.desc: Tests for Adding Inside Start. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, AddingInsideStart, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<uint32_t> startOrder;
@@ -483,6 +533,11 @@ UNIT_TEST_F(API_StartableControllerTest, AddingInsideStart, testing::ext::TestSi
     controller_->StopAll();
 }
 
+/**
+ * @tc.name: QueueAddingInsideStart
+ * @tc.desc: Tests for Queue Adding Inside Start. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StartableControllerTest, QueueAddingInsideStart, testing::ext::TestSize.Level1)
 {
     auto startQueue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);

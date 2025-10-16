@@ -31,6 +31,11 @@ META_BEGIN_NAMESPACE()
 
 namespace UTest {
 
+/**
+ * @tc.name: Values
+ * @tc.desc: Tests for Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, Values, testing::ext::TestSize.Level1)
 {
     auto p = ConstructArrayProperty<int>("test");
@@ -58,6 +63,11 @@ UNIT_TEST(API_ArrayPropertyTest, Values, testing::ext::TestSize.Level1)
     EXPECT_EQ(p->GetValue(), (BASE_NS::vector<int> { 7, 11, 5 }));
 }
 
+/**
+ * @tc.name: ValuesTypeless
+ * @tc.desc: Tests for Values Typeless. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, ValuesTypeless, testing::ext::TestSize.Level1)
 {
     auto p = ConstructArrayProperty<int>("test");
@@ -76,6 +86,11 @@ UNIT_TEST(API_ArrayPropertyTest, ValuesTypeless, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue<int>(v), 1);
 }
 
+/**
+ * @tc.name: ArrayElementBind
+ * @tc.desc: Tests for Array Element Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, ArrayElementBind, testing::ext::TestSize.Level1)
 {
     auto arr = ConstructArrayProperty<int>("test", BASE_NS::vector<int> { 1, 2, 3 });
@@ -101,6 +116,11 @@ UNIT_TEST(API_ArrayPropertyTest, ArrayElementBind, testing::ext::TestSize.Level1
     EXPECT_EQ(p->GetValue(), 1);
 }
 
+/**
+ * @tc.name: ValidArrayPropertyLock
+ * @tc.desc: Tests for Valid Array Property Lock. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, ValidArrayPropertyLock, testing::ext::TestSize.Level1)
 {
     {
@@ -139,6 +159,11 @@ UNIT_TEST(API_ArrayPropertyTest, ValidArrayPropertyLock, testing::ext::TestSize.
     }
 }
 
+/**
+ * @tc.name: TypelessAccess
+ * @tc.desc: Tests for Typeless Access. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, TypelessAccess, testing::ext::TestSize.Level1)
 {
     auto p = ConstructArrayProperty<int>("p", { 1, 2, 3, 4, 5 });
@@ -156,6 +181,11 @@ UNIT_TEST(API_ArrayPropertyTest, TypelessAccess, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: TypelessAccessCompatibility
+ * @tc.desc: Tests for Typeless Access Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, TypelessAccessCompatibility, testing::ext::TestSize.Level1)
 {
     Object a(CreateInstance(ClassId::Object)), b(CreateInstance(ClassId::Object)), c(CreateInstance(ClassId::Object)),
@@ -173,6 +203,11 @@ UNIT_TEST(API_ArrayPropertyTest, TypelessAccessCompatibility, testing::ext::Test
     }
 }
 
+/**
+ * @tc.name: PropertyHelpers
+ * @tc.desc: Tests for Property Helpers. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyTest, PropertyHelpers, testing::ext::TestSize.Level1)
 {
     Object a(CreateInstance(ClassId::Object)), b(CreateInstance(ClassId::Object)), c(CreateInstance(ClassId::Object));

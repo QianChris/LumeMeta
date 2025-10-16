@@ -28,6 +28,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: LambdaAutoLocksCapturedSharedPtr
+ * @tc.desc: Tests for Lambda Auto Locks Captured Shared Ptr. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedSharedPtr, testing::ext::TestSize.Level1)
 {
     {
@@ -49,6 +54,11 @@ UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedSharedPtr, testing::ext::T
     }
 }
 
+/**
+ * @tc.name: LambdaAutoLocksCapturedWeakPtr
+ * @tc.desc: Tests for Lambda Auto Locks Captured Weak Ptr. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedWeakPtr, testing::ext::TestSize.Level1)
 {
     {
@@ -72,6 +82,11 @@ UNIT_TEST(API_CaptureBindTest, LambdaAutoLocksCapturedWeakPtr, testing::ext::Tes
     }
 }
 
+/**
+ * @tc.name: LambdaNotThrowsWhenCapturedSharedPointerIsReleased
+ * @tc.desc: Tests for Lambda Not Throws When Captured Shared Pointer Is Released. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, LambdaNotThrowsWhenCapturedSharedPointerIsReleased, testing::ext::TestSize.Level1)
 {
     {
@@ -84,6 +99,11 @@ UNIT_TEST(API_CaptureBindTest, LambdaNotThrowsWhenCapturedSharedPointerIsRelease
     }
 }
 
+/**
+ * @tc.name: LambdaNotThrowsWhenCapturedWeakPointerPointsToInvalidResource
+ * @tc.desc: Tests for Lambda Not Throws When Captured Weak Pointer Points To Invalid Resource. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(
     API_CaptureBindTest, LambdaNotThrowsWhenCapturedWeakPointerPointsToInvalidResource, testing::ext::TestSize.Level1)
 {
@@ -107,6 +127,11 @@ UNIT_TEST(
     }
 }
 
+/**
+ * @tc.name: SimpleLambda
+ * @tc.desc: Tests for Simple Lambda. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, SimpleLambda, testing::ext::TestSize.Level1)
 {
     BASE_NS::shared_ptr<int> p(new int {});
@@ -163,6 +188,11 @@ UNIT_TEST(API_CaptureBindTest, SimpleLambda, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: MakeCallback
+ * @tc.desc: Tests for Make Callback. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, MakeCallback, testing::ext::TestSize.Level1)
 {
     auto& registry = GetObjectRegistry();
@@ -181,6 +211,11 @@ UNIT_TEST(API_CaptureBindTest, MakeCallback, testing::ext::TestSize.Level1)
     EXPECT_EQ(*count, 1);
 }
 
+/**
+ * @tc.name: MakeCallable
+ * @tc.desc: Tests for Make Callable. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, MakeCallable, testing::ext::TestSize.Level1)
 {
     auto& registry = GetObjectRegistry();
@@ -215,6 +250,11 @@ class TestAttachment : public META_NS::AttachmentFwd {
 };
 } // namespace
 
+/**
+ * @tc.name: IObject
+ * @tc.desc: Tests for Iobject. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CaptureBindTest, IObject, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestAttachment>();

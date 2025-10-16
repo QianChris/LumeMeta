@@ -116,6 +116,11 @@ struct EnumValueSerType : public SerType {
     SetTypeTestEnum enum_;
 };
 
+/**
+ * @tc.name: EnumValueSer
+ * @tc.desc: Tests for Enum Value Ser. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, EnumValueSer, testing::ext::TestSize.Level1)
 {
     auto& reg = GetObjectRegistry();
@@ -137,6 +142,11 @@ UNIT_TEST(API_SerializationTest, EnumValueSer, testing::ext::TestSize.Level1)
     reg.UnregisterObjectType<EnumValueSerType>();
 }
 
+/**
+ * @tc.name: JsonExportExplicitSer
+ * @tc.desc: Tests for Json Export Explicit Ser. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, JsonExportExplicitSer, testing::ext::TestSize.Level1)
 {
     auto& reg = GetObjectRegistry();
@@ -164,6 +174,11 @@ UNIT_TEST(API_SerializationTest, JsonExportExplicitSer, testing::ext::TestSize.L
     reg.UnregisterObjectType<ExplicitSerType>();
 }
 
+/**
+ * @tc.name: JsonExportAutoSer
+ * @tc.desc: Tests for Json Export Auto Ser. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, JsonExportAutoSer, testing::ext::TestSize.Level1)
 {
     auto& reg = GetObjectRegistry();

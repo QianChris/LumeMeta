@@ -68,6 +68,11 @@ public:
     BASE_NS::vector<META_NS::IProperty::Ptr> keepAliveProperties;
 };
 
+/**
+ * @tc.name: ReverseImplicitAnimation
+ * @tc.desc: Tests for Reverse Implicit Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationModifierTestBase, ReverseImplicitAnimation, testing::ext::TestSize.Level1)
 {
     auto animation = META_NS::PropertyAnimation(CreateInstance(ClassId::PropertyAnimation));
@@ -268,7 +273,12 @@ IAnimation::Ptr Serialize(API_AnimationModifierTestBase& test, IAnimation::Ptr a
     return nullptr;
 }
 
-TEST_P(API_ReverseAnimationModifierTest, ReversedAnimationIsPlayedBackward)
+/**
+ * @tc.name: ReversedAnimationIsPlayedBackward
+ * @tc.desc: Tests for Reversed Animation Is Played Backward. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ReverseAnimationModifierTest, ReversedAnimationIsPlayedBackward, testing::ext::TestSize.Level1)
 {
     using ::testing::FloatNear;
     using ::testing::Pointwise;
@@ -303,7 +313,12 @@ static IObject::Ptr GetAnimAttachment(IAnimation::Ptr anim)
     return attachment;
 }
 
-TEST_P(API_LoopAnimationModifierTest, LoopCountModifiesDuration)
+/**
+ * @tc.name: LoopCountModifiesDuration
+ * @tc.desc: Tests for Loop Count Modifies Duration. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_LoopAnimationModifierTest, LoopCountModifiesDuration, testing::ext::TestSize.Level1)
 {
     auto anim = GetAnimation();
     int loopCount = GetLoopCount();
@@ -330,7 +345,13 @@ TEST_P(API_LoopAnimationModifierTest, LoopCountModifiesDuration)
     EXPECT_EQ(GetValue(anim->TotalDuration()), TimeSpan::Infinite());
 }
 
-TEST_P(API_LoopAnimationModifierTest, AnimationIsLoopingRegardlessOfSpeedModificator)
+/**
+ * @tc.name: AnimationIsLoopingRegardlessOfSpeedModificator
+ * @tc.desc: Tests for Animation Is Looping Regardless Of Speed Modificator. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(
+    API_LoopAnimationModifierTest, AnimationIsLoopingRegardlessOfSpeedModificator, testing::ext::TestSize.Level1)
 {
     static constexpr int64_t frameStepMs = 10;
     static constexpr float speedFactor = 2.7;
@@ -363,7 +384,12 @@ TEST_P(API_LoopAnimationModifierTest, AnimationIsLoopingRegardlessOfSpeedModific
     EXPECT_EQ(actualLoops, expectedLoops);
 }
 
-TEST_P(API_LoopAnimationModifierTest, AnimationIslooping)
+/**
+ * @tc.name: AnimationIslooping
+ * @tc.desc: Tests for Animation Islooping. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_LoopAnimationModifierTest, AnimationIslooping, testing::ext::TestSize.Level1)
 {
     auto anim = GetAnimation();
     int loopCount = GetLoopCount();
@@ -429,7 +455,12 @@ TEST_P(API_LoopAnimationModifierTest, AnimationIslooping)
     }
 }
 
-TEST_P(API_LoopAnimationModifierTest, DuplicateProperties)
+/**
+ * @tc.name: DuplicateProperties
+ * @tc.desc: Tests for Duplicate Properties. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_LoopAnimationModifierTest, DuplicateProperties, testing::ext::TestSize.Level1)
 {
     auto animation = GetAnimation();
     animation = Transform(animation);
@@ -447,7 +478,12 @@ TEST_P(API_LoopAnimationModifierTest, DuplicateProperties)
     }
 }
 
-TEST_P(API_SpeedAnimationModifierTest, SpeedFactorModifiesDuration)
+/**
+ * @tc.name: SpeedFactorModifiesDuration
+ * @tc.desc: Tests for Speed Factor Modifies Duration. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_SpeedAnimationModifierTest, SpeedFactorModifiesDuration, testing::ext::TestSize.Level1)
 {
     auto anim = GetAnimation();
     float speedFactor = GetSpeedFactor();
@@ -483,7 +519,12 @@ TEST_P(API_SpeedAnimationModifierTest, SpeedFactorModifiesDuration)
     EXPECT_EQ(GetValue(anim->TotalDuration()), TimeSpan::Infinite());
 }
 
-TEST_P(API_SpeedAnimationModifierTest, SpeedFactorAffectsPlayback)
+/**
+ * @tc.name: SpeedFactorAffectsPlayback
+ * @tc.desc: Tests for Speed Factor Affects Playback. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_SpeedAnimationModifierTest, SpeedFactorAffectsPlayback, testing::ext::TestSize.Level1)
 {
     auto anim = GetAnimation();
     const float speedFactor = GetSpeedFactor();

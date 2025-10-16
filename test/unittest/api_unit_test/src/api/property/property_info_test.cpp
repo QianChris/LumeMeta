@@ -40,6 +40,11 @@ META_ENUM_TYPE(MyPropEnum)
 
 namespace UTest {
 
+/**
+ * @tc.name: Info
+ * @tc.desc: Tests for Info. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyInfoTest, Info, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<MyPropEnum>("test");
@@ -49,6 +54,11 @@ UNIT_TEST(API_PropertyInfoTest, Info, testing::ext::TestSize.Level1)
     EXPECT_EQ(info->GetDescription(), "Nice Enum");
 }
 
+/**
+ * @tc.name: ConstEnum
+ * @tc.desc: Tests for Const Enum. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyInfoTest, ConstEnum, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<MyPropEnum>("test");
@@ -61,6 +71,11 @@ UNIT_TEST(API_PropertyInfoTest, ConstEnum, testing::ext::TestSize.Level1)
     EXPECT_EQ(info->GetValues().size(), 2);
 }
 
+/**
+ * @tc.name: Enum
+ * @tc.desc: Tests for Enum. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_PropertyInfoTest, Enum, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<MyPropEnum>("test");

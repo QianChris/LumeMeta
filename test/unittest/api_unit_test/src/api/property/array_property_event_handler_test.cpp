@@ -35,6 +35,11 @@ static void ExpectChanges(ArrayChanges<Type> a1, ArrayChanges<Type> a2)
     EXPECT_EQ(a1.positionChanged, a2.positionChanged);
 }
 
+/**
+ * @tc.name: Diff
+ * @tc.desc: Tests for Diff. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ArrayPropertyEventHandlerTest, Diff, testing::ext::TestSize.Level1)
 {
     auto p = ConstructArrayProperty<int>("test", BASE_NS::vector<int> { 1, 2, 3 });

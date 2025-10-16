@@ -23,6 +23,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: DefaultAndUidConstruction
+ * @tc.desc: Tests for Default And Uid Construction. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, DefaultAndUidConstruction, testing::ext::TestSize.Level1)
 {
     RefUri empty;
@@ -69,6 +74,11 @@ UNIT_TEST(API_RefUriTest, DefaultAndUidConstruction, testing::ext::TestSize.Leve
     EXPECT_EQ(u3, RefUri(uid, "/test/path"));
 }
 
+/**
+ * @tc.name: StringConstruction
+ * @tc.desc: Tests for String Construction. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, StringConstruction, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(RefUri { "ref:/" }, RefUri {});
@@ -160,6 +170,11 @@ UNIT_TEST(API_RefUriTest, StringConstruction, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Setters
+ * @tc.desc: Tests for Setters. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, Setters, testing::ext::TestSize.Level1)
 {
     {
@@ -181,6 +196,11 @@ UNIT_TEST(API_RefUriTest, Setters, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Escaping
+ * @tc.desc: Tests for Escaping. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, Escaping, testing::ext::TestSize.Level1)
 {
     {
@@ -200,6 +220,11 @@ UNIT_TEST(API_RefUriTest, Escaping, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Context
+ * @tc.desc: Tests for Context. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, Context, testing::ext::TestSize.Level1)
 {
     {
@@ -229,6 +254,11 @@ UNIT_TEST(API_RefUriTest, Context, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Canonicalization
+ * @tc.desc: Tests for Canonicalization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, Canonicalization, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(RefUri("ref:/.").ToString(), "ref:/");
@@ -244,6 +274,11 @@ UNIT_TEST(API_RefUriTest, Canonicalization, testing::ext::TestSize.Level1)
     EXPECT_EQ(RefUri("ref:/@Context/..").ToString(), "ref:/");
 }
 
+/**
+ * @tc.name: ObjectHierarchyTraversal
+ * @tc.desc: Tests for Object Hierarchy Traversal. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, ObjectHierarchyTraversal, testing::ext::TestSize.Level1)
 {
     auto r1 = CreateTestType();
@@ -283,6 +318,11 @@ UNIT_TEST(API_RefUriTest, ObjectHierarchyTraversal, testing::ext::TestSize.Level
     EXPECT_EQ(o5->GetInstanceId(), interface_pointer_cast<IObjectInstance>(r2)->GetInstanceId());
 }
 
+/**
+ * @tc.name: ObjectHierarchyTraversalWithProperty
+ * @tc.desc: Tests for Object Hierarchy Traversal With Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, ObjectHierarchyTraversalWithProperty, testing::ext::TestSize.Level1)
 {
     auto p = CreateProperty<IObject::Ptr>("prop", 0);
@@ -306,6 +346,11 @@ UNIT_TEST(API_RefUriTest, ObjectHierarchyTraversalWithProperty, testing::ext::Te
     EXPECT_EQ(o->GetInstanceId(), interface_cast<IObjectInstance>(r)->GetInstanceId());
 }
 
+/**
+ * @tc.name: ResolveWithProperties
+ * @tc.desc: Tests for Resolve With Properties. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, ResolveWithProperties, testing::ext::TestSize.Level1)
 {
     {
@@ -350,6 +395,11 @@ UNIT_TEST(API_RefUriTest, ResolveWithProperties, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: IObjectResolveAndSelf
+ * @tc.desc: Tests for Iobject Resolve And Self. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, IObjectResolveAndSelf, testing::ext::TestSize.Level1)
 {
     Metadata obj(CreateInstance(META_NS::ClassId::Object));
@@ -361,6 +411,11 @@ UNIT_TEST(API_RefUriTest, IObjectResolveAndSelf, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetSelf(obj.GetPtr<IObject>()), obj.GetPtr<IObject>());
 }
 
+/**
+ * @tc.name: Attachment
+ * @tc.desc: Tests for Attachment. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, Attachment, testing::ext::TestSize.Level1)
 {
     auto obj = CreateInstance(META_NS::ClassId::Object);
@@ -377,6 +432,11 @@ UNIT_TEST(API_RefUriTest, Attachment, testing::ext::TestSize.Level1)
     EXPECT_EQ(obj->Resolve(uri), interface_pointer_cast<IObject>(att->First().GetProperty()));
 }
 
+/**
+ * @tc.name: Subscripting
+ * @tc.desc: Tests for Subscripting. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_RefUriTest, Subscripting, testing::ext::TestSize.Level1)
 {
     auto aobj = CreateTestType();

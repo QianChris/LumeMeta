@@ -154,6 +154,11 @@ protected:
     META_NS::Property<float> dataContextProperty_;
 };
 
+/**
+ * @tc.name: AttachDetach
+ * @tc.desc: Tests for Attach Detach. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, AttachDetach, testing::ext::TestSize.Level1)
 {
     META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
@@ -195,6 +200,11 @@ UNIT_TEST_F(API_AttachTest, AttachDetach, testing::ext::TestSize.Level1)
     EXPECT_EQ(myAttachment_->GetDetachCount(), 1);
 }
 
+/**
+ * @tc.name: GetAttachmentsTemplate
+ * @tc.desc: Tests for Get Attachments Template. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, GetAttachmentsTemplate, testing::ext::TestSize.Level1)
 {
     META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
@@ -210,6 +220,11 @@ UNIT_TEST_F(API_AttachTest, GetAttachmentsTemplate, testing::ext::TestSize.Level
     EXPECT_EQ(attachment->GetDetachCount(), 0);
 }
 
+/**
+ * @tc.name: GetAttachments
+ * @tc.desc: Tests for Get Attachments. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, GetAttachments, testing::ext::TestSize.Level1)
 {
     META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
@@ -252,6 +267,11 @@ UNIT_TEST_F(API_AttachTest, GetAttachments, testing::ext::TestSize.Level1)
     EXPECT_THAT(attachmentsObjectNotStrict, testing::UnorderedElementsAre(attachment_));
 }
 
+/**
+ * @tc.name: DataContext
+ * @tc.desc: Tests for Data Context. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, DataContext, testing::ext::TestSize.Level1)
 {
     META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
@@ -267,6 +287,11 @@ UNIT_TEST_F(API_AttachTest, DataContext, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue<float>(myAttachment_->Value()), 32.f);
 }
 
+/**
+ * @tc.name: ObjectAttachment
+ * @tc.desc: Tests for Object Attachment. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, ObjectAttachment, testing::ext::TestSize.Level1)
 {
     META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
@@ -302,6 +327,11 @@ UNIT_TEST_F(API_AttachTest, ObjectAttachment, testing::ext::TestSize.Level1)
     ASSERT_THAT(attachments, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: ContainerAttachDetach
+ * @tc.desc: Tests for Container Attach Detach. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, ContainerAttachDetach, testing::ext::TestSize.Level1)
 {
     META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
@@ -365,6 +395,11 @@ UNIT_TEST_F(API_AttachTest, ContainerAttachDetach, testing::ext::TestSize.Level1
     EXPECT_EQ(container->GetSize(), 0);
 }
 
+/**
+ * @tc.name: ContainerInsert
+ * @tc.desc: Tests for Container Insert. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, ContainerInsert, testing::ext::TestSize.Level1)
 {
     META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
@@ -392,6 +427,11 @@ UNIT_TEST_F(API_AttachTest, ContainerInsert, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue(attachment2->AttachedTo()).lock(), object.GetPtr<META_NS::IAttach>());
 }
 
+/**
+ * @tc.name: ContainerReplace
+ * @tc.desc: Tests for Container Replace. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, ContainerReplace, testing::ext::TestSize.Level1)
 {
     META_NS::Object object(CreateInstance(META_NS::ClassId::Object));
@@ -419,6 +459,11 @@ UNIT_TEST_F(API_AttachTest, ContainerReplace, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue(attachment2->AttachedTo()).lock(), object.GetPtr<META_NS::IAttach>());
 }
 
+/**
+ * @tc.name: ObjectFlagsDefault
+ * @tc.desc: Tests for Object Flags Default. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, ObjectFlagsDefault, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -435,6 +480,11 @@ UNIT_TEST_F(API_AttachTest, ObjectFlagsDefault, testing::ext::TestSize.Level1)
     EXPECT_EQ(imported->GetAttachments().size(), 2);
 }
 
+/**
+ * @tc.name: ObjectFlagsNoAttachments
+ * @tc.desc: Tests for Object Flags No Attachments. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, ObjectFlagsNoAttachments, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -458,6 +508,11 @@ UNIT_TEST_F(API_AttachTest, ObjectFlagsNoAttachments, testing::ext::TestSize.Lev
     EXPECT_EQ(imported->GetAttachments().size(), 0);
 }
 
+/**
+ * @tc.name: Serialization
+ * @tc.desc: Tests for Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AttachTest, Serialization, testing::ext::TestSize.Level1)
 {
     constexpr auto dcxPropertyName = "MyDataContext";
@@ -571,6 +626,11 @@ public:
 
 } // namespace
 
+/**
+ * @tc.name: DuplicateAttachmentFromSerialization
+ * @tc.desc: Tests for Duplicate Attachment From Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AttachmentTest, DuplicateAttachmentFromSerialization, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestAttachment>();
@@ -640,6 +700,11 @@ public:
 };
 
 #if defined(_CPPRTTI) || defined(__GXX_RTTI)
+/**
+ * @tc.name: ResolveFinalClass
+ * @tc.desc: Tests for Resolve Final Class. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AttachmentTest, ResolveFinalClass, testing::ext::TestSize.Level1)
 {
     auto& registry = GetObjectRegistry();
@@ -677,12 +742,22 @@ UNIT_TEST(API_AttachmentTest, ResolveFinalClass, testing::ext::TestSize.Level1)
     UnregisterObjectType<MyTypedAttachment2>();
 }
 #else
+/**
+ * @tc.name: ResolveFinalClass
+ * @tc.desc: Tests for Resolve Final Class. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AttachmentTest, DISABLED_ResolveFinalClass, testing::ext::TestSize.Level1)
 {
     // Skip
 }
 #endif
 
+/**
+ * @tc.name: AttachProperty
+ * @tc.desc: Tests for Attach Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AttachmentTest, AttachProperty, testing::ext::TestSize.Level1)
 {
     META_NS::AttachmentContainer object(CreateInstance(META_NS::ClassId::Object));
@@ -703,6 +778,11 @@ struct TestEventInfo {
 };
 using TestEvent = SimpleEvent<TestEventInfo, void()>;
 
+/**
+ * @tc.name: AttachmentsWithSameName
+ * @tc.desc: Tests for Attachments With Same Name. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AttachmentTest, AttachmentsWithSameName, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestAttachment>();

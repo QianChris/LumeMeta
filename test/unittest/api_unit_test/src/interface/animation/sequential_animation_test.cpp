@@ -29,6 +29,12 @@ class API_SequentialAnimationTest : public API_AnimationTestBase {
 protected:
 };
 
+/**
+ * @tc.name: SeekingSequentialAnimationNeedsToBeStartedToUpdateAnimatedPropertyValues
+ * @tc.desc: Tests for Seeking Sequential Animation Needs To Be Started To Update Animated Property Values.
+ * [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_SequentialAnimationTest, SeekingSequentialAnimationNeedsToBeStartedToUpdateAnimatedPropertyValues,
     testing::ext::TestSize.Level1)
 {
@@ -79,6 +85,11 @@ UNIT_TEST_F(API_SequentialAnimationTest, SeekingSequentialAnimationNeedsToBeStar
     EXPECT_THAT(progress75Property2Value, testing::Eq(0.5F));
 }
 
+/**
+ * @tc.name: SeekingSequentialAnimationAndPause
+ * @tc.desc: Tests for Seeking Sequential Animation And Pause. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_SequentialAnimationTest, SeekingSequentialAnimationAndPause, testing::ext::TestSize.Level1)
 {
     // given

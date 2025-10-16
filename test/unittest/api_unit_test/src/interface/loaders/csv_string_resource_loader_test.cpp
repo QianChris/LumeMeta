@@ -114,6 +114,11 @@ protected:
     IFileContentLoader::Ptr loader_;
 };
 
+/**
+ * @tc.name: Basic
+ * @tc.desc: Tests for Basic. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CsvLoaderTest, Basic, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://csv/basic.csv";
@@ -125,6 +130,11 @@ UNIT_TEST_F(API_CsvLoaderTest, Basic, testing::ext::TestSize.Level1)
     CheckTranslations(path, keys, content);
 }
 
+/**
+ * @tc.name: Quotes
+ * @tc.desc: Tests for Quotes. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CsvLoaderTest, Quotes, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://csv/quotes.csv";
@@ -138,6 +148,11 @@ UNIT_TEST_F(API_CsvLoaderTest, Quotes, testing::ext::TestSize.Level1)
     CheckTranslations(path, keys, content);
 }
 
+/**
+ * @tc.name: Multiline
+ * @tc.desc: Tests for Multiline. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CsvLoaderTest, Multiline, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://csv/multiline.csv";
@@ -149,6 +164,11 @@ UNIT_TEST_F(API_CsvLoaderTest, Multiline, testing::ext::TestSize.Level1)
     CheckTranslations(path, keys, content);
 }
 
+/**
+ * @tc.name: Complex
+ * @tc.desc: Tests for Complex. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CsvLoaderTest, Complex, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://csv/complex.csv";
@@ -163,6 +183,11 @@ UNIT_TEST_F(API_CsvLoaderTest, Complex, testing::ext::TestSize.Level1)
     CheckTranslations(path, keys, content);
 }
 
+/**
+ * @tc.name: CsvInvalid
+ * @tc.desc: Tests for Csv Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CsvLoaderTest, CsvInvalid, testing::ext::TestSize.Level1)
 {
     constexpr auto path1 = "test://csv/invalid_content.csv";

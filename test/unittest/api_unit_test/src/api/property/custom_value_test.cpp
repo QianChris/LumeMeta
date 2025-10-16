@@ -83,6 +83,11 @@ private:
     mutable int setCalled_ {};
 };
 
+/**
+ * @tc.name: GetSet
+ * @tc.desc: Tests for Get Set. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CustomValueTest, GetSet, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<GetSetTestType>();

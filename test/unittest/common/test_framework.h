@@ -24,10 +24,12 @@
 #if defined(UNIT_TESTS_USE_HCPPTEST)
 #define UNIT_TEST(TestSuiteName, TestName, TestType) HWTEST(TestSuiteName, TestName, TestType)
 #define UNIT_TEST_F(TestFixtureName, TestName, TestType) HWTEST_F(TestFixtureName, TestName, TestType)
-// HWTYPED_TEST, HWTYPED_TEST_P, HWTEST_P
+#define UNIT_TEST_P(TestFixtureName, TestName, TestType) HWTEST_P(TestFixtureName, TestName, TestType)
+// HWTYPED_TEST, HWTYPED_TEST_P
 #else // GTest
 #define UNIT_TEST(TestSuiteName, TestName, ...) TEST(TestSuiteName, TestName)
 #define UNIT_TEST_F(TestFixtureName, TestName, ...) TEST_F(TestFixtureName, TestName)
+#define UNIT_TEST_P(TestFixtureName, TestName, ...) TEST_P(TestFixtureName, TestName)
 #endif
 
 #endif // TEST_FRAMEWORK

@@ -71,6 +71,11 @@ protected:
     META_NS::IAnimationController::Ptr sutAnimationCtrl_;
 };
 
+/**
+ * @tc.name: RunningAnimationListContainsStartedAnimations
+ * @tc.desc: Tests for Running Animation List Contains Started Animations. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListContainsStartedAnimations, testing::ext::TestSize.Level1)
 {
     // given
@@ -86,6 +91,11 @@ UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListContainsStartedAnim
     EXPECT_THAT(runningAnimations[0].lock(), testing::Eq(anim));
 }
 
+/**
+ * @tc.name: RunningAnimationListIsEmptyWhenAllAnimationsWereStopped
+ * @tc.desc: Tests for Running Animation List Is Empty When All Animations Were Stopped. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(
     API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWereStopped, testing::ext::TestSize.Level1)
 {
@@ -101,6 +111,11 @@ UNIT_TEST_F(
     EXPECT_TRUE(sutAnimationCtrl_->GetRunning().empty());
 }
 
+/**
+ * @tc.name: RunningAnimationListContainsResumedAnimations
+ * @tc.desc: Tests for Running Animation List Contains Resumed Animations. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListContainsResumedAnimations, testing::ext::TestSize.Level1)
 {
     // given
@@ -118,6 +133,11 @@ UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListContainsResumedAnim
     EXPECT_THAT(runningAnimations[0].lock(), testing::Eq(anim));
 }
 
+/**
+ * @tc.name: RunningAnimationListIsEmptyWhenAllAnimationsWereFinished
+ * @tc.desc: Tests for Running Animation List Is Empty When All Animations Were Finished. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnimationsWereFinished,
     testing::ext::TestSize.Level1)
 {
@@ -135,6 +155,11 @@ UNIT_TEST_F(API_AnimationControllerTest, RunningAnimationListIsEmptyWhenAllAnima
     EXPECT_TRUE(sutAnimationCtrl_->GetRunning().empty());
 }
 
+/**
+ * @tc.name: AnimationControllerUpdatesControllerPropOfAddedAnimation
+ * @tc.desc: Tests for Animation Controller Updates Controller Prop Of Added Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationControllerTest, AnimationControllerUpdatesControllerPropOfAddedAnimation,
     testing::ext::TestSize.Level1)
 {
@@ -151,6 +176,11 @@ UNIT_TEST_F(API_AnimationControllerTest, AnimationControllerUpdatesControllerPro
     EXPECT_THAT(anim.GetController().lock(), testing::Eq(sutAnimationCtrl_));
 }
 
+/**
+ * @tc.name: Serialization
+ * @tc.desc: Tests for Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationControllerTest, Serialization, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;

@@ -27,6 +27,11 @@ namespace UTest {
 using CORE_NS::Mutex;
 using CORE_NS::UniqueLock;
 
+/**
+ * @tc.name: UniqueLock
+ * @tc.desc: Tests for Unique Lock. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MutexTest, UniqueLock, testing::ext::TestSize.Level1)
 {
     Mutex m;

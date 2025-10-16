@@ -29,6 +29,12 @@
 #include "helpers/testing_objects.h"
 #include "test_framework.h"
 
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+#include <core/plugin/intf_plugin_register.h>
+
+#include "load_lib.h"
+#endif
+
 #if defined(__ANDROID__)
 #include <test_runner_android.h>
 #elif defined(__OHOS__)
@@ -38,6 +44,7 @@
 #undef OPTIONAL
 #undef CreateDirectory
 #undef CreateFile
+#undef GetClassName
 #elif defined(__linux__)
 #include <test_runner_linux.h>
 #endif
@@ -91,6 +98,31 @@ public:
         const BASE_NS::string appAssetPath = ::Test::g_linuxApp->GetAssetDir();
 #endif
 
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+        // Load engine lib
+#if defined(_WIN32)
+        m_engineLib.Load("AGPEngineDLL");
+#elif defined(__ANDROID__) || defined(__OHOS__)
+        m_engineLib.Load("libAGPEngineDLL");
+#else // Linux
+        m_engineLib.Load("./libAGPEngineDLL");
+#endif
+
+        ASSERT_TRUE(m_engineLib.IsLoaded());
+        // Load functions
+#if defined(_WIN32)
+        ASSERT_TRUE(m_engineLib.LoadFunction<decltype(CORE_NS::CreatePluginRegistry)>(
+            CORE_NS::CreatePluginRegistry, "?CreatePluginRegistry@Core@@YAXAEBUPlatformCreateInfo@1@@Z"));
+        ASSERT_TRUE(m_engineLib.LoadFunction<decltype(CORE_NS::GetPluginRegister)>(
+            CORE_NS::GetPluginRegister, "?GetPluginRegister@Core@@YAAEAVIPluginRegister@1@XZ"));
+#else
+        m_engineLib.LoadFunction<decltype(CORE_NS::CreatePluginRegistry)>(
+            CORE_NS::CreatePluginRegistry, "_ZN4Core20CreatePluginRegistryERKNS_18PlatformCreateInfoE");
+        m_engineLib.LoadFunction<decltype(CORE_NS::GetPluginRegister)>(
+            CORE_NS::GetPluginRegister, "_ZN4Core17GetPluginRegisterEv");
+#endif
+#endif // defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+
         CORE_NS::CreatePluginRegistry(info);
 
         constexpr BASE_NS::Uid uids[] { META_NS::META_OBJECT_PLUGIN_UID };
@@ -109,6 +141,11 @@ public:
         UnregisterTestTypes();
         g_testEnv.reset();
     }
+
+private:
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+    Test::DynamicLibrary m_engineLib;
+#endif
 };
 } // namespace
 

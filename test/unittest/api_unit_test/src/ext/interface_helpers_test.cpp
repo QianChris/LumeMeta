@@ -81,6 +81,11 @@ constexpr bool Contains(Internal::UIDArray<S> arr, const BASE_NS::Uid& uid)
 
 } // namespace
 
+/**
+ * @tc.name: IntroduceInterfaces
+ * @tc.desc: Tests for Introduce Interfaces. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_InterfaceHelpers, IntroduceInterfaces, testing::ext::TestSize.Level1)
 {
     using CORE_NS::IInterface;
@@ -96,6 +101,11 @@ UNIT_TEST(API_InterfaceHelpers, IntroduceInterfaces, testing::ext::TestSize.Leve
     EXPECT_TRUE(c.GetInterface(BaseE3::UID) == static_cast<IInterface*>(c.Cast<BaseE3>()));
 }
 
+/**
+ * @tc.name: GetInterfaces
+ * @tc.desc: Tests for Get Interfaces. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_InterfaceHelpers, GetInterfaces, testing::ext::TestSize.Level1)
 {
     using GI = GetInterfacesImpl<void, BaseA, BaseB, BaseC, BaseD, BaseE>;
@@ -141,6 +151,11 @@ struct LivelyClass : IntroduceInterfaces<BaseA, IDervivedLifecycle, IOtherDerviv
     using MyBase::GetInterface;
 };
 
+/**
+ * @tc.name: ILifecycleSupport
+ * @tc.desc: Tests for Ilifecycle Support. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_InterfaceHelpers, ILifecycleSupport, testing::ext::TestSize.Level1)
 {
     static_assert(HAS_ILIFECYCLE<BaseA, BaseB, ILifecycle, BaseC>);
@@ -178,6 +193,11 @@ struct TopClass : IntroduceInterfaces<Class, BaseH, AnotherClass> {
     }
 };
 
+/**
+ * @tc.name: EmbeddedIntroduceInterfacesSupport
+ * @tc.desc: Tests for Embedded Introduce Interfaces Support. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_InterfaceHelpers, EmbeddedIntroduceInterfacesSupport, testing::ext::TestSize.Level1)
 {
     using GI = GetInterfacesImpl<TopClass, Class, BaseH, AnotherClass>;
@@ -199,6 +219,11 @@ UNIT_TEST(API_InterfaceHelpers, EmbeddedIntroduceInterfacesSupport, testing::ext
     static_assert(Contains(arr, BASE_NS::Uid { "920e72e2-abd5-4322-ba35-2a767db8ae89" }));
 }
 
+/**
+ * @tc.name: EmbeddedIntroduceInterfacesSupportGetInterface
+ * @tc.desc: Tests for Embedded Introduce Interfaces Support Get Interface. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_InterfaceHelpers, EmbeddedIntroduceInterfacesSupportGetInterface, testing::ext::TestSize.Level1)
 {
     using CORE_NS::IInterface;

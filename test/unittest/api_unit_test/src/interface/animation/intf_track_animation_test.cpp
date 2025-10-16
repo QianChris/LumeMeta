@@ -61,6 +61,11 @@ protected:
     void TestBindingAnimation(bool animateSource, bool useInBetweenProperty);
 };
 
+/**
+ * @tc.name: TrackAnimation
+ * @tc.desc: Tests for Track Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, TrackAnimation, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<KeyframeHandler>();
@@ -182,6 +187,11 @@ static BASE_NS::vector<float> trackTimestamps = { 0.1f, 0.5f, 1.f };
 static BASE_NS::vector<BASE_NS::Math::Vec3> trackKeyframes = { { 50, 30, 0 }, { 170, 150, 0 }, { 500, 500, 0 } };
 static BASE_NS::Math::Vec3 trackInitialValue = { 10, 10, 0 };
 
+/**
+ * @tc.name: AddKeyframe
+ * @tc.desc: Tests for Add Keyframe. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, AddKeyframe, testing::ext::TestSize.Level1)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
@@ -214,6 +224,11 @@ UNIT_TEST_F(API_TrackAnimationTest, AddKeyframe, testing::ext::TestSize.Level1)
     });
 }
 
+/**
+ * @tc.name: AddKeyframes
+ * @tc.desc: Tests for Add Keyframes. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, AddKeyframes, testing::ext::TestSize.Level1)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
@@ -246,6 +261,11 @@ UNIT_TEST_F(API_TrackAnimationTest, AddKeyframes, testing::ext::TestSize.Level1)
     });
 }
 
+/**
+ * @tc.name: RemoveKeyframe
+ * @tc.desc: Tests for Remove Keyframe. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, RemoveKeyframe, testing::ext::TestSize.Level1)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
@@ -275,6 +295,11 @@ UNIT_TEST_F(API_TrackAnimationTest, RemoveKeyframe, testing::ext::TestSize.Level
     });
 }
 
+/**
+ * @tc.name: RemoveAllKeyframes
+ * @tc.desc: Tests for Remove All Keyframes. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, RemoveAllKeyframes, testing::ext::TestSize.Level1)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
@@ -293,6 +318,11 @@ UNIT_TEST_F(API_TrackAnimationTest, RemoveAllKeyframes, testing::ext::TestSize.L
     EXPECT_FALSE(animation.GetValid());
 }
 
+/**
+ * @tc.name: HandlerTest
+ * @tc.desc: Tests for Handler Test. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, HandlerTest, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<KeyframeHandler>();
@@ -337,6 +367,11 @@ UNIT_TEST_F(API_TrackAnimationTest, HandlerTest, testing::ext::TestSize.Level1)
     UnregisterObjectType<KeyframeHandler>();
 }
 
+/**
+ * @tc.name: HandlerTest2
+ * @tc.desc: Tests for Handler Test2. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, HandlerTest2, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<KeyframeHandler>();
@@ -379,6 +414,11 @@ UNIT_TEST_F(API_TrackAnimationTest, HandlerTest2, testing::ext::TestSize.Level1)
     UnregisterObjectType<KeyframeHandler>();
 }
 
+/**
+ * @tc.name: HandlerTest3
+ * @tc.desc: Tests for Handler Test3. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, HandlerTest3, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<KeyframeHandler>();
@@ -428,6 +468,11 @@ UNIT_TEST_F(API_TrackAnimationTest, HandlerTest3, testing::ext::TestSize.Level1)
     UnregisterObjectType<KeyframeHandler>();
 }
 
+/**
+ * @tc.name: KeyframeCurves
+ * @tc.desc: Tests for Keyframe Curves. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, KeyframeCurves, testing::ext::TestSize.Level1)
 {
     constexpr auto keyframeCount = 4;
@@ -508,6 +553,11 @@ UNIT_TEST_F(API_TrackAnimationTest, KeyframeCurves, testing::ext::TestSize.Level
     Metadata(animation).RemoveProperty(property);
 }
 
+/**
+ * @tc.name: PropertyOnChanged
+ * @tc.desc: Tests for Property On Changed. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, PropertyOnChanged, testing::ext::TestSize.Level1)
 {
     auto property = ConstructProperty<BASE_NS::Math::Vec3>("Prop", trackInitialValue);
@@ -535,6 +585,11 @@ UNIT_TEST_F(API_TrackAnimationTest, PropertyOnChanged, testing::ext::TestSize.Le
     EXPECT_TRUE(count >= 50) << count;
 }
 
+/**
+ * @tc.name: SeekingPaused
+ * @tc.desc: Tests for Seeking Paused. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, SeekingPaused, testing::ext::TestSize.Level1)
 {
     auto property = ConstructProperty<int>("Prop");
@@ -579,6 +634,11 @@ UNIT_TEST_F(API_TrackAnimationTest, SeekingPaused, testing::ext::TestSize.Level1
     EXPECT_EQ(count, 3);
 }
 
+/**
+ * @tc.name: BeyondLastFrame
+ * @tc.desc: Tests for Beyond Last Frame. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TrackAnimationTest, BeyondLastFrame, testing::ext::TestSize.Level1)
 {
     static BASE_NS::vector<float> timestamps = { 0.5f, 0.6f, 0.7f };

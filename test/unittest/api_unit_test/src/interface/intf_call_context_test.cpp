@@ -23,6 +23,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: Empty
+ * @tc.desc: Tests for Empty. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, Empty, testing::ext::TestSize.Level1)
 {
     auto context = GetObjectRegistry().ConstructDefaultCallContext();
@@ -38,6 +43,11 @@ UNIT_TEST(API_CallContextTest, Empty, testing::ext::TestSize.Level1)
     EXPECT_TRUE(context->Succeeded());
 }
 
+/**
+ * @tc.name: ReturnType
+ * @tc.desc: Tests for Return Type. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, ReturnType, testing::ext::TestSize.Level1)
 {
     auto context = GetObjectRegistry().ConstructDefaultCallContext();
@@ -51,6 +61,11 @@ UNIT_TEST(API_CallContextTest, ReturnType, testing::ext::TestSize.Level1)
     EXPECT_EQ(*res, 2);
 }
 
+/**
+ * @tc.name: Parameters
+ * @tc.desc: Tests for Parameters. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, Parameters, testing::ext::TestSize.Level1)
 {
     auto context = GetObjectRegistry().ConstructDefaultCallContext();
@@ -73,6 +88,11 @@ UNIT_TEST(API_CallContextTest, Parameters, testing::ext::TestSize.Level1)
     EXPECT_TRUE(context->Succeeded());
 }
 
+/**
+ * @tc.name: Clone
+ * @tc.desc: Tests for Clone. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, Clone, testing::ext::TestSize.Level1)
 {
     auto& r = GetObjectRegistry();
@@ -141,6 +161,11 @@ struct TestClass : IntroduceInterfaces<IObjectInstance> {
 };
 } // namespace
 
+/**
+ * @tc.name: CreateCallContext
+ * @tc.desc: Tests for Create Call Context. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, CreateCallContext, testing::ext::TestSize.Level1)
 {
     BASE_NS::string_view arr[] = { "1", "2", "3" };
@@ -168,6 +193,11 @@ UNIT_TEST(API_CallContextTest, CreateCallContext, testing::ext::TestSize.Level1)
     EXPECT_EQ(res.value, 5);
 }
 
+/**
+ * @tc.name: BadCallFunction
+ * @tc.desc: Tests for Bad Call Function. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, BadCallFunction, testing::ext::TestSize.Level1)
 {
     BASE_NS::string_view arr[] = { "1", "2", "3" };
@@ -180,6 +210,11 @@ UNIT_TEST(API_CallContextTest, BadCallFunction, testing::ext::TestSize.Level1)
     EXPECT_FALSE(c->Succeeded());
 }
 
+/**
+ * @tc.name: ConstFunctions
+ * @tc.desc: Tests for Const Functions. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, ConstFunctions, testing::ext::TestSize.Level1)
 {
     auto context = [] {
@@ -200,6 +235,11 @@ UNIT_TEST(API_CallContextTest, ConstFunctions, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: ReferenceArgs
+ * @tc.desc: Tests for Reference Args. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, ReferenceArgs, testing::ext::TestSize.Level1)
 {
     auto context = [] {
@@ -223,6 +263,11 @@ UNIT_TEST(API_CallContextTest, ReferenceArgs, testing::ext::TestSize.Level1)
     EXPECT_EQ(*p2, 2);
 }
 
+/**
+ * @tc.name: CallArgumentOrder
+ * @tc.desc: Tests for Call Argument Order. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CallContextTest, CallArgumentOrder, testing::ext::TestSize.Level1)
 {
     BASE_NS::string_view arr[] = { "1", "2" };

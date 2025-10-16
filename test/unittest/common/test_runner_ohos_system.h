@@ -29,6 +29,9 @@
 
 #include "helpers/testing_objects.h"
 #include "test_framework.h"
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+#include "load_lib.h"
+#endif
 
 // Just making sure that RTTI is disabled. Remove this if we decide to enable RTTI at some point.
 #if defined(_CPPRTTI) || defined(__GXX_RTTI)
@@ -96,6 +99,27 @@ public:
         info.coreRootPath = OHOS_PLATFORM_CORE_PATH;
         info.appPluginPath = OHOS_PLATFORM_PLUGINS_PATH;
 
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+        //  Load engine lib
+#if defined(__OHOS_PLATFORM__)
+        m_engineLib.Load("/system/lib64/libAGPDLL.z.so");
+#else
+        m_engineLib.Load("AGPEngineDLL");
+#endif
+        CORE_ASSERT(m_engineLib.IsLoaded());
+        // Load functions
+#if defined(_WIN32)
+        CORE_ASSERT(m_engineLib.LoadFunction<decltype(CORE_NS::CreatePluginRegistry)>(
+            CORE_NS::CreatePluginRegistry, "?CreatePluginRegistry@Core@@YAXAEBUPlatformCreateInfo@1@@Z"));
+        CORE_ASSERT(m_engineLib.LoadFunction<decltype(CORE_NS::GetPluginRegister)>(
+            CORE_NS::GetPluginRegister, "?GetPluginRegister@Core@@YAAEAVIPluginRegister@1@XZ"));
+#else
+        m_engineLib.LoadFunction<decltype(CORE_NS::CreatePluginRegistry)>(
+            CORE_NS::CreatePluginRegistry, "_ZN4Core20CreatePluginRegistryERKNS_18PlatformCreateInfoE");
+        m_engineLib.LoadFunction<decltype(CORE_NS::GetPluginRegister)>(
+            CORE_NS::GetPluginRegister, "_ZN4Core17GetPluginRegisterEv");
+#endif
+#endif
         CORE_NS::CreatePluginRegistry(info);
 
         constexpr BASE_NS::Uid uids[] { META_NS::META_OBJECT_PLUGIN_UID };
@@ -112,8 +136,14 @@ public:
     void TearDown() override
     {
         UnregisterTestTypes();
+        CORE_NS::GetPluginRegister().UnloadPlugins({});
         g_testEnv.reset();
     }
+
+private:
+#if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+    Test::DynamicLibrary m_engineLib;
+#endif
 };
 } // namespace
 

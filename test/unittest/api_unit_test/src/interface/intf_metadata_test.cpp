@@ -30,6 +30,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: Functions
+ * @tc.desc: Tests for Functions. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, Functions, testing::ext::TestSize.Level1)
 {
     auto p = CreateTestType();
@@ -59,6 +64,11 @@ UNIT_TEST(API_MetadataTest, Functions, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Events
+ * @tc.desc: Tests for Events. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, Events, testing::ext::TestSize.Level1)
 {
     auto p = CreateTestType();
@@ -104,6 +114,11 @@ void TestGetSetValue(BASE_NS::shared_ptr<Type> p)
     TestGetSetValue(w_p, p);
 }
 
+/**
+ * @tc.name: GetSetValue
+ * @tc.desc: Tests for Get Set Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, GetSetValue, testing::ext::TestSize.Level1)
 {
     auto p = CreateTestType();
@@ -113,6 +128,11 @@ UNIT_TEST(API_MetadataTest, GetSetValue, testing::ext::TestSize.Level1)
     TestGetSetValue<CORE_NS::IInterface>(interface_pointer_cast<CORE_NS::IInterface>(p));
 }
 
+/**
+ * @tc.name: StaticMetadata
+ * @tc.desc: Tests for Static Metadata. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, StaticMetadata, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(META_NS::UTest::InterfaceId::ITestType.ReadableName(), "This is test type");
@@ -280,16 +300,31 @@ void TestMetadata(const ClassInfo& info)
     r.UnregisterObjectType<Type>();
 }
 
+/**
+ * @tc.name: MetadataInfo
+ * @tc.desc: Tests for Metadata Info. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, MetadataInfo, testing::ext::TestSize.Level1)
 {
     TestMetadata<MetadataTest>(ClassId::MetadataTest);
 }
 
+/**
+ * @tc.name: EmptyMetadataInfo
+ * @tc.desc: Tests for Empty Metadata Info. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, EmptyMetadataInfo, testing::ext::TestSize.Level1)
 {
     TestMetadata<EmptyMetadataTest>(ClassId::EmptyMetadataTest);
 }
 
+/**
+ * @tc.name: MetadataConstructor
+ * @tc.desc: Tests for Metadata Constructor. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, MetadataConstructor, testing::ext::TestSize.Level1)
 {
     auto& r = META_NS::GetObjectRegistry();
@@ -346,6 +381,11 @@ class MetadataTestAggrDerived : public MetadataTestAggr {
         META_NS::ClassId::Object)
 };
 
+/**
+ * @tc.name: AggregateOverride
+ * @tc.desc: Tests for Aggregate Override. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, AggregateOverride, testing::ext::TestSize.Level1)
 {
     auto& r = META_NS::GetObjectRegistry();
@@ -407,6 +447,11 @@ private:
     IMetadataTest::Ptr object_;
 };
 
+/**
+ * @tc.name: StaticDataWithForwarding
+ * @tc.desc: Tests for Static Data With Forwarding. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, StaticDataWithForwarding, testing::ext::TestSize.Level1)
 {
     GetObjectRegistry().RegisterObjectType<MetadataTest>();
@@ -414,6 +459,11 @@ UNIT_TEST(API_MetadataTest, StaticDataWithForwarding, testing::ext::TestSize.Lev
     GetObjectRegistry().UnregisterObjectType<MetadataTest>();
 }
 
+/**
+ * @tc.name: StaticDataWithForwardingSerialise
+ * @tc.desc: Tests for Static Data With Forwarding Serialise. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_MetadataTest, StaticDataWithForwardingSerialise, testing::ext::TestSize.Level1)
 {
     auto& r = GetObjectRegistry();

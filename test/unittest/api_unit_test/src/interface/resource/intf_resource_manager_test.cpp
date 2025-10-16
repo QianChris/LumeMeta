@@ -80,6 +80,11 @@ struct Listener : CORE_NS::IResourceManager::IResourceListener {
     BASE_NS::vector<CORE_NS::ResourceId> removed;
 };
 
+/**
+ * @tc.name: AddWithObject
+ * @tc.desc: Tests for Add With Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, AddWithObject, testing::ext::TestSize.Level1)
 {
     BASE_NS::shared_ptr<Listener> listener(new Listener);
@@ -104,6 +109,11 @@ static void MakeEmptyJsonFile()
     ser.Dump("app://test.json");
 }
 
+/**
+ * @tc.name: AddWithoutObject
+ * @tc.desc: Tests for Add Without Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, AddWithoutObject, testing::ext::TestSize.Level1)
 {
     MakeEmptyJsonFile();
@@ -115,6 +125,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithoutObject, testing::ext::TestSiz
     ASSERT_TRUE(queried);
 }
 
+/**
+ * @tc.name: OptionsData
+ * @tc.desc: Tests for Options Data. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, OptionsData, testing::ext::TestSize.Level1)
 {
     MakeEmptyJsonFile();
@@ -138,6 +153,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, OptionsData, testing::ext::TestSize.Lev
     EXPECT_EQ(p->GetValue(), 2);
 }
 
+/**
+ * @tc.name: ExportImportAll
+ * @tc.desc: Tests for Export Import All. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, ExportImportAll, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<CORE_NS::ResourceId> exp;
@@ -157,6 +177,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportAll, testing::ext::TestSize
     EXPECT_THAT(listener->added, testing::UnorderedElementsAreArray(exp));
 }
 
+/**
+ * @tc.name: ExportImportGroups
+ * @tc.desc: Tests for Export Import Groups. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, ExportImportGroups, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<BASE_NS::string> groups { "hips", "hops", "some", "" };
@@ -199,6 +224,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportGroups, testing::ext::TestS
     EXPECT_EQ(resources->GetResourceInfos("hips").size(), 10);
 }
 
+/**
+ * @tc.name: Rename
+ * @tc.desc: Tests for Rename. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, Rename, testing::ext::TestSize.Level1)
 {
     BASE_NS::shared_ptr<Listener> listener(new Listener);
@@ -223,6 +253,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, Rename, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Purge
+ * @tc.desc: Tests for Purge. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FileResourceManagerTest, Purge, testing::ext::TestSize.Level1)
 {
     auto res = CreateTestResource("app://test.scene");

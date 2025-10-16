@@ -90,6 +90,11 @@ protected:
     CORE_NS::IResourceManager::Ptr resources_;
 };
 
+/**
+ * @tc.name: Basic
+ * @tc.desc: Tests for Basic. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ResourceSerializationTest, Basic, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -119,6 +124,11 @@ UNIT_TEST_F(API_ResourceSerializationTest, Basic, testing::ext::TestSize.Level1)
     EXPECT_EQ(rp->GetValue(), 1);
 }
 
+/**
+ * @tc.name: ResourceManagerSerialisation
+ * @tc.desc: Tests for Resource Manager Serialisation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ResourceSerializationTest, ResourceManagerSerialisation, testing::ext::TestSize.Level1)
 {
     ASSERT_EQ(resources_->Export("app://test.resources"), CORE_NS::IResourceManager::Result::OK);
@@ -173,6 +183,11 @@ public:
     }
 };
 
+/**
+ * @tc.name: ObjectTemplate
+ * @tc.desc: Tests for Object Template. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ResourceSerializationTest, ObjectTemplate, testing::ext::TestSize.Level1)
 {
     GetObjectRegistry().RegisterObjectType<MyInstor>();

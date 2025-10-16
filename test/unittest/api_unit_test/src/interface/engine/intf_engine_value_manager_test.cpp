@@ -54,6 +54,11 @@ private:
     CORE_NS::IEngine* engine_;
 };
 
+/**
+ * @tc.name: Values
+ * @tc.desc: Tests for Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, Values, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
@@ -115,6 +120,11 @@ UNIT_TEST_F(API_EngineManagerTest, Values, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: ArrayValues
+ * @tc.desc: Tests for Array Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, ArrayValues, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
@@ -141,6 +151,11 @@ UNIT_TEST_F(API_EngineManagerTest, ArrayValues, testing::ext::TestSize.Level1)
         (BASE_NS::vector<float> { 3, 4, 5 }));
 }
 
+/**
+ * @tc.name: AddValuesRecursively
+ * @tc.desc: Tests for Add Values Recursively. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, AddValuesRecursively, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
@@ -198,6 +213,11 @@ UNIT_TEST_F(API_EngineManagerTest, AddValuesRecursively, testing::ext::TestSize.
     EXPECT_EQ(type->GetValue(), BASE_NS::Math::IVec2(9, 0));
 }
 
+/**
+ * @tc.name: AddValuesRecursivelyWithHandle
+ * @tc.desc: Tests for Add Values Recursively With Handle. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, AddValuesRecursivelyWithHandle, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman1 { prop1::ENGINE_TESTPROP_METADATA };
@@ -226,6 +246,11 @@ UNIT_TEST_F(API_EngineManagerTest, AddValuesRecursivelyWithHandle, testing::ext:
     EXPECT_EQ(array->GetValue(), (BASE_NS::vector<uint32_t> { 1, 1 }));
 }
 
+/**
+ * @tc.name: SyncWithInvalidParentHandle
+ * @tc.desc: Tests for Sync With Invalid Parent Handle. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, SyncWithInvalidParentHandle, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman1 { prop1::ENGINE_TESTPROP_METADATA };
@@ -258,6 +283,11 @@ UNIT_TEST_F(API_EngineManagerTest, SyncWithInvalidParentHandle, testing::ext::Te
     EXPECT_EQ(value->GetValue(), 1);
 }
 
+/**
+ * @tc.name: ChangeHandle
+ * @tc.desc: Tests for Change Handle. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, ChangeHandle, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman1 { prop1::ENGINE_TESTPROP_METADATA };
@@ -317,6 +347,11 @@ void TestWithSingle(BASE_NS::string_view path, EngineValueOptions ops = {})
     EXPECT_TRUE(manager->ConstructProperty<Type>(name));
 }
 
+/**
+ * @tc.name: AddSingleValue
+ * @tc.desc: Tests for Add Single Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, AddSingleValue, testing::ext::TestSize.Level1)
 {
     TestWithSingle<int>("value");
@@ -342,6 +377,11 @@ UNIT_TEST_F(API_EngineManagerTest, AddSingleValue, testing::ext::TestSize.Level1
 }
 
 // check the overlapping values don't overwrite each other if not altered
+/**
+ * @tc.name: Overlapping
+ * @tc.desc: Tests for Overlapping. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, Overlapping, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
@@ -372,6 +412,11 @@ UNIT_TEST_F(API_EngineManagerTest, Overlapping, testing::ext::TestSize.Level1)
     EXPECT_EQ(x->GetValue(), 3);
 }
 
+/**
+ * @tc.name: Enum
+ * @tc.desc: Tests for Enum. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, Enum, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop3::EngineTestProp> cman { prop3::ENGINE_TESTPROP_METADATA };
@@ -426,6 +471,11 @@ UNIT_TEST_F(API_EngineManagerTest, Enum, testing::ext::TestSize.Level1)
     EXPECT_FALSE(ei->SetValueIndex(3));
 }
 
+/**
+ * @tc.name: BitField
+ * @tc.desc: Tests for Bit Field. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, BitField, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop3::EngineTestProp> cman { prop3::ENGINE_TESTPROP_METADATA };
@@ -484,6 +534,11 @@ UNIT_TEST_F(API_EngineManagerTest, BitField, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue<int64_t>(*v), int64_t(EngineTestBitField::MY_VALUE_2));
 }
 
+/**
+ * @tc.name: ContainerSubscription
+ * @tc.desc: Tests for Container Subscription. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineManagerTest, ContainerSubscription, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop2::EngineTestProp> cman { prop2::ENGINE_TESTPROP_METADATA };

@@ -55,6 +55,11 @@ private:
     CORE_NS::IEngine* engine_;
 };
 
+/**
+ * @tc.name: Property
+ * @tc.desc: Tests for Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineInputPropertyManagerTest, Property, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
@@ -90,6 +95,11 @@ UNIT_TEST_F(API_EngineInputPropertyManagerTest, Property, testing::ext::TestSize
     EXPECT_TRUE(CORE_NS::SetPropertyValue(*cman.GetData(0), "value", 7));
 }
 
+/**
+ * @tc.name: PopulateMetadata
+ * @tc.desc: Tests for Populate Metadata. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineInputPropertyManagerTest, PopulateMetadata, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
@@ -116,6 +126,11 @@ UNIT_TEST_F(API_EngineInputPropertyManagerTest, PopulateMetadata, testing::ext::
     EXPECT_TRUE(CORE_NS::SetPropertyValue(*cman.GetData(0), "value", 2));
 }
 
+/**
+ * @tc.name: DefaultValueFromEngineValue
+ * @tc.desc: Tests for Default Value From Engine Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineInputPropertyManagerTest, DefaultValueFromEngineValue, testing::ext::TestSize.Level1)
 {
     TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };

@@ -25,6 +25,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: TestType
+ * @tc.desc: Tests for Test Type. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationCompatTest, TestType, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://metav1/test_type.json";
@@ -39,6 +44,11 @@ UNIT_TEST(API_SerializationCompatTest, TestType, testing::ext::TestSize.Level1)
     // EXPECT_TRUE(IsEqual(interface_pointer_cast<IMetadata>(CreateTestType()), obj));
 }
 
+/**
+ * @tc.name: TestTypeWithAttachment
+ * @tc.desc: Tests for Test Type With Attachment. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationCompatTest, TestTypeWithAttachment, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://metav1/test_type_with_attachment.json";
@@ -64,6 +74,11 @@ UNIT_TEST(API_SerializationCompatTest, TestTypeWithAttachment, testing::ext::Tes
     EXPECT_EQ(p->GetValue(), "Some");
 }
 
+/**
+ * @tc.name: Bind
+ * @tc.desc: Tests for Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationCompatTest, Bind, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://metav1/bind.json";
@@ -84,6 +99,11 @@ UNIT_TEST(API_SerializationCompatTest, Bind, testing::ext::TestSize.Level1)
     EXPECT_EQ(p2->GetValue(), 2);
 }
 
+/**
+ * @tc.name: Obj1
+ * @tc.desc: Tests for Obj1. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationCompatTest, Obj1, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://metav1/obj1.json";
@@ -97,6 +117,11 @@ UNIT_TEST(API_SerializationCompatTest, Obj1, testing::ext::TestSize.Level1)
     EXPECT_FALSE(p->GetValue());
 };
 
+/**
+ * @tc.name: Obj2
+ * @tc.desc: Tests for Obj2. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationCompatTest, Obj2, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://metav1/obj2.json";
@@ -110,6 +135,11 @@ UNIT_TEST(API_SerializationCompatTest, Obj2, testing::ext::TestSize.Level1)
     EXPECT_TRUE(p->GetValue());
 };
 
+/**
+ * @tc.name: LocalStringProperties
+ * @tc.desc: Tests for Local String Properties. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationCompatTest, LocalStringProperties, testing::ext::TestSize.Level1)
 {
     constexpr auto path = "test://metav1/local_strings.json";

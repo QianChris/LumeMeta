@@ -20,6 +20,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: Compare
+ * @tc.desc: Tests for Compare. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_VersionTest, Compare, testing::ext::TestSize.Level1)
 {
     Version a;
@@ -64,6 +69,11 @@ void TestFromToVersion(Version v)
     EXPECT_EQ(v, other);
 }
 
+/**
+ * @tc.name: ToString
+ * @tc.desc: Tests for To String. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_VersionTest, ToString, testing::ext::TestSize.Level1)
 {
     TestFromToVersion(Version());
@@ -74,6 +84,11 @@ UNIT_TEST(API_VersionTest, ToString, testing::ext::TestSize.Level1)
     TestFromToVersion(Version(123, 2));
 }
 
+/**
+ * @tc.name: FromString
+ * @tc.desc: Tests for From String. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_VersionTest, FromString, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(Version("1"), Version(1, 0));
@@ -82,6 +97,11 @@ UNIT_TEST(API_VersionTest, FromString, testing::ext::TestSize.Level1)
     EXPECT_EQ(Version("1.df"), Version(1, 0));
 }
 
+/**
+ * @tc.name: InvalidString
+ * @tc.desc: Tests for Invalid String. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_VersionTest, InvalidString, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(Version(""), Version());

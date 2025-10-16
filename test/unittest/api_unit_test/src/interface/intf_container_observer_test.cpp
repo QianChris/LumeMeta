@@ -84,6 +84,11 @@ protected:
     META_NS::ContainerObserver observer_ { CreateInstance(ClassId::ContainerObserver) };
 };
 
+/**
+ * @tc.name: AddDirectChild
+ * @tc.desc: Tests for Add Direct Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerObserverTest, AddDirectChild, testing::ext::TestSize.Level1)
 {
     auto child = CreateTestType<IObject>("DirectChild");
@@ -98,6 +103,11 @@ UNIT_TEST_F(API_ContainerObserverTest, AddDirectChild, testing::ext::TestSize.Le
     EXPECT_EQ(info.parent.lock(), container_);
 }
 
+/**
+ * @tc.name: AddDescendantChild
+ * @tc.desc: Tests for Add Descendant Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerObserverTest, AddDescendantChild, testing::ext::TestSize.Level1)
 {
     auto child = CreateTestType<IObject>("Descendant");
@@ -112,6 +122,11 @@ UNIT_TEST_F(API_ContainerObserverTest, AddDescendantChild, testing::ext::TestSiz
     EXPECT_EQ(info.parent.lock(), container2_1_);
 }
 
+/**
+ * @tc.name: ChangeAfterChild
+ * @tc.desc: Tests for Change After Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerObserverTest, ChangeAfterChild, testing::ext::TestSize.Level1)
 {
     auto container = CreateTestContainer<IContainer>("DescendantContainer");
@@ -149,6 +164,11 @@ UNIT_TEST_F(API_ContainerObserverTest, ChangeAfterChild, testing::ext::TestSize.
     EXPECT_EQ(info.parent.lock(), container1_1_);
 }
 
+/**
+ * @tc.name: RemoveDescendant
+ * @tc.desc: Tests for Remove Descendant. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerObserverTest, RemoveDescendant, testing::ext::TestSize.Level1)
 {
     container_->Remove(container1_1_);

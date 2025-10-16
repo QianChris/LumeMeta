@@ -30,6 +30,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: BasicCompatibility
+ * @tc.desc: Tests for Basic Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, BasicCompatibility, testing::ext::TestSize.Level1)
 {
     Any<uint32_t> any { 1 };
@@ -44,6 +49,11 @@ UNIT_TEST(API_AnyTest, BasicCompatibility, testing::ext::TestSize.Level1)
     EXPECT_EQ(any.GetTypeId(), uid);
 }
 
+/**
+ * @tc.name: SharedPointerCompatibility
+ * @tc.desc: Tests for Shared Pointer Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, SharedPointerCompatibility, testing::ext::TestSize.Level1)
 {
     Any<IObject::Ptr> any { CreateTestType<IObject>() };
@@ -70,6 +80,11 @@ UNIT_TEST(API_AnyTest, SharedPointerCompatibility, testing::ext::TestSize.Level1
     EXPECT_TRUE(IsGetCompatibleWith<SharedPtrConstIInterface>(constAny));
 }
 
+/**
+ * @tc.name: WeakPointerCompatibility
+ * @tc.desc: Tests for Weak Pointer Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, WeakPointerCompatibility, testing::ext::TestSize.Level1)
 {
     IObject::Ptr p = CreateTestType<IObject>();
@@ -97,6 +112,11 @@ UNIT_TEST(API_AnyTest, WeakPointerCompatibility, testing::ext::TestSize.Level1)
     EXPECT_EQ(any.GetTypeId(), uid);
 }
 
+/**
+ * @tc.name: GetSet
+ * @tc.desc: Tests for Get Set. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, GetSet, testing::ext::TestSize.Level1)
 {
     Any<uint32_t> any { 1 };
@@ -126,6 +146,11 @@ UNIT_TEST(API_AnyTest, GetSet, testing::ext::TestSize.Level1)
     EXPECT_FALSE(otherType.CopyFrom(any));
 }
 
+/**
+ * @tc.name: GetSetSharedPointer
+ * @tc.desc: Tests for Get Set Shared Pointer. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, GetSetSharedPointer, testing::ext::TestSize.Level1)
 {
     auto p = CreateTestType<IObject>();
@@ -165,6 +190,11 @@ UNIT_TEST(API_AnyTest, GetSetSharedPointer, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetSetWeakPointer
+ * @tc.desc: Tests for Get Set Weak Pointer. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, GetSetWeakPointer, testing::ext::TestSize.Level1)
 {
     auto p = CreateTestType<IObject>();
@@ -191,6 +221,11 @@ UNIT_TEST(API_AnyTest, GetSetWeakPointer, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: PtrCopyFrom
+ * @tc.desc: Tests for Ptr Copy From. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, PtrCopyFrom, testing::ext::TestSize.Level1)
 {
     auto p1 = CreateTestType<IObject>();
@@ -251,6 +286,11 @@ UNIT_TEST(API_AnyTest, PtrCopyFrom, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: BasicCompatibility
+ * @tc.desc: Tests for Basic Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyArrayTest, BasicCompatibility, testing::ext::TestSize.Level1)
 {
     ArrayAny<uint32_t> any { 1, 2, 3 };
@@ -270,6 +310,11 @@ UNIT_TEST(API_AnyArrayTest, BasicCompatibility, testing::ext::TestSize.Level1)
     EXPECT_EQ(any.GetTypeId(), arrayUid);
 }
 
+/**
+ * @tc.name: GetSetTypes
+ * @tc.desc: Tests for Get Set Types. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyArrayTest, GetSetTypes, testing::ext::TestSize.Level1)
 {
     static constexpr auto VALUE_COUNT = 3;
@@ -300,6 +345,11 @@ UNIT_TEST(API_AnyArrayTest, GetSetTypes, testing::ext::TestSize.Level1)
     EXPECT_THAT(values, testing::ElementsAreArray(vectorArr));
 }
 
+/**
+ * @tc.name: Types
+ * @tc.desc: Tests for Types. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
 {
     auto& reg = GetObjectRegistry().GetPropertyRegister();
@@ -453,6 +503,11 @@ UNIT_TEST(API_AnyTest, Types, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetSet
+ * @tc.desc: Tests for Get Set. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_AnyArrayTest, GetSet, testing::ext::TestSize.Level1)
 {
     using ArrayType = BASE_NS::vector<uint32_t>;

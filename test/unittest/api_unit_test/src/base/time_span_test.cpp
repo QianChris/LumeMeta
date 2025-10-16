@@ -23,6 +23,11 @@ namespace UTest {
 
 using namespace META_NS::TimeSpanLiterals;
 
+/**
+ * @tc.name: InitMethods
+ * @tc.desc: Tests for Init Methods. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, InitMethods, testing::ext::TestSize.Level1)
 {
     constexpr auto v1 = TimeSpan::Milliseconds(2000);
@@ -40,6 +45,11 @@ UNIT_TEST(API_TimeSpan, InitMethods, testing::ext::TestSize.Level1)
     EXPECT_EQ(v6, v1);
 }
 
+/**
+ * @tc.name: Addition
+ * @tc.desc: Tests for Addition. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, Addition, testing::ext::TestSize.Level1)
 {
     constexpr auto v1 = TimeSpan::Milliseconds(400);
@@ -54,6 +64,11 @@ UNIT_TEST(API_TimeSpan, Addition, testing::ext::TestSize.Level1)
     EXPECT_EQ(TimeSpan::Microseconds(2000), v2);
 }
 
+/**
+ * @tc.name: Subtraction
+ * @tc.desc: Tests for Subtraction. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, Subtraction, testing::ext::TestSize.Level1)
 {
     constexpr auto v1 = TimeSpan::Milliseconds(400);
@@ -68,6 +83,11 @@ UNIT_TEST(API_TimeSpan, Subtraction, testing::ext::TestSize.Level1)
     EXPECT_EQ(TimeSpan::Microseconds(2000), v2);
 }
 
+/**
+ * @tc.name: Negation
+ * @tc.desc: Tests for Negation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, Negation, testing::ext::TestSize.Level1)
 {
     constexpr auto v1 = -TimeSpan::Milliseconds(200);
@@ -78,6 +98,11 @@ UNIT_TEST(API_TimeSpan, Negation, testing::ext::TestSize.Level1)
     EXPECT_EQ(v2, TimeSpan::Milliseconds(-200));
 }
 
+/**
+ * @tc.name: Infinities
+ * @tc.desc: Tests for Infinities. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, Infinities, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(TimeSpan::Infinite(), TimeSpan::Infinite() + TimeSpan::Infinite());
@@ -104,6 +129,11 @@ UNIT_TEST(API_TimeSpan, Infinities, testing::ext::TestSize.Level1)
     EXPECT_EQ(TimeSpan::Infinite(), v2);
 }
 
+/**
+ * @tc.name: TimeIsRoundedToMicroseconds
+ * @tc.desc: Tests for Time Is Rounded To Microseconds. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, TimeIsRoundedToMicroseconds, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(TimeSpan::Microseconds(1), TimeSpan::Seconds(1e-6));
@@ -118,12 +148,22 @@ UNIT_TEST(API_TimeSpan, TimeIsRoundedToMicroseconds, testing::ext::TestSize.Leve
     EXPECT_EQ(TimeSpan::Microseconds(1), timeSpan);
 }
 
+/**
+ * @tc.name: MultiplicationResultIsRoundedToMicroseconds
+ * @tc.desc: Tests for Multiplication Result Is Rounded To Microseconds. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, MultiplicationResultIsRoundedToMicroseconds, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(TimeSpan::Microseconds(1), TimeSpan::Microseconds(1) * 0.5f);
     EXPECT_EQ(TimeSpan::Microseconds(0), TimeSpan::Microseconds(1) * 0.1f);
 }
 
+/**
+ * @tc.name: DivisionResultIsRoundedToMicroseconds
+ * @tc.desc: Tests for Division Result Is Rounded To Microseconds. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TimeSpan, DivisionResultIsRoundedToMicroseconds, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(TimeSpan::Microseconds(1), TimeSpan::Microseconds(1) / 2);

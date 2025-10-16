@@ -40,6 +40,11 @@ namespace UTest {
 
 class API_EngineValueTest : public ::testing::Test {};
 
+/**
+ * @tc.name: Values
+ * @tc.desc: Tests for Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineValueTest, Values, testing::ext::TestSize.Level1)
 {
     // The purpose of this test case is to cover as many branches of CoreAny and ArrayCoreAny as possible
@@ -289,6 +294,11 @@ private:
     mutable int returnValidCounter_ { std::numeric_limits<int>::max() };
 };
 
+/**
+ * @tc.name: Access
+ * @tc.desc: Tests for Access. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_EngineValueTest, Access, testing::ext::TestSize.Level1)
 {
     // The purpose of this test case is to cover as many branches of EngineInternalValueAccess and

@@ -24,6 +24,11 @@ META_BEGIN_NAMESPACE()
 
 namespace UTest {
 
+/**
+ * @tc.name: ObjectBaseAPI
+ * @tc.desc: Tests for Object Base Api. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectTest, ObjectBaseAPI, testing::ext::TestSize.Level1)
 {
     META_NS::Object object(CreateObjectInstance(ClassId::Object));
@@ -46,6 +51,11 @@ UNIT_TEST(API_ObjectTest, ObjectBaseAPI, testing::ext::TestSize.Level1)
     EXPECT_EQ(object3.GetPtr<IObject>(), nullptr);
 }
 
+/**
+ * @tc.name: TypeConversion
+ * @tc.desc: Tests for Type Conversion. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectTest, TypeConversion, testing::ext::TestSize.Level1)
 {
     META_NS::Object o1(CreateTestType());
@@ -61,6 +71,11 @@ UNIT_TEST(API_ObjectTest, TypeConversion, testing::ext::TestSize.Level1)
     EXPECT_EQ(o1.GetClassId(), o2.GetClassId());
 }
 
+/**
+ * @tc.name: TypeCompatibility
+ * @tc.desc: Tests for Type Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(ObjectTest, TypeCompatibility, testing::ext::TestSize.Level1)
 {
     auto parallel = ParallelAnimation(CreateNew);
@@ -80,6 +95,11 @@ UNIT_TEST(ObjectTest, TypeCompatibility, testing::ext::TestSize.Level1)
     EXPECT_TRUE(parallelAsAnimationAsParallel);
 }
 
+/**
+ * @tc.name: InvalidTypes
+ * @tc.desc: Tests for Invalid Types. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
 UNIT_TEST(API_ObjectTest, InvalidTypes, testing::ext::TestSize.Level1)
 {
@@ -119,6 +139,12 @@ UNIT_TEST(API_ObjectTest, InvalidTypes, testing::ext::TestSize.Level1)
     EXPECT_NE(anim, anim4);
 }
 */
+
+/**
+ * @tc.name: LazyInitBase
+ * @tc.desc: Tests for Lazy Init Base. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectTest, LazyInitBase, testing::ext::TestSize.Level1)
 {
     static constexpr auto propName = "value";
@@ -154,6 +180,11 @@ UNIT_TEST(API_ObjectTest, LazyInitBase, testing::ext::TestSize.Level1)
     EXPECT_EQ(p2, p1);
 }
 
+/**
+ * @tc.name: Instantiate
+ * @tc.desc: Tests for Instantiate. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(ObjectTest, Instantiate, testing::ext::TestSize.Level1)
 {
     Object o1(CreateNew);
@@ -163,6 +194,11 @@ UNIT_TEST(ObjectTest, Instantiate, testing::ext::TestSize.Level1)
     EXPECT_FALSE(o2);
 }
 
+/**
+ * @tc.name: LazyInitDerived
+ * @tc.desc: Tests for Lazy Init Derived. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
 UNIT_TEST(API_ObjectTest, LazyInitDerived, testing::ext::TestSize.Level1)
 {
@@ -187,6 +223,12 @@ UNIT_TEST(API_ObjectTest, LazyInitDerived, testing::ext::TestSize.Level1)
     EXPECT_EQ(p1.TotalDuration().Get(), p3.TotalDuration().Get());
 }
 */
+
+/**
+ * @tc.name: Initialize
+ * @tc.desc: Tests for Initialize. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
 UNIT_TEST(API_ObjectTest, Initialize, testing::ext::TestSize.Level1)
 {
@@ -205,7 +247,14 @@ UNIT_TEST(API_ObjectTest, Initialize, testing::ext::TestSize.Level1)
     ASSERT_NE(prop, nullptr);
     EXPECT_EQ(prop->GetValue(), value);
 }
+*/
 
+/**
+ * @tc.name: Store
+ * @tc.desc: Tests for Store. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, Store, testing::ext::TestSize.Level1)
 {
     PropertyAnimation p1, p2;
@@ -229,7 +278,14 @@ UNIT_TEST(API_ObjectTest, Store, testing::ext::TestSize.Level1)
     p4.Duration(TimeSpan::Milliseconds(500));
     EXPECT_EQ(p4.Duration().Get(), p5.Duration().Get());
 }
+*/
 
+/**
+ * @tc.name: CachedInterfaces
+ * @tc.desc: Tests for Cached Interfaces. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, CachedInterfaces, testing::ext::TestSize.Level1)
 {
     // Check that also properties accessed through interfaces are updated
@@ -272,6 +328,12 @@ UNIT_TEST(API_ObjectTest, CachedInterfaces, testing::ext::TestSize.Level1)
     EXPECT_EQ(p1.Metadata().GetProperty(propName), nullptr);
 }
 */
+
+/**
+ * @tc.name: ResetIObject
+ * @tc.desc: Tests for Reset Iobject. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectTest, ResetIObject, testing::ext::TestSize.Level1)
 {
     META_NS::Object object1(CreateObjectInstance(ClassId::Object));
@@ -285,6 +347,12 @@ UNIT_TEST(API_ObjectTest, ResetIObject, testing::ext::TestSize.Level1)
     EXPECT_FALSE(object1);
     EXPECT_NE(object1.GetPtr(), iobject2);
 }
+
+/**
+ * @tc.name: ResetIObjectDerived
+ * @tc.desc: Tests for Reset Iobject Derived. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
 UNIT_TEST(API_ObjectTest, ResetIObjectDerived, testing::ext::TestSize.Level1)
 {
@@ -305,7 +373,14 @@ UNIT_TEST(API_ObjectTest, ResetIObjectDerived, testing::ext::TestSize.Level1)
     // P2 should not have anything to do with p1 anymore
     EXPECT_EQ(GetValue(p2.Duration()), 400_ms);
 }
+*/
 
+/**
+ * @tc.name: CopyiedUserApiObjectContainsPointerToOriginalObject
+ * @tc.desc: Tests for Copyied User Api Object Contains Pointer To Original Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, CopyiedUserApiObjectContainsPointerToOriginalObject, testing::ext::TestSize.Level1)
 {
     // given
@@ -321,7 +396,14 @@ UNIT_TEST(API_ObjectTest, CopyiedUserApiObjectContainsPointerToOriginalObject, t
     EXPECT_THAT(copy, Eq(origin));
     EXPECT_THAT(copyPtr, Eq(originPtr));
 }
+*/
 
+/**
+ * @tc.name: AssignmentUserApiObjectContainsPointerToOriginalObject
+ * @tc.desc: Tests for Assignment User Api Object Contains Pointer To Original Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, AssignmentUserApiObjectContainsPointerToOriginalObject, testing::ext::TestSize.Level1)
 {
     // given
@@ -338,7 +420,15 @@ UNIT_TEST(API_ObjectTest, AssignmentUserApiObjectContainsPointerToOriginalObject
     EXPECT_THAT(assigned, Eq(origin));
     EXPECT_THAT(assignedPtr, Eq(originPtr));
 }
+*/
 
+/**
+ * @tc.name: MoveConstructedObjectContainsPointerFromOriginAndRemovesContentFromIt
+ * @tc.desc: Tests for Move Constructed Object Contains Pointer From Origin And Removes Content From It.
+ * [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, MoveConstructedObjectContainsPointerFromOriginAndRemovesContentFromIt,
 testing::ext::TestSize.Level1)
 {
@@ -359,7 +449,14 @@ testing::ext::TestSize.Level1)
     EXPECT_THAT(originPtr, Ne(originRawPtr));
     EXPECT_THAT(movedPtr, Eq(originRawPtr));
 }
+*/
 
+/**
+ * @tc.name: MoveAssignedObjectContainsPointerFromOriginAndRemovesContentFromIt
+ * @tc.desc: Tests for Move Assigned Object Contains Pointer From Origin And Removes Content From It. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, MoveAssignedObjectContainsPointerFromOriginAndRemovesContentFromIt,
 testing::ext::TestSize.Level1)
 {
@@ -384,7 +481,14 @@ testing::ext::TestSize.Level1)
     EXPECT_THAT(originPtr, Ne(originRawPtr));
     EXPECT_THAT(movedPtr, Eq(originRawPtr));
 }
+*/
 
+/**
+ * @tc.name: NotCompatibileMoveAssignedObjectIsEmptyAndMovedObjectIsEmptyAlso
+ * @tc.desc: Tests for Not Compatibile Move Assigned Object Is Empty And Moved Object Is Empty Also. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST(API_ObjectTest, NotCompatibileMoveAssignedObjectIsEmptyAndMovedObjectIsEmptyAlso,
 testing::ext::TestSize.Level1)
 {
@@ -407,6 +511,11 @@ testing::ext::TestSize.Level1)
 }
 */
 
+/**
+ * @tc.name: ObjectName
+ * @tc.desc: Tests for Object Name. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectTest, ObjectName, testing::ext::TestSize.Level1)
 {
     {
@@ -428,6 +537,11 @@ UNIT_TEST(API_ObjectTest, ObjectName, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: ObjectNameSerialise
+ * @tc.desc: Tests for Object Name Serialise. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectTest, ObjectNameSerialise, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;

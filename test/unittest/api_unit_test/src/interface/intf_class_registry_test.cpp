@@ -51,12 +51,22 @@ MATCHER_P(ContainsClass, uid, "")
     return false;
 }
 
+/**
+ * @tc.name: GetAllClasses
+ * @tc.desc: Tests for Get All Classes. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ClassRegistryTest, GetAllClasses, testing::ext::TestSize.Level1)
 {
     auto all = classRegistry_.GetAllTypes({});
     EXPECT_THAT(all, testing::Not(testing::IsEmpty()));
 }
 
+/**
+ * @tc.name: GetAllTypesUis
+ * @tc.desc: Tests for Get All Types Uis. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ClassRegistryTest, GetAllTypesUis, testing::ext::TestSize.Level1)
 {
     auto animations = classRegistry_.GetAllTypes({ IAnimation::UID });
@@ -85,6 +95,11 @@ class MyObject2 : public META_NS::ObjectFwd {
     META_OBJECT(MyObject2, ClassId::MyObject2, ObjectFwd, META_NS::ClassId::Object)
 };
 
+/**
+ * @tc.name: Invalid
+ * @tc.desc: Tests for Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ClassRegistryTest, Invalid, testing::ext::TestSize.Level1)
 {
     auto& reg = META_NS::GetObjectRegistry();
@@ -92,6 +107,11 @@ UNIT_TEST_F(API_ClassRegistryTest, Invalid, testing::ext::TestSize.Level1)
     EXPECT_FALSE(reg.UnregisterObjectType(nullptr));
 }
 
+/**
+ * @tc.name: Events
+ * @tc.desc: Tests for Events. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ClassRegistryTest, Events, testing::ext::TestSize.Level1)
 {
     auto& objReg = META_NS::GetObjectRegistry();

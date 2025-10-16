@@ -45,7 +45,8 @@ namespace Curves {
 #define META_EASING_CURVE_INTERFACE_OBJECT(Class)                                       \
     class Class : public EasingCurve {                                                  \
     public:                                                                             \
-        Class(const IInterfacePtr& ptr) : EasingCurve(ptr) {}                           \
+        Class(const IInterfacePtr& ptr) : EasingCurve(ptr)                              \
+        {}                                                                              \
         Class(const ::META_NS::InitializationType& t)                                   \
             : EasingCurve(::META_NS::CreateObjectInstance(ClassId::Class##EasingCurve)) \
         {}                                                                              \

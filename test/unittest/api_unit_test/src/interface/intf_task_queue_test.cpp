@@ -101,7 +101,12 @@ public:
 
 #define EXPECT_TRUE_TIMED(millis, arg) EXPECT_TRUE(this->TimedWait(millis, [&] { return (arg); }));
 
-TEST_P(API_TaskQueueTest, SingleShot)
+/**
+ * @tc.name: SingleShot
+ * @tc.desc: Tests for Single Shot. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_TaskQueueTest, SingleShot, testing::ext::TestSize.Level1)
 {
     {
         std::atomic<int> count = 0;
@@ -125,7 +130,12 @@ TEST_P(API_TaskQueueTest, SingleShot)
     }
 }
 
-TEST_P(API_TaskQueueTest, CurrentQueue)
+/**
+ * @tc.name: CurrentQueue
+ * @tc.desc: Tests for Current Queue. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_TaskQueueTest, CurrentQueue, testing::ext::TestSize.Level1)
 {
     {
         std::atomic<int> count = 0;
@@ -141,7 +151,12 @@ TEST_P(API_TaskQueueTest, CurrentQueue)
     }
 }
 
-TEST_P(API_TaskQueueTest, Recurring)
+/**
+ * @tc.name: Recurring
+ * @tc.desc: Tests for Recurring. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_TaskQueueTest, Recurring, testing::ext::TestSize.Level1)
 {
     std::atomic<int> count = 0;
 
@@ -159,7 +174,12 @@ TEST_P(API_TaskQueueTest, Recurring)
     EXPECT_TRUE((end - start) >= std::chrono::milliseconds(150));
 }
 
-TEST_P(API_TaskQueueTest, RecurringWithCancel)
+/**
+ * @tc.name: RecurringWithCancel
+ * @tc.desc: Tests for Recurring With Cancel. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level1)
 {
     std::atomic<int> count = 0;
     ITaskQueue::Token token = this->AddTask(
@@ -205,6 +225,11 @@ TEST_P(API_TaskQueueTest, RecurringWithCancel)
     EXPECT_EQ(count, curCount);
 }
 
+/**
+ * @tc.name: AddWaitableTaskWithValue
+ * @tc.desc: Tests for Add Waitable Task With Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, AddWaitableTaskWithValue, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -215,6 +240,11 @@ UNIT_TEST(API_TaskQueueTest, AddWaitableTaskWithValue, testing::ext::TestSize.Le
     EXPECT_EQ(f->GetResultOr<int>(0), 1);
 }
 
+/**
+ * @tc.name: AddWaitableTaskWithoutValue
+ * @tc.desc: Tests for Add Waitable Task Without Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, AddWaitableTaskWithoutValue, testing::ext::TestSize.Level1)
 {
     std::atomic<int> count = 0;
@@ -228,6 +258,11 @@ UNIT_TEST(API_TaskQueueTest, AddWaitableTaskWithoutValue, testing::ext::TestSize
     EXPECT_EQ(count, 1);
 }
 
+/**
+ * @tc.name: AddWaitableTaskTimedWait
+ * @tc.desc: Tests for Add Waitable Task Timed Wait. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, AddWaitableTaskTimedWait, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
@@ -246,6 +281,11 @@ UNIT_TEST(API_TaskQueueTest, AddWaitableTaskTimedWait, testing::ext::TestSize.Le
     EXPECT_EQ(f->GetResultOr<uint8_t>(0), 0);
 }
 
+/**
+ * @tc.name: AddWaitableTaskAbandoned
+ * @tc.desc: Tests for Add Waitable Task Abandoned. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, AddWaitableTaskAbandoned, testing::ext::TestSize.Level1)
 {
     IFuture::Ptr f;
@@ -262,6 +302,11 @@ UNIT_TEST(API_TaskQueueTest, AddWaitableTaskAbandoned, testing::ext::TestSize.Le
     EXPECT_FALSE(f->GetResult());
 }
 
+/**
+ * @tc.name: ThenWithValue
+ * @tc.desc: Tests for Then With Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenWithValue, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -273,6 +318,11 @@ UNIT_TEST(API_TaskQueueTest, ThenWithValue, testing::ext::TestSize.Level1)
     EXPECT_EQ(f->GetResultOr<int>(0), 2);
 }
 
+/**
+ * @tc.name: ThenWithValueInline
+ * @tc.desc: Tests for Then With Value Inline. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenWithValueInline, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -284,6 +334,11 @@ UNIT_TEST(API_TaskQueueTest, ThenWithValueInline, testing::ext::TestSize.Level1)
     EXPECT_EQ(f->GetResultOr<int>(0), 2);
 }
 
+/**
+ * @tc.name: ThenWithoutValue
+ * @tc.desc: Tests for Then Without Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenWithoutValue, testing::ext::TestSize.Level1)
 {
     std::atomic<int> count = 0;
@@ -303,6 +358,11 @@ UNIT_TEST(API_TaskQueueTest, ThenWithoutValue, testing::ext::TestSize.Level1)
     EXPECT_EQ(count, 2);
 }
 
+/**
+ * @tc.name: ThenAbandoned
+ * @tc.desc: Tests for Then Abandoned. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenAbandoned, testing::ext::TestSize.Level1)
 {
     IFuture::Ptr f;
@@ -319,6 +379,11 @@ UNIT_TEST(API_TaskQueueTest, ThenAbandoned, testing::ext::TestSize.Level1)
     EXPECT_FALSE(f->GetResult());
 }
 
+/**
+ * @tc.name: MultiThen
+ * @tc.desc: Tests for Multi Then. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, MultiThen, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -333,6 +398,11 @@ UNIT_TEST(API_TaskQueueTest, MultiThen, testing::ext::TestSize.Level1)
     EXPECT_EQ(f->GetResultOr<int>(0), 5);
 }
 
+/**
+ * @tc.name: MultiThenOnSameFuture
+ * @tc.desc: Tests for Multi Then On Same Future. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, MultiThenOnSameFuture, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -356,6 +426,11 @@ UNIT_TEST(API_TaskQueueTest, MultiThenOnSameFuture, testing::ext::TestSize.Level
     EXPECT_EQ(f4->GetResultOr<int>(0), 5);
 }
 
+/**
+ * @tc.name: ThenAndIntermediateResult
+ * @tc.desc: Tests for Then And Intermediate Result. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenAndIntermediateResult, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -372,6 +447,11 @@ UNIT_TEST(API_TaskQueueTest, ThenAndIntermediateResult, testing::ext::TestSize.L
     EXPECT_EQ(f2->GetResultOr<int>(0), 2);
 }
 
+/**
+ * @tc.name: ThenOnSucceededFuture
+ * @tc.desc: Tests for Then On Succeeded Future. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenOnSucceededFuture, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -382,6 +462,11 @@ UNIT_TEST(API_TaskQueueTest, ThenOnSucceededFuture, testing::ext::TestSize.Level
     EXPECT_EQ(f2->GetResultOr<int>(0), 2);
 }
 
+/**
+ * @tc.name: FutureCancel
+ * @tc.desc: Tests for Future Cancel. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, FutureCancel, testing::ext::TestSize.Level1)
 {
     {
@@ -426,6 +511,11 @@ UNIT_TEST(API_TaskQueueTest, FutureCancel, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: ThenOnAbandonedFuture
+ * @tc.desc: Tests for Then On Abandoned Future. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ThenOnAbandonedFuture, testing::ext::TestSize.Level1)
 {
     IFuture::Ptr f1;
@@ -439,6 +529,11 @@ UNIT_TEST(API_TaskQueueTest, ThenOnAbandonedFuture, testing::ext::TestSize.Level
     EXPECT_EQ(f2->GetState(), IFuture::ABANDONED);
 }
 
+/**
+ * @tc.name: CreateWaitableTask
+ * @tc.desc: Tests for Create Waitable Task. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, CreateWaitableTask, testing::ext::TestSize.Level1)
 {
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
@@ -455,6 +550,11 @@ UNIT_TEST(API_TaskQueueTest, CreateWaitableTask, testing::ext::TestSize.Level1)
     EXPECT_EQ(f->GetResultOr<int>(0), 1);
 }
 
+/**
+ * @tc.name: RecurringMultipleOrder
+ * @tc.desc: Tests for Recurring Multiple Order. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, DISABLED_RecurringMultipleOrder, testing::ext::TestSize.Level1)
 {
     // make sure that the order of recurring tasks does not change.
@@ -484,6 +584,11 @@ UNIT_TEST(API_TaskQueueTest, DISABLED_RecurringMultipleOrder, testing::ext::Test
     EXPECT_TRUE(task2 == 6);
 }
 
+/**
+ * @tc.name: ApiFuture
+ * @tc.desc: Tests for Api Future. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, ApiFuture, testing::ext::TestSize.Level1)
 {
     {
@@ -531,6 +636,11 @@ UNIT_TEST(API_TaskQueueTest, ApiFuture, testing::ext::TestSize.Level1)
     EXPECT_EQ(vf.Wait(), IFuture::COMPLETED);
 }
 
+/**
+ * @tc.name: AddFutureTaskOrRunDirectly
+ * @tc.desc: Tests for Add Future Task Or Run Directly. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly, testing::ext::TestSize.Level1)
 {
     std::atomic<int> value {};
@@ -547,6 +657,11 @@ UNIT_TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly, testing::ext::TestSize.
     EXPECT_EQ(value, 1);
 }
 
+/**
+ * @tc.name: CancelRunningTask
+ * @tc.desc: Tests for Cancel Running Task. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueTest, CancelRunningTask, testing::ext::TestSize.Level1)
 {
     std::atomic<bool> start {};

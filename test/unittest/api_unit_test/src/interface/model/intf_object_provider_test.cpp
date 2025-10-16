@@ -109,7 +109,12 @@ protected:
     IContainer::Ptr cont_;
 };
 
-TEST_P(API_InstantiatingObjectProviderTest, CreateAndDispose)
+/**
+ * @tc.name: CreateAndDispose
+ * @tc.desc: Tests for Create And Dispose. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_InstantiatingObjectProviderTest, CreateAndDispose, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<IObject::Ptr> objs;
 
@@ -136,7 +141,12 @@ TEST_P(API_InstantiatingObjectProviderTest, CreateAndDispose)
     }
 }
 
-TEST_P(API_InstantiatingObjectProviderTest, AddRemoveMove)
+/**
+ * @tc.name: AddRemoveMove
+ * @tc.desc: Tests for Add Remove Move. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_InstantiatingObjectProviderTest, AddRemoveMove, testing::ext::TestSize.Level1)
 {
     size_t addIndex = -1;
     size_t RemoveIndex = -1;
@@ -245,6 +255,11 @@ protected:
     size_t size_;
 };
 
+/**
+ * @tc.name: CreateAndDispose
+ * @tc.desc: Tests for Create And Dispose. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CompositeObjectProviderTest, CreateAndDispose, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<IObject::Ptr> objs;
@@ -271,6 +286,11 @@ UNIT_TEST_F(API_CompositeObjectProviderTest, CreateAndDispose, testing::ext::Tes
     }
 }
 
+/**
+ * @tc.name: AddRemoveMove
+ * @tc.desc: Tests for Add Remove Move. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CompositeObjectProviderTest, AddRemoveMove, testing::ext::TestSize.Level1)
 {
     size_t addIndex = -1;
@@ -308,6 +328,11 @@ UNIT_TEST_F(API_CompositeObjectProviderTest, AddRemoveMove, testing::ext::TestSi
     EXPECT_EQ(moveToIndex, 14);
 }
 
+/**
+ * @tc.name: AddProviders
+ * @tc.desc: Tests for Add Providers. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CompositeObjectProviderTest, AddProviders, testing::ext::TestSize.Level1)
 {
     size_t index = -1;
@@ -331,6 +356,11 @@ UNIT_TEST_F(API_CompositeObjectProviderTest, AddProviders, testing::ext::TestSiz
     EXPECT_EQ(count, 4);
 }
 
+/**
+ * @tc.name: RemoveProviders
+ * @tc.desc: Tests for Remove Providers. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CompositeObjectProviderTest, RemoveProviders, testing::ext::TestSize.Level1)
 {
     size_t index = -1;
@@ -359,6 +389,11 @@ UNIT_TEST_F(API_CompositeObjectProviderTest, RemoveProviders, testing::ext::Test
     EXPECT_EQ(count, 10);
 }
 
+/**
+ * @tc.name: MoveProviders
+ * @tc.desc: Tests for Move Providers. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_CompositeObjectProviderTest, MoveProviders, testing::ext::TestSize.Level1)
 {
     size_t from = -1;
@@ -446,7 +481,12 @@ static CORE_NS::IFile::Ptr CreateTestFileWithoutProperty()
     return CORE_NS::IFile::Ptr(new MemFile(ser.GetData()));
 }
 
-TEST_P(API_ContentLoaderObjectProviderTest, JsonWithoutProperty)
+/**
+ * @tc.name: JsonWithoutProperty
+ * @tc.desc: Tests for Json Without Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContentLoaderObjectProviderTest, JsonWithoutProperty, testing::ext::TestSize.Level1)
 {
     SetJsonLoader(CreateTestFileWithoutProperty());
 
@@ -482,7 +522,12 @@ static CORE_NS::IFile::Ptr CreateTestFileWithProperty()
     return CORE_NS::IFile::Ptr(new MemFile(ser.GetData()));
 }
 
-TEST_P(API_ContentLoaderObjectProviderTest, JsonWithProperty)
+/**
+ * @tc.name: JsonWithProperty
+ * @tc.desc: Tests for Json With Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContentLoaderObjectProviderTest, JsonWithProperty, testing::ext::TestSize.Level1)
 {
     SetJsonLoader(CreateTestFileWithProperty());
 

@@ -25,7 +25,10 @@ endif()
 set(common_test_sources
     ../common/log_util.cpp
     ../common/log_util.h
+    ../common/load_lib.h
+    ../common/load_lib.cpp
     ../common/test_runner_common.h
+    ../common/test_framework.h
 )
 if(ANDROID)
 list(APPEND common_test_sources
@@ -53,6 +56,11 @@ endif()
 set(all_common_test_sources
     ../common/log_util.cpp
     ../common/log_util.h
+    ../common/load_lib.h
+    ../common/load_lib.cpp
+    ../common/test_framework.h
+    ../common/test_runner_ohos_system.h
+    ../common/test_runner_ohos_system.cpp
     ../common/test_runner_android.cpp
     ../common/test_runner_android.h
     ../common/test_runner_common.h
@@ -183,6 +191,8 @@ else()
     target_compile_definitions(${executableName} PRIVATE WIN32_LEAN_AND_MEAN=1 NOMINMAX)
 endif()
 
+target_compile_definitions(${executableName} PRIVATE CORE_DYNAMIC=1)
+
 target_include_directories(${executableName} PRIVATE 
     ${CMAKE_CURRENT_LIST_DIR}/src
     ${CMAKE_CURRENT_LIST_DIR}/../common
@@ -213,7 +223,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 target_link_libraries(${executableName}
-    AGPEngine::AGPEngineDLL # to avoid manual dll loading
     LumeMeta::ExtAPI
     LumeMeta::Plugin
     gtest
@@ -230,46 +239,13 @@ if(MINGW)
     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 endif()
 
-# Cmake helper TargetPluginsDependencies doesn't copy pdb files
-#include(TargetPluginsDependencies)
-#
-#target_plugins_dependencies(${executableName} 
-#        PLUGINS AGPEngine::AGPEngineDLL
-#        RELATIVE_DEPLOY_PATH .
-#        VERBOSE)
-#
-#target_plugins_dependencies(${executableName} 
-#        PLUGINS LumeMeta::Plugin
-#        RELATIVE_DEPLOY_PATH "plugins"
-#        VERBOSE)
-
-##magicFile_ used to trigger the required copies..
-#target_sources(LumeMetaTestRunner PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/magicFile_.txt)
-#add_custom_command(
-#    OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/magicFile_.txt
-#    COMMAND echo "Copying test assets"
-#
-#    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:LumeMetaTestRunner>/assets/
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/assets/ $<TARGET_FILE_DIR:LumeMetaTestRunner>/assets/
-#
-#    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/magicFile.txt
-#)
-
-# Visual studio specific config. so the debugger working directory matches default QtCreator. and is WITH the executable.
-#set_target_properties(LumeMetaTestRunner PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:LumeMetaTestRunner>")
-
-if(NOT OHOS)
-    #Required copies..
+# Required copies
+if(OHOS)
     add_custom_command(
         TARGET ${executableName} POST_BUILD
 
-        # Plugins
-	    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/plugins/
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LumeMeta::Plugin> $<TARGET_FILE_DIR:${executableName}>/plugins/
-
-	    # Shared and common assets/resources
-	    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/../../assets/
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../assets/
+        # Shared and common assets/resources
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../../../res/default/resources/rawfile/
     )
 else()
     add_custom_command(
@@ -277,27 +253,13 @@ else()
 
         # Plugins
 	    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/plugins/
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LumeMeta::Plugin> $<TARGET_FILE_DIR:${executableName}>/plugins/
-    
-        # Shared and common assets/resources
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../../../res/default/resources/rawfile/
-    )
-endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(COPY_TARGET_PDB
-        ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PDB_FILE:AGPEngine::AGPEngineDLL>    $<TARGET_FILE_DIR:${executableName}> &&
-        ${CMAKE_COMMAND} -E copy_if_different $<TARGET_PDB_FILE:LumeMeta::Plugin>         $<TARGET_FILE_DIR:${executableName}>/plugins/ 
-    )
-    add_custom_command(
-        TARGET ${executableName} POST_BUILD
-
-        # DLLs
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AGPEngine::AGPEngineDLL> $<TARGET_FILE_DIR:${executableName}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LumeMeta::Plugin> $<TARGET_FILE_DIR:${executableName}>/plugins/
 
-        # PDB files
-        COMMAND "$<IF:$<CONFIG:Debug,RelWithDebInfo>,${COPY_TARGET_PDB},>"
-        COMMAND_EXPAND_LISTS
+	    # Shared and common assets/resources
+	    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/../../assets/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../assets/
     )
 endif()
 

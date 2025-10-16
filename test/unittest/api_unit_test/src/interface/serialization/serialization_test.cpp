@@ -203,6 +203,11 @@ TYPED_TEST(API_BasicSerialisationTest, ExportImportValue)
     EXPECT_TRUE(IsEqual(obj->GetVector(), this->GetVector1()));
 }
 
+/**
+ * @tc.name: AutoSerialisationIMetadata
+ * @tc.desc: Tests for Auto Serialisation Imetadata. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, AutoSerialisationIMetadata, testing::ext::TestSize.Level1)
 {
     auto original = CreateTestType();
@@ -216,6 +221,11 @@ UNIT_TEST(API_SerializationTest, AutoSerialisationIMetadata, testing::ext::TestS
     EXPECT_TRUE(IsEqual(interface_pointer_cast<IMetadata>(original), obj));
 }
 
+/**
+ * @tc.name: AutoSerialisationIContainer
+ * @tc.desc: Tests for Auto Serialisation Icontainer. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, AutoSerialisationIContainer, testing::ext::TestSize.Level1)
 {
     auto original = CreateTestContainer<IContainer>();
@@ -233,6 +243,11 @@ UNIT_TEST(API_SerializationTest, AutoSerialisationIContainer, testing::ext::Test
     EXPECT_TRUE(IsEqual(original, obj));
 }
 
+/**
+ * @tc.name: AutoSerialisationIAttach
+ * @tc.desc: Tests for Auto Serialisation Iattach. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, AutoSerialisationIAttach, testing::ext::TestSize.Level1)
 {
     AttachmentContainer original(CreateInstance(ClassId::Object));
@@ -252,6 +267,11 @@ UNIT_TEST(API_SerializationTest, AutoSerialisationIAttach, testing::ext::TestSiz
     EXPECT_TRUE(IsEqual(interface_pointer_cast<IAttach>(original), obj));
 }
 
+/**
+ * @tc.name: AutoSerialisationIObjectFlags
+ * @tc.desc: Tests for Auto Serialisation Iobject Flags. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, AutoSerialisationIObjectFlags, testing::ext::TestSize.Level1)
 {
     {
@@ -276,6 +296,11 @@ UNIT_TEST(API_SerializationTest, AutoSerialisationIObjectFlags, testing::ext::Te
     }
 }
 
+/**
+ * @tc.name: EscapingNames
+ * @tc.desc: Tests for Escaping Names. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, EscapingNames, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -342,6 +367,11 @@ UNIT_TEST(API_SerializationTest, EscapingNames, testing::ext::TestSize.Level1)
     EXPECT_EQ(prop2->GetValue(), prop2Value);
 }
 
+/**
+ * @tc.name: InstanceIdMapping
+ * @tc.desc: Tests for Instance Id Mapping. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, InstanceIdMapping, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser1;
@@ -390,6 +420,11 @@ public:
     }
 };
 
+/**
+ * @tc.name: Metadata
+ * @tc.desc: Tests for Metadata. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, Metadata, testing::ext::TestSize.Level1)
 {
     auto& reg = GetObjectRegistry();
@@ -409,6 +444,11 @@ UNIT_TEST(API_SerializationTest, Metadata, testing::ext::TestSize.Level1)
     reg.UnregisterObjectType<TestMetadata>();
 }
 
+/**
+ * @tc.name: NonSerializablePropertyInProperty
+ * @tc.desc: Tests for Non Serializable Property In Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, NonSerializablePropertyInProperty, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;

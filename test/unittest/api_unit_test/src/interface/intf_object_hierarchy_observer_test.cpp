@@ -227,6 +227,11 @@ protected:
     META_NS::ObjectHierarchyObserver observer_ { CreateInstance(META_NS::ClassId::ObjectHierarchyObserver) };
 };
 
+/**
+ * @tc.name: AddDirectChild
+ * @tc.desc: Tests for Add Direct Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ObjectHierarchyObserverTest, AddDirectChild, testing::ext::TestSize.Level1)
 {
     auto child = CreateTestType<IObject>("DirectChild");
@@ -241,6 +246,11 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, AddDirectChild, testing::ext::TestS
     EXPECT_THAT(info.parent.lock(), ObjectEq(container_));
 }
 
+/**
+ * @tc.name: AddDescendantChild
+ * @tc.desc: Tests for Add Descendant Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ObjectHierarchyObserverTest, AddDescendantChild, testing::ext::TestSize.Level1)
 {
     auto child = CreateTestType<IObject>("DirectChild");
@@ -255,6 +265,11 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, AddDescendantChild, testing::ext::T
     EXPECT_THAT(info.parent.lock(), ObjectEq(container2_1_));
 }
 
+/**
+ * @tc.name: AddDescendantContent
+ * @tc.desc: Tests for Add Descendant Content. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ObjectHierarchyObserverTest, AddDescendantContent, testing::ext::TestSize.Level1)
 {
     auto child = CreateTestType<IObject>("Content");
@@ -300,6 +315,11 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, AddDescendantContent, testing::ext:
     }
 }
 
+/**
+ * @tc.name: ContentChangeAfterRemove
+ * @tc.desc: Tests for Content Change After Remove. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ObjectHierarchyObserverTest, ContentChangeAfterRemove, testing::ext::TestSize.Level1)
 {
     auto child = CreateTestType<IObject>("Content");
@@ -332,6 +352,11 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, ContentChangeAfterRemove, testing::
     }
 }
 
+/**
+ * @tc.name: Attachment
+ * @tc.desc: Tests for Attachment. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ObjectHierarchyObserverTest, Attachment, testing::ext::TestSize.Level1)
 {
     auto& obr = GetObjectRegistry();
@@ -359,6 +384,11 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, Attachment, testing::ext::TestSize.
     }
 }
 
+/**
+ * @tc.name: ContainerDescendantHierarchy
+ * @tc.desc: Tests for Container Descendant Hierarchy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ObjectHierarchyObserverTest, ContainerDescendantHierarchy, testing::ext::TestSize.Level1)
 {
     auto container = CreateTestContainer<IContainer>("DescendamtHierarchy");
@@ -418,6 +448,11 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, ContainerDescendantHierarchy, testi
     }
 }
 
+/**
+ * @tc.name: Properties
+ * @tc.desc: Tests for Properties. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectHierarchyObserver, Properties, testing::ext::TestSize.Level1)
 {
     auto obj = CreateTestType();
@@ -441,6 +476,11 @@ UNIT_TEST(API_ObjectHierarchyObserver, Properties, testing::ext::TestSize.Level1
     EXPECT_EQ(interface_pointer_cast<IProperty>(info.object), obj->Second().GetProperty());
 }
 
+/**
+ * @tc.name: GetAll
+ * @tc.desc: Tests for Get All. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectHierarchyObserver, GetAll, testing::ext::TestSize.Level1)
 {
     ObjectHierarchyObserver obs(CreateInstance(ClassId::ObjectHierarchyObserver));
@@ -460,6 +500,11 @@ UNIT_TEST(API_ObjectHierarchyObserver, GetAll, testing::ext::TestSize.Level1)
     EXPECT_THAT(obs.GetAllObserved(), testing::UnorderedElementsAre(containerObject));
 }
 
+/**
+ * @tc.name: Remove
+ * @tc.desc: Tests for Remove. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectHierarchyObserver, Remove, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<IObject::Ptr> removed;
@@ -492,6 +537,11 @@ UNIT_TEST(API_ObjectHierarchyObserver, Remove, testing::ext::TestSize.Level1)
     EXPECT_THAT(removed, testing::ElementsAre(childContainerObject));
 }
 
+/**
+ * @tc.name: DestroyEvents
+ * @tc.desc: Tests for Destroy Events. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectHierarchyObserver, DestroyEvents, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<IObject::Ptr> removed;
@@ -539,6 +589,11 @@ UNIT_TEST(API_ObjectHierarchyObserver, DestroyEvents, testing::ext::TestSize.Lev
     EXPECT_THAT(removed, testing::ElementsAre(childContainerObject, childObject4, childObject2));
 }
 
+/**
+ * @tc.name: DestroyEventsContent
+ * @tc.desc: Tests for Destroy Events Content. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectHierarchyObserver, DestroyEventsContent, testing::ext::TestSize.Level1)
 {
     BASE_NS::vector<IObject::Ptr> removed;
@@ -568,6 +623,11 @@ UNIT_TEST(API_ObjectHierarchyObserver, DestroyEventsContent, testing::ext::TestS
     EXPECT_THAT(removed, testing::ElementsAre(childObject));
 }
 
+/**
+ * @tc.name: DoNotSerialise
+ * @tc.desc: Tests for Do Not Serialise. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectHierarchyObserver, DoNotSerialise, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;

@@ -54,6 +54,11 @@ private:
     size_t finishedCalled_ {};
 };
 
+/**
+ * @tc.name: KeyframeAnimation
+ * @tc.desc: Tests for Keyframe Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, KeyframeAnimation, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -91,6 +96,11 @@ UNIT_TEST_F(API_AnimationTest, KeyframeAnimation, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetFinishedCalledCount(), 1);
 }
 
+/**
+ * @tc.name: KeyframeAnimationFinish
+ * @tc.desc: Tests for Keyframe Animation Finish. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, KeyframeAnimationFinish, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -114,6 +124,11 @@ UNIT_TEST_F(API_AnimationTest, KeyframeAnimationFinish, testing::ext::TestSize.L
     EXPECT_EQ(GetFinishedCalledCount(), 1);
 }
 
+/**
+ * @tc.name: KeyframeAnimationChangeProperty
+ * @tc.desc: Tests for Keyframe Animation Change Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, KeyframeAnimationChangeProperty, testing::ext::TestSize.Level1)
 {
     auto p1 = ConstructProperty<int>("test");
@@ -137,6 +152,11 @@ UNIT_TEST_F(API_AnimationTest, KeyframeAnimationChangeProperty, testing::ext::Te
     st->Stop();
 }
 
+/**
+ * @tc.name: KeyframeAnimationSerialization
+ * @tc.desc: Tests for Keyframe Animation Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, KeyframeAnimationSerialization, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -192,6 +212,11 @@ UNIT_TEST_F(API_AnimationTest, KeyframeAnimationSerialization, testing::ext::Tes
     EXPECT_FALSE(ani->Running()->GetValue());
 }
 
+/**
+ * @tc.name: ImplicitAnimation
+ * @tc.desc: Tests for Implicit Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, DISABLED_ImplicitAnimation, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -265,6 +290,11 @@ UNIT_TEST_F(API_AnimationTest, DISABLED_ImplicitAnimation, testing::ext::TestSiz
     EXPECT_EQ(GetFinishedCalledCount(), 2);
 }
 
+/**
+ * @tc.name: ImplicitAnimationNoEvaluate
+ * @tc.desc: Tests for Implicit Animation No Evaluate. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, ImplicitAnimationNoEvaluate, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -291,6 +321,11 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimationNoEvaluate, testing::ext::TestSi
     EXPECT_EQ(p->GetValue(), 10);
 }
 
+/**
+ * @tc.name: ImplicitAnimationSerialization
+ * @tc.desc: Tests for Implicit Animation Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, ImplicitAnimationSerialization, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -343,6 +378,11 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimationSerialization, testing::ext::Tes
     EXPECT_EQ(p->GetValue(), 10);
 }
 
+/**
+ * @tc.name: ImplicitAnimationSerializationWithAttachment
+ * @tc.desc: Tests for Implicit Animation Serialization With Attachment. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, ImplicitAnimationSerializationWithAttachment, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -401,6 +441,11 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimationSerializationWithAttachment, tes
     EXPECT_EQ(p->GetValue(), 10);
 }
 
+/**
+ * @tc.name: ImplicitAnimationOnChanged
+ * @tc.desc: Tests for Implicit Animation On Changed. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_AnimationTest, ImplicitAnimationOnChanged, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");

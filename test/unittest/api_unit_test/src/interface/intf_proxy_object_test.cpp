@@ -52,6 +52,11 @@ protected:
     IProxyObject::Ptr proxy_;
 };
 
+/**
+ * @tc.name: Proxy
+ * @tc.desc: Tests for Proxy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, Proxy, testing::ext::TestSize.Level1)
 {
     ASSERT_FALSE(interface_cast<IObjectFlags>(proxy_)->GetObjectFlags() & ObjectFlagBits::SERIALIZE);
@@ -81,6 +86,11 @@ UNIT_TEST_F(API_ProxyObjectTest, Proxy, testing::ext::TestSize.Level1)
     ASSERT_TRUE(interface_cast<IObjectFlags>(proxy_)->GetObjectFlags() & ObjectFlagBits::SERIALIZE);
 }
 
+/**
+ * @tc.name: PropertyInProxy
+ * @tc.desc: Tests for Property In Proxy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, PropertyInProxy, testing::ext::TestSize.Level1)
 {
     auto meta = interface_pointer_cast<IMetadata>(proxy_);
@@ -105,6 +115,11 @@ UNIT_TEST_F(API_ProxyObjectTest, PropertyInProxy, testing::ext::TestSize.Level1)
     ASSERT_FALSE(interface_cast<IObjectFlags>(proxy_)->GetObjectFlags() & ObjectFlagBits::SERIALIZE);
 }
 
+/**
+ * @tc.name: AddProperty
+ * @tc.desc: Tests for Add Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, AddProperty, testing::ext::TestSize.Level1)
 {
     static constexpr auto prop3Name = "prop3";
@@ -123,6 +138,11 @@ UNIT_TEST_F(API_ProxyObjectTest, AddProperty, testing::ext::TestSize.Level1)
     EXPECT_EQ(prop3Proxy->GetValue(), 42.f);
 }
 
+/**
+ * @tc.name: RemoveProperty
+ * @tc.desc: Tests for Remove Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, RemoveProperty, testing::ext::TestSize.Level1)
 {
     // Remove prop2 from our source object
@@ -150,6 +170,11 @@ UNIT_TEST_F(API_ProxyObjectTest, RemoveProperty, testing::ext::TestSize.Level1)
     EXPECT_EQ(prop1Proxy->GetValue(), 100.f);
 }
 
+/**
+ * @tc.name: Dynamic
+ * @tc.desc: Tests for Dynamic. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, Dynamic, testing::ext::TestSize.Level1)
 {
     proxy_->Dynamic()->SetValue(false);
@@ -178,6 +203,11 @@ UNIT_TEST_F(API_ProxyObjectTest, Dynamic, testing::ext::TestSize.Level1)
     EXPECT_FALSE(meta->GetProperty<float>(prop3Name));
 }
 
+/**
+ * @tc.name: ProxyOfProxy
+ * @tc.desc: Tests for Proxy Of Proxy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, ProxyOfProxy, testing::ext::TestSize.Level1)
 {
     // Create a secondary proxy object which proxies the proxy
@@ -222,6 +252,11 @@ UNIT_TEST_F(API_ProxyObjectTest, ProxyOfProxy, testing::ext::TestSize.Level1)
     EXPECT_EQ(prop1Proxy2->GetValue(), 55);
 }
 
+/**
+ * @tc.name: ProxyMember
+ * @tc.desc: Tests for Proxy Member. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, ProxyMember, testing::ext::TestSize.Level1)
 {
     Object p2obj(CreateInstance(ClassId::Object));
@@ -272,6 +307,11 @@ UNIT_TEST_F(API_ProxyObjectTest, ProxyMember, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SetPropertyTarget
+ * @tc.desc: Tests for Set Property Target. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, SetPropertyTarget, testing::ext::TestSize.Level1)
 {
     auto meta = interface_pointer_cast<IMetadata>(proxy_);
@@ -304,6 +344,11 @@ UNIT_TEST_F(API_ProxyObjectTest, SetPropertyTarget, testing::ext::TestSize.Level
     EXPECT_FALSE(proxy_->GetOverride(Prop1));
 }
 
+/**
+ * @tc.name: InternalBindingIsScheduledForCreatingBeforeGettinProxyProperty
+ * @tc.desc: Tests for Internal Binding Is Scheduled For Creating Before Gettin Proxy Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(
     API_ProxyObjectTest, InternalBindingIsScheduledForCreatingBeforeGettinProxyProperty, testing::ext::TestSize.Level1)
 {
@@ -328,6 +373,11 @@ UNIT_TEST_F(
     EXPECT_THAT(internalProxyProp2->GetValue(), testing::FloatEq(1000.0F));
 }
 
+/**
+ * @tc.name: InternalBindingRemovesBindToTargetAndBindToInternalProperty
+ * @tc.desc: Tests for Internal Binding Removes Bind To Target And Bind To Internal Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(
     API_ProxyObjectTest, InternalBindingRemovesBindToTargetAndBindToInternalProperty, testing::ext::TestSize.Level1)
 {
@@ -350,6 +400,11 @@ UNIT_TEST_F(
     EXPECT_THAT(internalProxyProp2->GetValue(), testing::FloatEq(1000.0F));
 }
 
+/**
+ * @tc.name: InternalBindWorksAfterChangingProxyTarget
+ * @tc.desc: Tests for Internal Bind Works After Changing Proxy Target. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ProxyObjectTest, InternalBindWorksAfterChangingProxyTarget, testing::ext::TestSize.Level1)
 {
     proxy_->AddInternalProxy(Prop2, Prop1);
@@ -370,6 +425,11 @@ UNIT_TEST_F(API_ProxyObjectTest, InternalBindWorksAfterChangingProxyTarget, test
     EXPECT_THAT(internalProxyProp2->GetValue(), testing::FloatEq(300.0F));
 }
 
+/**
+ * @tc.name: InternalBindIsRemovedWhenNewTargetDoesNotHaveSourceProperty
+ * @tc.desc: Tests for Internal Bind Is Removed When New Target Does Not Have Source Property. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(
     API_ProxyObjectTest, InternalBindIsRemovedWhenNewTargetDoesNotHaveSourceProperty, testing::ext::TestSize.Level1)
 {

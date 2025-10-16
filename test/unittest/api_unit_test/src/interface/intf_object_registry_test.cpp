@@ -33,7 +33,12 @@ namespace UTest {
 
 class API_ObjectRegistryAPI : public ::testing::TestWithParam<ObjectCategoryBits> {};
 
-TEST_P(API_ObjectRegistryAPI, GetAllCategories)
+/**
+ * @tc.name: GetAllCategories
+ * @tc.desc: Tests for Get All Categories. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ObjectRegistryAPI, GetAllCategories, testing::ext::TestSize.Level1)
 {
     ObjectCategoryBits category = GetParam();
 
@@ -52,7 +57,12 @@ TEST_P(API_ObjectRegistryAPI, GetAllCategories)
     }
 }
 
-TEST_P(API_ObjectRegistryAPI, GetAllTypes)
+/**
+ * @tc.name: GetAllTypes
+ * @tc.desc: Tests for Get All Types. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ObjectRegistryAPI, GetAllTypes, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
     auto types = objectRegistry.GetAllTypes(GetParam());
@@ -61,7 +71,12 @@ TEST_P(API_ObjectRegistryAPI, GetAllTypes)
     EXPECT_TRUE(types.size() > 0);
 }
 
-TEST_P(API_ObjectRegistryAPI, GetAllTypesAllCategories)
+/**
+ * @tc.name: GetAllTypesAllCategories
+ * @tc.desc: Tests for Get All Types All Categories. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ObjectRegistryAPI, GetAllTypesAllCategories, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
     auto types = objectRegistry.GetAllTypes(GetParam());
@@ -79,7 +94,12 @@ TEST_P(API_ObjectRegistryAPI, GetAllTypesAllCategories)
     }
 }
 
-TEST_P(API_ObjectRegistryAPI, Create)
+/**
+ * @tc.name: Create
+ * @tc.desc: Tests for Create. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ObjectRegistryAPI, Create, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
     auto types = objectRegistry.GetAllTypes(GetParam());
@@ -128,6 +148,11 @@ INSTANTIATE_TEST_SUITE_P(API_ObjectRegistryTest, API_ObjectRegistryAPI,
     ::testing::Values(META_NS::ObjectCategoryBits::NO_CATEGORY, META_NS::ObjectCategoryBits::ANIMATION,
         META_NS::ObjectCategoryBits::INTERNAL, META_NS::ObjectCategoryBits::CURVE, META_NS::ObjectCategoryBits::ANY));
 
+/**
+ * @tc.name: Singleton
+ * @tc.desc: Tests for Singleton. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, Singleton, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -148,6 +173,11 @@ UNIT_TEST(API_ObjectRegistryTest, Singleton, testing::ext::TestSize.Level1)
     auto w3 = objectRegistry.Create<META_NS::IEasingCurve>(META_NS::ClassId::InBackEasingCurve);
 }
 
+/**
+ * @tc.name: Global
+ * @tc.desc: Tests for Global. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, Global, testing::ext::TestSize.Level1)
 {
     constexpr BASE_NS::Uid uid { "11140d0f-4ec5-455c-a66d-dcd749b08194" };
@@ -159,6 +189,11 @@ UNIT_TEST(API_ObjectRegistryTest, Global, testing::ext::TestSize.Level1)
     ASSERT_EQ(g, obj);
 }
 
+/**
+ * @tc.name: Invalid
+ * @tc.desc: Tests for Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, Invalid, testing::ext::TestSize.Level1)
 {
     static constexpr BASE_NS::Uid invalid { "852f8748-e6fb-4b9b-bd49-b48d13c0d1d6" };
@@ -213,6 +248,11 @@ class DeprecatedMyWidget final : public META_NS::ObjectFwd {
     META_OBJECT(DeprecatedMyWidget, ClassId::DeprecatedMyWidget, ObjectFwd)
 };
 
+/**
+ * @tc.name: GetTypesBits
+ * @tc.desc: Tests for Get Types Bits. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, GetTypesBits, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -266,6 +306,11 @@ UNIT_TEST(API_ObjectRegistryTest, GetTypesBits, testing::ext::TestSize.Level1)
     objectRegistry.UnregisterObjectType<DeprecatedMyWidget>();
 }
 
+/**
+ * @tc.name: GetTypesBitsIncludingDeprecated
+ * @tc.desc: Tests for Get Types Bits Including Deprecated. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, GetTypesBitsIncludingDeprecated, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -319,6 +364,11 @@ UNIT_TEST(API_ObjectRegistryTest, GetTypesBitsIncludingDeprecated, testing::ext:
     objectRegistry.UnregisterObjectType<DeprecatedMyWidget>();
 }
 
+/**
+ * @tc.name: GetTypesBitsStrict
+ * @tc.desc: Tests for Get Types Bits Strict. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, GetTypesBitsStrict, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -346,6 +396,11 @@ UNIT_TEST(API_ObjectRegistryTest, GetTypesBitsStrict, testing::ext::TestSize.Lev
     objectRegistry.UnregisterObjectType(DeprecatedMyWidget::GetFactory());
 }
 
+/**
+ * @tc.name: GetTypesBitsStrictIncludingDeprecated
+ * @tc.desc: Tests for Get Types Bits Strict Including Deprecated. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, GetTypesBitsStrictIncludingDeprecated, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -395,6 +450,11 @@ BASE_NS::vector<bool> CheckObjectList(
     return result;
 }
 
+/**
+ * @tc.name: GetObjectInstancesByCategory
+ * @tc.desc: Tests for Get Object Instances By Category. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, GetObjectInstancesByCategory, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -540,6 +600,11 @@ public:
     IMetadata::Ptr buildParam_;
 };
 
+/**
+ * @tc.name: Build
+ * @tc.desc: Tests for Build. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, Build, testing::ext::TestSize.Level1)
 {
     auto& registry = GetObjectRegistry();
@@ -587,6 +652,11 @@ static bool ContainsName(const BASE_NS::vector<Type>& vec, const BASE_NS::string
     return false;
 }
 
+/**
+ * @tc.name: ConstructWithParam
+ * @tc.desc: Tests for Construct With Param. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, ConstructWithParam, testing::ext::TestSize.Level1)
 {
     auto& registry = GetObjectRegistry();
@@ -607,6 +677,11 @@ UNIT_TEST(API_ObjectRegistryTest, ConstructWithParam, testing::ext::TestSize.Lev
     UnregisterObjectType<TestSuper>();
 }
 
+/**
+ * @tc.name: ConstructWithDefaultObjectFactory
+ * @tc.desc: Tests for Construct With Default Object Factory. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, ConstructWithDefaultObjectFactory, testing::ext::TestSize.Level1)
 {
     auto& registry = GetObjectRegistry();
@@ -705,6 +780,11 @@ class TestFail final : public META_NS::ObjectFwd {
     }
 };
 
+/**
+ * @tc.name: ConstructBuildReturnFalse
+ * @tc.desc: Tests for Construct Build Return False. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, ConstructBuildReturnFalse, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestFail>();
@@ -715,6 +795,11 @@ UNIT_TEST(API_ObjectRegistryTest, ConstructBuildReturnFalse, testing::ext::TestS
     UnregisterObjectType<TestFail>();
 }
 
+/**
+ * @tc.name: GetInterface
+ * @tc.desc: Tests for Get Interface. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, GetInterface, testing::ext::TestSize.Level1)
 {
     auto& objectRegistry = GetObjectRegistry();
@@ -742,6 +827,11 @@ UNIT_TEST(API_ObjectRegistryTest, GetInterface, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SameObjectInstanceId
+ * @tc.desc: Tests for Same Object Instance Id. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ObjectRegistryTest, SameObjectInstanceId, testing::ext::TestSize.Level1)
 {
     auto& r = GetObjectRegistry();

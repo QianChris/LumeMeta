@@ -59,6 +59,11 @@ protected:
     ITestType::Ptr r1_;
 };
 
+/**
+ * @tc.name: CreateParallel
+ * @tc.desc: Tests for Create Parallel. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, CreateParallel, testing::ext::TestSize.Level1)
 {
     auto anim = CreateObjectInstance<IParallelAnimation>();
@@ -71,6 +76,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, CreateParallel, testing::ext::TestSize.L
     EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IStartableAnimation.Id().ToUid()));
 }
 
+/**
+ * @tc.name: CreateSequential
+ * @tc.desc: Tests for Create Sequential. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, CreateSequential, testing::ext::TestSize.Level1)
 {
     auto anim = CreateObjectInstance<ISequentialAnimation>();
@@ -83,6 +93,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, CreateSequential, testing::ext::TestSize
     EXPECT_TRUE(anim.GetInterface(META_NS::InterfaceId::IStartableAnimation.Id().ToUid()));
 }
 
+/**
+ * @tc.name: ParallelSingleChild
+ * @tc.desc: Tests for Parallel Single Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelSingleChild, testing::ext::TestSize.Level1)
 {
     auto staggered = CreateObjectInstance<IParallelAnimation>();
@@ -125,6 +140,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelSingleChild, testing::ext::TestS
     EXPECT_EQ(GetValue(t1_->Vec3Property1()), to);
 }
 
+/**
+ * @tc.name: Parallel
+ * @tc.desc: Tests for Parallel. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, Parallel, testing::ext::TestSize.Level1)
 {
     auto staggered = CreateObjectInstance<IParallelAnimation>();
@@ -197,6 +217,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, Parallel, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
 }
 
+/**
+ * @tc.name: ParallelStopsItsChildrenWhenNotRunning
+ * @tc.desc: Tests for Parallel Stops Its Children When Not Running. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelStopsItsChildrenWhenNotRunning, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
@@ -214,6 +239,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelStopsItsChildrenWhenNotRunning, 
     EXPECT_FALSE(childAnim.GetRunning());
 }
 
+/**
+ * @tc.name: ParallelSerialization
+ * @tc.desc: Tests for Parallel Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelSerialization, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -317,6 +347,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelSerialization, testing::ext::Tes
     EXPECT_EQ(GetValue(prop3), to[2]);
 }
 
+/**
+ * @tc.name: ParallelLoop
+ * @tc.desc: Tests for Parallel Loop. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelLoop, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
@@ -408,6 +443,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelLoop, testing::ext::TestSize.Lev
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
 }
 
+/**
+ * @tc.name: ParallelReverse
+ * @tc.desc: Tests for Parallel Reverse. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelReverse, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
@@ -490,6 +530,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelReverse, testing::ext::TestSize.
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), from);
 }
 
+/**
+ * @tc.name: LoopPastEnd
+ * @tc.desc: Tests for Loop Past End. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, LoopPastEnd, testing::ext::TestSize.Level1)
 {
     META_NS::KeyframeAnimation<float> a1(CreateInstance(ClassId::KeyframeAnimation));
@@ -551,6 +596,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, LoopPastEnd, testing::ext::TestSize.Leve
     }
 }
 
+/**
+ * @tc.name: Sequential
+ * @tc.desc: Tests for Sequential. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, Sequential, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
@@ -627,6 +677,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, Sequential, testing::ext::TestSize.Level
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
 }
 
+/**
+ * @tc.name: SequentialSerialization
+ * @tc.desc: Tests for Sequential Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, SequentialSerialization, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -736,6 +791,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, SequentialSerialization, testing::ext::T
     EXPECT_EQ(GetValue(prop3), to[2]);
 }
 
+/**
+ * @tc.name: SequentialWithSameAnimation
+ * @tc.desc: Tests for Sequential With Same Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, SequentialWithSameAnimation, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
@@ -777,6 +837,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, SequentialWithSameAnimation, testing::ex
     EXPECT_EQ(anim.GetProgress(), 1.f);
 }
 
+/**
+ * @tc.name: SequentialModified
+ * @tc.desc: Tests for Sequential Modified. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, SequentialModified, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
@@ -865,6 +930,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, SequentialModified, testing::ext::TestSi
     EXPECT_EQ(GetValue(t1_->Vec3Property3()), to[2]);
 }
 
+/**
+ * @tc.name: DurationParallel
+ * @tc.desc: Tests for Duration Parallel. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, DurationParallel, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
@@ -892,6 +962,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, DurationParallel, testing::ext::TestSize
     EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration);
 }
 
+/**
+ * @tc.name: ParallelWithSameAnimation
+ * @tc.desc: Tests for Parallel With Same Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelWithSameAnimation, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
@@ -911,6 +986,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelWithSameAnimation, testing::ext:
     EXPECT_EQ(staggered.GetTotalDuration(), TimeSpan::Milliseconds(50));
 }
 
+/**
+ * @tc.name: DurationParallelModified
+ * @tc.desc: Tests for Duration Parallel Modified. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, DurationParallelModified, testing::ext::TestSize.Level1)
 {
     for (int loopCount = 1; loopCount != 4; ++loopCount) {
@@ -954,6 +1034,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, DurationParallelModified, testing::ext::
     }
 }
 
+/**
+ * @tc.name: DurationSequential
+ * @tc.desc: Tests for Duration Sequential. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, DurationSequential, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
@@ -981,6 +1066,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, DurationSequential, testing::ext::TestSi
     EXPECT_EQ(staggered.GetTotalDuration(), staggeredDuration);
 }
 
+/**
+ * @tc.name: Hierarchy
+ * @tc.desc: Tests for Hierarchy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, Hierarchy, testing::ext::TestSize.Level1)
 {
     /*
@@ -1052,6 +1142,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, Hierarchy, testing::ext::TestSize.Level1
     EXPECT_EQ(GetValue(p4), to[3]);
 }
 
+/**
+ * @tc.name: Reparent
+ * @tc.desc: Tests for Reparent. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, Reparent, testing::ext::TestSize.Level1)
 {
     auto p1 = ConstructProperty<float>("p1", 0);
@@ -1105,6 +1200,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, Reparent, testing::ext::TestSize.Level1)
     EXPECT_TRUE(a1.GetRunning());
 }
 
+/**
+ * @tc.name: Name
+ * @tc.desc: Tests for Name. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, Name, testing::ext::TestSize.Level1)
 {
     ParallelAnimation a1(CreateInstance(ClassId::ParallelAnimation));
@@ -1124,6 +1224,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, Name, testing::ext::TestSize.Level1)
     EXPECT_EQ(a2.GetPtr()->GetName(), n2.GetName());
 }
 
+/**
+ * @tc.name: ParallelMove
+ * @tc.desc: Tests for Parallel Move. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelMove, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::ParallelAnimation(CreateInstance(ClassId::ParallelAnimation));
@@ -1146,6 +1251,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, ParallelMove, testing::ext::TestSize.Lev
     EXPECT_EQ(c.GetSize(), 0);
 }
 
+/**
+ * @tc.name: SequentialMove
+ * @tc.desc: Tests for Sequential Move. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, SequentialMove, testing::ext::TestSize.Level1)
 {
     auto staggered = META_NS::SequentialAnimation(CreateInstance(ClassId::SequentialAnimation));
@@ -1168,6 +1278,11 @@ UNIT_TEST_F(API_StaggeredAnimationTest, SequentialMove, testing::ext::TestSize.L
     EXPECT_EQ(c.GetSize(), 0);
 }
 
+/**
+ * @tc.name: ParallelWithTrackAnimationSeeking
+ * @tc.desc: Tests for Parallel With Track Animation Seeking. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_StaggeredAnimationTest, ParallelWithTrackAnimationSeeking, testing::ext::TestSize.Level1)
 {
     static BASE_NS::vector<float> trackTimestamps = { 0.0f, 1.f };

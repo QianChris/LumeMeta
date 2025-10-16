@@ -60,6 +60,11 @@ private:
     int min_, max_;
 };
 
+/**
+ * @tc.name: ValidRange
+ * @tc.desc: Tests for Valid Range. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ModifierTest, ValidRange, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -78,6 +83,11 @@ UNIT_TEST(API_ModifierTest, ValidRange, testing::ext::TestSize.Level1)
     EXPECT_EQ(mods.size(), 1);
 }
 
+/**
+ * @tc.name: ValidRangePropertyBind
+ * @tc.desc: Tests for Valid Range Property Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ModifierTest, ValidRangePropertyBind, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
@@ -116,6 +126,11 @@ UNIT_TEST(API_ModifierTest, ValidRangePropertyBind, testing::ext::TestSize.Level
     EXPECT_EQ(p->GetValue(), 0);
 }
 
+/**
+ * @tc.name: IncompatibleModifier
+ * @tc.desc: Tests for Incompatible Modifier. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ModifierTest, IncompatibleModifier, testing::ext::TestSize.Level1)
 {
     auto modifier = IModifier::Ptr(new ValidRangeEvaluator(1, 10));
@@ -154,6 +169,11 @@ private:
     int allowed_;
 };
 
+/**
+ * @tc.name: StickyValidator
+ * @tc.desc: Tests for Sticky Validator. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ModifierTest, StickyValidator, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");

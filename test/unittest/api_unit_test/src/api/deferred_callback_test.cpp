@@ -39,6 +39,11 @@ using Callable = SimpleEvent<IOnTestInfo, void()>::InterfaceType;
 
 } // namespace
 
+/**
+ * @tc.name: CallWithCallable
+ * @tc.desc: Tests for Call With Callable. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_DeferredCallbackTest, CallWithCallable, testing::ext::TestSize.Level1)
 {
     auto& registry = META_NS::GetObjectRegistry();
@@ -59,6 +64,11 @@ UNIT_TEST(API_DeferredCallbackTest, CallWithCallable, testing::ext::TestSize.Lev
     EXPECT_EQ(count, 2);
 }
 
+/**
+ * @tc.name: CallWithEvent
+ * @tc.desc: Tests for Call With Event. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_DeferredCallbackTest, CallWithEvent, testing::ext::TestSize.Level1)
 {
     auto& registry = META_NS::GetObjectRegistry();
@@ -79,6 +89,11 @@ UNIT_TEST(API_DeferredCallbackTest, CallWithEvent, testing::ext::TestSize.Level1
     EXPECT_EQ(count, 3);
 }
 
+/**
+ * @tc.name: PropertyOnChange
+ * @tc.desc: Tests for Property On Change. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_DeferredCallbackTest, PropertyOnChange, testing::ext::TestSize.Level1)
 {
     auto& registry = META_NS::GetObjectRegistry();
@@ -104,6 +119,11 @@ UNIT_TEST(API_DeferredCallbackTest, PropertyOnChange, testing::ext::TestSize.Lev
     EXPECT_EQ(count, 1);
 }
 
+/**
+ * @tc.name: PropertyChangedHandler
+ * @tc.desc: Tests for Property Changed Handler. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_DeferredCallbackTest, PropertyChangedHandler, testing::ext::TestSize.Level1)
 {
     auto& registry = META_NS::GetObjectRegistry();
@@ -125,6 +145,11 @@ UNIT_TEST(API_DeferredCallbackTest, PropertyChangedHandler, testing::ext::TestSi
     EXPECT_EQ(count, 1);
 }
 
+/**
+ * @tc.name: PropertyChangedHandlerId
+ * @tc.desc: Tests for Property Changed Handler Id. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_DeferredCallbackTest, PropertyChangedHandlerId, testing::ext::TestSize.Level1)
 {
     auto& registry = META_NS::GetObjectRegistry();

@@ -25,6 +25,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: ContainerDataModel
+ * @tc.desc: Tests for Container Data Model. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_DataModelTest, ContainerDataModel, testing::ext::TestSize.Level1)
 {
     auto model = GetObjectRegistry().Create<IDataModel>(META_NS::ClassId::ContainerDataModel);

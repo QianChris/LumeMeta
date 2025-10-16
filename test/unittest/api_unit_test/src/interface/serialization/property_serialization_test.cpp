@@ -33,6 +33,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: ExportImportWeakPtrPropertyDefault
+ * @tc.desc: Tests for Export Import Weak Ptr Property Default. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, ExportImportWeakPtrPropertyDefault, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -60,6 +65,11 @@ UNIT_TEST(API_SerializationTest, ExportImportWeakPtrPropertyDefault, testing::ex
     ASSERT_TRUE(p2->GetValue().lock() == p1->GetValue());
 }
 
+/**
+ * @tc.name: ExportImportWeakPtrPropertyValue
+ * @tc.desc: Tests for Export Import Weak Ptr Property Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, ExportImportWeakPtrPropertyValue, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -89,6 +99,11 @@ UNIT_TEST(API_SerializationTest, ExportImportWeakPtrPropertyValue, testing::ext:
     ASSERT_TRUE(p2->GetValue().lock() == p1->GetValue());
 }
 
+/**
+ * @tc.name: ExportImportWeakPtrPropertyWithGlobalAnchor
+ * @tc.desc: Tests for Export Import Weak Ptr Property With Global Anchor. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, DISABLED_ExportImportWeakPtrPropertyWithGlobalAnchor, testing::ext::TestSize.Level1)
 {
     auto cont = CreateTestContainer<IContainer>();
@@ -120,6 +135,11 @@ UNIT_TEST(API_SerializationTest, DISABLED_ExportImportWeakPtrPropertyWithGlobalA
     GetObjectRegistry().GetGlobalSerializationData().UnregisterGlobalObject(interface_pointer_cast<IObject>(cont));
 }
 
+/**
+ * @tc.name: PropertyBind
+ * @tc.desc: Tests for Property Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, PropertyBind, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -147,6 +167,11 @@ UNIT_TEST(API_SerializationTest, PropertyBind, testing::ext::TestSize.Level1)
     EXPECT_EQ(p1->GetValue(), 3);
 }
 
+/**
+ * @tc.name: SerialiseBind
+ * @tc.desc: Tests for Serialise Bind. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_SerializationTest, SerialiseBind, testing::ext::TestSize.Level1)
 {
     // serialise bind that requires resolving the bind later on when the target property owner has been serialised

@@ -87,6 +87,11 @@ protected:
     }
 };
 
+/**
+ * @tc.name: BaseObject
+ * @tc.desc: Tests for Base Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BaseObjectTest, BaseObject, testing::ext::TestSize.Level1)
 {
     auto object = GetObjectRegistry().Create(META_NS::ClassId::BaseObject);
@@ -96,6 +101,11 @@ UNIT_TEST_F(API_BaseObjectTest, BaseObject, testing::ext::TestSize.Level1)
     EXPECT_THAT(object->GetInterfaces(), testing::SizeIs(BASE_OBJECT_INTERFACES.size()));
 }
 
+/**
+ * @tc.name: Object
+ * @tc.desc: Tests for Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BaseObjectTest, Object, testing::ext::TestSize.Level1)
 {
     auto object = GetObjectRegistry().Create(META_NS::ClassId::Object);
@@ -105,6 +115,11 @@ UNIT_TEST_F(API_BaseObjectTest, Object, testing::ext::TestSize.Level1)
     EXPECT_THAT(object->GetInterfaces(), testing::SizeIs(BASE_OBJECT_INTERFACES.size() + OBJECT_INTERFACES.size()));
 }
 
+/**
+ * @tc.name: DeriveBaseObject
+ * @tc.desc: Tests for Derive Base Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BaseObjectTest, DeriveBaseObject, testing::ext::TestSize.Level1)
 {
     auto object = GetObjectRegistry().Create(ClassId::BaseObjectDerived);
@@ -115,6 +130,11 @@ UNIT_TEST_F(API_BaseObjectTest, DeriveBaseObject, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetBaseClass(object), META_NS::ClassId::BaseObject);
 }
 
+/**
+ * @tc.name: DeriveObject
+ * @tc.desc: Tests for Derive Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BaseObjectTest, DeriveObject, testing::ext::TestSize.Level1)
 {
     auto object = GetObjectRegistry().Create(ClassId::ObjectDerived);

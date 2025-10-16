@@ -60,6 +60,11 @@ META_TYPE(PlainEnum)
 
 namespace UTest {
 
+/**
+ * @tc.name: SingleValue
+ * @tc.desc: Tests for Single Value. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, SingleValue, testing::ext::TestSize.Level1)
 {
     Enum<MyEnumMetadata> v;
@@ -88,6 +93,11 @@ UNIT_TEST(API_EnumTest, SingleValue, testing::ext::TestSize.Level1)
     EXPECT_FALSE(v.SetValueIndex(3));
 }
 
+/**
+ * @tc.name: BitField
+ * @tc.desc: Tests for Bit Field. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, BitField, testing::ext::TestSize.Level1)
 {
     Enum<MyBitFieldEnumMetadata> v;
@@ -116,6 +126,11 @@ UNIT_TEST(API_EnumTest, BitField, testing::ext::TestSize.Level1)
     EXPECT_FALSE(v.IsValueSet(2));
 }
 
+/**
+ * @tc.name: Compatibility
+ * @tc.desc: Tests for Compatibility. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, Compatibility, testing::ext::TestSize.Level1)
 {
     Enum<MyEnumMetadata> v1;
@@ -126,6 +141,11 @@ UNIT_TEST(API_EnumTest, Compatibility, testing::ext::TestSize.Level1)
     EXPECT_TRUE(IsCompatible(v2, UidFromType<uint64_t>()));
 }
 
+/**
+ * @tc.name: GetSetData
+ * @tc.desc: Tests for Get Set Data. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, GetSetData, testing::ext::TestSize.Level1)
 {
     {
@@ -149,6 +169,11 @@ UNIT_TEST(API_EnumTest, GetSetData, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: CopyFrom
+ * @tc.desc: Tests for Copy From. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, CopyFrom, testing::ext::TestSize.Level1)
 {
     Enum<MyEnumMetadata> v;
@@ -169,6 +194,11 @@ UNIT_TEST(API_EnumTest, CopyFrom, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue<int64_t>(any), 4);
 }
 
+/**
+ * @tc.name: ArrayEnum
+ * @tc.desc: Tests for Array Enum. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, ArrayEnum, testing::ext::TestSize.Level1)
 {
     ArrayEnum<MyEnumMetadata> arr { MyEnum::MyA, MyEnum::MyB, MyEnum::MyC };
@@ -180,6 +210,11 @@ UNIT_TEST(API_EnumTest, ArrayEnum, testing::ext::TestSize.Level1)
     EXPECT_EQ(GetValue<MyEnum>(*any), MyEnum::MyA);
 }
 
+/**
+ * @tc.name: Serialise
+ * @tc.desc: Tests for Serialise. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, Serialise, testing::ext::TestSize.Level1)
 {
     RegisterUserAny<Enum<MyEnumMetadata>>();
@@ -201,6 +236,11 @@ UNIT_TEST(API_EnumTest, Serialise, testing::ext::TestSize.Level1)
     UnregisterUserAny<Enum<MyEnumMetadata>>();
 }
 
+/**
+ * @tc.name: SerialiseBitField
+ * @tc.desc: Tests for Serialise Bit Field. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, SerialiseBitField, testing::ext::TestSize.Level1)
 {
     RegisterUserAny<Enum<MyBitFieldEnumMetadata>>();
@@ -228,6 +268,11 @@ UNIT_TEST(API_EnumTest, SerialiseBitField, testing::ext::TestSize.Level1)
     UnregisterUserAny<Enum<MyBitFieldEnumMetadata>>();
 }
 
+/**
+ * @tc.name: PlainEnum
+ * @tc.desc: Tests for Plain Enum. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EnumTest, PlainEnum, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<PlainEnum>("test");

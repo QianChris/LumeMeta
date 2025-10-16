@@ -81,6 +81,11 @@ public:
 
 } // namespace
 
+/**
+ * @tc.name: EventConnect
+ * @tc.desc: Tests for Event Connect. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_FunctionTest, EventConnect, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestType>();
@@ -111,6 +116,11 @@ UNIT_TEST(API_FunctionTest, EventConnect, testing::ext::TestSize.Level1)
     UnregisterObjectType<TestType>();
 }
 
+/**
+ * @tc.name: Connector
+ * @tc.desc: Tests for Connector. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_FunctionTest, Connector, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestType>();
@@ -136,6 +146,11 @@ UNIT_TEST(API_FunctionTest, Connector, testing::ext::TestSize.Level1)
     UnregisterObjectType<TestType>();
 }
 
+/**
+ * @tc.name: Forwarding
+ * @tc.desc: Tests for Forwarding. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_FunctionTest, Forwarding, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestType>();
@@ -158,6 +173,11 @@ UNIT_TEST(API_FunctionTest, Forwarding, testing::ext::TestSize.Level1)
     UnregisterObjectType<TestType>();
 }
 
+/**
+ * @tc.name: SerialiseConnector
+ * @tc.desc: Tests for Serialise Connector. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_FunctionTest, SerialiseConnector, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestType>();
@@ -186,6 +206,11 @@ UNIT_TEST(API_FunctionTest, SerialiseConnector, testing::ext::TestSize.Level1)
     UnregisterObjectType<TestType>();
 }
 
+/**
+ * @tc.name: Serialization
+ * @tc.desc: Tests for Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_FunctionTest, Serialization, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<TestType>();

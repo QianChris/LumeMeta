@@ -25,6 +25,11 @@ namespace UTest {
 
 enum MyEnum : int16_t { ONE = 1, TWO, THREE };
 
+/**
+ * @tc.name: Values
+ * @tc.desc: Tests for Values. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_NumberTest, Values, testing::ext::TestSize.Level1)
 {
     Number n = 1;

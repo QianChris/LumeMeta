@@ -25,6 +25,11 @@ namespace UTest {
 
 using types = TypeList<bool, char, int16_t, int32_t>;
 
+/**
+ * @tc.name: SetGet
+ * @tc.desc: Tests for Set Get. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_CompatibleValueUtilTest, SetGet, testing::ext::TestSize.Level1)
 {
     Any<int16_t> any { 2 };

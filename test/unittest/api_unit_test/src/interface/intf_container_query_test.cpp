@@ -25,6 +25,11 @@ META_BEGIN_NAMESPACE()
 
 namespace UTest {
 
+/**
+ * @tc.name: Self
+ * @tc.desc: Tests for Self. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContainerInfoTest, Self, testing::ext::TestSize.Level1)
 {
     /*Object object;

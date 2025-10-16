@@ -27,6 +27,11 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
+/**
+ * @tc.name: Search
+ * @tc.desc: Tests for Search. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, Search, testing::ext::TestSize.Level1)
 {
     auto content = CreateTestType<IObject>("Content");
@@ -55,6 +60,11 @@ UNIT_TEST(API_ContentTest, Search, testing::ext::TestSize.Level1)
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 2);
 }
 
+/**
+ * @tc.name: SearchContentContainer
+ * @tc.desc: Tests for Search Content Container. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, SearchContentContainer, testing::ext::TestSize.Level1)
 {
     auto ccontent = CreateTestType<IObject>("Content");
@@ -78,6 +88,11 @@ UNIT_TEST(API_ContentTest, SearchContentContainer, testing::ext::TestSize.Level1
     EXPECT_EQ(c->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER }).size(), 3);
 }
 
+/**
+ * @tc.name: Iteration
+ * @tc.desc: Tests for Iteration. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, Iteration, testing::ext::TestSize.Level1)
 {
     auto ccontent = CreateTestType<IObject>("Content");
@@ -108,6 +123,11 @@ UNIT_TEST(API_ContentTest, Iteration, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Serialization
+ * @tc.desc: Tests for Serialization. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, Serialization, testing::ext::TestSize.Level1)
 {
     {
@@ -139,6 +159,11 @@ UNIT_TEST(API_ContentTest, Serialization, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Defaults
+ * @tc.desc: Tests for Defaults. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, Defaults, testing::ext::TestSize.Level1)
 {
     ContentObject co(CreateInstance(ClassId::ContentObject));
@@ -147,6 +172,11 @@ UNIT_TEST(API_ContentTest, Defaults, testing::ext::TestSize.Level1)
     EXPECT_FALSE(objectFlags->GetObjectFlags().IsSet(META_NS::ObjectFlagBits::SERIALIZE_HIERARCHY));
 }
 
+/**
+ * @tc.name: ObjectFlagsNoHierarchy
+ * @tc.desc: Tests for Object Flags No Hierarchy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, ObjectFlagsNoHierarchy, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -162,6 +192,11 @@ UNIT_TEST(API_ContentTest, ObjectFlagsNoHierarchy, testing::ext::TestSize.Level1
     EXPECT_FALSE(imported->Content()->GetValue());
 }
 
+/**
+ * @tc.name: ObjectFlagsHierarchy
+ * @tc.desc: Tests for Object Flags Hierarchy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, ObjectFlagsHierarchy, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -181,6 +216,11 @@ UNIT_TEST(API_ContentTest, ObjectFlagsHierarchy, testing::ext::TestSize.Level1)
     EXPECT_EQ(content->GetName(), "Content");
 }
 
+/**
+ * @tc.name: ContentRequiredInterfaces
+ * @tc.desc: Tests for Content Required Interfaces. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_ContentTest, ContentRequiredInterfaces, testing::ext::TestSize.Level1)
 {
     ContentObject co(CreateInstance(ClassId::ContentObject));

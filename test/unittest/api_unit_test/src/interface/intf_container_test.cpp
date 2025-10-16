@@ -127,7 +127,12 @@ public:
     }
 };
 
-TEST_P(API_ContainerCommonTest, IsAncestorOf)
+/**
+ * @tc.name: IsAncestorOf
+ * @tc.desc: Tests for Is Ancestor Of. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, IsAncestorOf, testing::ext::TestSize.Level1)
 {
     auto object = container1_1_->FindAnyFromHierarchy<IObject>("Object2_1");
     ASSERT_NE(object, nullptr);
@@ -147,7 +152,12 @@ TEST_P(API_ContainerCommonTest, IsAncestorOf)
     EXPECT_TRUE(container2->IsAncestorOf(object2));
 }
 
-TEST_P(API_ContainerCommonTest, AddChild)
+/**
+ * @tc.name: AddChild
+ * @tc.desc: Tests for Add Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, AddChild, testing::ext::TestSize.Level1)
 {
     const auto object = interface_pointer_cast<IObject>(CreateTestType());
     EXPECT_TRUE(container_->Add(object));
@@ -161,7 +171,12 @@ TEST_P(API_ContainerCommonTest, AddChild)
     EXPECT_EQ(addedCalls_[0], expected);
 }
 
-TEST_P(API_ContainerCommonTest, ContainsObject)
+/**
+ * @tc.name: ContainsObject
+ * @tc.desc: Tests for Contains Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, ContainsObject, testing::ext::TestSize.Level1)
 {
     const auto object = CreateTestType();
     const auto notFound = CreateTestType();
@@ -172,7 +187,12 @@ TEST_P(API_ContainerCommonTest, ContainsObject)
     EXPECT_FALSE(ContainsObject(container_, notFound));
 }
 
-TEST_P(API_ContainerCommonTest, Insert)
+/**
+ * @tc.name: Insert
+ * @tc.desc: Tests for Insert. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, Insert, testing::ext::TestSize.Level1)
 {
     auto all = container_->GetAll();
     auto expectedSize = NumDirectChildren;
@@ -208,7 +228,12 @@ TEST_P(API_ContainerCommonTest, Insert)
     EXPECT_THAT(addedCalls_, testing::ElementsAre(expected1, expected2, expected3));
 }
 
-TEST_P(API_ContainerCommonTest, GetAt)
+/**
+ * @tc.name: GetAt
+ * @tc.desc: Tests for Get At. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, GetAt, testing::ext::TestSize.Level1)
 {
     const auto all = container_->GetAll();
     ASSERT_EQ(all.size(), NumDirectChildren);
@@ -223,7 +248,12 @@ TEST_P(API_ContainerCommonTest, GetAt)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, RemoveChild)
+/**
+ * @tc.name: RemoveChild
+ * @tc.desc: Tests for Remove Child. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, RemoveChild, testing::ext::TestSize.Level1)
 {
     auto children = container_->GetAll();
     auto expectedCount = NumDirectChildren;
@@ -259,7 +289,12 @@ TEST_P(API_ContainerCommonTest, RemoveChild)
     EXPECT_EQ(container_->GetSize(), 0);
 }
 
-TEST_P(API_ContainerCommonTest, RemoveIndex)
+/**
+ * @tc.name: RemoveIndex
+ * @tc.desc: Tests for Remove Index. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, RemoveIndex, testing::ext::TestSize.Level1)
 {
     auto children = container_->GetAll();
     auto expectedCount = NumDirectChildren;
@@ -289,7 +324,12 @@ TEST_P(API_ContainerCommonTest, RemoveIndex)
     EXPECT_THAT(removedCalls_, testing::ElementsAreArray(removed));
 }
 
-TEST_P(API_ContainerCommonTest, RemoveChildInvalid)
+/**
+ * @tc.name: RemoveChildInvalid
+ * @tc.desc: Tests for Remove Child Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, RemoveChildInvalid, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
     const auto expectedCount = NumDirectChildren;
@@ -310,7 +350,12 @@ TEST_P(API_ContainerCommonTest, RemoveChildInvalid)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, RemoveAll)
+/**
+ * @tc.name: RemoveAll
+ * @tc.desc: Tests for Remove All. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, RemoveAll, testing::ext::TestSize.Level1)
 {
     container_->RemoveAll();
     EXPECT_EQ(container_->GetSize(), 0);
@@ -321,7 +366,12 @@ TEST_P(API_ContainerCommonTest, RemoveAll)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, Replace)
+/**
+ * @tc.name: Replace
+ * @tc.desc: Tests for Replace. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, Replace, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
     const auto expectedCount = NumDirectChildren;
@@ -343,7 +393,12 @@ TEST_P(API_ContainerCommonTest, Replace)
     EXPECT_THAT(removedCalls_, testing::ElementsAre(removed));
 }
 
-TEST_P(API_ContainerCommonTest, ReplaceSame)
+/**
+ * @tc.name: ReplaceSame
+ * @tc.desc: Tests for Replace Same. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, ReplaceSame, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
     const auto expectedCount = NumDirectChildren;
@@ -383,7 +438,12 @@ TEST_P(API_ContainerCommonTest, ReplaceSame)
     EXPECT_THAT(addedCalls_, testing::ElementsAre(added));
 }
 
-TEST_P(API_ContainerCommonTest, ReplaceNull)
+/**
+ * @tc.name: ReplaceNull
+ * @tc.desc: Tests for Replace Null. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, ReplaceNull, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
     ASSERT_EQ(children.size(), NumDirectChildren);
@@ -432,7 +492,12 @@ TEST_P(API_ContainerCommonTest, ReplaceNull)
     EXPECT_THAT(addedCalls_, testing::ElementsAre(added2));
 }
 
-TEST_P(API_ContainerCommonTest, ReplaceAdd)
+/**
+ * @tc.name: ReplaceAdd
+ * @tc.desc: Tests for Replace Add. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, ReplaceAdd, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
     const auto expectedCount = NumDirectChildren;
@@ -464,7 +529,12 @@ TEST_P(API_ContainerCommonTest, ReplaceAdd)
     EXPECT_THAT(addedCalls_, testing::ElementsAre(added));
 }
 
-TEST_P(API_ContainerCommonTest, MoveEmpty)
+/**
+ * @tc.name: MoveEmpty
+ * @tc.desc: Tests for Move Empty. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveEmpty, testing::ext::TestSize.Level1)
 {
     auto moveItem = container_->GetAt(0);
     container_->RemoveAll();
@@ -480,7 +550,12 @@ TEST_P(API_ContainerCommonTest, MoveEmpty)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, MoveBack)
+/**
+ * @tc.name: MoveBack
+ * @tc.desc: Tests for Move Back. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveBack, testing::ext::TestSize.Level1)
 {
     size_t from = NumDirectChildren - 1;
     size_t to = 0;
@@ -495,7 +570,12 @@ TEST_P(API_ContainerCommonTest, MoveBack)
     EXPECT_THAT(movedCalls_, testing::ElementsAre(moved));
 }
 
-TEST_P(API_ContainerCommonTest, MoveForward)
+/**
+ * @tc.name: MoveForward
+ * @tc.desc: Tests for Move Forward. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveForward, testing::ext::TestSize.Level1)
 {
     // Move front to back
     size_t from = 0;
@@ -509,7 +589,12 @@ TEST_P(API_ContainerCommonTest, MoveForward)
     EXPECT_THAT(movedCalls_, testing::ElementsAre(moved));
 }
 
-TEST_P(API_ContainerCommonTest, MoveNext)
+/**
+ * @tc.name: MoveNext
+ * @tc.desc: Tests for Move Next. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveNext, testing::ext::TestSize.Level1)
 {
     // Move to next
     size_t from = NumDirectChildren / 2;
@@ -522,7 +607,12 @@ TEST_P(API_ContainerCommonTest, MoveNext)
     EXPECT_THAT(movedCalls_, testing::ElementsAre(moved));
 }
 
-TEST_P(API_ContainerCommonTest, MoveSame)
+/**
+ * @tc.name: MoveSame
+ * @tc.desc: Tests for Move Same. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveSame, testing::ext::TestSize.Level1)
 {
     // Move to next
     size_t from = NumDirectChildren / 2;
@@ -536,7 +626,12 @@ TEST_P(API_ContainerCommonTest, MoveSame)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0)); // No move as the indices are the same
 }
 
-TEST_P(API_ContainerCommonTest, MoveFromBiggerThanSize)
+/**
+ * @tc.name: MoveFromBiggerThanSize
+ * @tc.desc: Tests for Move From Bigger Than Size. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveFromBiggerThanSize, testing::ext::TestSize.Level1)
 {
     // Move past last index to first, should move the last item
     size_t from = NumDirectChildren + 10;
@@ -551,7 +646,12 @@ TEST_P(API_ContainerCommonTest, MoveFromBiggerThanSize)
     EXPECT_THAT(movedCalls_, testing::ElementsAre(moved));
 }
 
-TEST_P(API_ContainerCommonTest, MoveToBiggerThanSize)
+/**
+ * @tc.name: MoveToBiggerThanSize
+ * @tc.desc: Tests for Move To Bigger Than Size. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveToBiggerThanSize, testing::ext::TestSize.Level1)
 {
     // Move from middle to past last index, should move to end
     size_t from = NumDirectChildren / 2;
@@ -566,7 +666,12 @@ TEST_P(API_ContainerCommonTest, MoveToBiggerThanSize)
     EXPECT_THAT(movedCalls_, testing::ElementsAre(moved));
 }
 
-TEST_P(API_ContainerCommonTest, MoveFromToBiggerThanSize)
+/**
+ * @tc.name: MoveFromToBiggerThanSize
+ * @tc.desc: Tests for Move From To Bigger Than Size. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveFromToBiggerThanSize, testing::ext::TestSize.Level1)
 {
     // Move past last to past last, should not do anything
     size_t from = NumDirectChildren + 10;
@@ -580,7 +685,12 @@ TEST_P(API_ContainerCommonTest, MoveFromToBiggerThanSize)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, MoveObject)
+/**
+ * @tc.name: MoveObject
+ * @tc.desc: Tests for Move Object. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, MoveObject, testing::ext::TestSize.Level1)
 {
     size_t from = NumDirectChildren - 1;
     size_t to = 0;
@@ -595,7 +705,12 @@ TEST_P(API_ContainerCommonTest, MoveObject)
     EXPECT_THAT(movedCalls_, testing::ElementsAre(moved));
 }
 
-TEST_P(API_ContainerCommonTest, FindAllNameDirect)
+/**
+ * @tc.name: FindAllNameDirect
+ * @tc.desc: Tests for Find All Name Direct. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, FindAllNameDirect, testing::ext::TestSize.Level1)
 {
     // Direct child
     auto result1 = container_->FindAll({ "Object1_1", TraversalType::NO_HIERARCHY, {}, false });
@@ -610,7 +725,12 @@ TEST_P(API_ContainerCommonTest, FindAllNameDirect)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, SetRequiredInterfacesReplace)
+/**
+ * @tc.name: SetRequiredInterfacesReplace
+ * @tc.desc: Tests for Set Required Interfaces Replace. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, SetRequiredInterfacesReplace, testing::ext::TestSize.Level1)
 {
     auto req = interface_cast<IRequiredInterfaces>(container_);
     ASSERT_TRUE(req);
@@ -641,7 +761,12 @@ TEST_P(API_ContainerCommonTest, SetRequiredInterfacesReplace)
     EXPECT_THAT(container_->GetAll(), testing::Not(testing::Contains(replace)));
 }
 
-TEST_P(API_ContainerCommonTest, FindAnyNameDirect)
+/**
+ * @tc.name: FindAnyNameDirect
+ * @tc.desc: Tests for Find Any Name Direct. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, FindAnyNameDirect, testing::ext::TestSize.Level1)
 {
     // Direct child
     auto result1 = container_->FindAny({ "Object1_1", TraversalType::NO_HIERARCHY, {}, false });
@@ -656,7 +781,12 @@ TEST_P(API_ContainerCommonTest, FindAnyNameDirect)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
-TEST_P(API_ContainerCommonTest, SetRequiredInterfaces)
+/**
+ * @tc.name: SetRequiredInterfaces
+ * @tc.desc: Tests for Set Required Interfaces. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_ContainerCommonTest, SetRequiredInterfaces, testing::ext::TestSize.Level1)
 {
     auto req = interface_cast<IRequiredInterfaces>(container_);
     ASSERT_TRUE(req);
@@ -679,6 +809,11 @@ TEST_P(API_ContainerCommonTest, SetRequiredInterfaces)
     EXPECT_EQ(all[0], container);
 }
 
+/**
+ * @tc.name: FailAddLoop
+ * @tc.desc: Tests for Fail Add Loop. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FailAddLoop, testing::ext::TestSize.Level1)
 {
     // container_ is already a parent of container2_1_, so adding it as a child
@@ -689,6 +824,11 @@ UNIT_TEST_F(API_ContainerTest, FailAddLoop, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FailInsertLoop
+ * @tc.desc: Tests for Fail Insert Loop. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FailInsertLoop, testing::ext::TestSize.Level1)
 {
     EXPECT_FALSE(container2_1_->Insert(0, container_));
@@ -697,6 +837,11 @@ UNIT_TEST_F(API_ContainerTest, FailInsertLoop, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FailReplaceLoop
+ * @tc.desc: Tests for Fail Replace Loop. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FailReplaceLoop, testing::ext::TestSize.Level1)
 {
     EXPECT_FALSE(container1_1_->Replace(container1_1_->GetAll()[1], container_));
@@ -705,6 +850,11 @@ UNIT_TEST_F(API_ContainerTest, FailReplaceLoop, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: ReplaceNullWithExisting
+ * @tc.desc: Tests for Replace Null With Existing. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, ReplaceNullWithExisting, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
@@ -724,6 +874,11 @@ UNIT_TEST_F(API_ContainerTest, ReplaceNullWithExisting, testing::ext::TestSize.L
     EXPECT_THAT(removedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: ReplaceWithExistingAddAlways
+ * @tc.desc: Tests for Replace With Existing Add Always. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, ReplaceWithExistingAddAlways, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
@@ -748,6 +903,11 @@ UNIT_TEST_F(API_ContainerTest, ReplaceWithExistingAddAlways, testing::ext::TestS
     EXPECT_THAT(removedCalls_, testing::ElementsAre(removed));
 }
 
+/**
+ * @tc.name: ReplaceWithExistingDontAddAlways
+ * @tc.desc: Tests for Replace With Existing Dont Add Always. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, ReplaceWithExistingDontAddAlways, testing::ext::TestSize.Level1)
 {
     const auto children = container_->GetAll();
@@ -772,6 +932,11 @@ UNIT_TEST_F(API_ContainerTest, ReplaceWithExistingDontAddAlways, testing::ext::T
     EXPECT_THAT(removedCalls_, testing::ElementsAre(removed));
 }
 
+/**
+ * @tc.name: AddChildTwice
+ * @tc.desc: Tests for Add Child Twice. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, AddChildTwice, testing::ext::TestSize.Level1)
 {
     const auto child = interface_pointer_cast<IObject>(CreateTestType("Twice"));
@@ -794,6 +959,11 @@ UNIT_TEST_F(API_ContainerTest, AddChildTwice, testing::ext::TestSize.Level1)
     EXPECT_EQ(addedCalls_[0], expected);
 }
 
+/**
+ * @tc.name: FindAllEmptyName
+ * @tc.desc: Tests for Find All Empty Name. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAllEmptyName, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAll({ "", TraversalType::DEPTH_FIRST_PRE_ORDER, {}, false });
@@ -810,6 +980,11 @@ UNIT_TEST_F(API_ContainerTest, FindAllEmptyName, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAllNameRecursive
+ * @tc.desc: Tests for Find All Name Recursive. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAllNameRecursive, testing::ext::TestSize.Level1)
 {
     // Direct child
@@ -825,6 +1000,11 @@ UNIT_TEST_F(API_ContainerTest, FindAllNameRecursive, testing::ext::TestSize.Leve
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAllNameDuplicate
+ * @tc.desc: Tests for Find All Name Duplicate. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAllNameDuplicate, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAll({ "ObjectDupe", TraversalType::NO_HIERARCHY, {}, false });
@@ -839,6 +1019,11 @@ UNIT_TEST_F(API_ContainerTest, FindAllNameDuplicate, testing::ext::TestSize.Leve
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAllUid
+ * @tc.desc: Tests for Find All Uid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAllUid, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAll({ "", TraversalType::NO_HIERARCHY, { ITestContainer::UID }, false });
@@ -860,6 +1045,11 @@ UNIT_TEST_F(API_ContainerTest, FindAllUid, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAllUidStrict
+ * @tc.desc: Tests for Find All Uid Strict. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAllUidStrict, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAll({ "SameNameDifferentUid", TraversalType::DEPTH_FIRST_PRE_ORDER,
@@ -879,6 +1069,11 @@ UNIT_TEST_F(API_ContainerTest, FindAllUidStrict, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAllInvalid
+ * @tc.desc: Tests for Find All Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAllInvalid, testing::ext::TestSize.Level1)
 {
     // Direct child
@@ -899,6 +1094,11 @@ UNIT_TEST_F(API_ContainerTest, FindAllInvalid, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAnyEmptyName
+ * @tc.desc: Tests for Find Any Empty Name. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAnyEmptyName, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAny({ "", TraversalType::DEPTH_FIRST_PRE_ORDER, {}, false });
@@ -913,6 +1113,11 @@ UNIT_TEST_F(API_ContainerTest, FindAnyEmptyName, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAnyNameRecursive
+ * @tc.desc: Tests for Find Any Name Recursive. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAnyNameRecursive, testing::ext::TestSize.Level1)
 {
     // Direct child
@@ -931,6 +1136,11 @@ UNIT_TEST_F(API_ContainerTest, FindAnyNameRecursive, testing::ext::TestSize.Leve
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAnyNameDuplicate
+ * @tc.desc: Tests for Find Any Name Duplicate. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAnyNameDuplicate, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAny({ "ObjectDupe", TraversalType::NO_HIERARCHY, {}, false });
@@ -943,6 +1153,11 @@ UNIT_TEST_F(API_ContainerTest, FindAnyNameDuplicate, testing::ext::TestSize.Leve
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAnyUid
+ * @tc.desc: Tests for Find Any Uid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAnyUid, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAny({ "", TraversalType::NO_HIERARCHY, { ITestContainer::UID }, false });
@@ -960,6 +1175,11 @@ UNIT_TEST_F(API_ContainerTest, FindAnyUid, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAnyUidStrict
+ * @tc.desc: Tests for Find Any Uid Strict. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAnyUidStrict, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAny({ "SameNameDifferentUid", TraversalType::DEPTH_FIRST_PRE_ORDER,
@@ -976,6 +1196,11 @@ UNIT_TEST_F(API_ContainerTest, FindAnyUidStrict, testing::ext::TestSize.Level1)
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
 
+/**
+ * @tc.name: FindAnyInvalid
+ * @tc.desc: Tests for Find Any Invalid. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindAnyInvalid, testing::ext::TestSize.Level1)
 {
     auto result1 = container_->FindAny({ "InvalidObject", TraversalType::NO_HIERARCHY, {}, false });
@@ -993,8 +1218,14 @@ UNIT_TEST_F(API_ContainerTest, FindAnyInvalid, testing::ext::TestSize.Level1)
     EXPECT_THAT(removedCalls_, testing::SizeIs(0));
     EXPECT_THAT(movedCalls_, testing::SizeIs(0));
 }
+
+/**
+ * @tc.name: ObjectFlagsDefault
+ * @tc.desc: Tests for Object Flags Default. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
-UNIT_TEST_F(API_ContainerTest, ObjectFlagsDefault, testing::ext::TestSize.Level1)
+ UNIT_TEST_F(API_ContainerTest, ObjectFlagsDefault, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
     ASSERT_TRUE(ser.Export(container_));
@@ -1004,7 +1235,14 @@ UNIT_TEST_F(API_ContainerTest, ObjectFlagsDefault, testing::ext::TestSize.Level1
 
     EXPECT_EQ(imported->GetAll().size(), NumDirectChildren);
 }
+*/
 
+/**
+ * @tc.name: ObjectFlagsNoHierarchy
+ * @tc.desc: Tests for Object Flags No Hierarchy. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+/*
 UNIT_TEST_F(API_ContainerTest, ObjectFlagsNoHierarchy, testing::ext::TestSize.Level1)
 {
     TestSerialiser ser;
@@ -1023,6 +1261,12 @@ UNIT_TEST_F(API_ContainerTest, ObjectFlagsNoHierarchy, testing::ext::TestSize.Le
     EXPECT_EQ(imported->GetAll().size(), 0);
 }
 */
+
+/**
+ * @tc.name: IterationSupport
+ * @tc.desc: Tests for Iteration Support. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, IterationSupport, testing::ext::TestSize.Level1)
 {
     {
@@ -1113,6 +1357,11 @@ UNIT_TEST_F(API_ContainerTest, IterationSupport, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: IterationSupportNonIterable
+ * @tc.desc: Tests for Iteration Support Non Iterable. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, IterationSupportNonIterable, testing::ext::TestSize.Level1)
 {
     auto nonContainer = GetObjectRegistry().Create(ClassId::Object);
@@ -1179,6 +1428,11 @@ UNIT_TEST_F(API_ContainerTest, IterationSupportNonIterable, testing::ext::TestSi
     }
 }
 
+/**
+ * @tc.name: FindOrder
+ * @tc.desc: Tests for Find Order. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_ContainerTest, FindOrder, testing::ext::TestSize.Level1)
 {
     auto c = CreateContainer("X");
@@ -1268,6 +1522,11 @@ UNIT_TEST_F(API_ContainerTest, FindOrder, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SameItemMultipleTimes
+ * @tc.desc: Tests for Same Item Multiple Times. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FlatContainerTest, SameItemMultipleTimes, testing::ext::TestSize.Level1)
 {
     const auto child = interface_pointer_cast<IObject>(CreateTestType("Twice"));
@@ -1293,6 +1552,11 @@ UNIT_TEST_F(API_FlatContainerTest, SameItemMultipleTimes, testing::ext::TestSize
     EXPECT_EQ(addedCalls_[1], expected2);
 }
 
+/**
+ * @tc.name: IterationSupport
+ * @tc.desc: Tests for Iteration Support. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_FlatContainerTest, IterationSupport, testing::ext::TestSize.Level1)
 {
     {

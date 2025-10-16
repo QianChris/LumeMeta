@@ -59,6 +59,11 @@ protected:
         0.996289, 0.999118, 1.000000 };
 };
 
+/**
+ * @tc.name: BezierDefault
+ * @tc.desc: Tests for Bezier Default. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BezierCurveTest, BezierDefault, testing::ext::TestSize.Level1)
 {
     // Linear as control points are at default [0,0], [1,1]
@@ -68,6 +73,11 @@ UNIT_TEST_F(API_BezierCurveTest, BezierDefault, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: BezierCurve
+ * @tc.desc: Tests for Bezier Curve. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BezierCurveTest, BezierCurve, testing::ext::TestSize.Level1)
 {
     SetControlPoints();
@@ -78,6 +88,11 @@ UNIT_TEST_F(API_BezierCurveTest, BezierCurve, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: BezierAnimation
+ * @tc.desc: Tests for Bezier Animation. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_BezierCurveTest, BezierAnimation, testing::ext::TestSize.Level1)
 {
     constexpr auto animationMs = 1000;

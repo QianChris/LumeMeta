@@ -44,6 +44,11 @@ protected:
     InstanceId queueId_;
 };
 
+/**
+ * @tc.name: Ctor
+ * @tc.desc: Tests for Ctor. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, Ctor, testing::ext::TestSize.Level1)
 {
     {
@@ -62,6 +67,11 @@ UNIT_TEST_F(API_TimerTests, Ctor, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Moving
+ * @tc.desc: Tests for Moving. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, Moving, testing::ext::TestSize.Level1)
 {
     Timer t(
@@ -72,6 +82,11 @@ UNIT_TEST_F(API_TimerTests, Moving, testing::ext::TestSize.Level1)
     EXPECT_TRUE(t2.IsRunning());
 }
 
+/**
+ * @tc.name: Start
+ * @tc.desc: Tests for Start. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, Start, testing::ext::TestSize.Level1)
 {
     {
@@ -92,6 +107,11 @@ UNIT_TEST_F(API_TimerTests, Start, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Stop
+ * @tc.desc: Tests for Stop. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, Stop, testing::ext::TestSize.Level1)
 {
     {
@@ -120,6 +140,11 @@ UNIT_TEST_F(API_TimerTests, Stop, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SingleShot
+ * @tc.desc: Tests for Single Shot. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, SingleShot, testing::ext::TestSize.Level1)
 {
     {
@@ -143,6 +168,11 @@ UNIT_TEST_F(API_TimerTests, SingleShot, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: Detach
+ * @tc.desc: Tests for Detach. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, Detach, testing::ext::TestSize.Level1)
 {
     std::atomic<int> count = 0;
@@ -158,6 +188,11 @@ UNIT_TEST_F(API_TimerTests, Detach, testing::ext::TestSize.Level1)
     EXPECT_EQ(count, 1);
 }
 
+/**
+ * @tc.name: BadQueue
+ * @tc.desc: Tests for Bad Queue. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST_F(API_TimerTests, BadQueue, testing::ext::TestSize.Level1)
 {
     {
@@ -185,6 +220,12 @@ UNIT_TEST_F(API_TimerTests, BadQueue, testing::ext::TestSize.Level1)
         EXPECT_TRUE(!t.IsRunning());
     }
 }
+
+/**
+ * @tc.name: Debug
+ * @tc.desc: Tests for Debug. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 /*
 UNIT_TEST_F(API_TimerTests, Debug, testing::ext::TestSize.Level1)
 {

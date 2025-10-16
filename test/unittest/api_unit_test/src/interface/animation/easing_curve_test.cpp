@@ -42,7 +42,12 @@ private:
     IEasingCurve::Ptr curve_;
 };
 
-TEST_P(API_EasingCurveTest, Transform)
+/**
+ * @tc.name: Transform
+ * @tc.desc: Tests for Transform. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_EasingCurveTest, Transform, testing::ext::TestSize.Level1)
 {
     auto curve = this->GetCurve();
     curve->Transform(-1);

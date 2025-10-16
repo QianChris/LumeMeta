@@ -47,12 +47,22 @@ using Event2 = SimpleEvent<test2Info, void(int, int)>;
 
 } // namespace
 
+/**
+ * @tc.name: CreateSimpleEvent
+ * @tc.desc: Tests for Create Simple Event. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EventTest, CreateSimpleEvent, testing::ext::TestSize.Level1)
 {
     EXPECT_EQ(Event1::UID, test1Info::UID);
     EXPECT_EQ(Event2::UID, test2Info::UID);
 }
 
+/**
+ * @tc.name: Methods
+ * @tc.desc: Tests for Methods. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EventTest, Methods, testing::ext::TestSize.Level1)
 {
     auto c = GetObjectRegistry().Create<IContainer>(ClassId::ObjectFlatContainer);
@@ -77,6 +87,11 @@ UNIT_TEST(API_EventTest, Methods, testing::ext::TestSize.Level1)
     EXPECT_TRUE(cloneable->GetClone());
 }
 
+/**
+ * @tc.name: DestroyAtInvoke
+ * @tc.desc: Tests for Destroy At Invoke. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_EventTest, DestroyAtInvoke, testing::ext::TestSize.Level1)
 {
     constexpr auto name = "DestroyedEvent";

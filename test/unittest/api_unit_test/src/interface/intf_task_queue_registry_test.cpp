@@ -26,6 +26,11 @@ namespace UTest {
 
 constexpr BASE_NS::Uid CustomTaskQueueId { "7a55939d-3b89-479f-9e6a-40a13b80434d" };
 
+/**
+ * @tc.name: Register
+ * @tc.desc: Tests for Register. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueRegistryTest, Register, testing::ext::TestSize.Level1)
 {
     auto& taskqRegistry = GetTaskQueueRegistry();
@@ -54,6 +59,11 @@ UNIT_TEST(API_TaskQueueRegistryTest, Register, testing::ext::TestSize.Level1)
     EXPECT_TRUE(taskqRegistry.UnregisterAllTaskQueues());
 }
 
+/**
+ * @tc.name: Replace
+ * @tc.desc: Tests for Replace. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueRegistryTest, Replace, testing::ext::TestSize.Level1)
 {
     auto& taskqRegistry = GetTaskQueueRegistry();
@@ -77,6 +87,11 @@ UNIT_TEST(API_TaskQueueRegistryTest, Replace, testing::ext::TestSize.Level1)
     EXPECT_TRUE(taskqRegistry.UnregisterAllTaskQueues());
 }
 
+/**
+ * @tc.name: UnRegister
+ * @tc.desc: Tests for Un Register. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
 UNIT_TEST(API_TaskQueueRegistryTest, UnRegister, testing::ext::TestSize.Level1)
 {
     auto& taskqRegistry = GetTaskQueueRegistry();
