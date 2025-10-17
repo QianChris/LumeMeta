@@ -383,6 +383,13 @@ class TestContainer : public TestContainerFwd {
     META_OBJECT(TestContainer, ClassId::TestContainer, TestContainerFwd, ClassId::ObjectContainer)
 };
 
+class TestContainerPreTransaction : public META_NS::IntroduceInterfaces<TestContainerFwd, IContainerPreTransaction> {
+    META_OBJECT(
+        TestContainerPreTransaction, ClassId::TestContainerPreTransaction, TestContainerFwd, ClassId::ObjectContainer)
+public:
+    META_IMPLEMENT_EVENT(IOnChildChanging, ContainerAboutToChange);
+};
+
 class TestFlatContainer : public TestContainerFwd {
     META_OBJECT(TestFlatContainer, ClassId::TestFlatContainer, TestContainerFwd, ClassId::ObjectFlatContainer)
 };
@@ -594,6 +601,7 @@ void RegisterTestTypes()
     auto& registry = META_NS::GetObjectRegistry();
     registry.RegisterObjectType(EmbeddedTestType::GetFactory());
     registry.RegisterObjectType(TestContainer::GetFactory());
+    registry.RegisterObjectType(TestContainerPreTransaction::GetFactory());
     registry.RegisterObjectType(TestFlatContainer::GetFactory());
     registry.RegisterObjectType(TestType::GetFactory());
     registry.RegisterObjectType(MyTestTypeInterpolator::GetFactory());
@@ -639,6 +647,7 @@ void UnregisterTestTypes()
     registry.UnregisterObjectType(MyTestTypeInterpolator::GetFactory());
     registry.UnregisterObjectType(TestType::GetFactory());
     registry.UnregisterObjectType(TestFlatContainer::GetFactory());
+    registry.UnregisterObjectType(TestContainerPreTransaction::GetFactory());
     registry.UnregisterObjectType(TestContainer::GetFactory());
     registry.UnregisterObjectType(EmbeddedTestType::GetFactory());
 }

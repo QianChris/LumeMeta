@@ -353,6 +353,72 @@ UNIT_TEST_F(API_ObjectHierarchyObserverTest, ContentChangeAfterRemove, testing::
 }
 
 /**
+ * @tc.name: ContainerPreTransaction
+ * @tc.desc: Test pre transaction events.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_ObjectHierarchyObserverTest, ContainerPreTransaction, testing::ext::TestSize.Level1)
+{
+    auto tc = CreateTestContainer("pretrans", ClassId::TestContainerPreTransaction);
+    auto container = interface_cast<IContainer>(tc);
+    auto object = CreateTestType("object");
+    auto pre = interface_cast<IContainerPreTransaction>(container);
+    ASSERT_TRUE(pre);
+    bool succeed = true;
+
+    uint32_t addingCount {};
+    uint32_t removingCount {};
+    pre->ContainerAboutToChange()->AddHandler(
+        MakeCallback<IOnChildChanging>([&](const ChildChangedInfo& info, bool& success) {
+            switch (info.type) {
+                case ContainerChangeType::ADDING:
+                    success = succeed;
+                    addingCount++;
+                    break;
+                case ContainerChangeType::REMOVING:
+                    success = succeed;
+                    removingCount++;
+                    break;
+                default:
+                    break;
+            }
+        }));
+
+    uint32_t changeCount {};
+    observer_.SetTarget(interface_pointer_cast<IObject>(tc));
+    observer_.OnHierarchyChanged([&](const HierarchyChangedInfo& info) { changeCount++; });
+
+    auto checkGT = [](uint32_t& current, uint32_t& previous) {
+        EXPECT_GT(current, previous);
+        previous = current;
+    };
+
+    auto previousAdding = addingCount;
+    auto previousRemoving = removingCount;
+    auto previousChange = changeCount;
+    succeed = false;
+    container->Add(object);
+    checkGT(addingCount, previousAdding);
+    checkGT(changeCount, previousChange);
+    EXPECT_EQ(container->GetSize(), 0);
+    succeed = true;
+    container->Add(object);
+    checkGT(addingCount, previousAdding);
+    checkGT(changeCount, previousChange);
+    EXPECT_EQ(container->GetSize(), 1);
+    succeed = false;
+    container->Remove(object);
+    checkGT(removingCount, previousRemoving);
+    checkGT(changeCount, previousChange);
+    EXPECT_EQ(container->GetSize(), 1);
+    succeed = true;
+    container->Remove(object);
+    checkGT(removingCount, previousRemoving);
+    checkGT(changeCount, previousChange);
+    EXPECT_EQ(container->GetSize(), 0);
+}
+
+/**
  * @tc.name: Attachment
  * @tc.desc: Tests for Attachment. [AUTO-GENERATED]
  * @tc.type: FUNC

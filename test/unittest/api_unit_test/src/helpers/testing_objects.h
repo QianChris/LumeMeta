@@ -44,6 +44,8 @@ META_REGISTER_CLASS(
     TestStartable, "e9470f5b-97ce-404c-9d1e-b37a4f1ac594", ObjectCategoryBits::NO_CATEGORY, "Test startable")
 
 META_REGISTER_CLASS(TestContainer, "bb8fe547-6f70-4552-b269-9bcb55c27f8a", ObjectCategoryBits::NO_CATEGORY)
+META_REGISTER_CLASS(
+    TestContainerPreTransaction, "038e74f7-bb55-4637-a13f-3db86408663f", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(TestFlatContainer, "cc9fe547-6f70-4552-b269-9bcb55c27f8a", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(TestString, "96f87fd0-aabb-4223-8ccf-24662be1dec1", ObjectCategoryBits::NO_CATEGORY)
 META_REGISTER_CLASS(TestPtrValue, "f77b3c6b-312a-4102-a8ed-a2442b2a8872", ObjectCategoryBits::NO_CATEGORY)

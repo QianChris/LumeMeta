@@ -25,6 +25,7 @@
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/curves/intf_easing_curve.h>
 #include <meta/interface/intf_object_registry.h>
+#include <meta/interface/intf_proxy_object.h>
 #include <meta/interface/intf_task_queue_registry.h>
 
 #include "helpers/util.h"
@@ -968,6 +969,56 @@ UNIT_TEST(API_ObjectRegistryTest, DefaultObjectContext, testing::ext::TestSize.L
     EXPECT_TRUE(ctx);
     EXPECT_EQ(r.GetDefaultObjectContext(), ctx);
     EXPECT_EQ(r.GetDefaultObjectContext(), ctx);
+}
+
+/**
+ * @tc.name: DefaultObjectContext
+ * @tc.desc: Test default and custom object context
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, ObjectContext, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+    auto defaultCtx = r.GetDefaultObjectContext();
+
+    auto testContext = [](const IObjectContext::Ptr& context, const IObject::Ptr& target = {}) {
+        ASSERT_TRUE(context);
+
+        EXPECT_EQ(&context->GetObjectRegistry(), &GetObjectRegistry());
+
+        IMetadata* meta = interface_cast<IMetadata>(context);
+        const IMetadata* cmeta = meta;
+        EXPECT_FALSE(meta->GetProperty("invalid"));
+        EXPECT_FALSE(meta->GetProperties().empty());
+        EXPECT_FALSE(cmeta->GetProperty("invalid"));
+        EXPECT_FALSE(cmeta->GetProperties().empty());
+
+        auto p = ConstructProperty<int>("added", 0);
+
+        auto proxy = interface_cast<IProxyObject>(context);
+        ASSERT_TRUE(proxy);
+        EXPECT_EQ(proxy->GetTarget(), target);
+        EXPECT_TRUE(proxy->GetOverrides().empty());
+        EXPECT_FALSE(proxy->GetOverride(""));
+        EXPECT_FALSE(proxy->GetProxyProperty("invalid"));
+        EXPECT_TRUE(proxy->SetPropertyTarget(p));
+    };
+
+    testContext(defaultCtx);
+    auto created = r.Create<IObjectContext>(META_NS::ClassId::ObjectContext);
+    testContext(created);
+
+    auto invalidTarget = r.Create(META_NS::ClassId::Object);
+    auto target = r.Create(META_NS::ClassId::ObjectContext);
+    ASSERT_TRUE(invalidTarget);
+    auto proxy = interface_cast<IProxyObject>(created);
+    ASSERT_TRUE(proxy);
+    EXPECT_FALSE(proxy->SetTarget(invalidTarget));
+    testContext(created);
+    EXPECT_TRUE(proxy->SetTarget(target));
+    testContext(created, target);
+    EXPECT_TRUE(proxy->SetTarget({}));
+    testContext(created);
 }
 
 } // namespace UTest
