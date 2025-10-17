@@ -25,6 +25,7 @@
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/engine/intf_engine_value_manager.h>
 #include <meta/interface/intf_object_registry.h>
+#include <meta/interface/intf_task_queue_registry.h>
 
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
@@ -599,6 +600,132 @@ UNIT_TEST_F(API_EngineManagerTest, ContainerSubscription, testing::ext::TestSize
         EXPECT_EQ(v->GetValue(), 7);
     }
     EXPECT_EQ(v0->GetValue(), (EngineTestType { { 7, 6 } }));
+
+    v0->ResetValue();
+}
+
+/**
+ * @tc.name: InvalidState
+ * @tc.desc: Tests EngineValue invalid state.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, InvalidState, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop2::EngineTestProp> cman { prop2::ENGINE_TESTPROP_METADATA };
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+    EXPECT_TRUE(manager->ConstructValues(EnginePropertyHandle { &cman, cman.entityRef }));
+
+    auto value = manager->GetEngineValue("value");
+    ASSERT_TRUE(value);
+    auto internal = interface_cast<IEngineValueInternal>(value);
+    ASSERT_TRUE(internal);
+    // Invalidate state
+    EnginePropertyParams p;
+    p.pushValueToEngineDirectly = true;
+    EXPECT_TRUE(internal->SetPropertyParams(p));
+    // Calls should start failing now
+    EXPECT_EQ(value->Sync(EngineSyncDirection::AUTO), AnyReturn::INVALID_ARGUMENT);
+    auto any = Any<int>(0);
+    EXPECT_EQ(value->SetValue(any), AnyReturn::INVALID_ARGUMENT);
+    EXPECT_EQ(value->GetValue().GetClassId(), ObjectId {});
+}
+
+/**
+ * @tc.name: SetValueDirect
+ * @tc.desc: Tests engine value SetValue when pushValueToEngineDirectly = true.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, SetValueDirect, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop2::EngineTestProp> cman { prop2::ENGINE_TESTPROP_METADATA };
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+    EXPECT_TRUE(manager->ConstructValues(EnginePropertyHandle { &cman, cman.entityRef }));
+
+    Any<int> v(5);
+    Any<float> f(1.f);
+    auto value = manager->GetEngineValue("value");
+    ASSERT_TRUE(value);
+    auto internal = interface_cast<IEngineValueInternal>(value);
+    ASSERT_TRUE(internal);
+    auto p = internal->GetPropertyParams();
+    p.pushValueToEngineDirectly = true;
+    EXPECT_TRUE(internal->SetPropertyParams(p));
+    EXPECT_TRUE(value->SetValue(v));
+    EXPECT_FALSE(value->SetValue(f));
+}
+
+/**
+ * @tc.name: SetValueDirect
+ * @tc.desc: Test engine value manager value construction with raw property handle pointer.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, ConstructPtr, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop2::EngineTestProp> cman { prop2::ENGINE_TESTPROP_METADATA };
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+    EnginePropertyHandle eph;
+    EXPECT_FALSE(manager->ConstructValues(eph, {}));
+    EXPECT_FALSE(manager->ConstructValues(nullptr, {}));
+    auto ph = EnginePropertyHandle { &cman, cman.entityRef };
+    EXPECT_TRUE(manager->ConstructValues(ph.Handle(), {}));
+    auto count = manager->GetAllEngineValues().size();
+    EXPECT_GT(count, 0);
+    EXPECT_TRUE(manager->ConstructValues(ph.Handle(), {}));
+    EXPECT_EQ(count, manager->GetAllEngineValues().size());
+    EXPECT_TRUE(manager->ConstructValue(EnginePropertyParams {}, {}));
+    EXPECT_FALSE(manager->ConstructAllProperties().empty());
+}
+
+/**
+ * @tc.name: SetValueDirect
+ * @tc.desc: Test engine value manager notifications.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, Notification, testing::ext::TestSize.Level1)
+{
+    auto queue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    auto queueId = interface_cast<IObjectInstance>(queue)->GetInstanceId().ToUid();
+    auto& tr = GetTaskQueueRegistry();
+    tr.RegisterTaskQueue(queue, queueId);
+
+    TestComponentManager<prop2::EngineTestProp> cman { prop2::ENGINE_TESTPROP_METADATA };
+
+    uint32_t onChangedCount = 0;
+    {
+        auto manager = GetObjectRegistry().Create<IEngineValueManager>(ClassId::EngineValueManager);
+        ASSERT_TRUE(manager);
+        manager->SetNotificationQueue(queue);
+
+        EXPECT_TRUE(manager->ConstructValues(EnginePropertyHandle { &cman, cman.entityRef }));
+        auto p = manager->ConstructProperty<int>("value");
+
+        ASSERT_TRUE(p);
+        p->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&]() { onChangedCount++; }));
+        p->SetValue(42);
+        EXPECT_EQ(onChangedCount, 1);
+        manager->Sync(EngineSyncDirection::AUTO);
+
+        EXPECT_EQ(onChangedCount, 1);
+        queue->ProcessTasks();
+        EXPECT_EQ(onChangedCount, 2);
+
+        // Set + sync again but leave the notify pending in the queue
+        p->SetValue(43);
+        EXPECT_EQ(onChangedCount, 3);
+        manager->Sync(EngineSyncDirection::AUTO);
+        // Expect EngineValueManager to cancel the task at destruction
+    }
+    EXPECT_EQ(onChangedCount, 3);
+    queue->ProcessTasks();
+    EXPECT_EQ(onChangedCount, 3);
+
+    tr.UnregisterTaskQueue(queueId);
 }
 
 } // namespace UTest
