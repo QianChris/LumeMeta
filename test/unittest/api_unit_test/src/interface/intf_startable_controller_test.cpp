@@ -186,6 +186,32 @@ UNIT_TEST_F(API_StartableControllerTest, GetAll, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: InvalidState
+ * @tc.desc: Test functions when controller is in invalid state
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_StartableControllerTest, InvalidState, testing::ext::TestSize.Level1)
+{
+    auto testController = [](const IStartableController::Ptr& controller, bool expectSuccess) {
+        EXPECT_EQ(controller->StartAll(), expectSuccess);
+        EXPECT_EQ(
+            controller->StartAll(static_cast<IStartableController::ControlBehavior>(-1)), expectSuccess); // NOLINT
+
+        EXPECT_EQ(controller->StopAll(), expectSuccess);
+        EXPECT_EQ(controller->StopAll(static_cast<IStartableController::ControlBehavior>(-1)), expectSuccess); // NOLINT
+    };
+    testController(controller_, false);
+    AttachController();
+    testController(controller_, true);
+    SetValue(controller_->TraversalType(), TraversalType::BREADTH_FIRST_ORDER);
+    testController(controller_, true);
+
+    static constexpr auto invalidQueueId = BASE_NS::Uid { "11111111-1111-1111-1111-111111111111" };
+    controller_->SetStartableQueueId(invalidQueueId, invalidQueueId);
+    testController(controller_, true);
+}
+
+/**
  * @tc.name: DynamicStart
  * @tc.desc: Tests for Dynamic Start. [AUTO-GENERATED]
  * @tc.type: FUNC

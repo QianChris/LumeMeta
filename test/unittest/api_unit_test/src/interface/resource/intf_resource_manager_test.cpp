@@ -89,12 +89,59 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithObject, testing::ext::TestSize.L
 {
     BASE_NS::shared_ptr<Listener> listener(new Listener);
     resources->AddListener(listener);
+    resources->AddListener(listener); // again, should be a no-op
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("app://test.scene")));
     auto queried = resources->GetResource(CORE_NS::ResourceId("app://test.scene"));
     ASSERT_TRUE(queried);
     EXPECT_EQ(queried, res);
+    resources->RemoveListener(listener);
+}
+
+/**
+ * @tc.name: ResourceTypes
+ * @tc.desc: Test resource type APIs
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, ResourceTypes, testing::ext::TestSize.Level1)
+{
+    EXPECT_FALSE(resources->GetResourceTypes().empty());
+    EXPECT_TRUE(resources->GetResourceGroups().empty());
+    auto res = CreateTestResource("app://test.scene");
+    ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
+    EXPECT_FALSE(resources->GetResourceGroups().empty());
+}
+
+/**
+ * @tc.name: ReloadResource
+ * @tc.desc: Test ReloadResource API.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, ReloadResource, testing::ext::TestSize.Level1)
+{
+    auto res = CreateTestResource("app://test.scene");
+    ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
+    auto groupsBefore = resources->GetResourceGroups();
+    EXPECT_FALSE(resources->ReloadResource(res)); // ObjectResource fails to reload
+    auto groupsAfter = resources->GetResourceGroups();
+    EXPECT_THAT(groupsBefore, ::testing::ElementsAreArray(groupsAfter));
+}
+
+/**
+ * @tc.name: PurgeGroup
+ * @tc.desc: Test PurgeGroup API.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, PurgeGroup, testing::ext::TestSize.Level1)
+{
+    auto res = CreateTestResource("app://test.scene");
+    ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
+    auto groups = resources->GetResourceGroups();
+    EXPECT_EQ(resources->PurgeGroup("invalid_name"), 0);
+    for (auto&& group : groups) {
+        EXPECT_GT(resources->PurgeGroup(group), 0);
+    }
 }
 
 static void MakeEmptyJsonFile()
