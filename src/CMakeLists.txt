@@ -77,6 +77,7 @@ target_sources(${PLUGIN_NAME} PRIVATE
     functions.h
     future.cpp
     future.h
+    keep_alive.h
     loaders/class_content_loader.cpp
     loaders/class_content_loader.h
     loaders/csv_parser.cpp
