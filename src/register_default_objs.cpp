@@ -25,6 +25,7 @@
 #include "container_observer.h"
 #include "engine/engine_input_property_manager.h"
 #include "functions.h"
+#include "keep_alive.h"
 #include "loaders/class_content_loader.h"
 #include "loaders/csv_string_resource_loader.h"
 #include "loaders/json_content_loader.h"
@@ -105,7 +106,8 @@ static constexpr ObjectTypeInfo OBJECTS[] = {
     ParallelAnimationTemplateAccess::OBJECT_INFO,
     KeyframeAnimationTemplateAccess::OBJECT_INFO,
     TrackAnimationTemplateAccess::OBJECT_INFO,
-    Serialization::RefUriBuilder::OBJECT_INFO
+    Serialization::RefUriBuilder::OBJECT_INFO,
+    KeepAlive::OBJECT_INFO
 };
 // clang-format on
 
