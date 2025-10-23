@@ -18,7 +18,9 @@
 
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/resource/intf_object_resource.h>
+#include <meta/interface/resource/intf_owned_resource_groups.h>
 #include <meta/interface/resource/intf_resource.h>
+#include <meta/interface/resource/intf_resource_query.h>
 
 #include "helpers/serialisation_utils.h"
 
@@ -141,6 +143,43 @@ UNIT_TEST_F(API_FileResourceManagerTest, PurgeGroup, testing::ext::TestSize.Leve
     EXPECT_EQ(resources->PurgeGroup("invalid_name"), 0);
     for (auto&& group : groups) {
         EXPECT_GT(resources->PurgeGroup(group), 0);
+    }
+}
+
+/**
+ * @tc.name: ResourceQuery
+ * @tc.desc: Test IResourceQuery API.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, ResourceQuery, testing::ext::TestSize.Level1)
+{
+    auto res = CreateTestResource("app://test.scene");
+    ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
+    auto query = interface_cast<IResourceQuery>(resources);
+    ASSERT_TRUE(query);
+    auto groups = resources->GetResourceGroups();
+    for (auto&& group : groups) {
+        const auto match = CORE_NS::MatchingResourceId(group);
+        auto alive = query->FindAliveResources({ match });
+        EXPECT_FALSE(alive.empty());
+        EXPECT_EQ(query->GetAliveCount({ match }), alive.size());
+    }
+}
+
+/**
+ * @tc.name: GetResourceHandle
+ * @tc.desc: Test GetResourceHandle API.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, GetResourceHandle, testing::ext::TestSize.Level1)
+{
+    auto res = CreateTestResource("app://test.scene");
+    ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
+    auto owned = interface_cast<IOwnedResourceGroups>(resources);
+    ASSERT_TRUE(owned);
+    auto groups = resources->GetResourceGroups();
+    for (auto&& group : groups) {
+        EXPECT_TRUE(owned->GetGroupHandle(group));
     }
 }
 
