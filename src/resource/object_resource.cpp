@@ -122,7 +122,8 @@ bool ObjectResourceOptions::Load(
     }
     return res;
 }
-bool ObjectResourceOptions::Save(CORE_NS::IFile& options, const CORE_NS::ResourceManagerPtr& rman) const
+bool ObjectResourceOptions::Save(
+    CORE_NS::IFile& options, const CORE_NS::ResourceManagerPtr& rman, const CORE_NS::ResourceContextPtr&) const
 {
     bool res = false;
     if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {

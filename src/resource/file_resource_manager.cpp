@@ -396,7 +396,7 @@ bool FileResourceManager::AddResource(const CORE_NS::ResourceId& id, const CORE_
         d.path = path;
         if (options) {
             MemFile opts;
-            options->Save(opts, GetSelf<IResourceManager>());
+            options->Save(opts, GetSelf<IResourceManager>(), {});
             d.optionData = opts.Data();
         }
         auto& v = resources_[id.group][id.name];
