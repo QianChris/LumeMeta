@@ -30,7 +30,7 @@
 
 META_BEGIN_NAMESPACE()
 
-class ThreadedTaskQueue : public IntroduceInterfaces<MetaObject, IThreadedTaskQueue, TaskQueueImpl> {
+class ThreadedTaskQueue : public IntroduceInterfaces<MetaObject, IThreadedTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
     META_OBJECT(ThreadedTaskQueue, ClassId::ThreadedTaskQueue, IntroduceInterfaces)
 public:
     using Token = ITaskQueue::Token;
@@ -43,12 +43,34 @@ public:
         Shutdown();
     }
 
+    uint64_t CurrentThread() const
+    {
+        return std::hash<std::thread::id> {}(std::this_thread::get_id());
+    }
+    bool CurrentThreadIsExecutionThread() const override
+    {
+        return CurrentThread() == threadId_;
+    }
+
+    bool SetExecutionThread()
+    {
+        auto id = CurrentThread();
+        if (threadId_ != 0) {
+            return (threadId_ == id);
+        }
+        threadId_ = id;
+        return true;
+    }
+
     bool Build(const IMetadata::Ptr& data) override
     {
         bool ret = Super::Build(data);
         if (ret) {
             self_ = GetSelf<ITaskQueue>();
-            thread_ = std::thread([this]() { ProcessTasks(); });
+            thread_ = std::thread([this]() {
+                SetExecutionThread();
+                ProcessTasks();
+            });
         }
         return ret;
     }
@@ -123,6 +145,7 @@ public:
     }
 
 private:
+    uint64_t threadId_ { 0 };
     std::condition_variable addCondition_;
     std::thread thread_;
 };
