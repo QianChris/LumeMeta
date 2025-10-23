@@ -553,6 +553,10 @@ bool ObjectRegistry::RegisterTaskQueue(const ITaskQueue::Ptr& queue, const BASE_
         // Null queue but no existing queue found
         return false;
     }
+    // warn if the thread info interface is not implemented
+    if (!interface_cast<ITaskQueueThreadInfo>(queue)) {
+        CORE_LOG_W("The registered task queue does not implement the ITaskQueueThreadInfo. This may cause issues when matching threads.");
+    }
     queues_[queueId] = queue;
     return true;
 }
