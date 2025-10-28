@@ -679,6 +679,77 @@ UNIT_TEST(API_TaskQueueTest, CancelRunningTask, testing::ext::TestSize.Level1)
     EXPECT_TRUE(done);
 }
 
+/**
+ * @tc.name: NestedTaskQueues
+ * @tc.desc: Tests for Nested Task Queues. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, NestedTaskQueues, testing::ext::TestSize.Level1)
+{
+    auto top = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
+    auto nested = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+
+    std::atomic<bool> done {};
+    top->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        nested->ProcessTasks();
+
+        auto f = AddFutureTaskOrRunDirectly(nested, [&] { done = true; });
+        f.Wait();
+
+        return false;
+    }));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    EXPECT_TRUE(done);
+}
+
+/**
+ * @tc.name: OutsideQueuesTask
+ * @tc.desc: Tests for Outside Queues Task. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, OutsideQueuesTask, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+
+    std::atomic<bool> done {};
+
+    q->ProcessTasks();
+
+    auto f = AddFutureTaskOrRunDirectly(q, [&] { done = true; });
+    f.Wait();
+
+    EXPECT_TRUE(done);
+}
+
+
+/**
+ * @tc.name: TaskDestructionTask
+ * @tc.desc: Tests for Task Destruction Task. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, TaskDestructionTask, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+
+    std::atomic<bool> done {};
+    q->ProcessTasks();
+
+    struct obj {
+        obj(IPollingTaskQueue::Ptr queue, std::atomic<bool>& done) : queue(queue), done(done) {}
+        ~obj()
+        {
+            auto f = AddFutureTaskOrRunDirectly(queue, [&] { done = true; });
+            f.Wait();
+        }
+        IPollingTaskQueue::Ptr queue;
+        std::atomic<bool>& done;
+    };
+    q->AddTask(MakeCallback<ITaskQueueTask>([o = obj { q, done }] { return false;  }));
+    q->ProcessTasks();
+    
+    EXPECT_TRUE(done);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     API_TaskQueueTest, API_TaskQueueTest, ::testing::Values(ClassId::PollingTaskQueue, ClassId::ThreadedTaskQueue));
 
