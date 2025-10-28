@@ -305,6 +305,9 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimationNoEvaluate, testing::ext::TestSi
     EXPECT_TRUE(pani->Property()->SetValue(p));
     EXPECT_TRUE(ani->Duration()->SetValue(TimeSpan::Milliseconds(100)));
 
+    std::size_t changes = 0;
+    p->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&]() { changes++; }));
+
     // Set the value, it should not immediately change but rather start animating as we
     // run some frames
     EXPECT_TRUE(p->SetValue(10));
@@ -319,6 +322,7 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimationNoEvaluate, testing::ext::TestSi
 
     EXPECT_TRUE(p->SetValue(0));
     EXPECT_EQ(p->GetValue(), 10);
+    EXPECT_EQ(changes, 11);
 }
 
 /**

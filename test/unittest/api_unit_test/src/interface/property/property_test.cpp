@@ -680,22 +680,33 @@ UNIT_TEST(API_PropertyTest, MultiOnChangedWithSameHandle, testing::ext::TestSize
     EXPECT_EQ(count, 2);
 }
 
+class ITestPropertyProperty : public CORE_NS::IInterface {
+    META_INTERFACE(CORE_NS::IInterface, ITestPropertyProperty, "dadaa454-2b65-475c-813d-f0ff6b7bb2dc")
+public:
+    META_PROPERTY(int, Indirect);
+};
+
 META_REGISTER_CLASS(PropertyOwnerTest, "2ab1b570-f44d-4fe3-9d40-4ed02294cee6", META_NS::ObjectCategoryBits::NO_CATEGORY)
-class PropertyOwnerTest final : public IntroduceInterfaces<META_NS::ObjectFwd, IEmbeddedTestType, IPropertyOwner> {
+class PropertyOwnerTest final
+    : public IntroduceInterfaces<META_NS::ObjectFwd, IEmbeddedTestType, ITestPropertyProperty, IPropertyOwner> {
     META_OBJECT(PropertyOwnerTest, ClassId::PropertyOwnerTest, IntroduceInterfaces)
 
     META_BEGIN_STATIC_DATA()
     META_STATIC_PROPERTY_DATA(IEmbeddedTestType, int, Property)
+    META_STATIC_PROPERTY_DATA(ITestPropertyProperty, int, Indirect)
     META_END_STATIC_DATA()
     META_IMPLEMENT_PROPERTY(int, Property)
+    META_IMPLEMENT_PROPERTY(int, Indirect)
 
     void OnPropertyChanged(const IProperty& p) override
     {
-        changed_ = p.GetName() == "Property";
+        changed_ |= p.GetName() == "Property";
+        indirect_ |= p.GetName() == "Indirect";
     }
 
 public:
     bool changed_ {};
+    bool indirect_ {};
 };
 
 /**
@@ -709,9 +720,15 @@ UNIT_TEST(API_PropertyTest, PropertyOwner, testing::ext::TestSize.Level1)
     auto object = GetObjectRegistry().Create(ClassId::PropertyOwnerTest);
     ASSERT_TRUE(object);
 
-    interface_cast<IEmbeddedTestType>(object)->Property()->SetValue(1);
+    auto prop = ConstructProperty<int>("test");
+    interface_cast<ITestPropertyProperty>(object)->Indirect()->PushValue(interface_pointer_cast<IValue>(prop));
     PropertyOwnerTest* p = reinterpret_cast<PropertyOwnerTest*>(object.get());
+    p->changed_ = false;
+    p->indirect_ = false;
+    interface_cast<IEmbeddedTestType>(object)->Property()->SetValue(1);
+    prop->SetValue(2);
     EXPECT_TRUE(p->changed_);
+    //    EXPECT_TRUE(p->indirect_); see LUME-9139
 
     UnregisterObjectType<PropertyOwnerTest>();
 }
