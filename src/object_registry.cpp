@@ -930,4 +930,58 @@ IMetadata::Ptr ObjectRegistry::ConstructObjectDataContainer()
 {
     return IMetadata::Ptr(new Internal::ObjectDataContainer);
 }
+
+namespace Internal {
+constexpr bool IsUniqueName(const BASE_NS::array_view<BASE_NS::string_view>& names, BASE_NS::string_view name)
+{
+    for (auto&& n : names) {
+        if (n == name) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void MakeNameUnique(const BASE_NS::array_view<BASE_NS::string_view>& names, BASE_NS::string& name, uint32_t index)
+{
+    if (IsUniqueName(names, name)) {
+        // Name is already unique
+        return;
+    }
+    constexpr uint32_t POSTFIX_MIN_LENGTH = 3; // 3 chars: "(x)"
+    const auto length = name.length();
+    if (length >= POSTFIX_MIN_LENGTH && name.ends_with(')')) {
+        // Remove existing postfix, e.g. (1)
+        for (int64_t pos = static_cast<int64_t>(length) - 1; pos >= 0; pos--) {
+            if (name[pos] == '(') {
+                if (!pos || name[pos - 1] == ' ') {
+                    // Require that '(x)' must be preceded by ' ' unless only the postfix exists
+                    name = name.substr(0, pos);
+                }
+                break;
+            }
+        }
+    }
+    // Try with and incremented postfix, e.g. " (2)"
+    BASE_NS::string postfix = name.empty() || name.ends_with(" ") ? "" : " ";
+    postfix.append("(").append(BASE_NS::to_string(++index)).append(")");
+    name = name + postfix;
+    MakeNameUnique(names, name, index);
+}
+
+} // namespace Internal
+
+BASE_NS::string ObjectRegistry::GetUniqueName(
+    BASE_NS::string_view name, BASE_NS::array_view<BASE_NS::string_view> names) const
+{
+    BASE_NS::string unique(name);
+    Internal::MakeNameUnique(names, unique, 0);
+    return unique;
+}
+
+IObjectUtil& ObjectRegistry::GetObjectUtil()
+{
+    return *this;
+}
+
 META_END_NAMESPACE()

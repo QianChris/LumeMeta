@@ -46,7 +46,8 @@ class ObjectRegistry final : public IObjectRegistry,
                              public ITaskQueueRegistry,
                              public IPropertyRegister,
                              public IGlobalSerializationData,
-                             public IEngineData {
+                             public IEngineData,
+                             public IObjectUtil {
 public:
     META_NO_COPY_MOVE(ObjectRegistry)
 
@@ -117,6 +118,12 @@ public:
 
     IObject::Ptr DefaultResolveObject(const IObjectInstance::Ptr& base, const RefUri& uri) const override;
     IMetadata::Ptr ConstructObjectDataContainer() override;
+
+protected: // IObjectUtil
+    BASE_NS::string GetUniqueName(
+        BASE_NS::string_view name, BASE_NS::array_view<BASE_NS::string_view> names) const override;
+
+    IObjectUtil& GetObjectUtil() override;
 
 protected:
     void Ref() override;

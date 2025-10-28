@@ -1021,5 +1021,41 @@ UNIT_TEST(API_ObjectRegistryTest, ObjectContext, testing::ext::TestSize.Level1)
     testContext(created);
 }
 
+/**
+ * @tc.name: GetUniqueName
+ * @tc.desc: Test IObjectUtil::GetUniqueName.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, GetUniqueName, testing::ext::TestSize.Level1)
+{
+    auto& util = GetObjectUtil();
+    BASE_NS::vector<BASE_NS::string_view> names = { "child", "child(1)", "child (2)", "child (3)", "child 2)", "(2)",
+        "child (2", "xx)" };
+
+    EXPECT_EQ(util.GetUniqueName("child", names), "child (1)");
+    EXPECT_EQ(util.GetUniqueName("child1", names), "child1");
+    EXPECT_EQ(util.GetUniqueName("child (2)", names), "child (1)");
+    EXPECT_EQ(util.GetUniqueName("child (1)", names), "child (1)");
+    EXPECT_EQ(util.GetUniqueName("child(1)", names), "child(1) (1)");
+    EXPECT_EQ(util.GetUniqueName("(2)", names), "(1)");
+    EXPECT_EQ(util.GetUniqueName("(1)", names), "(1)");
+    EXPECT_EQ(util.GetUniqueName("child 2)", names), "child 2) (1)");
+    EXPECT_EQ(util.GetUniqueName("child (2", names), "child (2 (1)");
+    EXPECT_EQ(util.GetUniqueName("child (x)", names), "child (x)");
+    EXPECT_EQ(util.GetUniqueName("()", names), "()");
+    EXPECT_EQ(util.GetUniqueName("xx)", names), "xx) (1)");
+    EXPECT_EQ(util.GetUniqueName("yy)", names), "yy)");
+
+    // Test empty name in list
+    BASE_NS::vector<BASE_NS::string_view> names2 = { "", "child", "()" };
+    EXPECT_EQ(util.GetUniqueName("", names2), "(1)");
+    EXPECT_EQ(util.GetUniqueName("child", names2), "child (1)");
+    EXPECT_EQ(util.GetUniqueName("()", names2), "() (1)");
+
+    // Empty list should always return the name as is
+    EXPECT_EQ(util.GetUniqueName("child", {}), "child");
+    EXPECT_EQ(util.GetUniqueName("", {}), "");
+}
+
 } // namespace UTest
 META_END_NAMESPACE()
