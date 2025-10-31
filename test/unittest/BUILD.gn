@@ -158,6 +158,7 @@ ohos_unittest("lume_meta_api_test") {
     "api_unit_test/src/interface/intf_task_queue_registry_test.cpp",
     "api_unit_test/src/interface/intf_task_queue_test.cpp",
     "api_unit_test/src/interface/simple_event_test.cpp",
+    "${LUME_CORE_PATH}/api/core/property_tools/property_data.cpp",
   ]
 
   # External deps

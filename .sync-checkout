@@ -1,0 +1,12 @@
+include/meta/**
+src/**
+benchmark/**
+environment_setup/**
+BUILD.gn
+
+# Tests 
+test/unittest/**
+
+# excludes
+!**/CMakeLists.txt
+!**/android

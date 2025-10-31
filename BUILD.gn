@@ -14,13 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/graphic/graphic_3d/lume/lume_config.gni")
 
-config("lume_meta_api_config") {
-  include_dirs = [
-    "include",
-  ]
-}
-
-config("lume_meta_src_config") {
+config("lume_metaobject_config") {
   include_dirs = [
     "3rdparty/",
     "src/",
@@ -37,7 +31,7 @@ config("lume_meta_src_config") {
     "CORE3D_DEV_ENABLED=${CORE_DEV_ENABLED}",
     "CORE3D_PUBLIC=__attribute__((visibility(\"default\")))",
     "CORE_USE_COMPILER_GENERATED_STATIC_LIST=1",
-    "CORE_STATIC_PLUGIN_HEADER=${CORE_STATIC_PLUGIN_HEADER }",
+    "CORE_STATIC_PLUGIN_HEADER=${CORE_STATIC_PLUGIN_HEADER }"
   ]
   cflags = [
     "-Wall",
@@ -50,26 +44,26 @@ config("lume_meta_src_config") {
     "-Wno-tautological-unsigned-zero-compare",
     "-Wno-ignored-qualifiers",
     "-Wno-unused-lambda-capture",
-    "-Wno-unused-but-set-variable",
+    "-Wno-unused-but-set-variable"
   ]
   cflags_cc = [
     "-Wno-overloaded-virtual",
-    "-Wno-missing-braces",
+    "-Wno-missing-braces"
   ]
 }
 
-ohos_source_set("lume_meta_src") {
+ohos_source_set("lume_metaobject_src") {
   public_configs = [
-    ":lume_meta_src_config",
+    ":lume_metaobject_config",
     "${LUME_RENDER_PATH}:lume_render_api",
     "${LUME_CORE_PATH}:lume_base_api",
     "${LUME_CORE_PATH}:lume_engine_api",
     "${LUME_CORE_PATH}:lume_component_help_config",
-    "${LUME_CORE_PATH}:lume_default",
+    "${LUME_CORE_PATH}:lume_default"
   ]
 
   sources = [
-    "src/animation/animation.h",
+    "animation/animation.h",
     "src/animation/animation_controller.cpp",
     "src/animation/animation_controller.h",
     "src/animation/animation_modifier.h",
@@ -98,7 +92,6 @@ ohos_source_set("lume_meta_src") {
     "src/animation/track_animation.h",
     "src/animation/track_animation_state.cpp",
     "src/animation/track_animation_state.h",
-    "src/any.h",
     "src/attachment_container.cpp",
     "src/attachment_container.h",
     "src/base_object.h",
@@ -190,12 +183,14 @@ ohos_source_set("lume_meta_src") {
     "src/register_engine_access.cpp",
     "src/register_entities.cpp",
     "src/register_value_serializers.cpp",
+    "src/resource/animation_resource.cpp",
+    "src/resource/animation_resource.h",
     "src/resource/file_resource_manager.cpp",
     "src/resource/file_resource_manager.h",
-    "src/resource/memfile.h",
     "src/resource/object_resource.cpp",
     "src/resource/object_resource.h",
-    "src/resource/resource_placeholder.h",
+    "src/resource/object_template.cpp",
+    "src/resource/object_template.h",
     "src/serialization/backend/debug_output.cpp",
     "src/serialization/backend/debug_output.h",
     "src/serialization/backend/json_input.cpp",
@@ -212,17 +207,27 @@ ohos_source_set("lume_meta_src") {
     "src/serialization/json_importer.h",
     "src/serialization/metav1_compat.cpp",
     "src/serialization/metav1_compat.h",
-    "src/serialization/ser_nodes.h",
+    "src/serialization/refuri_builder.cpp",
+    "src/serialization/refuri_builder.h",
     "src/startable_object_controller.cpp",
     "src/startable_object_controller.h",
     "src/system_clock.cpp",
     "src/task_queue.h",
-    "src/threaded_task_queue.cpp",
+    "src/threaded_task_queue.cpp"
   ]
-  deps = []
-  external_deps = [ "c_utils:utils" ]
+  deps = [
+  ]
+  external_deps = [
+    "c_utils:utils",
+  ]
   part_name = "graphic_3d"
   subsystem_name = "graphic"
+}
+
+config("lume_meta_api_config") {
+  include_dirs = [
+    "include",
+  ]
 }
 
 ohos_shared_library("AGPMetaApi") {
@@ -235,13 +240,17 @@ ohos_shared_library("AGPMetaApi") {
 }
 
 ohos_static_library("libMetaObject") {
-  public_deps = [ ":lume_meta_src" ]
+  public_deps = [
+    ":lume_metaobject_src",
+  ]
   part_name = "graphic_3d"
   subsystem_name = "graphic"
 }
 
 ohos_shared_library("libPluginMetaObject") {
-  public_deps = [ ":libMetaObject" ]
+  public_deps = [
+    ":libMetaObject",
+  ]
   relative_install_dir = "graphics3d"
   part_name = "graphic_3d"
   subsystem_name = "graphic"
