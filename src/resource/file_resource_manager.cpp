@@ -617,7 +617,7 @@ CORE_NS::IResource::Ptr FileResourceManager::ConstructResource(
         }
     }
 
-    if (resObj) {
+    if (res && resObj) {
         std::unique_lock lock { mutex_ };
         if (res->object) {
             resObj = res->object;

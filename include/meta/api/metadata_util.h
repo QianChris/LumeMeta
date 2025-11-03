@@ -131,7 +131,9 @@ inline void CopyToDefaultAndReset(const IProperty::ConstPtr& p, IProperty& out)
 {
     if (PropertyLock plock { p }) {
         if (PropertyLock lock { &out }) {
-            lock->SetDefaultValueAny(p->GetValue());
+            if (auto sc = interface_cast<IStackProperty>(&out)) {
+                sc->SetDefaultValue(p->GetValue());
+            }
             out.ResetValue();
         }
     }

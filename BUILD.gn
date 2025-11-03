@@ -63,7 +63,7 @@ ohos_source_set("lume_metaobject_src") {
   ]
 
   sources = [
-    "animation/animation.h",
+    "src/animation/animation.h",
     "src/animation/animation_controller.cpp",
     "src/animation/animation_controller.h",
     "src/animation/animation_modifier.h",
