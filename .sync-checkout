@@ -10,3 +10,7 @@ test/unittest/**
 # excludes
 !**/CMakeLists.txt
 !**/android/**
+!test/unittest/common/test_runner_ohos.*
+!test/unittest/common/test_runner_android.*
+!test/unittest/common/test_runner_windows.*
+!test/unittest/common/test_runner_linux.*
