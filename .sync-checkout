@@ -9,4 +9,4 @@ test/unittest/**
 
 # excludes
 !**/CMakeLists.txt
-!**/android
+!**/android/**
