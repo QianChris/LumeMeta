@@ -4,13 +4,15 @@ benchmark/**
 environment_setup/**
 BUILD.gn
 
-# Tests 
-test/unittest/**
+# tests
+test/unittest/BUILD.gn
+test/unittest/assets/**
+test/unittest/common/load_lib.*
+test/unittest/common/test_framework.h
+test/unittest/common/test_runner_ohos_system.*
+test/unittest/api_unit_test/src/**
+!test/unittest/api_unit_test/src/test_runner.*
 
 # excludes
 !**/CMakeLists.txt
 !**/android/**
-!test/unittest/common/test_runner_ohos.*
-!test/unittest/common/test_runner_android.*
-!test/unittest/common/test_runner_windows.*
-!test/unittest/common/test_runner_linux.*
