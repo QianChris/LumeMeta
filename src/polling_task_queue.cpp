@@ -28,7 +28,8 @@
 META_BEGIN_NAMESPACE()
 
 // notice, this is object only so we can construct it via object registery
-class PollingTaskQueue : public IntroduceInterfaces<MetaObject, IPollingTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
+class PollingTaskQueue :
+    public IntroduceInterfaces<MetaObject, IPollingTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
     META_OBJECT(PollingTaskQueue, ClassId::PollingTaskQueue, IntroduceInterfaces)
 public:
     using Token = ITaskQueue::Token;

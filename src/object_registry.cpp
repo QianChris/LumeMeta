@@ -555,7 +555,8 @@ bool ObjectRegistry::RegisterTaskQueue(const ITaskQueue::Ptr& queue, const BASE_
     }
     // warn if the thread info interface is not implemented
     if (!interface_cast<ITaskQueueThreadInfo>(queue)) {
-        CORE_LOG_W("The registered task queue does not implement the ITaskQueueThreadInfo. This may cause issues when matching threads.");
+        CORE_LOG_W("The registered task queue does not implement the ITaskQueueThreadInfo."\
+                   " This may cause issues when matching threads.");
     }
     queues_[queueId] = queue;
     return true;
@@ -950,16 +951,16 @@ void MakeNameUnique(const BASE_NS::array_view<BASE_NS::string_view>& names, BASE
     }
     constexpr uint32_t POSTFIX_MIN_LENGTH = 3; // 3 chars: "(x)"
     const auto length = name.length();
-    if (length >= POSTFIX_MIN_LENGTH && name.ends_with(')')) {
-        // Remove existing postfix, e.g. (1)
-        for (int64_t pos = static_cast<int64_t>(length) - 1; pos >= 0; pos--) {
-            if (name[pos] == '(') {
-                if (!pos || name[pos - 1] == ' ') {
-                    // Require that '(x)' must be preceded by ' ' unless only the postfix exists
-                    name = name.substr(0, pos);
-                }
-                break;
+    bool remove = length >= POSTFIX_MIN_LENGTH && name.ends_with(')');
+
+    // Remove existing postfix, e.g. (1)
+    for (int64_t pos = static_cast<int64_t>(length) - 1; remove && pos >= 0; pos--) {
+        if (name[pos] == '(') {
+            if (!pos || name[pos - 1] == ' ') {
+                // Require that '(x)' must be preceded by ' ' unless only the postfix exists
+                name = name.substr(0, pos);
             }
+            break;
         }
     }
     // Try with and incremented postfix, e.g. " (2)"

@@ -14,7 +14,9 @@
  */
 
 // disabled exceptions for msvc iomanip
+#ifndef __OHOS__
 #define _HAS_EXCEPTIONS 0
+#endif
 
 #include "file_resource_manager.h"
 

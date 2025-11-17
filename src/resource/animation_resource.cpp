@@ -45,15 +45,17 @@ static bool SetValuesFromTemplate(const CORE_NS::IResource::ConstPtr& templ, con
         CORE_LOG_W("Invalid resource type");
         return false;
     }
-    if (auto resm = interface_cast<META_NS::IMetadata>(templ)) {
-        if (auto m = interface_cast<META_NS::IMetadata>(res)) {
-            for (auto&& p : resm->GetProperties()) {
-                if (auto target = m->GetProperty(p->GetName())) {
-                    if (PropertyLock lock { target }) {
-                        if (lock->IsDefaultValue()) {
-                            CopyToDefaultAndReset(p, *target);
-                        }
-                    }
+    auto resm = interface_cast<META_NS::IMetadata>(templ);
+    auto m = interface_cast<META_NS::IMetadata>(res);
+    if (!(resm && m)) {
+        CORE_LOG_D("Unable to access metadata");
+        return false;
+    }
+    for (auto&& p : resm->GetProperties()) {
+        if (auto target = m->GetProperty(p->GetName())) {
+            if (PropertyLock lock { target }) {
+                if (lock->IsDefaultValue()) {
+                    CopyToDefaultAndReset(p, *target);
                 }
             }
             return true;
@@ -64,28 +66,28 @@ static bool SetValuesFromTemplate(const CORE_NS::IResource::ConstPtr& templ, con
 
 static CORE_NS::IResource::Ptr LoadTemplate(const CORE_NS::IResourceType::StorageInfo& s, CORE_NS::IResource::Ptr res)
 {
-    if (auto opts = META_NS::GetObjectRegistry().Create<META_NS::IObjectResourceOptions>(
-            META_NS::ClassId::ObjectResourceOptions)) {
-        opts->Load(*s.options, s.self, s.context);
-
-        if (s.path.empty()) {
-            auto type = opts->GetProperty<META_NS::IObject::Ptr>("__anim");
-            if (!res && type) {
-                res = interface_pointer_cast<CORE_NS::IResource>(type->GetValue());
-            }
+    auto opts = META_NS::GetObjectRegistry()
+        .Create<META_NS::IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    if (!opts) {
+        return res;
+    }
+    opts->Load(*s.options, s.self, s.context);
+    if (s.path.empty()) {
+        auto type = opts->GetProperty<META_NS::IObject::Ptr>("__anim");
+        if (!res && type) {
+            res = interface_pointer_cast<CORE_NS::IResource>(type->GetValue());
         }
-
-        if (res) {
-            if (auto i = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
-                auto base = opts->GetBaseResource();
-                if (base.IsValid()) {
-                    auto r = s.self->GetResource(base, s.context);
-                    if (!r) {
-                        CORE_LOG_W("Could not load base resource for %s", base.ToString().c_str());
-                    }
-                    if (SetValuesFromTemplate(r, res)) {
-                        i->SetTemplateId(base);
-                    }
+    }
+    if (res) {
+        if (auto i = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
+            auto base = opts->GetBaseResource();
+            if (base.IsValid()) {
+                auto r = s.self->GetResource(base, s.context);
+                if (!r) {
+                    CORE_LOG_W("Could not load base resource for %s", base.ToString().c_str());
+                }
+                if (SetValuesFromTemplate(r, res)) {
+                    i->SetTemplateId(base);
                 }
             }
         }
@@ -131,7 +133,6 @@ static void SaveTemplate(
             opts->SetProperty("__anim", p);
         }
 
-        //        opts->Save(*s.options, s.self, s.context);
         // need to set the export options
         if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {
             exporter->SetUserContext(interface_pointer_cast<IObject>(s.context));

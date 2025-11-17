@@ -54,15 +54,16 @@ public:
     {
         CORE_NS::IResource::Ptr res;
         auto obj = interface_cast<META_NS::IObject>(resource);
-        if (obj && obj->GetClassId() == resourceType_) {
-            res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
-            if (auto ores = interface_cast<IObjectResource>(res)) {
-                ores->SetResourceType(templateType_);
-                if (auto i = interface_cast<IMetadata>(res)) {
-                    if (auto m = interface_cast<IMetadata>(resource)) {
-                        for (auto&& p : m->GetProperties()) {
-                            CloneToDefault(p, *i);
-                        }
+        if (!obj || obj->GetClassId() != resourceType_) {
+            return res;
+        }
+        res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
+        if (auto ores = interface_cast<IObjectResource>(res)) {
+            ores->SetResourceType(templateType_);
+            if (auto i = interface_cast<IMetadata>(res)) {
+                 if (auto m = interface_cast<IMetadata>(resource)) {
+                    for (auto&& p : m->GetProperties()) {
+                        CloneToDefault(p, *i);
                     }
                 }
             }
@@ -77,24 +78,25 @@ public:
         const CORE_NS::IResource::ConstPtr& templ, const CORE_NS::IResource::Ptr& res) const override
     {
         auto obj = interface_cast<META_NS::IObject>(res);
-        if (obj && obj->GetClassId() == resourceType_) {
-            auto ores = interface_cast<IObjectResource>(templ);
-            if (!ores || templ->GetResourceType() != templateType_.ToUid()) {
-                CORE_LOG_W("Invalid resource type");
-                return false;
-            }
-            if (auto resm = interface_cast<META_NS::IMetadata>(templ)) {
-                if (auto m = interface_cast<META_NS::IMetadata>(res)) {
-                    for (auto&& p : resm->GetProperties()) {
-                        if (!m->GetMetadata(MetadataType::PROPERTY, p->GetName()).readOnly) {
-                            CopyToDefaultAndReset(p, *m);
-                        }
+        if (!(obj && obj->GetClassId() == resourceType_)) {
+            return false;
+        }
+        auto ores = interface_cast<IObjectResource>(templ);
+        if (!ores || templ->GetResourceType() != templateType_.ToUid()) {
+            CORE_LOG_W("Invalid resource type");
+            return false;
+        }
+        if (auto resm = interface_cast<META_NS::IMetadata>(templ)) {
+            if (auto m = interface_cast<META_NS::IMetadata>(res)) {
+                for (auto&& p : resm->GetProperties()) {
+                    if (!m->GetMetadata(MetadataType::PROPERTY, p->GetName()).readOnly) {
+                        CopyToDefaultAndReset(p, *m);
                     }
-                    if (auto id = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
-                        id->SetTemplateId(templ->GetResourceId());
-                    }
-                    return true;
                 }
+                if (auto id = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
+                    id->SetTemplateId(templ->GetResourceId());
+                }
+                return true;
             }
         }
         CORE_LOG_W("Invalid resource given to SetValuesFromTemplate: %s", res->GetResourceId().ToString().c_str());

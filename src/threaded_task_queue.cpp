@@ -30,7 +30,8 @@
 
 META_BEGIN_NAMESPACE()
 
-class ThreadedTaskQueue : public IntroduceInterfaces<MetaObject, IThreadedTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
+class ThreadedTaskQueue :
+    public IntroduceInterfaces<MetaObject, IThreadedTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
     META_OBJECT(ThreadedTaskQueue, ClassId::ThreadedTaskQueue, IntroduceInterfaces)
 public:
     using Token = ITaskQueue::Token;

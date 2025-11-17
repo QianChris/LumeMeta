@@ -8,47 +8,60 @@
 META_BEGIN_NAMESPACE()
 namespace Serialization {
 
+IObject::Ptr RefUriBuilder::ResolveProperty(
+    const IProperty* property, RefUri& uri, const IObject::ConstPtr& previous) const
+{
+    uint32_t index = -1;
+    if (ArrayPropertyLock lock { property }) {
+        for (size_t i = 0; i != lock->GetSize(); ++i) {
+            if (interface_pointer_cast<IObject>(GetConstPointer(lock->GetAnyAt(i))) == previous) {
+                index = i;
+                break;
+            }
+        }
+    }
+    uri.PushPropertySegment(property->GetName(), index);
+    auto owner = interface_pointer_cast<IObject>(property->GetOwner());
+    if (!owner) {
+        CORE_LOG_E("No Owner for property '%s' when exporting weak ptr", property->GetName().c_str());
+    }
+    return owner;
+}
+
+IObject::Ptr RefUriBuilder::ResolveObjectInstance(
+    const IObject::ConstPtr& ptr, const IObjectInstance& instance, RefUri& uri, const IObject::ConstPtr& previous) const
+{
+    if (!ptr) {
+        return {};
+    }
+    const auto parent = ptr->Resolve(RefUri::ParentUri());
+    if (auto i = interface_cast<META_NS::IProperty>(parent)) {
+        return parent;
+    }
+    if (auto i = interface_cast<IAttach>(parent)) {
+        if (auto cont = i->GetAttachmentContainer(false)) {
+            if (ContainsObject(cont, ptr)) {
+                uri.PushAttachmentSegment(instance.GetName());
+                return parent;
+            }
+        }
+    }
+    if (auto context = interface_cast<IObjectContext>(ptr)) {
+        uri.PushObjectContextSegment();
+    } else {
+        uri.PushObjectSegment(instance.GetName());
+    }
+    return parent;
+}
+
 IObject::Ptr RefUriBuilder::ResolveUriSegment(
     const IObject::ConstPtr& ptr, RefUri& uri, const IObject::ConstPtr& previous) const
 {
     if (auto property = interface_cast<IProperty>(ptr)) {
-        uint32_t index = -1;
-        if (ArrayPropertyLock lock { property }) {
-            for (size_t i = 0; i != lock->GetSize(); ++i) {
-                if (interface_pointer_cast<IObject>(GetConstPointer(lock->GetAnyAt(i))) == previous) {
-                    index = i;
-                    break;
-                }
-            }
-        }
-        uri.PushPropertySegment(property->GetName(), index);
-        auto owner = interface_pointer_cast<IObject>(property->GetOwner());
-        if (!owner) {
-            CORE_LOG_E("No Owner for property '%s' when exporting weak ptr", property->GetName().c_str());
-        }
-        return owner;
+        return ResolveProperty(property, uri, previous);
     }
     if (auto instance = interface_cast<IObjectInstance>(ptr)) {
-        auto parent = ptr->Resolve(RefUri::ParentUri());
-
-        if (auto i = interface_cast<META_NS::IProperty>(parent)) {
-            return parent;
-        }
-
-        if (auto i = interface_cast<IAttach>(parent)) {
-            if (auto cont = i->GetAttachmentContainer(false)) {
-                if (ContainsObject(cont, ptr)) {
-                    uri.PushAttachmentSegment(instance->GetName());
-                    return parent;
-                }
-            }
-        }
-        if (auto context = interface_cast<IObjectContext>(ptr)) {
-            uri.PushObjectContextSegment();
-        } else {
-            uri.PushObjectSegment(instance->GetName());
-        }
-        return parent;
+        return ResolveObjectInstance(ptr, *instance, uri, previous);
     }
     return nullptr;
 }

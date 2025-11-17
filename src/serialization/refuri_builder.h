@@ -35,6 +35,9 @@ public:
 private:
     IObject::Ptr ResolveUriSegment(const IObject::ConstPtr& ptr, RefUri& uri, const IObject::ConstPtr& previous) const;
     bool IsAnchorType(const ObjectId& id) const;
+    IObject::Ptr ResolveProperty(const IProperty* property, RefUri& uri, const IObject::ConstPtr& previous) const;
+    IObject::Ptr ResolveObjectInstance(const IObject::ConstPtr& ptr, const IObjectInstance& instance, RefUri& uri,
+        const IObject::ConstPtr& previous) const;
 
 private:
     BASE_NS::vector<ObjectId> anchorTypes_;
