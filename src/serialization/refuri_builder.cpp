@@ -98,23 +98,31 @@ RefUri RefUriBuilder::BuildRefUri(IExporterState& state, const IObject::ConstPtr
     auto original = p;
     IObject::ConstPtr previous;
     RefUri uri;
-    while (p) {
-        if (auto obj = interface_cast<IObjectInstance>(p)) {
-            auto iid = state.ConvertInstanceId(obj->GetInstanceId());
-            if (userContext && ops.useRelativeRefuriIfContextSet) {
-                if (userContext.get() == obj) {
-                    uri.SetStartsFromRoot(true);
-                    return uri;
-                }
-            }
-            if (IsAnchorType(obj->GetClassId())) {
+    auto handleInstance = [&](const IObjectInstance* obj) -> bool {
+        if (!obj) {
+            return false;
+        }
+        auto iid = state.ConvertInstanceId(obj->GetInstanceId());
+        if (userContext && ops.useRelativeRefuriIfContextSet) {
+            if (userContext.get() == obj) {
                 uri.SetStartsFromRoot(true);
-                return uri;
+                return true;
             }
-            if (state.HasBeenExported(iid) || state.IsGlobalObject(obj->GetInstanceId())) {
-                uri.SetBaseObjectUid(iid.ToUid());
-                return uri;
-            }
+        }
+        if (IsAnchorType(obj->GetClassId())) {
+            uri.SetStartsFromRoot(true);
+            return true;
+        }
+        if (state.HasBeenExported(iid) || state.IsGlobalObject(obj->GetInstanceId())) {
+            uri.SetBaseObjectUid(iid.ToUid());
+            return true;
+        }
+        return false;
+    };
+
+    while (p) {
+        if (handleInstance(interface_cast<IObjectInstance>(p))) {
+            return uri;
         }
         auto newp = ResolveUriSegment(p, uri, previous);
         previous = p;

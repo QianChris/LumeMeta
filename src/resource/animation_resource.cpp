@@ -52,14 +52,16 @@ static bool SetValuesFromTemplate(const CORE_NS::IResource::ConstPtr& templ, con
         return false;
     }
     for (auto&& p : resm->GetProperties()) {
-        if (auto target = m->GetProperty(p->GetName())) {
-            if (PropertyLock lock { target }) {
-                if (lock->IsDefaultValue()) {
-                    CopyToDefaultAndReset(p, *target);
-                }
-            }
-            return true;
+        auto target = m->GetProperty(p->GetName());
+        if (!target) {
+            continue;
         }
+        if (PropertyLock lock { target }) {
+            if (lock->IsDefaultValue()) {
+                CopyToDefaultAndReset(p, *target);
+            }
+        }
+        return true;
     }
     return false;
 }
