@@ -219,6 +219,8 @@ ohos_source_set("lume_metaobject_src") {
   ]
   external_deps = [
     "c_utils:utils",
+    "qos_manager:qos",
+    "resource_schedule_service:ressched_client",
   ]
   part_name = "graphic_3d"
   subsystem_name = "graphic"
