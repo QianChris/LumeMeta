@@ -43,7 +43,7 @@ void KeyframeAnimation::OnAnimationStateChanged(const AnimationStateChangedInfo&
     if (auto p = GetTargetProperty()) {
         switch (info.state) {
             case AnimationTargetState::FINISHED:
-                [[fallthrough]];
+                [[fallthrough]]; // follow the same procedure as STOPPED
             case AnimationTargetState::STOPPED:
                 if (currentValue_) {
                     // Evaluate current value
