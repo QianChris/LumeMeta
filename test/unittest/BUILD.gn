@@ -71,10 +71,7 @@ ohos_unittest("lume_meta_api_test") {
 
   # Src
   sources = [
-    "common/test_framework.h",
-    "common/test_runner_ohos_system.h",
     "common/test_runner_ohos_system.cpp",
-    "common/load_lib.h",
     "common/load_lib.cpp",
 
     # API

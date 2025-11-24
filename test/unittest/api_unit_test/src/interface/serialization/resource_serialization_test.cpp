@@ -243,7 +243,7 @@ void API_ResourceSerializationTest::BasicAnimationTest(BASE_NS::string_view anim
         auto property = object->First();
 
         BASE_NS::vector<float> timestamps = { 0.0f, 0.5f, 1.f };
-        BASE_NS::vector<int> keyframes = {  10, 50, 100 };
+        BASE_NS::vector<int> keyframes = { 10, 50, 100 };
 
         META_NS::TrackAnimation<int> anim(META_NS::CreateNew);
         anim.SetKeyframes(keyframes)
@@ -297,7 +297,7 @@ TEST_F(API_ResourceSerializationTest, AnimationWithoutPath)
 void API_ResourceSerializationTest::BasicAnimationTemplateTest(BASE_NS::string_view animPath)
 {
     BASE_NS::vector<float> timestamps = { 0.0f, 0.5f, 1.f };
-    BASE_NS::vector<int> keyframes = {  10, 50, 100 };
+    BASE_NS::vector<int> keyframes = { 10, 50, 100 };
     auto duration = TimeSpan::Milliseconds(100);
     {
         auto acc = GetObjectRegistry().Create<IResourceTemplateAccess>(META_NS::ClassId::TrackAnimationTemplateAccess);

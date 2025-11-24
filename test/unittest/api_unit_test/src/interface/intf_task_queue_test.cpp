@@ -721,7 +721,6 @@ UNIT_TEST(API_TaskQueueTest, OutsideQueuesTask, testing::ext::TestSize.Level1)
     EXPECT_TRUE(done);
 }
 
-
 /**
  * @tc.name: TaskDestructionTask
  * @tc.desc: Tests for Task Destruction Task. [AUTO-GENERATED]
@@ -744,9 +743,9 @@ UNIT_TEST(API_TaskQueueTest, TaskDestructionTask, testing::ext::TestSize.Level1)
         IPollingTaskQueue::Ptr queue;
         std::atomic<bool>& done;
     };
-    q->AddTask(MakeCallback<ITaskQueueTask>([o = obj { q, done }] { return false;  }));
+    q->AddTask(MakeCallback<ITaskQueueTask>([o = obj { q, done }] { return false; }));
     q->ProcessTasks();
-    
+
     EXPECT_TRUE(done);
 }
 
