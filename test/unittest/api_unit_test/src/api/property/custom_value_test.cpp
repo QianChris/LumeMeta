@@ -91,7 +91,10 @@ private:
 UNIT_TEST(API_CustomValueTest, GetSet, testing::ext::TestSize.Level1)
 {
     RegisterObjectType<GetSetTestType>();
-    auto obj = GetObjectRegistry().Create<IGetSetTestInterface>(ClassId::GetSetTestType);
+    auto o = GetObjectRegistry().Create(ClassId::GetSetTestType);
+    ASSERT_TRUE(o);
+    auto obj = interface_cast<IGetSetTestInterface>(o);
+    ASSERT_TRUE(obj);
 
     EXPECT_EQ(obj->Value()->GetValue(), 0);
     EXPECT_EQ(obj->Value()->GetValue(), 0);
@@ -100,6 +103,7 @@ UNIT_TEST(API_CustomValueTest, GetSet, testing::ext::TestSize.Level1)
 
     EXPECT_EQ(obj->GetCount(), 2);
     EXPECT_EQ(obj->SetCount(), 1);
+    o.reset();
 
     UnregisterObjectType<GetSetTestType>();
 }
