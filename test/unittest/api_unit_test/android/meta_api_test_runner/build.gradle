@@ -65,7 +65,7 @@ android {
     }
 
     sourceSets {
-        main.assets.srcDirs = ['../../../../../assets', '../../../../assets']
+        main.assets.srcDirs = ['../../../assets']
     }
 
     buildTypes {
