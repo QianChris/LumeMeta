@@ -104,7 +104,7 @@ UNIT_TEST(API_SerializationTest, ExportImportWeakPtrPropertyValue, testing::ext:
  * @tc.desc: Tests for Export Import Weak Ptr Property With Global Anchor. [AUTO-GENERATED]
  * @tc.type: FUNC
  */
-UNIT_TEST(API_SerializationTest, DISABLED_ExportImportWeakPtrPropertyWithGlobalAnchor, testing::ext::TestSize.Level1)
+UNIT_TEST(API_SerializationTest, ExportImportWeakPtrPropertyWithGlobalAnchor, testing::ext::TestSize.Level1)
 {
     auto cont = CreateTestContainer<IContainer>();
     GetObjectRegistry().GetGlobalSerializationData().RegisterGlobalObject(interface_pointer_cast<IObject>(cont));

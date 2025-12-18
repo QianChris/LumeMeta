@@ -555,7 +555,7 @@ UNIT_TEST(API_TaskQueueTest, CreateWaitableTask, testing::ext::TestSize.Level1)
  * @tc.desc: Tests for Recurring Multiple Order. [AUTO-GENERATED]
  * @tc.type: FUNC
  */
-UNIT_TEST(API_TaskQueueTest, DISABLED_RecurringMultipleOrder, testing::ext::TestSize.Level1)
+UNIT_TEST(API_TaskQueueTest, RecurringMultipleOrder, testing::ext::TestSize.Level1)
 {
     // make sure that the order of recurring tasks does not change.
     auto queue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);

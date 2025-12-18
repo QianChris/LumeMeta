@@ -747,7 +747,7 @@ UNIT_TEST(API_AttachmentTest, ResolveFinalClass, testing::ext::TestSize.Level1)
  * @tc.desc: Tests for Resolve Final Class. [AUTO-GENERATED]
  * @tc.type: FUNC
  */
-UNIT_TEST(API_AttachmentTest, DISABLED_ResolveFinalClass, testing::ext::TestSize.Level1)
+UNIT_TEST(API_AttachmentTest, ResolveFinalClass, testing::ext::TestSize.Level1)
 {
     // Skip
 }

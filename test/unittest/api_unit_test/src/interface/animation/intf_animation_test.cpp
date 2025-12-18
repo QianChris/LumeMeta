@@ -217,7 +217,7 @@ UNIT_TEST_F(API_AnimationTest, KeyframeAnimationSerialization, testing::ext::Tes
  * @tc.desc: Tests for Implicit Animation. [AUTO-GENERATED]
  * @tc.type: FUNC
  */
-UNIT_TEST_F(API_AnimationTest, DISABLED_ImplicitAnimation, testing::ext::TestSize.Level1)
+UNIT_TEST_F(API_AnimationTest, ImplicitAnimation, testing::ext::TestSize.Level1)
 {
     auto p = ConstructProperty<int>("test");
     auto pani = CreateAnimation(ClassId::PropertyAnimation);
