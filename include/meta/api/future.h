@@ -73,12 +73,35 @@ struct ContinuationTypedFuntionTypeImpl<void> {
 template<typename Param>
 using ContinuationTypedFuntionType = typename ContinuationTypedFuntionTypeImpl<Param>::Type;
 
-template<typename T>
-T VoidResultHelper()
+template<typename Func, typename Param>
+struct ResultTypeImpl {
+    using Type = decltype(BASE_NS::declval<Func>()(BASE_NS::declval<Param>()));
+};
+
+template<typename Func>
+struct ResultTypeImpl<Func, void> {
+    using Type = decltype(BASE_NS::declval<Func>()());
+};
+
+template<typename Func, typename ParamType>
+using ResultType = typename ResultTypeImpl<Func, ParamType>::Type;
+
+
+template<typename Result,typename Param, typename Func>
+Result CallResultHelper(Func func, const IAny::Ptr& v)
 {
-    if constexpr (!BASE_NS::is_same_v<T, void>) {
-        return T {};
+    if constexpr (!BASE_NS::is_same_v<Param, void>) {
+		if (v) {
+			Param value{};
+			if (v->GetValue(value)) {
+				return func(value);
+			}
+			CORE_LOG_W("Type mismatch for future then");
+		}
+    } else {
+        return func();
     }
+	return Result{};
 }
 
 template<typename Type>
@@ -124,19 +147,11 @@ public:
     /// Helper function which enables specifying the continuation task as a lambda function
     template<typename Func, typename ParamType = Type,
         typename = EnableIfCanInvokeWithArguments<Func, ContinuationTypedFuntionType<ParamType>>>
-    auto Then(Func func, const BASE_NS::shared_ptr<ITaskQueue>& queue, int = 0) -> Future<decltype(func(ParamType {}))>
+    auto Then(Func func, const BASE_NS::shared_ptr<ITaskQueue>& queue, int = 0) -> Future<ResultType<Func, ParamType>>
     {
-        using ReturnType = decltype(func(ParamType {}));
+        using ReturnType = ResultType<Func, ParamType>;
         auto cont = CreateContinuation([f = BASE_NS::move(func)](const IAny::Ptr& v) mutable {
-            if (v) {
-                ParamType value {};
-                if (v->GetValue(value)) {
-                    return f(value);
-                }
-                CORE_LOG_W("Type mismatch for future then");
-            }
-            // vc2017 chokes on having the if constexpr here directly, so use helper
-            return VoidResultHelper<ReturnType>();
+			return CallResultHelper<ReturnType, ParamType>(BASE_NS::move(f), v);
         });
         return fut_ ? fut_->Then(cont, queue) : nullptr;
     }

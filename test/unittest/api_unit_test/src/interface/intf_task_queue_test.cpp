@@ -634,6 +634,12 @@ UNIT_TEST(API_TaskQueueTest, ApiFuture, testing::ext::TestSize.Level1)
     Future<void> vf = queue->AddWaitableTask(CreateWaitableTask([] {}));
     ASSERT_TRUE(vf);
     EXPECT_EQ(vf.Wait(), IFuture::COMPLETED);
+
+    auto vt1 = vf.Then([](IAny::Ptr p) { return 1; }, queue);
+    EXPECT_EQ(vt1.GetResult(), 1);
+
+    auto vt2 = vf.Then([]() { return 1; }, queue);
+    EXPECT_EQ(vt2.GetResult(), 1);
 }
 
 /**
