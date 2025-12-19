@@ -101,7 +101,9 @@ Result CallResultHelper(Func func, const IAny::Ptr& v)
     } else {
         return func();
     }
-	return Result{};
+    if constexpr (!BASE_NS::is_same_v<Result, void>) {
+        return Result {};
+    }
 }
 
 template<typename Type>
