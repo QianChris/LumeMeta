@@ -16,6 +16,7 @@
 #ifndef META_INTERFACE_INOTIFY_ON_CHANGE_H
 #define META_INTERFACE_INOTIFY_ON_CHANGE_H
 
+#include <meta/base/interface_macros.h>
 #include <meta/base/types.h>
 #include <meta/interface/event.h>
 #include <meta/interface/metadata_query.h>
