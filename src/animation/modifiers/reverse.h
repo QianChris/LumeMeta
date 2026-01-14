@@ -18,7 +18,7 @@
 
 #include <meta/base/namespace.h>
 #include <meta/interface/animation/builtin_animations.h>
-#include <meta/interface/animation/intf_animation_modifier.h>
+#include <meta/interface/animation/modifiers/intf_speed.h>
 #include <meta/interface/intf_manual_clock.h>
 #include <meta/interface/object_macros.h>
 
@@ -28,7 +28,7 @@ META_BEGIN_NAMESPACE()
 
 namespace AnimationModifiers {
 
-class ReverseModifier final : public IntroduceInterfaces<AnimationModifierFwd> {
+class ReverseModifier final : public IntroduceInterfaces<AnimationModifierFwd, AnimationModifiers::ISpeedModifier> {
     META_OBJECT(ReverseModifier, META_NS::ClassId::ReverseAnimationModifier, IntroduceInterfaces, ClassId::Object)
 public:
     bool Build(const IMetadata::Ptr& data) override;
@@ -36,6 +36,9 @@ public:
 public: // IAnimationModifier
     bool ProcessOnGetDuration(DurationData& duration) const override;
     bool ProcessOnStep(StepData& step) const override;
+
+public: // AnimationModifiers::ISpeedModifier
+    float ModifySpeed(float progress) const override;
 };
 
 } // namespace AnimationModifiers

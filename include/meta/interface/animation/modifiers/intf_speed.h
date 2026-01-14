@@ -22,11 +22,14 @@
 META_BEGIN_NAMESPACE()
 
 META_REGISTER_INTERFACE(ISpeed, "1822d284-d256-4088-98ea-01ff620e709e")
+META_REGISTER_INTERFACE(ISpeedModifier, "f9972579-626e-410f-8568-420824879ff3")
 
 namespace AnimationModifiers {
 
 /**
- * @brief Defines interface for the loop animation modifier
+ * @brief Defines interface for animation modifiers which have a user-settable speed property.
+ *        Implemented by:
+ *          - ClassId::SpeedAnimationModifier
  */
 class ISpeed : public CORE_NS::IInterface {
     META_INTERFACE(IInterface, ISpeed)
@@ -37,6 +40,23 @@ public:
      *        The default value is 1.
      */
     META_PROPERTY(float, SpeedFactor)
+};
+
+/**
+ * @brief Defines ISpeedModifier interface for modifiers which can modify target speed.
+ *        Implemented by:
+ *          - ClassId::SpeedAnimationModifier
+ *          - ClassId::ReverseAnimationModifier
+ */
+class ISpeedModifier : public CORE_NS::IInterface {
+    META_INTERFACE(IInterface, ISpeedModifier)
+public:
+    /**
+     * @brief Modify a speed value.
+     * @param progress The speed to modify.
+     * @return Modified value.
+     */
+    virtual float ModifySpeed(float speed) const = 0;
 };
 
 } // namespace AnimationModifiers

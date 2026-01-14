@@ -85,7 +85,7 @@ inline IEvent::Token AddOnChangedHandler(
  * @param token Token of the callback.
  * @return True if the callback was successfully removed, false otherwise.
  */
-inline bool RemoveOnChangedHandler(const IProperty::Ptr& property, IEvent::Token token = {})
+inline bool RemoveOnChangedHandler(const IProperty::Ptr& property, IEvent::Token token)
 {
     return property && RemoveHandler(property->OnChanged(), token);
 }

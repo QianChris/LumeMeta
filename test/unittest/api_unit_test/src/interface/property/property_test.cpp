@@ -663,13 +663,13 @@ UNIT_TEST(API_PropertyTest, MultiOnChangedWithSameHandle, testing::ext::TestSize
     auto p = ConstructProperty<int>("test");
 
     int count = 0;
-    EXPECT_TRUE(p->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&] { ++count; }), uintptr_t(1)));
+    EXPECT_TRUE(AddOnChangedHandler(p, MakeCallback<IOnChanged>([&] { ++count; }), uintptr_t(1)));
     EXPECT_TRUE(p->OnChanged()->AddHandler(MakeCallback<IOnChanged>([&] { ++count; }), uintptr_t(1)));
 
     p->SetValue(1);
     EXPECT_EQ(count, 1);
 
-    EXPECT_TRUE(p->OnChanged()->RemoveHandler(uintptr_t(1)));
+    EXPECT_TRUE(RemoveOnChangedHandler(p, uintptr_t(1)));
 
     p->SetValue(2);
     EXPECT_EQ(count, 2);
