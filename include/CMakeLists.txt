@@ -29,6 +29,7 @@ target_sources(${PLUGIN_NAME}Base PUBLIC
     meta/base/interface_traits.h
     meta/base/interface_utils.h
     meta/base/macros.h
+    meta/base/memfile.h
     meta/base/meta_types.h
     meta/base/namespace.h
     meta/base/object_traits.h

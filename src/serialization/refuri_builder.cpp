@@ -92,7 +92,10 @@ bool RefUriBuilder::IsAnchorType(const ObjectId& id) const
 
 RefUri RefUriBuilder::BuildRefUri(IExporterState& state, const IObject::ConstPtr& object)
 {
-    auto userContext = state.GetUserContext();
+    IObject::ConstPtr userContext = state.GetUserContext();
+    if (auto geta = interface_cast<IGetAnchorObject>(userContext)) {
+        userContext = geta->GetAnchorObject();
+    }
     auto ops = state.GetOptions();
     IObject::ConstPtr p = object;
     auto original = p;

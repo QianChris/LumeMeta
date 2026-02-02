@@ -111,8 +111,7 @@ CORE_NS::IInterface* MetaObjectLib::GetInterface(const BASE_NS::Uid& uid)
     return const_cast<CORE_NS::IInterface*>(p->MetaObjectLib::GetInterface(uid));
 }
 
-MetaObjectLib::MetaObjectLib()
-    : sapi_ { { CreateMutex, DestroyMutex, LockMutex, UnlockMutex }, GetThreadId }
+MetaObjectLib::MetaObjectLib() : sapi_ { { CreateMutex, DestroyMutex, LockMutex, UnlockMutex }, GetThreadId }
 {
     if (USE_IN_PLACE_MUTEX) {
         CORE_LOG_D("Using in-place mutex");

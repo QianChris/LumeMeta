@@ -104,6 +104,7 @@ bool TestSerialiser::Export(const IObject::Ptr& object)
     auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter);
     exporter->SetInstanceIdMapping(mapping_);
     exporter->SetResourceManager(resources_);
+    exporter->SetUserContext(userContext_);
     exporter->SetMetadata(metadata_);
     bool ret = exporter->Export(data_, object);
     writePos_ = data_.GetPosition();
@@ -121,6 +122,7 @@ IObject::Ptr TestSerialiser::Import()
     data_.Seek(readPos_);
     auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter);
     importer->SetResourceManager(resources_);
+    importer->SetUserContext(userContext_);
     IObject::Ptr result = importer->Import(data_);
     readPos_ = data_.GetPosition();
     mapping_ = importer->GetInstanceIdMapping();
@@ -169,6 +171,10 @@ void TestSerialiser::SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, Ins
 void TestSerialiser::SetResourceManager(CORE_NS::IResourceManager::Ptr p)
 {
     resources_ = BASE_NS::move(p);
+}
+void TestSerialiser::SetUserContext(IObject::Ptr c)
+{
+    userContext_ = BASE_NS::move(c);
 }
 void TestSerialiser::SetMetadata(SerMetadata m)
 {

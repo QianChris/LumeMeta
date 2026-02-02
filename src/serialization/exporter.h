@@ -87,7 +87,7 @@ private:
     bool MarkExported(const IObject::ConstPtr& object);
     bool HasBeenExported(const InstanceId& id) const override;
 
-    ReturnError ExportObject(const IObject::ConstPtr& object, ISerNode::Ptr&);
+    ReturnError ExportObject(const IObject::ConstPtr& object, ISerNode::Ptr&, bool toplevel = false);
     ReturnError ExportPointer(const IAny& entity, ISerNode::Ptr&);
     ISerNode::Ptr ExportBuiltinValue(const IAny& value);
     ISerNode::Ptr ExportArray(const IArrayAny& array);
@@ -117,7 +117,9 @@ private:
 
 class ExportContext : public IntroduceInterfaces<IExportContext> {
 public:
-    ExportContext(Exporter& exp, IObject::ConstPtr p) : exporter_(exp), object_(BASE_NS::move(p)) {}
+    ExportContext(Exporter& exp, IObject::ConstPtr p, bool toplevel = false)
+        : exporter_(exp), object_(BASE_NS::move(p)), toplevel_(toplevel)
+    {}
 
     BASE_NS::shared_ptr<MapNode> ExtractNode();
 
@@ -131,6 +133,10 @@ public:
     IExporterState& Context() const override;
     ReturnError SubstituteThis(ISerNode::Ptr) override;
     SerMetadata GetMetadata() const override;
+    bool IsTopLevelObject() const override
+    {
+        return toplevel_;
+    };
 
     ISerNode::Ptr GetSubstitution() const
     {
@@ -140,6 +146,7 @@ public:
 private:
     Exporter& exporter_;
     IObject::ConstPtr object_;
+    bool toplevel_ {};
     BASE_NS::vector<NamedNode> elements_;
     ISerNode::Ptr substNode_;
 };

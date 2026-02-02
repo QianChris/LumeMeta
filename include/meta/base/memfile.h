@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef META_SRC_RESOURCE_MEMFILE_HEADER
-#define META_SRC_RESOURCE_MEMFILE_HEADER
+#ifndef META_BASE_MEMFILE_HEADER
+#define META_BASE_MEMFILE_HEADER
 
 #include <algorithm>
 #include <cstring>

@@ -78,6 +78,7 @@ struct TestSerialiser {
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>);
 
     void SetResourceManager(CORE_NS::IResourceManager::Ptr);
+    void SetUserContext(IObject::Ptr);
 
     void SetMetadata(SerMetadata);
     SerMetadata GetMetadata() const;
@@ -88,6 +89,7 @@ private:
     std::size_t readPos_ {};
     BASE_NS::unordered_map<InstanceId, InstanceId> mapping_;
     CORE_NS::IResourceManager::Ptr resources_;
+    IObject::Ptr userContext_;
     SerMetadata metadata_;
 };
 

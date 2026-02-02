@@ -19,8 +19,9 @@
 
 #if defined(__OHOS_PLATFORM__)
 #include <qos.h>
-#include <unistd.h>
 #include <sys/syscall.h>
+#include <unistd.h>
+
 #include "res_sched_client.h"
 #endif
 
@@ -39,8 +40,8 @@ META_BEGIN_NAMESPACE()
 
 constexpr uint32_t RES_TYPE_EXT_ENGINE_SET_QOS = 10028;
 
-class ThreadedTaskQueue :
-    public IntroduceInterfaces<MetaObject, IThreadedTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
+class ThreadedTaskQueue
+    : public IntroduceInterfaces<MetaObject, IThreadedTaskQueue, ITaskQueueThreadInfo, TaskQueueImpl> {
     META_OBJECT(ThreadedTaskQueue, ClassId::ThreadedTaskQueue, IntroduceInterfaces)
 public:
     using Token = ITaskQueue::Token;
@@ -143,8 +144,8 @@ public:
         CORE_LOG_I("set engine child thread qos %s", ret == 0 ? "success" : "failed");
         auto tid = syscall(SYS_gettid);
         if (tid > 0) {
-            std::unordered_map<std::string, std::string> mapPayload {
-                {"pid", std::to_string(getpid())}, {"tid", std::to_string(tid)}};
+            std::unordered_map<std::string, std::string> mapPayload { { "pid", std::to_string(getpid()) },
+                { "tid", std::to_string(tid) } };
             CORE_LOG_I("ReportEngineResType %s %s", mapPayload["pid"].c_str(), mapPayload["tid"].c_str());
             OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(
                 RES_TYPE_EXT_ENGINE_SET_QOS, 1, mapPayload);
@@ -168,11 +169,10 @@ public:
         }
 
 #if defined(__OHOS_PLATFORM__)
-        std::unordered_map<std::string, std::string> mapPayload {
-            {"pid", std::to_string(getpid())}, {"tid", std::to_string(tid)}};
+        std::unordered_map<std::string, std::string> mapPayload { { "pid", std::to_string(getpid()) },
+            { "tid", std::to_string(tid) } };
         CORE_LOG_I("ReportEngineResType %s %s", mapPayload["pid"].c_str(), mapPayload["tid"].c_str());
-        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(
-            RES_TYPE_EXT_ENGINE_SET_QOS, 0, mapPayload);
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(RES_TYPE_EXT_ENGINE_SET_QOS, 0, mapPayload);
 #endif
     }
 

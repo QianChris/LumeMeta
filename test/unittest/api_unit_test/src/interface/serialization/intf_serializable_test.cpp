@@ -206,5 +206,58 @@ UNIT_TEST(API_SerializationTest, JsonExportAutoSer, testing::ext::TestSize.Level
     reg.UnregisterObjectType<AutoSerType>();
 }
 
+META_REGISTER_CLASS(SecondLevelSerType, "cea942b1-cd61-4528-b743-8c0d659d3fe2", ObjectCategoryBits::NO_CATEGORY)
+META_REGISTER_CLASS(TopLevelSerType, "fff48440-77fd-4110-8f8e-3a4089b73b88", ObjectCategoryBits::NO_CATEGORY)
+
+struct SecondLevelSerType : public IntroduceInterfaces<MetaObject, ISerializable> {
+    META_OBJECT(SecondLevelSerType, ClassId::SecondLevelSerType, IntroduceInterfaces)
+    ReturnError Export(IExportContext& c) const override
+    {
+        EXPECT_FALSE(c.IsTopLevelObject());
+        return c.IsTopLevelObject() ? GenericError::FAIL : GenericError::SUCCESS;
+    }
+    ReturnError Import(IImportContext& c) override
+    {
+        return GenericError::SUCCESS;
+    }
+};
+
+struct TopLevelSerType : public IntroduceInterfaces<MetaObject, ISerializable> {
+    META_OBJECT(TopLevelSerType, ClassId::TopLevelSerType, IntroduceInterfaces)
+public:
+    TopLevelSerType() : obj(GetObjectRegistry().Create(ClassId::SecondLevelSerType)) {}
+
+    ReturnError Export(IExportContext& c) const override
+    {
+        EXPECT_TRUE(c.IsTopLevelObject());
+        return Serializer(c) & NamedValue("value", obj);
+    }
+    ReturnError Import(IImportContext& c) override
+    {
+        return Serializer(c) & NamedValue("value", obj);
+    }
+
+    IObject::Ptr obj;
+};
+
+UNIT_TEST(API_SerializationTest, TopLevelObject, testing::ext::TestSize.Level1)
+{
+    auto& reg = GetObjectRegistry();
+    reg.RegisterObjectType<TopLevelSerType>();
+    reg.RegisterObjectType<SecondLevelSerType>();
+
+    TestSerialiser ser;
+    {
+        auto obj = reg.Create(ClassId::TopLevelSerType);
+        ASSERT_TRUE(obj);
+        ASSERT_TRUE(ser.Export(obj));
+    }
+    auto obj = ser.Import();
+    ASSERT_TRUE(obj);
+
+    reg.UnregisterObjectType<TopLevelSerType>();
+    reg.UnregisterObjectType<SecondLevelSerType>();
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

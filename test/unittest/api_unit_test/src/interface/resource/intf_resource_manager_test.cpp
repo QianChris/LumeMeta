@@ -50,6 +50,8 @@ public:
         ASSERT_TRUE(resources->AddResourceType(interface_pointer_cast<CORE_NS::IResourceType>(res)));
 
         resources->SetFileManager(CORE_NS::IFileManager::Ptr(&GetTestEnv()->engine->GetFileManager()));
+        context = GetObjectRegistry().Create(META_NS::ClassId::Object);
+        context2 = GetObjectRegistry().Create(META_NS::ClassId::Object);
     }
     void TearDown() override {}
 
@@ -60,22 +62,28 @@ public:
             i->SetResourceType(ClassId::TestResource);
         }
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-            i->SetResourceId(id);
+            i->SetResourceId({ id, context });
         }
         return res;
     }
 
+    CORE_NS::ResourceContextPtr context;
+    CORE_NS::ResourceContextPtr context2;
     CORE_NS::IResourceManager::Ptr resources;
 };
 
 struct Listener : CORE_NS::IResourceManager::IResourceListener {
     void OnResourceEvent(CORE_NS::IResourceManager::IResourceListener::EventType type,
-        const BASE_NS::array_view<const CORE_NS::ResourceId>& ids) override
+        const BASE_NS::array_view<const CORE_NS::ResourceIdContext>& ids) override
     {
         if (type == CORE_NS::IResourceManager::IResourceListener::EventType::ADDED) {
-            added.insert(added.end(), ids.begin(), ids.end());
+            for (auto&& v : ids) {
+                added.push_back(v.id);
+            }
         } else {
-            removed.insert(removed.end(), ids.begin(), ids.end());
+            for (auto&& v : ids) {
+                removed.push_back(v.id);
+            }
         }
     }
     BASE_NS::vector<CORE_NS::ResourceId> added;
@@ -95,7 +103,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithObject, testing::ext::TestSize.L
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("app://test.scene")));
-    auto queried = resources->GetResource(CORE_NS::ResourceId("app://test.scene"));
+    auto queried = resources->GetResource(CORE_NS::ResourceIdContext("app://test.scene", context));
     ASSERT_TRUE(queried);
     EXPECT_EQ(queried, res);
     resources->RemoveListener(listener);
@@ -109,10 +117,12 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithObject, testing::ext::TestSize.L
 UNIT_TEST_F(API_FileResourceManagerTest, ResourceTypes, testing::ext::TestSize.Level1)
 {
     EXPECT_FALSE(resources->GetResourceTypes().empty());
-    EXPECT_TRUE(resources->GetResourceGroups().empty());
+    EXPECT_TRUE(resources->GetResourceGroups(context).empty());
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
-    EXPECT_FALSE(resources->GetResourceGroups().empty());
+    EXPECT_FALSE(resources->GetResourceGroups(context).empty());
+    EXPECT_TRUE(resources->GetResourceGroups(nullptr).empty());
+    EXPECT_TRUE(resources->GetResourceGroups(context2).empty());
 }
 
 /**
@@ -124,9 +134,9 @@ UNIT_TEST_F(API_FileResourceManagerTest, ReloadResource, testing::ext::TestSize.
 {
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
-    auto groupsBefore = resources->GetResourceGroups();
+    auto groupsBefore = resources->GetResourceGroups(context);
     EXPECT_FALSE(resources->ReloadResource(res)); // ObjectResource fails to reload
-    auto groupsAfter = resources->GetResourceGroups();
+    auto groupsAfter = resources->GetResourceGroups(context);
     EXPECT_THAT(groupsBefore, ::testing::ElementsAreArray(groupsAfter));
 }
 
@@ -139,10 +149,10 @@ UNIT_TEST_F(API_FileResourceManagerTest, PurgeGroup, testing::ext::TestSize.Leve
 {
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
-    auto groups = resources->GetResourceGroups();
-    EXPECT_EQ(resources->PurgeGroup("invalid_name"), 0);
+    auto groups = resources->GetResourceGroups(context);
+    EXPECT_EQ(resources->PurgeGroup("invalid_name", context), 0);
     for (auto&& group : groups) {
-        EXPECT_GT(resources->PurgeGroup(group), 0);
+        EXPECT_GT(resources->PurgeGroup(group, context), 0);
     }
 }
 
@@ -157,12 +167,12 @@ UNIT_TEST_F(API_FileResourceManagerTest, ResourceQuery, testing::ext::TestSize.L
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     auto query = interface_cast<IResourceQuery>(resources);
     ASSERT_TRUE(query);
-    auto groups = resources->GetResourceGroups();
+    auto groups = resources->GetResourceGroups(context);
     for (auto&& group : groups) {
         const auto match = CORE_NS::MatchingResourceId(group);
-        auto alive = query->FindAliveResources({ match });
+        auto alive = query->FindAliveResources({ match }, context);
         EXPECT_FALSE(alive.empty());
-        EXPECT_EQ(query->GetAliveCount({ match }), alive.size());
+        EXPECT_EQ(query->GetAliveCount({ match }, context), alive.size());
     }
 }
 
@@ -177,9 +187,9 @@ UNIT_TEST_F(API_FileResourceManagerTest, GetResourceHandle, testing::ext::TestSi
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     auto owned = interface_cast<IOwnedResourceGroups>(resources);
     ASSERT_TRUE(owned);
-    auto groups = resources->GetResourceGroups();
+    auto groups = resources->GetResourceGroups(context);
     for (auto&& group : groups) {
-        EXPECT_TRUE(owned->GetGroupHandle(group));
+        EXPECT_TRUE(owned->GetGroupHandle(group, context));
     }
 }
 
@@ -205,9 +215,10 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithoutObject, testing::ext::TestSiz
     MakeEmptyJsonFile();
     BASE_NS::shared_ptr<Listener> listener(new Listener);
     resources->AddListener(listener);
-    ASSERT_TRUE(resources->AddResource("test", ClassId::TestResource.Id().ToUid(), "app://test.json"));
+    CORE_NS::ResourceIdContext ctx { "test", context };
+    ASSERT_TRUE(resources->AddResource(ctx, ClassId::TestResource.Id().ToUid(), "app://test.json"));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("test")));
-    auto queried = resources->GetResource(CORE_NS::ResourceId("test"));
+    auto queried = resources->GetResource(ctx);
     ASSERT_TRUE(queried);
 }
 
@@ -222,11 +233,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, OptionsData, testing::ext::TestSize.Lev
     auto opts = GetObjectRegistry().Create<IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
     ASSERT_TRUE(opts);
     opts->SetProperty("test", uint32_t(2));
-    ASSERT_TRUE(resources->AddResource("test", ClassId::TestResource.Id().ToUid(), "app://test.json",
+    ASSERT_TRUE(resources->AddResource({ "test", context }, ClassId::TestResource.Id().ToUid(), "app://test.json",
         interface_pointer_cast<CORE_NS::IResourceOptions>(opts)));
-    auto queried = resources->GetResource(CORE_NS::ResourceId("test"));
+    auto queried = resources->GetResource(CORE_NS::ResourceIdContext("test", context));
     ASSERT_TRUE(queried);
-    auto info = resources->GetResourceInfo("test");
+    auto info = resources->GetResourceInfo({ "test", context });
     EXPECT_EQ(info.id, "test");
     EXPECT_EQ(info.type, ClassId::TestResource.Id().ToUid());
     EXPECT_EQ(info.path, "app://test.json");
@@ -253,12 +264,12 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportAll, testing::ext::TestSize
         auto res = CreateTestResource(name);
         ASSERT_TRUE(resources->AddResource(res, "app://" + name + ".json"));
     }
-    ASSERT_EQ(resources->Export("app://test.resources"), CORE_NS::IResourceManager::Result::OK);
+    ASSERT_EQ(resources->Export("app://test.resources", context), CORE_NS::IResourceManager::Result::OK);
     resources->RemoveAllResources();
     BASE_NS::shared_ptr<Listener> listener(new Listener);
     resources->AddListener(listener);
-    ASSERT_EQ(resources->Import("app://test.resources"), CORE_NS::IResourceManager::Result::OK);
-    auto res = resources->GetResources();
+    ASSERT_EQ(resources->Import("app://test.resources", context), CORE_NS::IResourceManager::Result::OK);
+    auto res = resources->GetResources(context);
     EXPECT_EQ(res.size(), 10);
     EXPECT_THAT(listener->added, testing::UnorderedElementsAreArray(exp));
 }
@@ -279,35 +290,35 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportGroups, testing::ext::TestS
         }
     }
     for (auto&& g : groups) {
-        ASSERT_EQ(resources->Export("app://test_" + g + ".resources", { CORE_NS::MatchingResourceId(g) }),
+        ASSERT_EQ(resources->Export("app://test_" + g + ".resources", { CORE_NS::MatchingResourceId(g) }, context),
             CORE_NS::IResourceManager::Result::OK);
     }
     resources->RemoveAllResources();
     int i = 0;
     for (auto&& g : groups) {
-        ASSERT_EQ(resources->Import("app://test_" + g + ".resources"), CORE_NS::IResourceManager::Result::OK);
-        auto res = resources->GetResources();
+        ASSERT_EQ(resources->Import("app://test_" + g + ".resources", context), CORE_NS::IResourceManager::Result::OK);
+        auto res = resources->GetResources(context);
         EXPECT_EQ(res.size(), ++i * 10);
-        auto gres = resources->GetResources(g);
+        auto gres = resources->GetResources(g, context);
         EXPECT_EQ(gres.size(), 10);
     }
 
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceId("test_1")));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceId("test_1", "hops")));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceId("test_1", "some")));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext("test_1", context)));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context)));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "some" }, context)));
 
-    resources->RemoveResource(CORE_NS::ResourceId("test_1", "hops"));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceId("test_1")));
-    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceId("test_1", "hops")));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceId("test_1", "some")));
+    resources->RemoveResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext("test_1", context)));
+    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context)));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "some" }, context)));
 
-    resources->RemoveGroup("some");
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceId("test_1")));
-    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceId("test_1", "hops")));
-    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceId("test_1", "some")));
-    EXPECT_EQ(resources->GetResources("some").size(), 0);
+    resources->RemoveGroup("some", context);
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext("test_1", context)));
+    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context)));
+    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "some" }, context)));
+    EXPECT_EQ(resources->GetResources("some", context).size(), 0);
 
-    EXPECT_EQ(resources->GetResourceInfos("hips").size(), 10);
+    EXPECT_EQ(resources->GetResourceInfos("hips", context).size(), 10);
 }
 
 /**
@@ -323,17 +334,17 @@ UNIT_TEST_F(API_FileResourceManagerTest, Rename, testing::ext::TestSize.Level1)
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("app://test.scene")));
     {
-        auto queried = resources->GetResource(CORE_NS::ResourceId("app://test.scene"));
+        auto queried = resources->GetResource(CORE_NS::ResourceIdContext("app://test.scene", context));
         ASSERT_TRUE(queried);
         EXPECT_EQ(queried, res);
     }
     listener->added.clear();
-    resources->RenameResource("app://test.scene", "ggg");
+    resources->RenameResource({ "app://test.scene", context }, { "ggg", context });
     EXPECT_THAT(listener->removed, testing::ElementsAre(CORE_NS::ResourceId("app://test.scene")));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("ggg")));
     {
-        EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceId("app://test.scene")));
-        auto queried = resources->GetResource(CORE_NS::ResourceId("ggg"));
+        EXPECT_FALSE(resources->GetResource({ CORE_NS::ResourceId("app://test.scene"), context }));
+        auto queried = resources->GetResource(CORE_NS::ResourceIdContext("ggg", context));
         ASSERT_TRUE(queried);
         EXPECT_EQ(queried, res);
     }
@@ -349,16 +360,16 @@ UNIT_TEST_F(API_FileResourceManagerTest, Purge, testing::ext::TestSize.Level1)
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     {
-        auto queried = resources->GetResource(CORE_NS::ResourceId("app://test.scene"));
+        auto queried = resources->GetResource(CORE_NS::ResourceIdContext("app://test.scene", context));
         ASSERT_TRUE(queried);
         EXPECT_EQ(queried, res);
     }
     CORE_NS::IResource::WeakPtr w = res;
     res.reset();
-    resources->PurgeResource("app://test.scene");
+    resources->PurgeResource({ "app://test.scene", context });
     EXPECT_TRUE(w.expired());
     {
-        auto queried = resources->GetResource(CORE_NS::ResourceId("app://test.scene"));
+        auto queried = resources->GetResource(CORE_NS::ResourceIdContext("app://test.scene", context));
         ASSERT_TRUE(queried);
     }
 }

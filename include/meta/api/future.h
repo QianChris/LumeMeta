@@ -86,18 +86,17 @@ struct ResultTypeImpl<Func, void> {
 template<typename Func, typename ParamType>
 using ResultType = typename ResultTypeImpl<Func, ParamType>::Type;
 
-
-template<typename Result,typename Param, typename Func>
+template<typename Result, typename Param, typename Func>
 Result CallResultHelper(Func func, const IAny::Ptr& v)
 {
     if constexpr (!BASE_NS::is_same_v<Param, void>) {
-		if (v) {
-			Param value{};
-			if (v->GetValue(value)) {
-				return func(value);
-			}
-			CORE_LOG_W("Type mismatch for future then");
-		}
+        if (v) {
+            Param value {};
+            if (v->GetValue(value)) {
+                return func(value);
+            }
+            CORE_LOG_W("Type mismatch for future then");
+        }
     } else {
         return func();
     }
@@ -153,7 +152,7 @@ public:
     {
         using ReturnType = ResultType<Func, ParamType>;
         auto cont = CreateContinuation([f = BASE_NS::move(func)](const IAny::Ptr& v) mutable {
-			return CallResultHelper<ReturnType, ParamType>(BASE_NS::move(f), v);
+            return CallResultHelper<ReturnType, ParamType>(BASE_NS::move(f), v);
         });
         return fut_ ? fut_->Then(cont, queue) : nullptr;
     }

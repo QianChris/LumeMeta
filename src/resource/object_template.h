@@ -52,7 +52,7 @@ public:
 
     ReturnError Export(IExportContext& c) const override
     {
-        if (c.Context().GetUserContext() != GetSelf()) {
+        if (!c.IsTopLevelObject()) {
             return Resource::Export(c);
         }
         return Serializer(c) & AutoSerialize();

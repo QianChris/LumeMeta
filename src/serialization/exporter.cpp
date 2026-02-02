@@ -96,7 +96,7 @@ ISerNode::Ptr Exporter::Export(const IObject::ConstPtr& object, ExportOptions op
             refUriBuilder_ = options_.refUriBuilder;
         }
         ISerNode::Ptr node;
-        auto r = ExportObject(object, node);
+        auto r = ExportObject(object, node, true);
         if (r) {
             // resolve deferred weak ptr exports
             for (auto&& d : deferred_) {
@@ -142,14 +142,14 @@ ISerNode::Ptr Exporter::CreateObjectRefNode(const IObject::ConstPtr& object)
     return res;
 }
 
-ReturnError Exporter::ExportObject(const IObject::ConstPtr& object, ISerNode::Ptr& res)
+ReturnError Exporter::ExportObject(const IObject::ConstPtr& object, ISerNode::Ptr& res, bool toplevel)
 {
     ReturnError err = GenericError::SUCCESS;
     if (ShouldSerialize(object)) {
         if (MarkExported(object)) {
             res = CreateObjectRefNode(object);
         } else if (auto ser = interface_cast<ISerializable>(object)) {
-            ExportContext context(*this, object);
+            ExportContext context(*this, object, toplevel);
             err = ser->Export(context);
             if (err) {
                 res = context.GetSubstitution();

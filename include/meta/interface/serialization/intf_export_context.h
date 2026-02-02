@@ -85,6 +85,8 @@ public:
     virtual ReturnError SubstituteThis(ISerNode::Ptr) = 0;
     /// Get Metadata
     virtual SerMetadata GetMetadata() const = 0;
+    // Is this the top level object being exported (top level is the one that was given to export function)
+    virtual bool IsTopLevelObject() const = 0;
 };
 
 META_INTERFACE_TYPE(META_NS::IExportContext)

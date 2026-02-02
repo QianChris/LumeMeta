@@ -30,6 +30,7 @@
 #include <meta/interface/resource/intf_object_resource.h>
 #include <meta/interface/resource/intf_object_template.h>
 #include <meta/interface/resource/intf_resource.h>
+#include <meta/interface/resource/intf_resource_manager_extension.h>
 #include <meta/interface/serialization/intf_refuri_builder.h>
 
 #include "helpers/serialisation_utils.h"
@@ -42,6 +43,7 @@
 #endif
 
 META_BEGIN_NAMESPACE()
+META_REGISTER_CLASS(TestResourceTemplate, "7a3efdef-9aa2-43db-a18e-f51e8dbf09d9", ObjectCategoryBits::NO_CATEGORY)
 namespace UTest {
 
 class API_ResourceSerializationTest : public ::testing::Test {
@@ -69,16 +71,23 @@ protected:
             resources_->AddResourceType(interface_pointer_cast<CORE_NS::IResourceType>(res));
         }
 
+        context_ = GetObjectRegistry().Create(META_NS::ClassId::Object);
+
         auto res = GetObjectRegistry().Create<CORE_NS::IResource>(ClassId::ObjectResource);
         if (auto m = interface_cast<IMetadata>(res)) {
             m->AddProperty(ConstructProperty<int>("prop", 1));
         }
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-            i->SetResourceId("app://test_resource.json");
+            i->SetResourceId({ "app://test_resource.json", context_ });
         }
         ASSERT_TRUE(resources_->AddResource(res));
 
         resources_->SetFileManager(CORE_NS::IFileManager::Ptr(&GetTestEnv()->engine->GetFileManager()));
+
+        if (auto res = GetObjectRegistry().Create<IObjectResource>(ClassId::ObjectResourceType)) {
+            res->SetResourceType(ClassId::TestResourceTemplate);
+            resources_->AddResourceType(interface_pointer_cast<CORE_NS::IResourceType>(res));
+        }
     }
 
     void TearDown() override {}
@@ -88,6 +97,7 @@ protected:
 
 protected:
     CORE_NS::IResourceManager::Ptr resources_;
+    CORE_NS::ResourceContextPtr context_;
 };
 
 /**
@@ -102,21 +112,23 @@ UNIT_TEST_F(API_ResourceSerializationTest, Basic, testing::ext::TestSize.Level1)
     {
         Object obj(CreateObjectInstance(ClassId::Object));
         auto prop = ConstructProperty<IObject::ConstPtr>(
-            "test", interface_pointer_cast<IObject>(resources_->GetResource("app://test_resource.json")));
+            "test", interface_pointer_cast<IObject>(resources_->GetResource({ "app://test_resource.json", context_ })));
         ASSERT_TRUE(prop);
         ASSERT_TRUE(prop->GetValue());
         Metadata(obj).AddProperty(prop);
         ser.Export(obj);
     }
     ser.Dump("app://resource.json");
+    ser.SetUserContext(interface_pointer_cast<IObject>(context_));
     auto m = ser.Import<IMetadata>();
     ASSERT_TRUE(m);
     auto p = m->GetProperty<IObject::ConstPtr>("test");
     ASSERT_TRUE(p);
     auto res = interface_pointer_cast<CORE_NS::IResource>(p->GetValue());
     ASSERT_TRUE(res);
-    EXPECT_EQ(res, resources_->GetResource("app://test_resource.json"));
+    EXPECT_EQ(res, resources_->GetResource({ "app://test_resource.json", context_ }));
     EXPECT_EQ(res->GetResourceId(), "app://test_resource.json");
+    EXPECT_EQ(res->GetContext().lock(), context_);
     auto resm = interface_cast<IMetadata>(res);
     ASSERT_TRUE(resm);
     auto rp = resm->GetProperty<int>("prop");
@@ -131,7 +143,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, Basic, testing::ext::TestSize.Level1)
  */
 UNIT_TEST_F(API_ResourceSerializationTest, ResourceManagerSerialisation, testing::ext::TestSize.Level1)
 {
-    ASSERT_EQ(resources_->Export("app://test.resources"), CORE_NS::IResourceManager::Result::OK);
+    ASSERT_EQ(resources_->Export("app://test.resources", context_), CORE_NS::IResourceManager::Result::OK);
 
     auto resman = GetObjectRegistry().Create<CORE_NS::IResourceManager>(ClassId::FileResourceManager);
     ASSERT_TRUE(resman);
@@ -139,9 +151,9 @@ UNIT_TEST_F(API_ResourceSerializationTest, ResourceManagerSerialisation, testing
         resman->AddResourceType(GetObjectRegistry().Create<CORE_NS::IResourceType>(ClassId::ObjectResourceType)));
 
     resman->SetFileManager(CORE_NS::IFileManager::Ptr(&GetTestEnv()->engine->GetFileManager()));
-    ASSERT_EQ(resman->Import("app://test.resources"), CORE_NS::IResourceManager::Result::OK);
+    ASSERT_EQ(resman->Import("app://test.resources", context_), CORE_NS::IResourceManager::Result::OK);
 
-    auto res = resman->GetResource("app://test_resource.json");
+    auto res = resman->GetResource({ "app://test_resource.json", context_ });
     ASSERT_TRUE(res);
     EXPECT_EQ(res->GetResourceId(), "app://test_resource.json");
     auto resm = interface_cast<IMetadata>(res);
@@ -195,7 +207,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, ObjectTemplate, testing::ext::TestSiz
         auto res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectTemplate);
         ASSERT_TRUE(res);
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-            i->SetResourceId("myobject");
+            i->SetResourceId({ "myobject", context_ });
         }
 
         Object obj(CreateNew);
@@ -210,12 +222,12 @@ UNIT_TEST_F(API_ResourceSerializationTest, ObjectTemplate, testing::ext::TestSiz
 
         ASSERT_TRUE(resources_->AddResource(res, "app://test_template.json"));
 
-        ASSERT_EQ(resources_->Export("app://test_template.resources"), CORE_NS::IResourceManager::Result::OK);
+        ASSERT_EQ(resources_->Export("app://test_template.resources", context_), CORE_NS::IResourceManager::Result::OK);
         resources_->RemoveAllResources();
     }
 
-    ASSERT_EQ(resources_->Import("app://test_template.resources"), CORE_NS::IResourceManager::Result::OK);
-    auto res = interface_pointer_cast<IObjectTemplate>(resources_->GetResource("myobject"));
+    ASSERT_EQ(resources_->Import("app://test_template.resources", context_), CORE_NS::IResourceManager::Result::OK);
+    auto res = interface_pointer_cast<IObjectTemplate>(resources_->GetResource({ "myobject", context_ }));
     ASSERT_TRUE(res);
 
     auto obj = res->Instantiate(nullptr);
@@ -254,23 +266,24 @@ void API_ResourceSerializationTest::BasicAnimationTest(BASE_NS::string_view anim
         ASSERT_TRUE(anim.GetValid());
 
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(anim)) {
-            i->SetResourceId("animation");
+            i->SetResourceId({ "animation", context_ });
         }
 
         ASSERT_TRUE(resources_->AddResource(interface_pointer_cast<CORE_NS::IResource>(anim), animPath));
-        ASSERT_EQ(resources_->Export("app://test_anim_resource.resources"), CORE_NS::IResourceManager::Result::OK);
+        ASSERT_EQ(
+            resources_->Export("app://test_anim_resource.resources", context_), CORE_NS::IResourceManager::Result::OK);
 
         resources_->RemoveAllResources();
     }
 
     auto clock = GetObjectRegistry().Create<IManualClock>(META_NS::ClassId::ManualClock);
 
-    ASSERT_EQ(resources_->Import("app://test_anim_resource.resources"), CORE_NS::IResourceManager::Result::OK);
-
     auto object = CreateTestType();
     ASSERT_TRUE(object);
 
-    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource("animation", object));
+    ASSERT_EQ(resources_->Import("app://test_anim_resource.resources", object), CORE_NS::IResourceManager::Result::OK);
+
+    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({ "animation", object }));
     ASSERT_TRUE(anim);
     EXPECT_TRUE(anim->Valid()->GetValue());
     interface_cast<META_NS::IStartableAnimation>(anim)->Start();
@@ -337,28 +350,29 @@ void API_ResourceSerializationTest::BasicAnimationTemplateTest(BASE_NS::string_v
         ASSERT_TRUE(anim.GetValid());
 
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(templ)) {
-            i->SetResourceId("template");
+            i->SetResourceId({ "template", context_ });
         }
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(anim)) {
-            i->SetResourceId("animation");
+            i->SetResourceId({ "animation", context_ });
         }
 
         ASSERT_TRUE(resources_->AddResource(templ, "app://test_templ_anim_resource.template"));
         ASSERT_TRUE(resources_->AddResource(resource, animPath));
-        ASSERT_EQ(
-            resources_->Export("app://test_templ_anim_resource.resources"), CORE_NS::IResourceManager::Result::OK);
+        ASSERT_EQ(resources_->Export("app://test_templ_anim_resource.resources", context_),
+            CORE_NS::IResourceManager::Result::OK);
 
         resources_->RemoveAllResources();
     }
 
     auto clock = GetObjectRegistry().Create<IManualClock>(META_NS::ClassId::ManualClock);
 
-    ASSERT_EQ(resources_->Import("app://test_templ_anim_resource.resources"), CORE_NS::IResourceManager::Result::OK);
-
     auto object = CreateTestType();
     ASSERT_TRUE(object);
 
-    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource("animation", object));
+    ASSERT_EQ(
+        resources_->Import("app://test_templ_anim_resource.resources", object), CORE_NS::IResourceManager::Result::OK);
+
+    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({ "animation", object }));
     ASSERT_TRUE(anim);
     EXPECT_TRUE(anim->Valid()->GetValue());
     interface_cast<META_NS::IStartableAnimation>(anim)->Start();
@@ -381,6 +395,31 @@ TEST_F(API_ResourceSerializationTest, CreateAnimationTemplateWithoutPath)
 {
     SCOPED_TRACE("anim path = ''");
     BasicAnimationTemplateTest("");
+}
+
+TEST_F(API_ResourceSerializationTest, ObjectResourceDeps)
+{
+    // IObjectResource
+    auto res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
+    if (auto i = interface_cast<IObjectResource>(res)) {
+        i->SetResourceType(META_NS::ClassId::TestResourceTemplate.Id());
+    }
+    if (auto m = interface_cast<IMetadata>(res)) {
+        m->AddProperty(ConstructProperty<int>("prop", 1));
+        m->AddProperty(ConstructProperty<IObject::ConstPtr>("test",
+            interface_pointer_cast<IObject>(resources_->GetResource({ "app://test_resource.json", context_ }))));
+    }
+    if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
+        i->SetResourceId({ "app://test_object_resource_deps.json", context_ });
+    }
+    ASSERT_TRUE(resources_->AddResource(res, "app://test_object_resource_deps.template"));
+
+    auto ext = interface_cast<IResourceManagerExtension>(resources_);
+    ASSERT_TRUE(ext);
+    auto deps = ext->UpdateOptionsData({ CORE_NS::ResourceId("app://test_object_resource_deps.json") }, context_);
+    ASSERT_EQ(deps.size(), 1);
+    EXPECT_EQ(deps[0].id.ToString(), "app://test_resource.json");
+    EXPECT_EQ(deps[0].context.lock(), context_);
 }
 
 } // namespace UTest

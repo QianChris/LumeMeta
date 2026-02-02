@@ -68,8 +68,8 @@ static bool SetValuesFromTemplate(const CORE_NS::IResource::ConstPtr& templ, con
 
 static CORE_NS::IResource::Ptr LoadTemplate(const CORE_NS::IResourceType::StorageInfo& s, CORE_NS::IResource::Ptr res)
 {
-    auto opts = META_NS::GetObjectRegistry()
-        .Create<META_NS::IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    auto opts =
+        META_NS::GetObjectRegistry().Create<META_NS::IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
     if (!opts) {
         return res;
     }
@@ -79,17 +79,18 @@ static CORE_NS::IResource::Ptr LoadTemplate(const CORE_NS::IResourceType::Storag
         if (!res && type) {
             res = interface_pointer_cast<CORE_NS::IResource>(type->GetValue());
         }
-    }
-    if (res) {
-        if (auto i = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
-            auto base = opts->GetBaseResource();
-            if (base.IsValid()) {
-                auto r = s.self->GetResource(base, s.context);
-                if (!r) {
-                    CORE_LOG_W("Could not load base resource for %s", base.ToString().c_str());
-                }
-                if (SetValuesFromTemplate(r, res)) {
-                    i->SetTemplateId(base);
+
+        if (res) {
+            if (auto i = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
+                auto base = opts->GetBaseResource();
+                if (base.IsValid()) {
+                    auto r = s.self->GetResource({ base, s.context });
+                    if (!r) {
+                        CORE_LOG_W("Could not load base resource for %s", base.ToString().c_str());
+                    }
+                    if (SetValuesFromTemplate(r, res)) {
+                        i->SetTemplateId(base);
+                    }
                 }
             }
         }

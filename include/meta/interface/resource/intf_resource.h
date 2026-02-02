@@ -67,6 +67,36 @@ public:
     }
 };
 
+class IResourceContext : public CORE_NS::IInterface {
+    META_INTERFACE(CORE_NS::IInterface, IResourceContext, "c3ceaf56-f375-455c-ba86-b01550221103")
+public:
+    virtual CORE_NS::ResourceContextPtr GetContext() const = 0;
+};
+
+class ICollectResources : public CORE_NS::IInterface {
+    META_INTERFACE(CORE_NS::IInterface, ICollectResources, "d84fd50f-089a-45bf-8a98-911c950b2433")
+public:
+    virtual void AddResource(CORE_NS::ResourceIdContext) = 0;
+};
+
+inline bool IsResourceMatch(
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection, const CORE_NS::ResourceId& id)
+{
+    for (auto&& s : selection) {
+        if ((s.hasWildCardName || id.name == s.name) && (s.hasWildCardGroup || id.group == s.group)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+struct ResourceIdLess {
+    bool operator()(const CORE_NS::ResourceId& l, const CORE_NS::ResourceId& r) const
+    {
+        return l.group < r.group || (l.group == r.group && l.name < r.name);
+    }
+};
+
 META_REGISTER_CLASS(
     ObjectResourceOptions, "196213b6-eb63-4a29-89be-1ec10ed68596", META_NS::ObjectCategoryBits::NO_CATEGORY)
 
@@ -77,6 +107,7 @@ META_INTERFACE_TYPE(CORE_NS::IResourceOptions)
 META_INTERFACE_TYPE(META_NS::IDerivedFromTemplate)
 META_INTERFACE_TYPE(META_NS::IResourceTemplateAccess)
 META_INTERFACE_TYPE(META_NS::IObjectResourceOptions)
+META_INTERFACE_TYPE(META_NS::ICollectResources)
 
 META_END_NAMESPACE()
 

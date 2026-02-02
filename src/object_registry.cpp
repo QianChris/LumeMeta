@@ -555,7 +555,7 @@ bool ObjectRegistry::RegisterTaskQueue(const ITaskQueue::Ptr& queue, const BASE_
     }
     // warn if the thread info interface is not implemented
     if (!interface_cast<ITaskQueueThreadInfo>(queue)) {
-        CORE_LOG_W("The registered task queue does not implement the ITaskQueueThreadInfo."\
+        CORE_LOG_W("The registered task queue does not implement the ITaskQueueThreadInfo."
                    " This may cause issues when matching threads.");
     }
     queues_[queueId] = queue;

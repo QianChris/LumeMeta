@@ -141,6 +141,7 @@ target_sources(${PLUGIN_NAME} PRIVATE
     resource/object_resource.h
     resource/object_template.cpp
     resource/object_template.h
+    resource/resource_placeholder.h
     serialization/backend/debug_output.cpp
     serialization/backend/debug_output.h
     serialization/backend/json_input.cpp
