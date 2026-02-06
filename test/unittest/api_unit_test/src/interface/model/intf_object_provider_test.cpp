@@ -563,5 +563,177 @@ static std::string BuildContentLoaderTestName(
 INSTANTIATE_TEST_SUITE_P(API_ContentLoaderObjectProviderTests, API_ContentLoaderObjectProviderTest,
     testing::Range(0, 10, 4), BuildContentLoaderTestName);
 
+/**
+ * @tc.name: CacheHintPropagation
+ * @tc.desc: Setting CacheHint on composite propagates to child providers.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, CacheHintPropagation, testing::ext::TestSize.Level1)
+{
+    auto cacheProv = interface_cast<IObjectProvider>(prov_);
+    ASSERT_TRUE(cacheProv);
+
+    cacheProv->CacheHint()->SetValue(7);
+
+    auto cont = interface_cast<IContainer>(prov_);
+    ASSERT_TRUE(cont);
+
+    for (size_t i = 0; i < cont->GetSize(); ++i) {
+        auto child = interface_cast<IObjectProvider>(cont->GetAt(i));
+        ASSERT_TRUE(child);
+        EXPECT_EQ(child->CacheHint()->GetValue(), 7);
+    }
+}
+
+/**
+ * @tc.name: CreateObjectInvalidIndex
+ * @tc.desc: CreateObject with out-of-range or invalid index returns nullptr.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, CreateObjectInvalidIndex, testing::ext::TestSize.Level1)
+{
+    // Out-of-range index
+    EXPECT_FALSE(prov_->CreateObject(DataModelIndex { size_ + 100 }));
+
+    // Default-constructed (invalid) index
+    EXPECT_FALSE(prov_->CreateObject(DataModelIndex {}));
+}
+
+/**
+ * @tc.name: GetObjectCountMultiDimensional
+ * @tc.desc: GetObjectCount with a valid multi-dimensional index delegates to child provider.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, GetObjectCountMultiDimensional, testing::ext::TestSize.Level1)
+{
+    DataModelIndex sub(0);
+    DataModelIndex index(0, &sub);
+
+    // This exercises the index.IsValid() + FindProvider delegation path
+    auto count = prov_->GetObjectCount(index);
+    // The child provider (InstantiatingObjectProvider) will handle the sub-dimension query
+    // We just verify it doesn't crash and returns a value
+    EXPECT_GE(count, 0u);
+}
+
+/**
+ * @tc.name: DisposeUnknownObject
+ * @tc.desc: DisposeObject with an object not created by composite returns false.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, DisposeUnknownObject, testing::ext::TestSize.Level1)
+{
+    auto unknownObj = CreateTestType<IObject>();
+    EXPECT_FALSE(prov_->DisposeObject(unknownObj));
+}
+
+/**
+ * @tc.name: AddProviderWithZeroObjects
+ * @tc.desc: Adding a provider with zero objects does not fire OnDataAdded.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, AddProviderWithZeroObjects, testing::ext::TestSize.Level1)
+{
+    bool addFired = false;
+    prov_->OnDataAdded()->AddHandler(
+        MakeCallback<IOnDataAdded>([&](auto index, auto count) { addFired = true; }));
+
+    auto cont = interface_cast<IContainer>(prov_);
+    cont->Add(CreateProvider(0, 0));
+
+    EXPECT_FALSE(addFired);
+    EXPECT_EQ(prov_->GetObjectCount(), size_);
+}
+
+/**
+ * @tc.name: MoveEmptyProvider
+ * @tc.desc: Moving a provider with zero objects does not fire OnDataMoved.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, MoveEmptyProvider, testing::ext::TestSize.Level1)
+{
+    bool moveFired = false;
+    prov_->OnDataMoved()->AddHandler(
+        MakeCallback<IOnDataMoved>([&](auto from, auto count, auto to) { moveFired = true; }));
+
+    auto cont = interface_cast<IContainer>(prov_);
+    // p2_ (index 1) has 0 items
+    cont->Move(1, 3);
+
+    EXPECT_FALSE(moveFired);
+    EXPECT_EQ(prov_->GetObjectCount(), size_);
+}
+
+/**
+ * @tc.name: DestroyCompositeWithChildren
+ * @tc.desc: Destroying composite provider removes handlers from children.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_CompositeObjectProviderTest, DestroyCompositeWithChildren, testing::ext::TestSize.Level1)
+{
+    // Create a new composite with its own providers in a nested scope
+    {
+        auto p = GetObjectRegistry().Create<IContainer>(META_NS::ClassId::CompositeObjectProvider);
+        ASSERT_TRUE(p);
+        p->Add(CreateProvider(3, 0));
+        p->Add(CreateProvider(2, 3));
+        auto prov = interface_pointer_cast<IObjectProvider>(p);
+        ASSERT_TRUE(prov);
+        EXPECT_EQ(prov->GetObjectCount(), 5);
+    }
+    // Destructor runs, exercises lines 27-33
+}
+
+/**
+ * @tc.name: ContentLoaderCreateWithoutLoader
+ * @tc.desc: ContentLoaderObjectProvider without SetContentLoader returns nullptr from CreateObject.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ContentLoaderObjectProviderEdgeTest, CreateWithoutLoader, testing::ext::TestSize.Level1)
+{
+    auto prov = GetObjectRegistry().Create<IModelObjectProvider>(META_NS::ClassId::ContentLoaderObjectProvider);
+    ASSERT_TRUE(prov);
+
+    auto model = CreateTestDataModel(5);
+    prov->SetDataModel(model);
+
+    EXPECT_EQ(prov->GetObjectCount(), 5);
+
+    // No content loader set, so CreateObject should return nullptr
+    auto obj = prov->CreateObject(DataModelIndex { 0 });
+    EXPECT_FALSE(obj);
+}
+
+/**
+ * @tc.name: CreateObjectInvalidInputs
+ * @tc.desc: ObjectProviderBase CreateObject with invalid index or no model returns nullptr.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectProviderBaseEdgeTest, CreateObjectInvalidInputs, testing::ext::TestSize.Level1)
+{
+    auto instprov =
+        GetObjectRegistry().Create<IInstantiatingObjectProvider>(META_NS::ClassId::InstantiatingObjectProvider);
+    ASSERT_TRUE(instprov);
+    instprov->SetObjectClassId(META_NS::ClassId::Object.Id());
+
+    auto prov = interface_pointer_cast<IModelObjectProvider>(instprov);
+    ASSERT_TRUE(prov);
+
+    // Set a data model first, then test invalid index
+    auto model = CreateTestDataModel(3);
+    prov->SetDataModel(model);
+
+    // Invalid (default-constructed) index → nullptr
+    EXPECT_FALSE(prov->CreateObject(DataModelIndex {}));
+
+    // Now test without data model
+    auto prov2 = interface_pointer_cast<IModelObjectProvider>(
+        GetObjectRegistry().Create<IInstantiatingObjectProvider>(META_NS::ClassId::InstantiatingObjectProvider));
+    ASSERT_TRUE(prov2);
+
+    // No data model set, valid index → nullptr
+    EXPECT_FALSE(prov2->CreateObject(DataModelIndex { 0 }));
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

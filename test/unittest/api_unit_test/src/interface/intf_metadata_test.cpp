@@ -489,5 +489,144 @@ UNIT_TEST(API_MetadataTest, StaticDataWithForwardingSerialise, testing::ext::Tes
     r.UnregisterObjectType<MetadataForwardTest>();
 }
 
+/**
+ * @tc.name: RemoveProperty
+ * @tc.desc: Tests that AddProperty then RemoveProperty removes the property.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_MetadataTest, RemoveProperty, testing::ext::TestSize.Level1)
+{
+    auto& r = META_NS::GetObjectRegistry();
+    r.RegisterObjectType<MetadataTest>();
+
+    auto obj = r.Create<IMetadata>(ClassId::MetadataTest);
+    ASSERT_TRUE(obj);
+
+    auto p = ConstructProperty<float>("DynProp");
+    ASSERT_TRUE(obj->AddProperty(p));
+    EXPECT_TRUE(obj->GetProperty("DynProp"));
+
+    EXPECT_TRUE(obj->RemoveProperty(p));
+    EXPECT_FALSE(obj->GetProperty<float>("DynProp"));
+
+    r.UnregisterObjectType<MetadataTest>();
+}
+
+/**
+ * @tc.name: RemoveFunction
+ * @tc.desc: Tests that a function can be retrieved and then removed.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_MetadataTest, RemoveFunction, testing::ext::TestSize.Level1)
+{
+    auto& r = META_NS::GetObjectRegistry();
+    r.RegisterObjectType<MetadataTest>();
+
+    auto obj = r.Create<IMetadata>(ClassId::MetadataTest);
+    ASSERT_TRUE(obj);
+
+    auto f = obj->GetFunction("Func");
+    ASSERT_TRUE(f);
+    EXPECT_TRUE(obj->RemoveFunction(f));
+    // After removal from metadata container, GetFunction with CONSTRUCT_ON_REQUEST may reconstruct it
+    // but with NO_CONSTRUCT it should be gone
+    auto fns = obj->GetFunctions();
+    bool found = false;
+    for (auto& fn : fns) {
+        if (fn->GetName() == "Func") {
+            found = true;
+        }
+    }
+    EXPECT_FALSE(found);
+
+    r.UnregisterObjectType<MetadataTest>();
+}
+
+/**
+ * @tc.name: RemoveEvent
+ * @tc.desc: Tests that an event can be retrieved and then removed.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_MetadataTest, RemoveEvent, testing::ext::TestSize.Level1)
+{
+    auto& r = META_NS::GetObjectRegistry();
+    r.RegisterObjectType<MetadataTest>();
+
+    auto obj = r.Create<IMetadata>(ClassId::MetadataTest);
+    ASSERT_TRUE(obj);
+
+    auto e = obj->GetEvent("OnChanged");
+    ASSERT_TRUE(e);
+    EXPECT_TRUE(obj->RemoveEvent(e));
+    auto evts = obj->GetEvents();
+    bool found = false;
+    for (auto& ev : evts) {
+        if (ev->GetName() == "OnChanged") {
+            found = true;
+        }
+    }
+    EXPECT_FALSE(found);
+
+    r.UnregisterObjectType<MetadataTest>();
+}
+
+/**
+ * @tc.name: GetMetadataForDynamicMember
+ * @tc.desc: Tests GetMetadata for dynamically added property.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_MetadataTest, GetMetadataForDynamicMember, testing::ext::TestSize.Level1)
+{
+    auto& r = META_NS::GetObjectRegistry();
+    r.RegisterObjectType<MetadataTest>();
+
+    auto obj = r.Create<IMetadata>(ClassId::MetadataTest);
+    ASSERT_TRUE(obj);
+
+    auto p = ConstructProperty<float>("DynamicProp");
+    obj->AddProperty(p);
+
+    auto m = obj->GetMetadata(MetadataType::PROPERTY, "DynamicProp");
+    EXPECT_TRUE(m.IsValid());
+    EXPECT_EQ(m.type, MetadataType::PROPERTY);
+    EXPECT_EQ(m.name, "DynamicProp");
+
+    r.UnregisterObjectType<MetadataTest>();
+}
+
+/**
+ * @tc.name: ConstGetters
+ * @tc.desc: Tests const overloads of GetProperties/GetFunctions/GetEvents.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_MetadataTest, ConstGetters, testing::ext::TestSize.Level1)
+{
+    auto& r = META_NS::GetObjectRegistry();
+    r.RegisterObjectType<MetadataTest>();
+
+    auto obj = r.Create<IMetadata>(ClassId::MetadataTest);
+    ASSERT_TRUE(obj);
+
+    // Trigger construction of all static members
+    obj->GetProperty("Value");
+    obj->GetProperty("ReadValue");
+    obj->GetFunction("Func");
+    obj->GetEvent("OnChanged");
+
+    const IMetadata::Ptr& constObj = obj;
+    const IMetadata* constPtr = constObj.get();
+
+    auto props = constPtr->GetProperties();
+    EXPECT_GE(props.size(), 2);
+
+    auto fns = constPtr->GetFunctions();
+    EXPECT_GE(fns.size(), 1);
+
+    auto evts = constPtr->GetEvents();
+    EXPECT_GE(evts.size(), 1);
+
+    r.UnregisterObjectType<MetadataTest>();
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

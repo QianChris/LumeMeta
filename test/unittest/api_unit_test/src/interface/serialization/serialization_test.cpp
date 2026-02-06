@@ -20,6 +20,7 @@
 #include <base/math/vector.h>
 
 #include <meta/api/object.h>
+#include <meta/base/ids.h>
 #include <meta/base/meta_types.h>
 #include <meta/ext/any_builder.h>
 #include <meta/ext/implementation_macros.h>
@@ -127,7 +128,11 @@ const TestTypes BasicTestData(
         TType<StartBehavior>       {StartBehavior::MANUAL, StartBehavior::AUTOMATIC},
         TType<StartableState>      {StartableState::ATTACHED, StartableState::STARTED},
         TType<TimeSpan>            {TimeSpan::Microseconds(1234567), TimeSpan::Microseconds(97)},
-        TType<BASE_NS::Uid>        {BASE_NS::StringToUid("9e6d554e-3647-4040-a5c4-ea299fa85b8f"), BASE_NS::StringToUid("d3c49aa9-9314-4680-b23a-7d2a24a0af30")}
+        TType<BASE_NS::Uid>        {BASE_NS::StringToUid("9e6d554e-3647-4040-a5c4-ea299fa85b8f"), BASE_NS::StringToUid("d3c49aa9-9314-4680-b23a-7d2a24a0af30")},
+        TType<BASE_NS::Color>      {BASE_NS::Color{1.f, 0.5f, 0.25f, 1.f}, BASE_NS::Color{0.f, 0.f, 0.f, 0.f}},
+        TType<TypeId>              {TypeId("9e6d554e-3647-4040-a5c4-ea299fa85b8f"), TypeId("d3c49aa9-9314-4680-b23a-7d2a24a0af30")},
+        TType<ObjectId>            {ObjectId("9e6d554e-3647-4040-a5c4-ea299fa85b8f"), ObjectId("d3c49aa9-9314-4680-b23a-7d2a24a0af30")},
+        TType<InstanceId>          {InstanceId("9e6d554e-3647-4040-a5c4-ea299fa85b8f"), InstanceId("d3c49aa9-9314-4680-b23a-7d2a24a0af30")}
         );
 
 // clang-format on

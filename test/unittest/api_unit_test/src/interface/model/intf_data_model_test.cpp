@@ -82,5 +82,27 @@ UNIT_TEST(API_DataModelTest, ContainerDataModel, testing::ext::TestSize.Level1)
     EXPECT_EQ(model->GetModelData(DataModelIndex { 2 }), interface_pointer_cast<IMetadata>(o1));
 }
 
+/**
+ * @tc.name: ConstGetModelData
+ * @tc.desc: Tests const overload of GetModelData.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_DataModelTest, ConstGetModelData, testing::ext::TestSize.Level1)
+{
+    auto model = GetObjectRegistry().Create<IDataModel>(META_NS::ClassId::ContainerDataModel);
+    ASSERT_TRUE(model);
+    auto cont = interface_cast<IContainer>(model);
+    ASSERT_TRUE(cont);
+
+    auto o1 = GetObjectRegistry().Create<IObject>(META_NS::ClassId::Object);
+    cont->Add(o1);
+
+    // Get const pointer and call GetModelData through it
+    const IDataModel* constModel = model.get();
+    auto constData = constModel->GetModelData(DataModelIndex { 0 });
+    ASSERT_TRUE(constData);
+    EXPECT_EQ(constData, interface_pointer_cast<IMetadata>(o1));
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

@@ -211,5 +211,94 @@ UNIT_TEST(API_SerializationTest, SerialiseBind, testing::ext::TestSize.Level1)
     EXPECT_EQ(p2->GetValue(), 3);
 }
 
+/**
+ * @tc.name: ExportImportWeakPtrToAttachment
+ * @tc.desc: Tests export/import of a weak ptr pointing to an attachment object.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_SerializationTest, ExportImportWeakPtrToAttachment, testing::ext::TestSize.Level1)
+{
+    TestSerialiser ser;
+    {
+        Object obj(CreateInstance(ClassId::Object));
+        auto attachment = CreateTestAttachment<IAttachment>("MyAttachment");
+        AttachmentContainer(obj).Attach(attachment);
+
+        auto weakProp = ConstructProperty<IObject::WeakPtr>("weakRef", interface_pointer_cast<IObject>(attachment));
+        Metadata(obj).AddProperty(weakProp);
+
+        ASSERT_TRUE(ser.Export(obj));
+        ser.Dump("app://weak_attach_test.json");
+    }
+    auto nobj = ser.Import<IMetadata>();
+    ASSERT_TRUE(nobj);
+
+    auto att = interface_cast<IAttach>(nobj);
+    ASSERT_TRUE(att);
+    auto attachments = att->GetAttachments();
+    ASSERT_GE(attachments.size(), 1);
+
+    // Find the attachment by name
+    IObject::Ptr myAttachment;
+    for (auto& a : attachments) {
+        if (a->GetName() == "MyAttachment") {
+            myAttachment = a;
+            break;
+        }
+    }
+    ASSERT_TRUE(myAttachment);
+
+    auto weakProp = nobj->GetProperty<IObject::WeakPtr>("weakRef");
+    ASSERT_TRUE(weakProp);
+    auto resolved = weakProp->GetValue().lock();
+    ASSERT_TRUE(resolved);
+    EXPECT_EQ(resolved, myAttachment);
+}
+
+/**
+ * @tc.name: ExportImportBindToAttachmentProperty
+ * @tc.desc: Tests export/import of a property bound to a property on an attachment.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_SerializationTest, ExportImportBindToAttachmentProperty, testing::ext::TestSize.Level1)
+{
+    TestSerialiser ser;
+    {
+        Object obj(CreateInstance(ClassId::Object));
+        Object target(CreateInstance(ClassId::Object));
+        auto p1 = ConstructProperty<int>("p1");
+        Metadata(target).AddProperty(p1);
+
+        AttachmentContainer(obj).Attach(target);
+
+        auto p2 = ConstructProperty<int>("p2");
+        Metadata(obj).AddProperty(p2);
+        ASSERT_TRUE(p2->SetBind(p1));
+
+        p1->SetValue(5);
+        EXPECT_EQ(p2->GetValue(), 5);
+
+        ASSERT_TRUE(ser.Export(obj));
+        ser.Dump("app://bind_attach_prop_test.json");
+    }
+
+    auto nobj = ser.Import<IMetadata>();
+    ASSERT_TRUE(nobj);
+    auto att = interface_cast<IAttach>(nobj);
+    ASSERT_TRUE(att);
+
+    auto p2 = nobj->GetProperty<int>("p2");
+    ASSERT_TRUE(p2);
+    auto all = att->GetAttachments<IMetadata>();
+    ASSERT_EQ(all.size(), 1);
+    auto targetMeta = interface_cast<IMetadata>(all[0]);
+    auto p1 = targetMeta->GetProperty<int>("p1");
+    ASSERT_TRUE(p1);
+
+    EXPECT_EQ(p2->GetValue(), 5);
+    p1->SetValue(10);
+    EXPECT_EQ(p2->GetValue(), 10);
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

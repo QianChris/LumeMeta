@@ -297,5 +297,79 @@ UNIT_TEST(API_CallContextTest, CallArgumentOrder, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: CopyConstructorViaClone
+ * @tc.desc: Tests for copy construction via ICloneable with params and result.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_CallContextTest, CopyConstructorViaClone, testing::ext::TestSize.Level1)
+{
+    auto context = GetObjectRegistry().ConstructDefaultCallContext();
+    // Use DefineParameter via interface directly with ConstructAny (which supports ICloneable via Clone())
+    EXPECT_TRUE(context->DefineParameter("p1", ConstructAny<int>(42)));
+    EXPECT_TRUE(context->DefineParameter("p2", ConstructAny<int>(99)));
+    EXPECT_TRUE(DefineResult<void>(context));
+    EXPECT_TRUE(SetResult(context));
+    EXPECT_TRUE(context->Succeeded());
+
+    auto cloneable = interface_cast<ICloneable>(context);
+    ASSERT_TRUE(cloneable);
+    auto cloned = interface_pointer_cast<ICallContext>(cloneable->GetClone());
+    ASSERT_TRUE(cloned);
+
+    // Verify params are present in clone with correct names
+    auto params = cloned->GetParameters();
+    ASSERT_EQ(params.size(), 2);
+    EXPECT_EQ(params[0].name, "p1");
+    EXPECT_EQ(params[1].name, "p2");
+
+    // Verify succeeded state is copied
+    EXPECT_TRUE(cloned->Succeeded());
+}
+
+/**
+ * @tc.name: ResetContext
+ * @tc.desc: Tests that Reset() clears the succeeded flag.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_CallContextTest, ResetContext, testing::ext::TestSize.Level1)
+{
+    auto context = GetObjectRegistry().ConstructDefaultCallContext();
+    EXPECT_TRUE(DefineResult<void>(context));
+    EXPECT_TRUE(SetResult(context));
+    EXPECT_TRUE(context->Succeeded());
+
+    context->Reset();
+    EXPECT_FALSE(context->Succeeded());
+}
+
+/**
+ * @tc.name: SetResultVoidFail
+ * @tc.desc: Tests that SetResult() (void) fails when result type is non-void.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_CallContextTest, SetResultVoidFail, testing::ext::TestSize.Level1)
+{
+    auto context = GetObjectRegistry().ConstructDefaultCallContext();
+    EXPECT_TRUE(DefineResult<int>(context));
+
+    // SetResult() (void overload) should fail because result is int, not void
+    EXPECT_FALSE(SetResult(context));
+    EXPECT_FALSE(context->Succeeded());
+}
+
+/**
+ * @tc.name: DefineParameterDuplicate
+ * @tc.desc: Tests that DefineParameter with the same name twice returns false.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_CallContextTest, DefineParameterDuplicate, testing::ext::TestSize.Level1)
+{
+    auto context = GetObjectRegistry().ConstructDefaultCallContext();
+    EXPECT_TRUE(DefineParameter<int>(context, "dup"));
+    EXPECT_FALSE(DefineParameter<int>(context, "dup"));
+    EXPECT_EQ(context->GetParameters().size(), 1);
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

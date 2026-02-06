@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <chrono>
+#include <thread>
+
 #include <meta/api/deferred_callback.h>
 #include <meta/api/property/property_event_handler.h>
 #include <meta/ext/object_fwd.h>
@@ -78,6 +81,7 @@ UNIT_TEST(API_DeferredCallbackTest, CallWithEvent, testing::ext::TestSize.Level1
     auto callback = MakeDeferred<IOnTest>([&](int i) { count += i; }, q);
 
     q->ProcessTasks();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     EXPECT_EQ(count, 0);
 
     callback->Invoke(1);
@@ -85,7 +89,9 @@ UNIT_TEST(API_DeferredCallbackTest, CallWithEvent, testing::ext::TestSize.Level1
 
     EXPECT_EQ(count, 0);
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     q->ProcessTasks();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     EXPECT_EQ(count, 3);
 }
 
