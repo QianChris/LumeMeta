@@ -374,6 +374,106 @@ UNIT_TEST_F(API_FileResourceManagerTest, Purge, testing::ext::TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: ObjectResourceTypeName
+ * @tc.desc: Tests that ObjectResourceType returns the correct resource name.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, ObjectResourceTypeName, testing::ext::TestSize.Level1)
+{
+    auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::ObjectResourceType);
+    ASSERT_TRUE(resType);
+    EXPECT_EQ(resType->GetResourceName(), "ObjectResource");
+}
+
+/**
+ * @tc.name: SaveResourceNullPtr
+ * @tc.desc: Tests that SaveResource returns false when resource pointer is null.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, SaveResourceNullPtr, testing::ext::TestSize.Level1)
+{
+    auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::ObjectResourceType);
+    ASSERT_TRUE(resType);
+    if (auto objRes = interface_cast<IObjectResource>(resType)) {
+        objRes->SetResourceType(ClassId::TestResource);
+    }
+
+    MemFile file;
+    CORE_NS::ResourceId rid("test_save_null");
+    CORE_NS::IResourceType::StorageInfo info { nullptr, &file, rid };
+    EXPECT_FALSE(resType->SaveResource(nullptr, info));
+}
+
+/**
+ * @tc.name: LoadResourceTypeMismatch
+ * @tc.desc: Tests that LoadResource returns null when loaded resource type does not match.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, LoadResourceTypeMismatch, testing::ext::TestSize.Level1)
+{
+    // Serialize an ObjectResource with TestResource type
+    TestSerialiser ser;
+    auto obj = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
+    ASSERT_TRUE(obj);
+    if (auto i = interface_cast<IObjectResource>(obj)) {
+        i->SetResourceType(ClassId::TestResource);
+    }
+    ASSERT_TRUE(ser.Export(obj));
+    auto data = ser.GetData();
+
+    // Create an ObjectResourceType configured for a different type
+    auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::ObjectResourceType);
+    ASSERT_TRUE(resType);
+    if (auto i = interface_cast<IObjectResource>(resType)) {
+        i->SetResourceType(::META_NS::ClassId::Object);
+    }
+
+    MemFile payload(data);
+    CORE_NS::ResourceId rid("test_mismatch");
+    CORE_NS::IResourceType::StorageInfo info { nullptr, &payload, rid, "", resources, context };
+    auto result = resType->LoadResource(info);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetPropertyOverridesExisting
+ * @tc.desc: Tests that SetProperty replaces an existing property with the same name.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, SetPropertyOverridesExisting, testing::ext::TestSize.Level1)
+{
+    auto opts = GetObjectRegistry().Create<IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    ASSERT_TRUE(opts);
+
+    opts->SetProperty("test", uint32_t(1));
+    auto p1 = opts->GetProperty<uint32_t>("test");
+    ASSERT_TRUE(p1);
+    EXPECT_EQ(p1->GetValue(), 1);
+
+    // Override with same name - should remove old and add new
+    opts->SetProperty("test", uint32_t(2));
+    auto p2 = opts->GetProperty<uint32_t>("test");
+    ASSERT_TRUE(p2);
+    EXPECT_EQ(p2->GetValue(), 2);
+}
+
+/**
+ * @tc.name: ObjectResourceReloadResource
+ * @tc.desc: Tests that ObjectResourceType ReloadResource returns false.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_FileResourceManagerTest, ObjectResourceReloadResource, testing::ext::TestSize.Level1)
+{
+    auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::ObjectResourceType);
+    ASSERT_TRUE(resType);
+
+    CORE_NS::ResourceId rid;
+    CORE_NS::IResourceType::StorageInfo info { nullptr, nullptr, rid };
+    CORE_NS::IResource::Ptr res;
+    EXPECT_FALSE(resType->ReloadResource(info, res));
+}
+
 } // namespace UTest
 
 META_END_NAMESPACE()

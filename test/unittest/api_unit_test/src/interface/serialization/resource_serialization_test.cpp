@@ -422,5 +422,107 @@ TEST_F(API_ResourceSerializationTest, ObjectResourceDeps)
     EXPECT_EQ(deps[0].context.lock(), context_);
 }
 
+/**
+ * @tc.name: AnimationResourceTypeName
+ * @tc.desc: Tests that GetResourceName returns expected name.
+ * @tc.type: FUNC
+ */
+TEST_F(API_ResourceSerializationTest, AnimationResourceTypeName)
+{
+    auto animRes = GetObjectRegistry().Create<CORE_NS::IResourceType>(::META_NS::ClassId::AnimationResourceType);
+    ASSERT_TRUE(animRes);
+    EXPECT_EQ(animRes->GetResourceName(), "AnimationResource");
+}
+
+/**
+ * @tc.name: AnimationReloadResource
+ * @tc.desc: Tests that ReloadResource returns false (not implemented).
+ * @tc.type: FUNC
+ */
+TEST_F(API_ResourceSerializationTest, AnimationReloadResource)
+{
+    auto animRes = GetObjectRegistry().Create<CORE_NS::IResourceType>(::META_NS::ClassId::AnimationResourceType);
+    ASSERT_TRUE(animRes);
+
+    CORE_NS::ResourceId rid;
+    CORE_NS::IResourceType::StorageInfo info { nullptr, nullptr, rid };
+    CORE_NS::IResource::Ptr res;
+    EXPECT_FALSE(animRes->ReloadResource(info, res));
+}
+
+/**
+ * @tc.name: AnimationTemplateWithBaseResource
+ * @tc.desc: Tests animation template with base resource to exercise SetValuesFromTemplate path.
+ * @tc.type: FUNC
+ */
+TEST_F(API_ResourceSerializationTest, AnimationTemplateWithBaseResource)
+{
+    // Create a base template (the "parent" template)
+    BASE_NS::vector<float> baseTimestamps = { 0.0f, 1.f };
+    BASE_NS::vector<int> baseKeyframes = { 0, 200 };
+    auto baseDuration = TimeSpan::Milliseconds(200);
+    {
+        auto acc = GetObjectRegistry().Create<IResourceTemplateAccess>(META_NS::ClassId::TrackAnimationTemplateAccess);
+        ASSERT_TRUE(acc);
+
+        auto baseTempl = acc->CreateEmptyTemplate();
+        auto baseMd = interface_cast<META_NS::IMetadata>(baseTempl);
+        ASSERT_TRUE(baseMd);
+        {
+            auto p1 = baseMd->GetArrayProperty<float>("Timestamps", META_NS::MetadataQuery::EXISTING);
+            ASSERT_TRUE(p1);
+            p1->SetValue(baseTimestamps);
+            auto p2 = baseMd->GetProperty("Keyframes", META_NS::MetadataQuery::EXISTING);
+            ASSERT_TRUE(p2);
+            p2->SetValue(ArrayAny<int>(baseKeyframes));
+            auto p3 = baseMd->GetProperty<TimeSpan>("Duration", META_NS::MetadataQuery::EXISTING);
+            ASSERT_TRUE(p3);
+            p3->SetValue(baseDuration);
+        }
+
+        if (auto i = interface_cast<CORE_NS::ISetResourceId>(baseTempl)) {
+            i->SetResourceId({ "base_template", context_ });
+        }
+        ASSERT_TRUE(resources_->AddResource(baseTempl, "app://base_anim.template"));
+
+        // Create a derived animation that references the base template
+        auto object = CreateTestType();
+        ASSERT_TRUE(object);
+        auto property = object->First();
+
+        META_NS::TrackAnimation<int> anim(META_NS::CreateNew);
+        auto resource = interface_pointer_cast<CORE_NS::IResource>(anim);
+        auto dt = interface_pointer_cast<IDerivedFromTemplate>(anim);
+        ASSERT_TRUE(dt);
+
+        // Set template and set the template ID to the base template's resource ID
+        ASSERT_TRUE(dt->SetTemplate(baseTempl));
+        dt->SetTemplateId({ "base_template", "resourceid" });
+
+        anim.SetProperty(property);
+        ASSERT_TRUE(anim.GetValid());
+
+        if (auto i = interface_cast<CORE_NS::ISetResourceId>(anim)) {
+            i->SetResourceId({ "derived_animation", context_ });
+        }
+
+        ASSERT_TRUE(resources_->AddResource(resource, ""));
+        ASSERT_EQ(
+            resources_->Export("app://test_base_anim_resource.resources", context_), CORE_NS::IResourceManager::Result::OK);
+
+        resources_->RemoveAllResources();
+    }
+
+    // Import and verify the derived animation works
+    auto object = CreateTestType();
+    ASSERT_TRUE(object);
+
+    ASSERT_EQ(
+        resources_->Import("app://test_base_anim_resource.resources", object), CORE_NS::IResourceManager::Result::OK);
+
+    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({ "derived_animation", object }));
+    ASSERT_TRUE(anim);
+}
+
 } // namespace UTest
 META_END_NAMESPACE()
