@@ -35,8 +35,9 @@ AnyReturnValue EngineValue::Sync(EngineSyncDirection dir)
     }
     if (dir == EngineSyncDirection::TO_ENGINE || (dir == EngineSyncDirection::AUTO && valueChanged_)) {
         if (valueChanged_) {
-            valueChanged_ = false;
-            return access_->SyncToEngine(*value_, params_) ? AnyReturn::NOTHING_TO_DO : AnyReturn::FAIL;
+            auto res = access_->SyncToEngine(*value_, params_);
+            valueChanged_ = !static_cast<bool>(res);
+            return res ? AnyReturn::NOTHING_TO_DO : AnyReturn::FAIL;
         }
         return params_.handle.Handle() ? AnyReturn::NOTHING_TO_DO : AnyReturn::FAIL;
     }
