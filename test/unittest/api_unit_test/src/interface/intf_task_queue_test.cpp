@@ -567,21 +567,25 @@ UNIT_TEST(API_TaskQueueTest, RecurringMultipleOrder, testing::ext::TestSize.Leve
         task1 = count;
         return true;
     }));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     queue->AddTask(META_NS::MakeCallback<ITaskQueueTask>([&] {
         ++count;
         task2 = count;
         return true;
     }));
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     queue->ProcessTasks();
-    EXPECT_TRUE(task1 == 1);
-    EXPECT_TRUE(task2 == 2);
+    EXPECT_EQ(task1, 1);
+    EXPECT_EQ(task2, 2);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     queue->ProcessTasks();
-    EXPECT_TRUE(task1 == 3);
-    EXPECT_TRUE(task2 == 4);
+    EXPECT_EQ(task1, 3);
+    EXPECT_EQ(task2, 4);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     queue->ProcessTasks();
-    EXPECT_TRUE(task1 == 5);
-    EXPECT_TRUE(task2 == 6);
+    EXPECT_EQ(task1, 5);
+    EXPECT_EQ(task2, 6);
 }
 
 /**
