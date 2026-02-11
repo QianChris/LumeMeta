@@ -143,11 +143,12 @@ bool ObjectResourceOptions::Save(
         exporter->SetUserContext(interface_pointer_cast<IObject>(context));
         exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("ObjectResourceOptions"));
         res = exporter->Export(options, GetSelf());
-        if (res) {
-            if (auto collect = interface_cast<META_NS::ICollectResources>(context)) {
-                if (baseResource_.IsValid()) {
-                    collect->AddResource(CORE_NS::ResourceIdContext { baseResource_ });
-                }
+        if (!res) {
+            return res;
+        }
+        if (auto collect = interface_cast<META_NS::ICollectResources>(context)) {
+            if (baseResource_.IsValid()) {
+                collect->AddResource(CORE_NS::ResourceIdContext { baseResource_ });
             }
         }
     }

@@ -283,21 +283,22 @@ FileResourceManager::Result FileResourceManager::SaveResourceData(const Resource
         CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(r.type).c_str());
         return Result::NO_RESOURCE_TYPE;
     }
-    if (!r.path.empty()) {
-        MemFile data;
-        if (!it->second->SaveResource(r.object,
-                CORE_NS::IResourceType::StorageInfo { nullptr, &data, r.id, r.path, GetSelf<IResourceManager>() })) {
-            CORE_LOG_W("Failed to save resource: %s", r.id.ToString().c_str());
-            return Result::EXPORT_FAILURE;
+    if (r.path.empty()) {
+        return Result::OK;
+    }
+    MemFile data;
+    if (!it->second->SaveResource(r.object,
+            CORE_NS::IResourceType::StorageInfo { nullptr, &data, r.id, r.path, GetSelf<IResourceManager>() })) {
+        CORE_LOG_W("Failed to save resource: %s", r.id.ToString().c_str());
+        return Result::EXPORT_FAILURE;
+    }
+    if (data.GetLength()) {
+        auto f = fileManager_->CreateFile(r.path);
+        if (!f) {
+            CORE_LOG_W("Failed to open resource file: %s", r.path.c_str());
+            return Result::FILE_WRITE_ERROR;
         }
-        if (data.GetLength()) {
-            auto f = fileManager_->CreateFile(r.path);
-            if (!f) {
-                CORE_LOG_W("Failed to open resource file: %s", r.path.c_str());
-                return Result::FILE_WRITE_ERROR;
-            }
-            f->Write(data.RawData(), data.GetLength());
-        }
+        f->Write(data.RawData(), data.GetLength());
     }
     return Result::OK;
 }
@@ -810,13 +811,16 @@ BASE_NS::vector<ResourceData> FileResourceManager::GetResources(
 {
     BASE_NS::vector<ResourceData> res;
     std::shared_lock lock { mutex_ };
+
+    auto func = [&](auto& r) {
+        if (IsResourceMatch(selection, r.id)) {
+            res.push_back(r);
+        }
+    };
     for (auto&& g : resources_) {
         if (IsCorrectContext(g.first, context)) {
             for (auto&& v : g.second) {
-                auto& r = *v.second;
-                if (IsResourceMatch(selection, r.id)) {
-                    res.push_back(r);
-                }
+                func(*v.second);
             }
         }
     }

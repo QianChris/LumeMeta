@@ -97,15 +97,17 @@ CORE_NS::IResource::Ptr ObjectTemplateType::LoadResource(const StorageInfo& s) c
 {
     CORE_NS::IResource::Ptr res;
     if (s.payload) {
-        if (auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter)) {
-            importer->SetUserContext(interface_pointer_cast<IObject>(s.context));
-            importer->SetResourceManager(s.self);
-            auto obj = interface_pointer_cast<CORE_NS::IResource>(importer->Import(*s.payload));
-            if (auto i = interface_cast<CORE_NS::ISetResourceId>(obj)) {
-                i->SetResourceId(CORE_NS::ResourceIdContext { s.id, s.context });
-            }
-            res = interface_pointer_cast<CORE_NS::IResource>(obj);
+        auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter);
+        if (!importer) {
+            return nullptr;
         }
+        importer->SetUserContext(interface_pointer_cast<IObject>(s.context));
+        importer->SetResourceManager(s.self);
+        auto obj = interface_pointer_cast<CORE_NS::IResource>(importer->Import(*s.payload));
+        if (auto i = interface_cast<CORE_NS::ISetResourceId>(obj)) {
+            i->SetResourceId(CORE_NS::ResourceIdContext { s.id, s.context });
+        }
+        res = interface_pointer_cast<CORE_NS::IResource>(obj);
     }
     return res;
 }
