@@ -77,6 +77,14 @@ class DefaultInterpolator : public IntroduceInterfaces<BaseObject, IInterpolator
     }
 };
 
+namespace {
+template<typename T>
+T InterpolateComponent(T a, T b, float t)
+{
+    return static_cast<T>(BASE_NS::Math::round(a + (b - a) * t));
+}
+} // namespace
+
 // No math operations have been defined for integer type vec3/4, implement interpolators manually
 class UVec3Interpolator : public IntroduceInterfaces<BaseObject, IInterpolator> {
     META_OBJECT(UVec3Interpolator, ClassId::UVec3Interpolator, IntroduceInterfaces)
@@ -87,9 +95,9 @@ class UVec3Interpolator : public IntroduceInterfaces<BaseObject, IInterpolator> 
             Type value0 = GetValue<Type>(from);
             Type value1 = GetValue<Type>(to);
             Type value;
-            value.x = value0.x + (value1.x - value0.x) * t;
-            value.y = value0.y + (value1.y - value0.y) * t;
-            value.z = value0.z + (value1.z - value0.z) * t;
+            value.x = InterpolateComponent(value0.x, value1.x, t);
+            value.y = InterpolateComponent(value0.y, value1.y, t);
+            value.z = InterpolateComponent(value0.z, value1.z, t);
             return output.SetValue<Type>(value);
         }
         return AnyReturn::INCOMPATIBLE_TYPE;
@@ -109,10 +117,10 @@ class UVec4Interpolator : public IntroduceInterfaces<BaseObject, IInterpolator> 
             Type value0 = GetValue<Type>(from);
             Type value1 = GetValue<Type>(to);
             Type value;
-            value.x = value0.x + (value1.x - value0.x) * t;
-            value.y = value0.y + (value1.y - value0.y) * t;
-            value.z = value0.z + (value1.z - value0.z) * t;
-            value.w = value0.w + (value1.w - value0.w) * t;
+            value.x = InterpolateComponent(value0.x, value1.x, t);
+            value.y = InterpolateComponent(value0.y, value1.y, t);
+            value.z = InterpolateComponent(value0.z, value1.z, t);
+            value.w = InterpolateComponent(value0.w, value1.w, t);
             return output.SetValue<Type>(value);
         }
         return AnyReturn::INCOMPATIBLE_TYPE;
@@ -132,9 +140,9 @@ class IVec3Interpolator : public IntroduceInterfaces<BaseObject, IInterpolator> 
             Type value0 = GetValue<Type>(from);
             Type value1 = GetValue<Type>(to);
             Type value;
-            value.x = value0.x + (value1.x - value0.x) * t;
-            value.y = value0.y + (value1.y - value0.y) * t;
-            value.z = value0.z + (value1.z - value0.z) * t;
+            value.x = InterpolateComponent(value0.x, value1.x, t);
+            value.y = InterpolateComponent(value0.y, value1.y, t);
+            value.z = InterpolateComponent(value0.z, value1.z, t);
             return output.SetValue<Type>(value);
         }
         return AnyReturn::INCOMPATIBLE_TYPE;
@@ -153,10 +161,10 @@ class IVec4Interpolator : public IntroduceInterfaces<BaseObject, IInterpolator> 
             Type value0 = GetValue<Type>(from);
             Type value1 = GetValue<Type>(to);
             Type value;
-            value.x = value0.x + (value1.x - value0.x) * t;
-            value.y = value0.y + (value1.y - value0.y) * t;
-            value.z = value0.z + (value1.z - value0.z) * t;
-            value.w = value0.w + (value1.w - value0.w) * t;
+            value.x = InterpolateComponent(value0.x, value1.x, t);
+            value.y = InterpolateComponent(value0.y, value1.y, t);
+            value.z = InterpolateComponent(value0.z, value1.z, t);
+            value.w = InterpolateComponent(value0.w, value1.w, t);
             return output.SetValue<Type>(value);
         }
         return AnyReturn::INCOMPATIBLE_TYPE;

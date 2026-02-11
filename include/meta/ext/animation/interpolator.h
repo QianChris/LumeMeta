@@ -16,6 +16,8 @@
 #ifndef META_EXT_INTERPOLATOR_H
 #define META_EXT_INTERPOLATOR_H
 
+#include <base/math/mathf.h>
+
 #include <meta/api/util.h>
 #include <meta/base/namespace.h>
 #include <meta/ext/base_object.h>
@@ -34,7 +36,12 @@ public:
         if (IsGetCompatibleWith<Type>(output) && IsGetCompatibleWith<Type>(from) && IsGetCompatibleWith<Type>(to)) {
             Type value0 = GetValue<Type>(from);
             Type value1 = GetValue<Type>(to);
-            return output.SetValue<Type>(value0 + (value1 - value0) * t);
+            auto result = value0 + (value1 - value0) * t;
+            if constexpr (BASE_NS::is_integral_v<Type>) {
+                return output.SetValue<Type>(static_cast<Type>(BASE_NS::Math::round(result)));
+            } else {
+                return output.SetValue<Type>(result);
+            }
         }
         return AnyReturn::INCOMPATIBLE_TYPE;
     }

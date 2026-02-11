@@ -268,7 +268,7 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimation, testing::ext::TestSize.Level1)
 
     this->RunFrames(11, [&](uint32_t frame) {
         auto f = frame - 1;
-        EXPECT_FLOAT_EQ(11 - frame, p->GetValue()) << "Frame: " << frame;
+        EXPECT_EQ(11 - frame, p->GetValue()) << "Frame: " << frame;
         EXPECT_EQ(ani->Running()->GetValue(), f < 10) << "Frame: " << frame;
         EXPECT_FLOAT_EQ(ani->Progress()->GetValue(), f / 10.f) << "Frame: " << frame;
     });
