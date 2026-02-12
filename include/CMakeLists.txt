@@ -209,6 +209,8 @@ target_sources(${PLUGIN_NAME}HighLevelAPI PUBLIC
     meta/api/property/default_value_bind.h
     meta/api/property/property_event_handler.h
     meta/api/property/property_info.h
+    meta/api/resource/derived_from_template.h
+    meta/api/resource/resource_template_access.h
     meta/api/task.h
     meta/api/task_queue.h
     meta/api/threading/mutex.h
