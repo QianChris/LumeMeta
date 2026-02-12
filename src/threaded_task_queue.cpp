@@ -17,7 +17,7 @@
 #include <mutex>
 #include <thread>
 
-#if defined(__OHOS_PLATFORM__)
+#if defined(__OHOS_PLATFORM__) && !defined(BUILD_PUBLIC_VERSION)
 #include <qos.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -139,7 +139,7 @@ public:
         std::unique_lock lock { mutex_ };
         execThread_ = std::this_thread::get_id();
 
-#if defined(__OHOS_PLATFORM__)
+#if defined(__OHOS_PLATFORM__) && !defined(BUILD_PUBLIC_VERSION)
         int ret = OHOS::QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
         CORE_LOG_I("set engine child thread qos %s", ret == 0 ? "success" : "failed");
         auto tid = syscall(SYS_gettid);
@@ -168,7 +168,7 @@ public:
             TaskQueueImpl::ProcessTasks(lock, curTime);
         }
 
-#if defined(__OHOS_PLATFORM__)
+#if defined(__OHOS_PLATFORM__) && !defined(BUILD_PUBLIC_VERSION)
         std::unordered_map<std::string, std::string> mapPayload { { "pid", std::to_string(getpid()) },
             { "tid", std::to_string(tid) } };
         CORE_LOG_I("ReportEngineResType %s %s", mapPayload["pid"].c_str(), mapPayload["tid"].c_str());
