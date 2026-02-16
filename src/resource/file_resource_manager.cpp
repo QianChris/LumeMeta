@@ -331,13 +331,15 @@ FileResourceManager::Result FileResourceManager::Export(BASE_NS::string_view fil
         return Result::FILE_WRITE_ERROR;
     }
     BASE_NS::flat_map<CORE_NS::ResourceId, BASE_NS::shared_ptr<ResourceData>, ResourceIdLess> imap;
+    auto pushRes = [&](auto res) {
+        if (IsResourceMatch(selection, res->id)) {
+            imap.insert({ res->id, res });
+        }
+    };
     for (auto&& g : resources_) {
         if (IsCorrectContext(g.first, context)) {
             for (auto&& v : g.second) {
-                auto& res = *v.second;
-                if (IsResourceMatch(selection, res.id)) {
-                    imap.insert({ res.id, v.second });
-                }
+                pushRes(v.second);
             }
         }
     }

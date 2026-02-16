@@ -137,22 +137,22 @@ bool ObjectResourceOptions::Load(
 bool ObjectResourceOptions::Save(
     CORE_NS::IFile& options, const CORE_NS::ResourceManagerPtr& rman, const CORE_NS::ResourceContextPtr& context) const
 {
-    bool res = false;
-    if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {
-        exporter->SetResourceManager(rman);
-        exporter->SetUserContext(interface_pointer_cast<IObject>(context));
-        exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("ObjectResourceOptions"));
-        res = exporter->Export(options, GetSelf());
-        if (!res) {
-            return res;
-        }
-        if (auto collect = interface_cast<META_NS::ICollectResources>(context)) {
-            if (baseResource_.IsValid()) {
-                collect->AddResource(CORE_NS::ResourceIdContext { baseResource_ });
-            }
+    auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter);
+    if (!exporter) {
+        return false;
+    }
+    exporter->SetResourceManager(rman);
+    exporter->SetUserContext(interface_pointer_cast<IObject>(context));
+    exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("ObjectResourceOptions"));
+    if (!exporter->Export(options, GetSelf())) {
+        return false;
+    }
+    if (auto collect = interface_cast<META_NS::ICollectResources>(context)) {
+        if (baseResource_.IsValid()) {
+            collect->AddResource(CORE_NS::ResourceIdContext { baseResource_ });
         }
     }
-    return res;
+    return true;
 }
 IProperty::Ptr ObjectResourceOptions::GetProperty(BASE_NS::string_view name)
 {
