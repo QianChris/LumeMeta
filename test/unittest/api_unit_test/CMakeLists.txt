@@ -232,42 +232,34 @@ target_link_libraries(${executableName}
     gmock
 )
 
-#
-# Add plugin dependencies
-#
-add_dependencies(${executableName} LumeMeta::Plugin)
-
 if(MINGW)
     # Linking mingw and c/c++ standard libs statically for easier usage.
     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 endif()
 
-# Required copies
+# Required copies -- uses a custom target so rebuilt plugins are always copied,
+# even when the test runner itself does not need re-linking.
 if(OHOS)
-    add_custom_command(
-        TARGET ${executableName} POST_BUILD
-
-        # Engine DLL
+    add_custom_target(${executableName}_CopyDeps ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AGPEngine::AGPEngineDLL> $<TARGET_FILE_DIR:${executableName}>
-
-        # Shared and common assets/resources
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../../../res/default/resources/rawfile/
+        COMMENT "Copying dependencies for ${executableName}"
     )
 else()
-    add_custom_command(
-        TARGET ${executableName} POST_BUILD
-
-        # Plugins
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/plugins/
-
+    add_custom_target(${executableName}_CopyDeps ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AGPEngine::AGPEngineDLL> $<TARGET_FILE_DIR:${executableName}>
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/plugins/
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LumeMeta::Plugin> $<TARGET_FILE_DIR:${executableName}>/plugins/
-
-        # Shared and common assets/resources
         COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/../../assets/
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../assets/
+        COMMENT "Copying dependencies for ${executableName}"
     )
 endif()
+add_dependencies(${executableName}_CopyDeps AGPEngine::AGPEngineDLL LumeMeta::Plugin)
+add_dependencies(${executableName} ${executableName}_CopyDeps)
+set_target_properties(${executableName}_CopyDeps PROPERTIES FOLDER Testing)
 
 set_target_properties(${executableName} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${executableName}>")
 
