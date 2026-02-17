@@ -53,7 +53,7 @@ class ISpeedModifier : public CORE_NS::IInterface {
 public:
     /**
      * @brief Modify a speed value.
-     * @param progress The speed to modify.
+     * @param speed The speed to modify.
      * @return Modified value.
      */
     virtual float ModifySpeed(float speed) const = 0;
