@@ -51,10 +51,10 @@ public:
     virtual IObject::ConstPtr GetAnchorObject() const = 0;
 };
 
+META_END_NAMESPACE()
+
 META_INTERFACE_TYPE(META_NS::IRefUriBuilder)
 META_INTERFACE_TYPE(META_NS::IRefUriBuilderAnchorType)
 META_INTERFACE_TYPE(META_NS::IGetAnchorObject)
-
-META_END_NAMESPACE()
 
 #endif

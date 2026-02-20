@@ -166,7 +166,8 @@ public:
     virtual bool ResetPendingNotify() = 0;
 };
 
-META_INTERFACE_TYPE(META_NS::IEngineValue)
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IEngineValue)
 
 #endif

@@ -35,8 +35,8 @@ public:
     virtual size_t GetResourceCount() const = 0;
 };
 
-META_INTERFACE_TYPE(META_NS::IResourceQuery)
-
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IResourceQuery)
 
 #endif

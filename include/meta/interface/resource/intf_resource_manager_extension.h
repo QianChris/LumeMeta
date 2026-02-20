@@ -21,6 +21,7 @@
 #include <meta/base/meta_types.h>
 #include <meta/base/namespace.h>
 #include <meta/interface/interface_macros.h>
+#include <meta/interface/resource/intf_resource.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -52,8 +53,8 @@ public:
     virtual bool RemoveGroup(BASE_NS::string_view group, const CORE_NS::ResourceContextWeakPtr&) = 0;
 };
 
-META_INTERFACE_TYPE(META_NS::IResourceManagerExtension)
-
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IResourceManagerExtension)
 
 #endif

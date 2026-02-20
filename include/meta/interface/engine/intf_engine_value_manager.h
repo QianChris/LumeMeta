@@ -116,7 +116,8 @@ public:
     virtual void SyncProperties() = 0;
 };
 
-META_INTERFACE_TYPE(META_NS::IEngineValueManager)
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IEngineValueManager)
 
 #endif

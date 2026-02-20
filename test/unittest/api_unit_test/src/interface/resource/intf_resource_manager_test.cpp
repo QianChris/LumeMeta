@@ -16,18 +16,19 @@
 
 #include <core/resources/intf_resource_manager.h>
 
-#include <meta/api/animation.h>
-#include <meta/api/iteration.h>
-#include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/builtin_objects.h>
-#include <meta/interface/intf_iterable.h>
-#include <meta/interface/property/construct_property.h>
 #include <meta/interface/resource/intf_object_resource.h>
 #include <meta/interface/resource/intf_object_template.h>
 #include <meta/interface/resource/intf_owned_resource_groups.h>
 #include <meta/interface/resource/intf_resource.h>
 #include <meta/interface/resource/intf_resource_query.h>
+
+#include <meta/api/animation.h>
+#include <meta/interface/animation/builtin_animations.h>
+#include <meta/interface/intf_iterable.h>
+#include <meta/interface/property/construct_property.h>
 #include <meta/interface/serialization/intf_refuri_builder.h>
+#include <meta/api/iteration.h>
 
 #include "helpers/serialisation_utils.h"
 
@@ -527,7 +528,8 @@ UNIT_TEST_F(API_FileResourceManagerTest, ImportInvalidFile, testing::ext::TestSi
     // Write garbage data to a file
     BASE_NS::vector<uint8_t> garbage = { 0xFF, 0xFE, 0x00, 0x01, 0x02 };
     WriteToFile(garbage, "app://garbage.resources");
-    EXPECT_EQ(resources->Import("app://garbage.resources", context), CORE_NS::IResourceManager::Result::INVALID_FILE);
+    EXPECT_EQ(resources->Import("app://garbage.resources", context),
+        CORE_NS::IResourceManager::Result::INVALID_FILE);
 }
 
 /**
@@ -588,8 +590,8 @@ UNIT_TEST_F(API_FileResourceManagerTest, RemoveAllResourcesWithContext, testing:
 
     // Add resources under context2 via the overload that takes a ResourceIdContext
     MakeEmptyJsonFile();
-    ASSERT_TRUE(
-        resources->AddResource({ "ctx2_res", context2 }, ClassId::TestResource.Id().ToUid(), "app://test.json"));
+    ASSERT_TRUE(resources->AddResource(
+        { "ctx2_res", context2 }, ClassId::TestResource.Id().ToUid(), "app://test.json"));
 
     // Remove only context's resources
     BASE_NS::shared_ptr<Listener> listener(new Listener);

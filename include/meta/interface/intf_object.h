@@ -169,9 +169,9 @@ typename Intf::Ptr Resolve(const T& object, const RefUri& uri)
     return nullptr;
 }
 
+META_END_NAMESPACE()
+
 META_INTERFACE_TYPE(META_NS::IObject)
 META_INTERFACE_TYPE(META_NS::IObjectInstance)
-
-META_END_NAMESPACE()
 
 #endif

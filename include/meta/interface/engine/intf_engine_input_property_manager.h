@@ -72,7 +72,8 @@ public:
     }
 };
 
-META_INTERFACE_TYPE(META_NS::IEngineInputPropertyManager)
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IEngineInputPropertyManager)
 
 #endif

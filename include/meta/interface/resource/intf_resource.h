@@ -100,15 +100,17 @@ struct ResourceIdLess {
 META_REGISTER_CLASS(
     ObjectResourceOptions, "196213b6-eb63-4a29-89be-1ec10ed68596", META_NS::ObjectCategoryBits::NO_CATEGORY)
 
+META_END_NAMESPACE()
+
 META_TYPE(CORE_NS::ResourceId)
+META_TYPE(CORE_NS::ResourceIdContext)
+
 META_INTERFACE_TYPE(CORE_NS::IResource)
-META_INTERFACE_TYPE(CORE_NS::ISetResourceId)
 META_INTERFACE_TYPE(CORE_NS::IResourceOptions)
+META_INTERFACE_TYPE(CORE_NS::ISetResourceId)
 META_INTERFACE_TYPE(META_NS::IDerivedFromTemplate)
 META_INTERFACE_TYPE(META_NS::IResourceTemplateAccess)
 META_INTERFACE_TYPE(META_NS::IObjectResourceOptions)
 META_INTERFACE_TYPE(META_NS::ICollectResources)
-
-META_END_NAMESPACE()
 
 #endif

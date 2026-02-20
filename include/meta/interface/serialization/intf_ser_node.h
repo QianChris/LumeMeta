@@ -128,8 +128,8 @@ public:
     virtual void Visit(const ISerNode&) = 0;
 };
 
-META_INTERFACE_TYPE(ISerNode)
-
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::ISerNode)
 
 #endif

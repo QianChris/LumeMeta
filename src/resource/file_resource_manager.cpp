@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-// disabled exceptions for msvc iomanip
-#ifndef __OHOS__
-#define _HAS_EXCEPTIONS 0
-#endif
-
 #include "file_resource_manager.h"
 
+#ifdef __OHOS__
 #include <iomanip>
+#else
+#include "iomanip_wo_exceptions.h"
+#endif
 #include <sstream>
 
 #include <base/containers/flat_map.h>

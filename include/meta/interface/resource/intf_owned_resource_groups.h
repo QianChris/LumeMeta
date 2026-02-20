@@ -32,8 +32,8 @@ public:
         BASE_NS::string_view group, const CORE_NS::ResourceContextPtr&) = 0;
 };
 
-META_INTERFACE_TYPE(META_NS::IOwnedResourceGroups)
-
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IOwnedResourceGroups)
 
 #endif

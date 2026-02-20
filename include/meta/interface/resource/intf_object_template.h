@@ -48,8 +48,8 @@ public:
     }
 };
 
-META_INTERFACE_TYPE(META_NS::IObjectTemplate)
-
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IObjectTemplate)
 
 #endif

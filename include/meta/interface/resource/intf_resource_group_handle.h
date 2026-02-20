@@ -31,8 +31,8 @@ public:
     virtual CORE_NS::ResourceContextPtr GetContext() const = 0;
 };
 
-META_INTERFACE_TYPE(META_NS::IResourceGroupHandle)
-
 META_END_NAMESPACE()
+
+META_INTERFACE_TYPE(META_NS::IResourceGroupHandle)
 
 #endif
