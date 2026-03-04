@@ -35,7 +35,7 @@ class NilNode : public IntroduceInterfaces<BaseObject, INilNode> {
     META_OBJECT(NilNode, ClassId::NilNode, IntroduceInterfaces)
 public:
     NilNode() = default;
-    void Apply(ISerNodeVisitor& v) override
+    void Apply(ISerNodeVisitor& v) const override
     {
         v.Visit(*this);
     }
@@ -67,7 +67,7 @@ public:
         elements.push_back(NamedNode { BASE_NS::string(name), BASE_NS::move(n) });
     }
 
-    void Apply(ISerNodeVisitor& v) override
+    void Apply(ISerNodeVisitor& v) const override
     {
         v.Visit(*this);
     }
@@ -92,7 +92,7 @@ public:
         elements.push_back(node);
     }
 
-    void Apply(ISerNodeVisitor& v) override
+    void Apply(ISerNodeVisitor& v) const override
     {
         v.Visit(*this);
     }
@@ -153,7 +153,7 @@ public:
         members = BASE_NS::move(n);
     }
 
-    void Apply(ISerNodeVisitor& v) override
+    void Apply(ISerNodeVisitor& v) const override
     {
         v.Visit(*this);
     }
@@ -190,7 +190,7 @@ public:
         object = BASE_NS::move(obj);
     }
 
-    void Apply(ISerNodeVisitor& v) override
+    void Apply(ISerNodeVisitor& v) const override
     {
         v.Visit(*this);
     }
@@ -220,7 +220,7 @@ public:
         value = v;
     }
 
-    void Apply(ISerNodeVisitor& v) override
+    void Apply(ISerNodeVisitor& v) const override
     {
         v.Visit(*this);
     }

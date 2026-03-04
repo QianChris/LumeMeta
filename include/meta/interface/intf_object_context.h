@@ -42,7 +42,6 @@ public:
 
 META_END_NAMESPACE()
 
-
 META_BEGIN_NAMESPACE()
 
 /**

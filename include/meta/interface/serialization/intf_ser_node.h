@@ -33,7 +33,7 @@ class ISerNode : public CORE_NS::IInterface {
     META_INTERFACE(CORE_NS::IInterface, ISerNode, "eea35313-5add-4408-ae62-0dd7464b986c")
 public:
     /// Apply visitor for the node
-    virtual void Apply(ISerNodeVisitor&) = 0;
+    virtual void Apply(ISerNodeVisitor&) const = 0;
 };
 
 /// Serialisation intermediate form root node

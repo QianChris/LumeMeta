@@ -635,8 +635,7 @@ UNIT_TEST_F(API_CompositeObjectProviderTest, DisposeUnknownObject, testing::ext:
 UNIT_TEST_F(API_CompositeObjectProviderTest, AddProviderWithZeroObjects, testing::ext::TestSize.Level1)
 {
     bool addFired = false;
-    prov_->OnDataAdded()->AddHandler(
-        MakeCallback<IOnDataAdded>([&](auto index, auto count) { addFired = true; }));
+    prov_->OnDataAdded()->AddHandler(MakeCallback<IOnDataAdded>([&](auto index, auto count) { addFired = true; }));
 
     auto cont = interface_cast<IContainer>(prov_);
     cont->Add(CreateProvider(0, 0));

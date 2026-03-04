@@ -507,8 +507,8 @@ TEST_F(API_ResourceSerializationTest, AnimationTemplateWithBaseResource)
         }
 
         ASSERT_TRUE(resources_->AddResource(resource, ""));
-        ASSERT_EQ(
-            resources_->Export("app://test_base_anim_resource.resources", context_), CORE_NS::IResourceManager::Result::OK);
+        ASSERT_EQ(resources_->Export("app://test_base_anim_resource.resources", context_),
+            CORE_NS::IResourceManager::Result::OK);
 
         resources_->RemoveAllResources();
     }
