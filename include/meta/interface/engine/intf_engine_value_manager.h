@@ -88,6 +88,8 @@ public:
     virtual BASE_NS::vector<IProperty::Ptr> ConstructAllProperties() const = 0;
     /// Get all engine values
     virtual BASE_NS::vector<IEngineValue::Ptr> GetAllEngineValues() const = 0;
+    /// Check if any engine values exist
+    virtual bool HasValues() const = 0;
     /// Construct property from engine value with given name
     template<typename Type>
     Property<Type> ConstructProperty(BASE_NS::string_view name)

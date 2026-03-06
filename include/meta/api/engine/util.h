@@ -15,10 +15,41 @@
 #ifndef META_API_ENGINE_UTIL_H
 #define META_API_ENGINE_UTIL_H
 
+#include <core/property/intf_property_api.h>
+
 #include <meta/api/util.h>
 #include <meta/interface/engine/intf_engine_value_manager.h>
 
 META_BEGIN_NAMESPACE()
+
+/**
+ * @brief Info about an engine property without creating engine values or bridges
+ */
+struct EnginePropertyInfo {
+    BASE_NS::string name;
+    CORE_NS::PropertyTypeDecl type;
+};
+
+/**
+ * @brief Enumerate property names and types from a component manager without creating engine values.
+ * @param manager The component manager to enumerate properties from
+ * @param namePrefix Property name prefix
+ * @param out Vector to append the the info to.
+ */
+inline void EnumerateEngineProperties(const CORE_NS::IComponentManager& manager, BASE_NS::string_view namePrefix,
+    BASE_NS::vector<EnginePropertyInfo>& out)
+{
+    for (auto& prop : manager.GetPropertyApi().MetaData()) {
+        EnginePropertyInfo info;
+        if (namePrefix.empty()) {
+            info.name = BASE_NS::string(prop.name);
+        } else {
+            info.name = BASE_NS::string(namePrefix) + "." + prop.name;
+        }
+        info.type = prop.type;
+        out.push_back(BASE_NS::move(info));
+    }
+}
 
 /**
  * @brief Populate engine values recursively from IEngineValue

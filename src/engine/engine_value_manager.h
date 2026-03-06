@@ -51,6 +51,7 @@ public:
 
     BASE_NS::vector<IProperty::Ptr> ConstructAllProperties() const override;
     BASE_NS::vector<IEngineValue::Ptr> GetAllEngineValues() const override;
+    bool HasValues() const override;
 
     bool Sync(EngineSyncDirection) override;
 

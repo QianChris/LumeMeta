@@ -361,6 +361,12 @@ BASE_NS::vector<IEngineValue::Ptr> EngineValueManager::GetAllEngineValues() cons
     return ret;
 }
 
+bool EngineValueManager::HasValues() const
+{
+    std::shared_lock lock { mutex_ };
+    return !values_.empty();
+}
+
 void EngineValueManager::NotifySyncs()
 {
     BASE_NS::vector<IEngineValue::Ptr> values;
