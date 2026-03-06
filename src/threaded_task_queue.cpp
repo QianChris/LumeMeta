@@ -29,11 +29,11 @@
 
 #include <meta/base/interface_macros.h>
 #include <meta/base/namespace.h>
+#include <meta/ext/object.h>
 #include <meta/interface/intf_task_queue.h>
 #include <meta/interface/intf_task_queue_registry.h>
 
 #include "future.h"
-#include "object.h"
 #include "task_queue.h"
 
 META_BEGIN_NAMESPACE()

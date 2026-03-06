@@ -111,7 +111,9 @@ public:
     }
 
 private:
-    uint64_t threadId_ { 0 };
+    // clang-format off
+    uint64_t threadId_{0};
+    // clang-format on
     TimeSpan lastTime_;
 };
 // Internal api for engine task queue
