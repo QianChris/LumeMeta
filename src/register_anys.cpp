@@ -30,7 +30,6 @@
 #include <meta/interface/intf_attach.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_startable.h>
-#include <meta/interface/loaders/intf_content_loader.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -84,7 +83,6 @@ using ObjectTypes = TypeList<
     IValue::ConstPtr,
     IValue::WeakPtr,
     IValue::ConstWeakPtr,
-    IContentLoader::Ptr,
     IProperty::Ptr,
     IProperty::ConstPtr,
     IProperty::WeakPtr,

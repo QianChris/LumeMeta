@@ -17,12 +17,10 @@
 
 #include <meta/api/iteration.h>
 #include <meta/api/object.h>
-#include <meta/interface/loaders/intf_class_content_loader.h>
 
 #include "helpers/serialisation_utils.h"
 #include "helpers/test_utils.h"
 #include "helpers/testing_objects.h"
-#include "helpers/util.h"
 
 META_BEGIN_NAMESPACE()
 namespace UTest {

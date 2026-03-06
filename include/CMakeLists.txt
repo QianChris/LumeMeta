@@ -125,14 +125,7 @@ target_sources(${PLUGIN_NAME}API PUBLIC
     meta/interface/intf_tickable.h
     meta/interface/intf_tickable_controller.h
     meta/interface/intf_value.h
-    meta/interface/loaders/intf_class_content_loader.h
-    meta/interface/loaders/intf_content_loader.h
-    meta/interface/loaders/intf_dynamic_content_loader.h
-    meta/interface/loaders/intf_file_content_loader.h
     meta/interface/metadata_query.h
-    meta/interface/model/data_model_index.h
-    meta/interface/model/intf_data_model.h
-    meta/interface/model/intf_object_provider.h
     meta/interface/object_macros.h
     meta/interface/object_type_info.h
     meta/interface/property/array_property.h

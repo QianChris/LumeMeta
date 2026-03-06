@@ -148,11 +148,6 @@ set(test_sources
     src/interface/intf_startable_controller_test.cpp
     src/interface/intf_task_queue_registry_test.cpp
     src/interface/intf_task_queue_test.cpp
-    src/interface/loaders/class_content_loader_test.cpp
-    src/interface/loaders/csv_string_resource_loader_test.cpp
-    src/interface/loaders/json_content_loader_test.cpp
-    src/interface/model/intf_data_model_test.cpp
-    src/interface/model/intf_object_provider_test.cpp
     src/interface/property/array_property_test.cpp
     src/interface/property/intf_modifier_test.cpp
     src/interface/property/property_test.cpp

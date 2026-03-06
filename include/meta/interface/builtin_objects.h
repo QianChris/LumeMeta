@@ -51,38 +51,6 @@ META_REGISTER_CLASS(ManualClock, "7069eb20-4fe8-4c78-8d98-9a5938b09170", ObjectC
 META_REGISTER_CLASS(ClampIntegerValidator, "3b8278a3-e50b-4e56-8cc1-990370ed5aa7", ObjectCategoryBits::NO_CATEGORY)
 
 /**
- * @brief Implementation of data model that implements IContainer interface.
- */
-META_REGISTER_CLASS(ContainerDataModel, "84911f22-92ad-47fe-9399-cc0e9222affa", ObjectCategoryBits::NO_CATEGORY)
-
-/**
- * @brief Implementation that instantiates objects with given class uid and sets properties from the data for this
- * object Note: "Model." is added to the property names of data when added to the created object instance. CreateObject:
- * Creates object by giving metadata from the model as Build argument. If object implements IRecyclable, Rebuild is
- * being called with the metadata. Otherwise matching properties are added to the object and those bind to the original
- * data. DisposeObject: If object implements IRecyclable, Dispose is called, otherwise all properties without NATIVE
- * flag are reset. Recycles objects based on the cache hint.
- */
-META_REGISTER_CLASS(
-    InstantiatingObjectProvider, "208fc857-2d5c-4eb9-98e4-de45eba5e2ca", ObjectCategoryBits::NO_CATEGORY)
-
-/**
- * @brief Implements object provider that uses content loader interface to create the objects.
- */
-META_REGISTER_CLASS(
-    ContentLoaderObjectProvider, "f5ab9348-43cf-4154-bdd6-11d7ed6082d6", ObjectCategoryBits::NO_CATEGORY)
-
-/**
- * @brief Implementation that provides view over many IObjectProviders as single IObjectProvider. Implements IContainer.
- */
-META_REGISTER_CLASS(CompositeObjectProvider, "f0eaec42-f6b2-43f0-b487-52ddbda305bb", ObjectCategoryBits::NO_CATEGORY)
-
-/** Content loaders */
-META_REGISTER_CLASS(CsvStringResourceLoader, "2e264ba2-a9a3-4f95-bac6-339b6c3ea033", ObjectCategoryBits::NO_CATEGORY)
-META_REGISTER_CLASS(JsonContentLoader, "b9d3860f-2a7e-4ac0-8140-542aea4a5e09", ObjectCategoryBits::NO_CATEGORY)
-META_REGISTER_CLASS(ClassContentLoader, "5d2bebca-f12c-11ec-8ea0-0242ac120002", ObjectCategoryBits::NO_CATEGORY)
-
-/**
  * @brief Default Event <-> Meta function connector object.
  */
 META_REGISTER_CLASS(Connector, "5b643aaa-c6f2-4839-b145-3afcb04d4125", ObjectCategoryBits::NO_CATEGORY)

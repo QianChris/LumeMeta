@@ -78,27 +78,9 @@ target_sources(${PLUGIN_NAME} PRIVATE
     future.cpp
     future.h
     keep_alive.h
-    loaders/class_content_loader.cpp
-    loaders/class_content_loader.h
-    loaders/csv_parser.cpp
-    loaders/csv_parser.h
-    loaders/csv_string_resource_loader.cpp
-    loaders/csv_string_resource_loader.h
-    loaders/json_content_loader.cpp
-    loaders/json_content_loader.h
     manual_clock.cpp
     meta_object_lib.cpp
     meta_object_lib.h
-    model/composite_object_provider.cpp
-    model/composite_object_provider.h
-    model/container_data_model.cpp
-    model/container_data_model.h
-    model/content_loader_object_provider.cpp
-    model/content_loader_object_provider.h
-    model/instantiating_object_provider.cpp
-    model/instantiating_object_provider.h
-    model/object_provider_base.cpp
-    model/object_provider_base.h
     number.cpp
     number.h
     object.h
