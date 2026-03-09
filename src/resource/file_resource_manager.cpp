@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "file_resource_manager.h"
-
 #ifdef __OHOS__
 #include <iomanip>
 #else
 #include "iomanip_wo_exceptions.h"
 #endif
+
 #include <sstream>
 
 #include <base/containers/flat_map.h>
@@ -31,6 +30,7 @@
 #include <meta/ext/minimal_object.h>
 #include <meta/interface/resource/intf_resource.h>
 
+#include "file_resource_manager.h"
 #include "resource_group_handle.h"
 
 META_BEGIN_NAMESPACE()

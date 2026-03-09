@@ -23,6 +23,8 @@
 #include <core/io/intf_file.h>
 #include <core/log.h>
 
+#include <meta/base/namespace.h>
+
 META_BEGIN_NAMESPACE()
 
 struct MemFile : public CORE_NS::IFile {
