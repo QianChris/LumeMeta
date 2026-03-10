@@ -101,7 +101,7 @@ public:
 
 #if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
         //  Load engine lib
-        m_engineLib.Load("/system/lib64/libAGPDLL.z.so");
+        m_engineLib.Load(OHOS_PLATFORM_CORE_PATH "libAGPDLL.z.so");
         CORE_ASSERT(m_engineLib.IsLoaded());
 
         // Load functions
