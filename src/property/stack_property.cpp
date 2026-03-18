@@ -436,6 +436,10 @@ void StackProperty::RemoveAll()
 }
 ReturnError StackProperty::Export(IExportContext& c) const
 {
+    if (requiresEvaluation_) {
+        // evaluate to make sure we have fresh values to export
+        RawGetValue();
+    }
     return Serializer(c) & NamedValue("defaultValue", defaultValue_) & NamedValue("values", values_) &
            NamedValue("modifiers", modifiers_);
 }
