@@ -20,6 +20,7 @@
 #include <meta/interface/intf_task_queue.h>
 #include <meta/interface/property/array_property.h>
 #include <meta/interface/property/property.h>
+#include <meta/interface/property/property_events.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -58,11 +59,29 @@ public:
     virtual void SetNotificationQueue(const ITaskQueue::WeakPtr&) = 0;
 
     /**
-     * @brief Synchronise engine values with core engine
-     *        Allows to specify direction to synchronise to.
+     * @brief Set a callable that is invoked when an engine value becomes dirty.
+     *        This allows the owner to schedule a TO_ENGINE sync without per-property OnChanged handlers.
+     */
+    virtual void SetDirtyNotifier(const IOnChanged::InterfaceTypePtr& notifier) = 0;
+
+    /**
+     * @brief Called internally by engine values when they become dirty.
+     *        Invokes the notifier set via SetDirtyNotifier.
+     */
+    virtual void NotifyDirty() = 0;
+
+    /**
+     * @brief Synchronise engine values with core engine.
+     *        When componentManager is non-null, only values belonging to that manager are synced.
      * @note  This must be called in correct thread because it touches the core engine
      */
-    virtual bool Sync(EngineSyncDirection) = 0;
+    virtual bool Sync(EngineSyncDirection dir, const CORE_NS::IComponentManager* componentManager) = 0;
+
+    /** @brief Convenience overload that syncs all values. */
+    bool Sync(EngineSyncDirection dir)
+    {
+        return Sync(dir, nullptr);
+    }
 
     /// Add engine values from the handle
     virtual bool ConstructValues(EnginePropertyHandle handle, EngineValueOptions) = 0;

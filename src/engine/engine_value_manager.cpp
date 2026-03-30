@@ -14,6 +14,7 @@
  */
 #include "engine_value_manager.h"
 
+#include <algorithm>
 #include <charconv>
 #include <mutex>
 
@@ -22,7 +23,6 @@
 
 #include <meta/api/engine/util.h>
 #include <meta/api/make_callback.h>
-#include <meta/ext/event_util.h>
 #include <meta/interface/engine/intf_engine_data.h>
 #include <meta/interface/intf_task_queue_registry.h>
 
@@ -42,6 +42,7 @@ static Type ReadValueFromEngine(const EnginePropertyParams& params)
 
 EngineValueManager::~EngineValueManager()
 {
+    EngineValueManager::RemoveAll();
     ITaskQueue::WeakPtr q;
     ITaskQueue::Token token {};
     {
@@ -60,6 +61,32 @@ void EngineValueManager::SetNotificationQueue(const ITaskQueue::WeakPtr& q)
 {
     queue_ = q;
 }
+
+void EngineValueManager::SetDirtyNotifier(const IOnChanged::InterfaceTypePtr& notifier)
+{
+    dirtyNotifier_ = notifier;
+}
+
+void EngineValueManager::NotifyDirty()
+{
+    if (dirtyNotifier_) {
+        dirtyNotifier_->Invoke();
+    }
+}
+
+EngineValueManager::ValueList::iterator EngineValueManager::FindValue(BASE_NS::string_view name)
+{
+    auto it = std::lower_bound(values_.begin(), values_.end(), name,
+        [](const ValueEntry& entry, BASE_NS::string_view n) { return entry.name < n; });
+    return (it != values_.end() && it->name == name) ? it : values_.end();
+}
+
+EngineValueManager::ValueList::const_iterator EngineValueManager::FindValue(BASE_NS::string_view name) const
+{
+    auto it = std::lower_bound(values_.cbegin(), values_.cend(), name,
+        [](const ValueEntry& entry, BASE_NS::string_view n) { return entry.name < n; });
+    return (it != values_.cend() && it->name == name) ? it : values_.cend();
+}
 static IEngineValueInternal::Ptr GetCompatibleValueInternal(IEngineValue::Ptr p, EnginePropertyParams params)
 {
     IEngineValueInternal::Ptr ret;
@@ -72,6 +99,14 @@ static IEngineValueInternal::Ptr GetCompatibleValueInternal(IEngineValue::Ptr p,
     }
     return ret;
 }
+void EngineValueManager::RemoveDirtyValue(IEngineValue* value)
+{
+    std::lock_guard dirtyLock { dirtyList_.mutex };
+    dirtyList_.values.erase(
+        std::remove(dirtyList_.values.begin(), dirtyList_.values.end(), value), dirtyList_.values.end());
+    static_cast<EngineValue*>(value)->ClearDirtyList();
+}
+
 IEngineValue::Ptr EngineValueManager::AddValue(EnginePropertyParams p, EngineValueOptions options)
 {
     BASE_NS::string name { p.property.name };
@@ -84,19 +119,24 @@ IEngineValue::Ptr EngineValueManager::AddValue(EnginePropertyParams p, EngineVal
     }
     if (auto access = META_NS::GetObjectRegistry().GetEngineData().GetInternalValueAccess(p.property.type)) {
         IEngineValue::Ptr v;
-        if (auto it = values_.find(name); it != values_.end()) {
-            if (auto acc = GetCompatibleValueInternal(it->second.value, p)) {
-                InterfaceUniqueLock valueLock { it->second.value };
+        auto pos = std::lower_bound(values_.begin(), values_.end(), name,
+            [](const ValueEntry& entry, BASE_NS::string_view n) { return entry.name < n; });
+        if (pos != values_.end() && pos->name == name) {
+            if (auto acc = GetCompatibleValueInternal(pos->value, p)) {
+                InterfaceUniqueLock valueLock { pos->value };
                 acc->SetPropertyParams(p);
-                v = it->second.value;
+                v = pos->value;
             } else {
-                values_.erase(it);
+                RemoveDirtyValue(pos->value.get());
+                pos = values_.erase(pos);
             }
         }
         if (!v) {
-            v = IEngineValue::Ptr(new EngineValue(name, access, p));
+            auto* ev = new EngineValue(name, access, p);
+            ev->SetDirtyList(&dirtyList_);
+            v = IEngineValue::Ptr(ev);
             v->Sync(META_NS::EngineSyncDirection::FROM_ENGINE);
-            values_[name] = ValueInfo { v };
+            values_.insert(pos, ValueEntry { name, v });
         }
         if (options.values) {
             options.values->push_back(v);
@@ -307,9 +347,10 @@ bool EngineValueManager::ConstructValue(
 bool EngineValueManager::RemoveValue(BASE_NS::string_view name)
 {
     std::unique_lock lock { mutex_ };
-    auto it = values_.find(name);
+    auto it = FindValue(name);
     bool ret = it != values_.end();
     if (ret) {
+        RemoveDirtyValue(it->value.get());
         values_.erase(it);
     }
     return ret;
@@ -317,7 +358,16 @@ bool EngineValueManager::RemoveValue(BASE_NS::string_view name)
 
 void EngineValueManager::RemoveAll()
 {
+    {
+        std::lock_guard dirtyLock { dirtyList_.mutex };
+        dirtyList_.values.clear();
+    }
     std::unique_lock lock { mutex_ };
+    for (auto& v : values_) {
+        if (auto* ev = static_cast<EngineValue*>(v.value.get())) {
+            ev->ClearDirtyList();
+        }
+    }
     values_.clear();
 }
 
@@ -326,9 +376,9 @@ IProperty::Ptr EngineValueManager::ConstructProperty(BASE_NS::string_view name) 
     IEngineValue::Ptr value;
     {
         std::shared_lock lock { mutex_ };
-        auto it = values_.find(name);
+        auto it = FindValue(name);
         if (it != values_.end()) {
-            value = it->second.value;
+            value = it->value;
         }
     }
     return PropertyFromEngineValue(name, value);
@@ -339,7 +389,7 @@ BASE_NS::vector<IProperty::Ptr> EngineValueManager::ConstructAllProperties() con
     BASE_NS::vector<IProperty::Ptr> ret;
     std::shared_lock lock { mutex_ };
     for (auto&& v : values_) {
-        ret.push_back(PropertyFromEngineValue(v.first, v.second.value));
+        ret.push_back(PropertyFromEngineValue(v.name, v.value));
     }
     return ret;
 }
@@ -347,8 +397,8 @@ BASE_NS::vector<IProperty::Ptr> EngineValueManager::ConstructAllProperties() con
 IEngineValue::Ptr EngineValueManager::GetEngineValue(BASE_NS::string_view name) const
 {
     std::shared_lock lock { mutex_ };
-    auto it = values_.find(name);
-    return it != values_.end() ? it->second.value : nullptr;
+    auto it = FindValue(name);
+    return it != values_.end() ? it->value : nullptr;
 }
 
 BASE_NS::vector<IEngineValue::Ptr> EngineValueManager::GetAllEngineValues() const
@@ -356,7 +406,7 @@ BASE_NS::vector<IEngineValue::Ptr> EngineValueManager::GetAllEngineValues() cons
     BASE_NS::vector<IEngineValue::Ptr> ret;
     std::shared_lock lock { mutex_ };
     for (auto&& v : values_) {
-        ret.push_back(v.second.value);
+        ret.push_back(v.value);
     }
     return ret;
 }
@@ -373,45 +423,122 @@ void EngineValueManager::NotifySyncs()
     {
         std::unique_lock lock { mutex_ };
         for (auto&& v : values_) {
-            if (auto i = interface_cast<IEngineValueInternal>(v.second.value); i && i->ResetPendingNotify()) {
-                values.push_back(v.second.value);
+            if (auto i = interface_cast<IEngineValueInternal>(v.value); i && i->ResetPendingNotify()) {
+                values.push_back(v.value);
             }
         }
         task_token_ = {};
     }
     for (auto&& v : values) {
-        if (auto noti = interface_cast<INotifyOnChange>(v)) {
-            Invoke<IOnChanged>(noti->OnChanged());
-        }
+        static_cast<EngineValue*>(v.get())->InvokeChangeCallbacks();
     }
 }
 
-static AnyReturnValue SyncValue(const IEngineValue::Ptr& value, EngineSyncDirection dir)
+static AnyReturnValue SyncValueParentDependency(IEngineValue* value)
 {
-    AnyReturnValue res = AnyReturn::SUCCESS;
-    InterfaceUniqueLock valueLock { value };
-    if (auto i = interface_pointer_cast<IEngineValueInternal>(value)) {
-        // if this engine value depends on another one, sync the dependency first
+    if (auto i = interface_cast<IEngineValueInternal>(value)) {
         if (auto pv = interface_pointer_cast<IEngineValue>(i->GetPropertyParams().handle.parentValue)) {
-            // make sure the parent is synchronised, either direction
-            res = SyncValue(pv, EngineSyncDirection::AUTO);
+            InterfaceUniqueLock parentLock { pv };
+            auto res = SyncValueParentDependency(pv.get());
+            if (!res) {
+                return res;
+            }
+            return pv->Sync(EngineSyncDirection::AUTO);
         }
     }
+    return AnyReturn::SUCCESS;
+}
+
+static AnyReturnValue SyncValue(IEngineValue* value, EngineSyncDirection dir)
+{
+    InterfaceUniqueLock valueLock { value };
+    auto res = SyncValueParentDependency(value);
     return res ? value->Sync(dir) : res;
 }
 
-bool EngineValueManager::Sync(EngineSyncDirection dir)
+static CORE_NS::IComponentManager* GetComponentManager(IEngineValue* value)
+{
+    if (auto i = interface_cast<IEngineValueInternal>(value)) {
+        return i->GetPropertyParams().handle.manager;
+    }
+    return nullptr;
+}
+
+BASE_NS::vector<IEngineValue*> EngineValueManager::StealDirtyValues(const CORE_NS::IComponentManager* componentManager)
+{
+    std::lock_guard dirtyLock { dirtyList_.mutex };
+    if (!componentManager) {
+        // No component manager specified, return all
+        return BASE_NS::move(dirtyList_.values);
+    }
+    BASE_NS::vector<IEngineValue*> result;
+    size_t write = 0;
+    // Extract matching values into result
+    for (size_t i = 0; i < dirtyList_.values.size(); ++i) {
+        if (Internal::GetComponentManager(dirtyList_.values[i]) == componentManager) {
+            result.push_back(dirtyList_.values[i]);
+        } else {
+            dirtyList_.values[write++] = dirtyList_.values[i];
+        }
+    }
+    dirtyList_.values.resize(write);
+    return result;
+}
+
+bool EngineValueManager::Sync(EngineSyncDirection dir, const CORE_NS::IComponentManager* componentManager)
 {
     bool ret = true;
     bool notify = false;
     {
         std::unique_lock lock { mutex_ };
-        for (auto&& v : values_) {
-            auto res = SyncValue(v.second.value, dir);
-            if (res && res != AnyReturn::NOTHING_TO_DO) {
-                notify = true;
+
+        auto syncAllValues = [&](EngineSyncDirection syncDir, bool skipUnobserved = false) {
+            for (auto&& v : values_) {
+                if (componentManager && Internal::GetComponentManager(v.value.get()) != componentManager) {
+                    continue;
+                }
+                // When syncing FROM_ENGINE, skip values that have no change callbacks registered.
+                // Nobody is observing the value, so pulling from engine is wasted work.
+                if (skipUnobserved) {
+                    if (auto* ev = static_cast<EngineValue*>(v.value.get()); ev->CanSkipFromEngineSync()) {
+                        continue;
+                    }
+                }
+                auto res = SyncValue(v.value.get(), syncDir);
+                if (res && res != AnyReturn::NOTHING_TO_DO) {
+                    notify = true;
+                }
+                ret = ret && res;
             }
-            ret = ret && res;
+        };
+
+        if (dir == EngineSyncDirection::TO_ENGINE) {
+            // Only sync values that have been modified since last sync.
+            auto dirtyValues = StealDirtyValues(componentManager);
+            for (auto* ev : dirtyValues) {
+                auto res = SyncValue(ev, dir);
+                if (res && res != AnyReturn::NOTHING_TO_DO) {
+                    notify = true;
+                }
+                ret = ret && res;
+            }
+        } else if (dir == EngineSyncDirection::AUTO) {
+            // Two-pass AUTO: first flush dirty values TO_ENGINE, then read all FROM_ENGINE.
+            // This ensures child writes (e.g. "vec.x") complete before parents read back,
+            // which matters because sorted iteration processes parents before children.
+            auto dirtyValues = StealDirtyValues(componentManager);
+            for (auto* ev : dirtyValues) {
+                auto res = SyncValue(ev, EngineSyncDirection::AUTO);
+                if (res && res != AnyReturn::NOTHING_TO_DO) {
+                    notify = true;
+                }
+                ret = ret && res;
+            }
+            // Skip unobserved values only when nothing was written to engine.
+            // If values were flushed, related values (e.g. vec.x after vec was written) must be re-read.
+            syncAllValues(EngineSyncDirection::FROM_ENGINE, dirtyValues.empty());
+        } else {
+            syncAllValues(dir);
         }
         notify = notify && !task_token_;
         if (notify && !queue_.expired()) {

@@ -15,6 +15,8 @@
 #ifndef META_SRC_ENGINE_ENGINE_INPUT_PROPERTY_MANAGER_H
 #define META_SRC_ENGINE_ENGINE_INPUT_PROPERTY_MANAGER_H
 
+#include <base/containers/unordered_map.h>
+
 #include <meta/interface/engine/intf_engine_input_property_manager.h>
 
 #include "engine_value_manager.h"

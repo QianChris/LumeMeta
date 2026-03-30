@@ -20,6 +20,7 @@
 #include <meta/api/make_callback.h>
 #include <meta/base/interface_macros.h>
 #include <meta/base/namespace.h>
+#include <meta/interface/intf_notify_on_change.h>
 #include <meta/interface/property/intf_stack_property.h>
 #include <meta/interface/serialization/intf_serializable.h>
 
@@ -28,7 +29,8 @@
 META_BEGIN_NAMESPACE()
 namespace Internal {
 
-class StackProperty : public IntroduceInterfaces<GenericProperty, IStackProperty, ISerializable> {
+class StackProperty
+    : public IntroduceInterfaces<GenericProperty, IStackProperty, ISerializable, INotifyOnChangeCallback> {
     using Super = IntroduceInterfaces;
 
 public:
@@ -78,6 +80,11 @@ public:
             self);
     }
 
+    INotifyOnChangeCallback::Ptr GetSelfCallback()
+    {
+        return interface_pointer_cast<INotifyOnChangeCallback>(self_.lock());
+    }
+
 protected:
     AnyReturnValue TryToSetToValue(const IAny& v, IValue::Ptr& value);
     AnyReturnValue SetValueInValueStack(const IAny& value);
@@ -85,6 +92,7 @@ protected:
     const IAny& GetValueFromStack() const;
     const IAny& RawGetValue() const;
     void CleanUp();
+    void SubscribePendingCallbacks();
 
     template<typename Vec>
     bool ProcessResetables(Vec& vec);
@@ -92,6 +100,11 @@ protected:
     ObjectId GetClassId() const override
     {
         return META_NS::ClassId::StackProperty.Id();
+    }
+
+    void NotifyChanged(INotifyOnChangeDirect&) override
+    {
+        InternalOnChanged();
     }
 
     void InternalOnChanged()

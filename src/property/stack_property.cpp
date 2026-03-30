@@ -17,6 +17,7 @@
 #include <meta/api/util.h>
 #include <meta/base/interface_utils.h>
 #include <meta/ext/serialization/serializer.h>
+#include <meta/interface/intf_notify_on_change.h>
 #include <meta/interface/property/intf_stack_resetable.h>
 
 #include "../any.h"
@@ -25,7 +26,44 @@
 META_BEGIN_NAMESPACE()
 namespace Internal {
 
+namespace {
+
+template<typename T>
+void SubscribeOnChanged(const T& obj, StackProperty& self, const ICallable::Ptr& legacyCb)
+{
+    if (auto d = interface_cast<INotifyOnChangeDirect>(obj)) {
+        d->AddChangeCallback(self.GetSelfCallback());
+    } else if (auto n = interface_cast<INotifyOnChange>(obj)) {
+        n->OnChanged()->AddHandler(legacyCb, reinterpret_cast<uintptr_t>(&self));
+    }
+}
+
+template<typename T>
+void UnsubscribeOnChanged(const T& obj, StackProperty& self, const ICallable::Ptr& legacyCb, bool reenable = false)
+{
+    if (auto d = interface_cast<INotifyOnChangeDirect>(obj)) {
+        d->RemoveChangeCallback(self.GetSelfCallback());
+    } else if (auto n = interface_cast<INotifyOnChange>(obj)) {
+        n->OnChanged()->RemoveHandler(reinterpret_cast<uintptr_t>(&self), reenable);
+    }
+}
+
+} // namespace
+
 StackProperty::StackProperty(BASE_NS::string name) : Super(BASE_NS::move(name)) {}
+
+void StackProperty::SubscribePendingCallbacks()
+{
+    if (defaultValue_) {
+        SubscribeOnChanged(defaultValue_, *this, onChangedCallback_);
+    }
+    for (auto&& v : values_) {
+        SubscribeOnChanged(v, *this, onChangedCallback_);
+    }
+    for (auto&& m : modifiers_) {
+        SubscribeOnChanged(m, *this, onChangedCallback_);
+    }
+}
 
 StackProperty::~StackProperty()
 {
@@ -34,19 +72,13 @@ StackProperty::~StackProperty()
 
 void StackProperty::CleanUp()
 {
-    if (auto i = interface_cast<INotifyOnChange>(defaultValue_)) {
-        i->OnChanged()->RemoveHandler(uintptr_t(this));
-    }
+    UnsubscribeOnChanged(defaultValue_, *this, onChangedCallback_);
     for (auto&& m : modifiers_) {
-        if (auto i = interface_cast<INotifyOnChange>(m)) {
-            i->OnChanged()->RemoveHandler(uintptr_t(this));
-        }
+        UnsubscribeOnChanged(m, *this, onChangedCallback_);
     }
     modifiers_.clear();
     for (auto&& v : values_) {
-        if (auto i = interface_cast<INotifyOnChange>(v)) {
-            i->OnChanged()->RemoveHandler(uintptr_t(this));
-        }
+        UnsubscribeOnChanged(v, *this, onChangedCallback_);
     }
     values_.clear();
 }
@@ -55,7 +87,8 @@ AnyReturnValue StackProperty::TryToSetToValue(const IAny& v, IValue::Ptr& value)
 {
     AnyReturnValue res = AnyReturn::FAIL;
 
-    auto noti = interface_cast<INotifyOnChange>(value);
+    // INotifyOnChangeDirect values have deferred notifications, no need to suppress.
+    auto noti = interface_cast<INotifyOnChangeDirect>(value) ? nullptr : interface_cast<INotifyOnChange>(value);
     InterfaceUniqueLock lock { value };
     if (noti) {
         noti->OnChanged()->EnableHandler(uintptr_t(this), false);
@@ -78,17 +111,13 @@ AnyReturnValue StackProperty::SetValueInValueStack(const IAny& value)
         if (res) {
             break;
         }
-        if (auto noti = interface_cast<INotifyOnChange>(values_[i])) {
-            noti->OnChanged()->RemoveHandler(uintptr_t(this), true);
-        }
+        UnsubscribeOnChanged(values_[i], *this, onChangedCallback_, true);
         values_.pop_back();
     }
     // if there was no any to set the new value, create one
     if (!res) {
         if (auto c = interface_pointer_cast<IValue>(value.Clone(true))) {
-            if (auto i = interface_cast<INotifyOnChange>(c)) {
-                i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
-            }
+            SubscribeOnChanged(c, *this, onChangedCallback_);
             values_.push_back(c);
             res = AnyReturn::SUCCESS;
         } else {
@@ -249,18 +278,14 @@ ReturnError StackProperty::PushValue(const IValue::Ptr& value)
             return GenericError::RECURSIVE_CALL;
         }
     }
-    if (auto i = interface_cast<INotifyOnChange>(value)) {
-        i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
-    }
+    SubscribeOnChanged(value, *this, onChangedCallback_);
     NotifyChange();
     return GenericError::SUCCESS;
 }
 ReturnError StackProperty::PopValue()
 {
     if (!values_.empty()) {
-        if (auto i = interface_cast<INotifyOnChange>(values_.back())) {
-            i->OnChanged()->RemoveHandler(uintptr_t(this));
-        }
+        UnsubscribeOnChanged(values_.back(), *this, onChangedCallback_);
         values_.pop_back();
         NotifyChange();
         return GenericError::SUCCESS;
@@ -276,9 +301,7 @@ ReturnError StackProperty::RemoveValue(const IValue::Ptr& value)
     size_t index = 0;
     for (auto m = values_.rbegin(); m != values_.rend(); ++m, ++index) {
         if (*m == value) {
-            if (auto i = interface_cast<INotifyOnChange>(*m)) {
-                i->OnChanged()->RemoveHandler(uintptr_t(this));
-            }
+            UnsubscribeOnChanged(*m, *this, onChangedCallback_);
             values_.erase(m.base() - 1);
             // notify if the top-most value was removed (i.e. pop value)
             if (index == 0) {
@@ -307,9 +330,7 @@ ReturnError StackProperty::InsertModifier(IndexType pos, const IModifier::Ptr& m
         CORE_LOG_W("Incompatible modifier");
         return GenericError::INCOMPATIBLE_TYPES;
     }
-    if (auto i = interface_cast<INotifyOnChange>(mod)) {
-        i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
-    }
+    SubscribeOnChanged(mod, *this, onChangedCallback_);
     IndexType i = pos < modifiers_.size() ? pos : modifiers_.size();
     modifiers_.insert(modifiers_.begin() + i, mod);
     NotifyChange();
@@ -321,9 +342,7 @@ IModifier::Ptr StackProperty::RemoveModifier(IndexType pos)
     if (pos < modifiers_.size()) {
         p = modifiers_[pos];
         modifiers_.erase(modifiers_.begin() + pos);
-        if (auto i = interface_cast<INotifyOnChange>(p)) {
-            i->OnChanged()->RemoveHandler(uintptr_t(this));
-        }
+        UnsubscribeOnChanged(p, *this, onChangedCallback_);
         NotifyChange();
     }
     return p;
@@ -332,9 +351,7 @@ ReturnError StackProperty::RemoveModifier(const IModifier::Ptr& mod)
 {
     for (auto m = modifiers_.begin(); m != modifiers_.end(); ++m) {
         if (*m == mod) {
-            if (auto i = interface_cast<INotifyOnChange>(*m)) {
-                i->OnChanged()->RemoveHandler(uintptr_t(this));
-            }
+            UnsubscribeOnChanged(*m, *this, onChangedCallback_);
             modifiers_.erase(m);
             NotifyChange();
             return GenericError::SUCCESS;
@@ -379,10 +396,15 @@ AnyReturnValue StackProperty::SetInternalAny(IAny::Ptr any)
 {
     auto res = Super::SetInternalAny(any);
     if (res) {
-        defaultValue_ = any->Clone(true);
-        if (auto i = interface_cast<INotifyOnChange>(defaultValue_)) {
-            i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
+        UnsubscribeOnChanged(defaultValue_, *this, onChangedCallback_);
+        for (auto&& v : values_) {
+            UnsubscribeOnChanged(v, *this, onChangedCallback_);
         }
+        for (auto&& m : modifiers_) {
+            UnsubscribeOnChanged(m, *this, onChangedCallback_);
+        }
+        defaultValue_ = any->Clone(true);
+        SubscribeOnChanged(defaultValue_, *this, onChangedCallback_);
         currentValue_ = defaultValue_->Clone(true);
         requiresEvaluation_ = true;
         values_.clear();
@@ -405,6 +427,7 @@ bool StackProperty::ProcessResetables(Vec& vec)
             res = rable->ProcessOnReset(*defaultValue_);
         }
         if (res & RESET_REMOVE_ME) {
+            UnsubscribeOnChanged(vec[i], *this, onChangedCallback_);
             vec.erase(vec.begin() + i);
         }
         if (res & RESET_STOP) {
@@ -426,7 +449,13 @@ void StackProperty::ResetValue()
 }
 void StackProperty::RemoveAll()
 {
+    for (auto&& v : values_) {
+        UnsubscribeOnChanged(v, *this, onChangedCallback_);
+    }
     values_.clear();
+    for (auto&& m : modifiers_) {
+        UnsubscribeOnChanged(m, *this, onChangedCallback_);
+    }
     modifiers_.clear();
     // reset the currentValue_ and internal value so we don't accidentally keep any shared_ptrs alive
     currentValue_ = defaultValue_->Clone(false);
@@ -455,27 +484,21 @@ ReturnError StackProperty::Import(IImportContext& c)
         if (!defaultValue_) {
             return GenericError::FAIL;
         }
-        if (auto i = interface_cast<INotifyOnChange>(defaultValue_)) {
-            i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
-        }
+        SubscribeOnChanged(defaultValue_, *this, onChangedCallback_);
         if (auto res = Super::SetInternalAny(defaultValue_->Clone(false))) {
             currentValue_ = defaultValue_->Clone(true);
             requiresEvaluation_ = true;
         }
         for (auto&& i : values) {
             if (auto v = interface_pointer_cast<IValue>(i)) {
-                if (auto i = interface_cast<INotifyOnChange>(v)) {
-                    i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
-                }
+                SubscribeOnChanged(v, *this, onChangedCallback_);
                 values_.push_back(BASE_NS::move(v));
                 def = false;
             }
         }
         for (auto&& i : modifiers) {
             if (auto v = interface_pointer_cast<IModifier>(i)) {
-                if (auto i = interface_cast<INotifyOnChange>(v)) {
-                    i->OnChanged()->AddHandler(onChangedCallback_, uintptr_t(this));
-                }
+                SubscribeOnChanged(v, *this, onChangedCallback_);
                 modifiers_.push_back(BASE_NS::move(v));
             }
         }

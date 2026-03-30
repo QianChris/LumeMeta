@@ -713,17 +713,17 @@ UNIT_TEST_F(API_EngineManagerTest, Notification, testing::ext::TestSize.Level1)
 
         EXPECT_EQ(onChangedCount, 1);
         queue->ProcessTasks();
-        EXPECT_EQ(onChangedCount, 2);
+        EXPECT_EQ(onChangedCount, 1);
 
         // Set + sync again but leave the notify pending in the queue
         p->SetValue(43);
-        EXPECT_EQ(onChangedCount, 3);
+        EXPECT_EQ(onChangedCount, 2);
         manager->Sync(EngineSyncDirection::AUTO);
         // Expect EngineValueManager to cancel the task at destruction
     }
-    EXPECT_EQ(onChangedCount, 3);
+    EXPECT_EQ(onChangedCount, 2);
     queue->ProcessTasks();
-    EXPECT_EQ(onChangedCount, 3);
+    EXPECT_EQ(onChangedCount, 2);
 
     tr.UnregisterTaskQueue(queueId);
 }
