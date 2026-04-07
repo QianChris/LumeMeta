@@ -248,10 +248,8 @@ UNIT_TEST_F(API_FileResourceManagerTest, OptionsData, testing::ext::TestSize.Lev
     EXPECT_EQ(info.id, "test");
     EXPECT_EQ(info.type, ClassId::TestResource.Id().ToUid());
     EXPECT_EQ(info.path, "app://test.json");
-    auto nopts = GetObjectRegistry().Create<IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    auto nopts = interface_cast<IObjectResourceOptions>(info.options);
     ASSERT_TRUE(nopts);
-    MemFile memopts(info.optionData);
-    EXPECT_TRUE(nopts->Load(memopts, nullptr, nullptr));
     auto p = nopts->GetProperty<uint32_t>("test");
     ASSERT_TRUE(p);
     EXPECT_EQ(p->GetValue(), 2);
@@ -491,7 +489,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, RemoveResourceType, testing::ext::TestS
     auto types = resources->GetResourceTypes();
     ASSERT_FALSE(types.empty());
     auto type = types[0]->GetResourceType();
-    EXPECT_TRUE(resources->RemoveResourceType(type));
+    EXPECT_TRUE(resources->RemoveResourceType(type, types[0]->GetVersion()));
     auto typesAfter = resources->GetResourceTypes();
     EXPECT_EQ(typesAfter.size(), types.size() - 1);
 }
@@ -880,16 +878,21 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationSaveLoadWithOptions, testing::
     ASSERT_TRUE(anim);
 
     // Save with options (no payload, empty path triggers SaveTemplate embedding in "__anim")
-    MemFile optionsFile;
+    auto saveOpts = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    ASSERT_TRUE(saveOpts);
     CORE_NS::ResourceId rid("test_anim_options");
-    CORE_NS::IResourceType::StorageInfo saveInfo { nullptr, nullptr, rid, "", resources, context };
-    saveInfo.options = &optionsFile;
+    CORE_NS::IResourceType::StorageInfo saveInfo { saveOpts, nullptr, rid, "", resources, context };
     EXPECT_TRUE(resType->SaveResource(anim, saveInfo));
 
     // Load with options
-    MemFile loadOptions(optionsFile.Data());
-    CORE_NS::IResourceType::StorageInfo loadInfo { nullptr, nullptr, rid, "", resources, context };
-    loadInfo.options = &loadOptions;
+    auto loadOpts = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    ASSERT_TRUE(loadOpts);
+    if (auto so = interface_cast<IObjectResourceOptions>(saveOpts)) {
+        if (auto lo = interface_cast<IObjectResourceOptions>(loadOpts)) {
+            lo->SetOptionData(so->GetOptionData());
+        }
+    }
+    CORE_NS::IResourceType::StorageInfo loadInfo { loadOpts, nullptr, rid, "", resources, context };
     auto loaded = resType->LoadResource(loadInfo);
     EXPECT_TRUE(loaded);
 }
@@ -936,16 +939,21 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationLoadWithBaseTemplate, testing:
     }
 
     // Save the animation via AnimationResourceType with empty path (triggers SaveTemplate)
-    MemFile optionsFile;
+    auto saveOpts = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    ASSERT_TRUE(saveOpts);
     CORE_NS::ResourceId rid("derived_anim");
-    CORE_NS::IResourceType::StorageInfo saveInfo { nullptr, nullptr, rid, "", resources, context };
-    saveInfo.options = &optionsFile;
+    CORE_NS::IResourceType::StorageInfo saveInfo { saveOpts, nullptr, rid, "", resources, context };
     EXPECT_TRUE(animResType->SaveResource(anim, saveInfo));
 
     // Load it back — LoadTemplate finds the base, calls SetValuesFromTemplate
-    MemFile loadOptions(optionsFile.Data());
-    CORE_NS::IResourceType::StorageInfo loadInfo { nullptr, nullptr, rid, "", resources, context };
-    loadInfo.options = &loadOptions;
+    auto loadOpts = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    ASSERT_TRUE(loadOpts);
+    if (auto so = interface_cast<IObjectResourceOptions>(saveOpts)) {
+        if (auto lo = interface_cast<IObjectResourceOptions>(loadOpts)) {
+            lo->SetOptionData(so->GetOptionData());
+        }
+    }
+    CORE_NS::IResourceType::StorageInfo loadInfo { loadOpts, nullptr, rid, "", resources, context };
     auto loaded = animResType->LoadResource(loadInfo);
     EXPECT_TRUE(loaded);
 }

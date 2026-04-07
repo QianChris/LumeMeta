@@ -46,11 +46,23 @@ public:
         const CORE_NS::IResource::ConstPtr& templ, const CORE_NS::IResource::Ptr& res) const = 0;
 };
 
-class IObjectResourceOptions : public CORE_NS::IResourceOptions {
-    META_INTERFACE(CORE_NS::IResourceOptions, IObjectResourceOptions, "3a8559b2-ad80-48f5-8e3b-3340c9048f77")
+class IDerivedResourceOptions : public CORE_NS::IResourceOptions {
+    META_INTERFACE(CORE_NS::IResourceOptions, IDerivedResourceOptions, "86578c9c-660a-49ed-9ee9-c3adb6284ad3")
 public:
     virtual void SetBaseResource(CORE_NS::ResourceId) = 0;
     virtual CORE_NS::ResourceId GetBaseResource() const = 0;
+};
+
+class IObjectResourceOptions : public IDerivedResourceOptions {
+    META_INTERFACE(CORE_NS::IResourceOptions, IObjectResourceOptions, "3a8559b2-ad80-48f5-8e3b-3340c9048f77")
+public:
+    virtual bool Load(
+        CORE_NS::IFile& options, const CORE_NS::ResourceManagerPtr&, const CORE_NS::ResourceContextPtr&) = 0;
+    virtual bool Save(
+        CORE_NS::IFile& options, const CORE_NS::ResourceManagerPtr&, const CORE_NS::ResourceContextPtr&) const = 0;
+
+    virtual void SetOptionData(BASE_NS::vector<uint8_t>) = 0;
+    virtual BASE_NS::vector<uint8_t> GetOptionData() const = 0;
 
     virtual IProperty::Ptr GetProperty(BASE_NS::string_view name) = 0;
     template<typename T>

@@ -115,20 +115,36 @@ void ObjectResourceType::SetResourceType(const ObjectId& id)
     type_ = id;
 }
 
+bool ObjectResourceOptions::ApplyOptions(CORE_NS::IResource&, const CORE_NS::ResourceContextPtr& context) const
+{
+    return false;
+}
+bool ObjectResourceOptions::UpdateOptions(const CORE_NS::IResource&, const CORE_NS::ResourceContextPtr& context)
+{
+    return false;
+}
+bool ObjectResourceOptions::Merge(const IResourceOptions&)
+{
+    return false;
+}
+
 bool ObjectResourceOptions::Load(
     CORE_NS::IFile& options, const CORE_NS::ResourceManagerPtr& rman, const CORE_NS::ResourceContextPtr& context)
 {
     bool res = false;
-    if (auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter)) {
-        importer->SetResourceManager(rman);
-        importer->SetUserContext(interface_pointer_cast<IObject>(context));
-        if (auto obj = importer->Import(options)) {
-            if (auto oro = interface_cast<IObjectResourceOptions>(obj)) {
-                SetBaseResource(oro->GetBaseResource());
-                if (auto in = interface_cast<IMetadata>(obj)) {
-                    Clone(*in, *this);
-                    res = true;
-                }
+    auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter);
+    if (!importer) {
+        return false;
+    }
+    importer->SetResourceManager(rman);
+    importer->SetUserContext(interface_pointer_cast<IObject>(context));
+    if (auto obj = importer->Import(options)) {
+        if (auto oro = interface_cast<IObjectResourceOptions>(obj)) {
+            SetBaseResource(oro->GetBaseResource());
+            if (auto in = interface_cast<IMetadata>(obj)) {
+                GetAttachmentContainer(true)->RemoveAll();
+                META_NS::Clone(*in, *this);
+                res = true;
             }
         }
     }
@@ -148,8 +164,9 @@ bool ObjectResourceOptions::Save(
         return false;
     }
     if (auto collect = interface_cast<META_NS::ICollectResources>(context)) {
-        if (baseResource_.IsValid()) {
-            collect->AddResource(CORE_NS::ResourceIdContext { baseResource_ });
+        auto bres = GetBaseResource();
+        if (bres.IsValid()) {
+            collect->AddResource(CORE_NS::ResourceIdContext { bres });
         }
     }
     return true;

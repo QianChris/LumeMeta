@@ -79,12 +79,28 @@ inline bool IsCorrectContext(const ResourceGroupContext& gc, const ResourceConte
     return gc.context.GetRawPointer() == ResolveContext(context).get();
 }
 
+struct ResourceTypeKey {
+    BASE_NS::Uid uid;
+    BASE_NS::string version {};
+
+    bool operator==(const ResourceTypeKey& o) const
+    {
+        return uid == o.uid && version == o.version;
+    }
+};
+
 META_END_NAMESPACE()
 
 template<>
 inline uint64_t BASE_NS::hash(const META_NS::ResourceGroupContext& g)
 {
     return BASE_NS::Hash(g.group, g.context.GetRawPointer());
+}
+
+template<>
+inline uint64_t BASE_NS::hash(const META_NS::ResourceTypeKey& g)
+{
+    return BASE_NS::Hash(g.uid, g.version);
 }
 
 META_BEGIN_NAMESPACE()
@@ -98,7 +114,7 @@ public:
     void AddListener(const IResourceListener::Ptr&) override;
     void RemoveListener(const IResourceListener::Ptr&) override;
     bool AddResourceType(CORE_NS::IResourceType::Ptr) override;
-    bool RemoveResourceType(const CORE_NS::ResourceType& type) override;
+    bool RemoveResourceType(const CORE_NS::ResourceType& type, BASE_NS::string_view version) override;
     BASE_NS::vector<CORE_NS::IResourceType::Ptr> GetResourceTypes() const override;
 
     BASE_NS::vector<CORE_NS::ResourceInfo> GetResourceInfos(
@@ -119,7 +135,7 @@ public:
     bool AddResource(const CORE_NS::IResource::Ptr& resource) override;
     bool AddResource(const CORE_NS::IResource::Ptr& resource, BASE_NS::string_view path) override;
     bool AddResource(const CORE_NS::ResourceIdContext&, const CORE_NS::ResourceType&, BASE_NS::string_view path,
-        const CORE_NS::IResourceOptions::ConstPtr&) override;
+        const CORE_NS::IResourceOptions::Ptr&) override;
 
     bool ReloadResource(const CORE_NS::IResource::Ptr& resource) override;
     bool RenameResource(const CORE_NS::ResourceIdContext&, const CORE_NS::ResourceIdContext&) override;
@@ -153,7 +169,10 @@ public:
         const BASE_NS::array_view<const CORE_NS::MatchingResourceId>&, const ResourceContextPtr&) const override;
     ResourceData GetResource(const CORE_NS::ResourceIdContext&) const override;
     void AddResources(const BASE_NS::array_view<const ResourceData>, const ResourceContextPtr&) override;
+    bool AddResource(ResourceData, const CORE_NS::ResourceContextPtr&) override;
     bool RemoveGroup(BASE_NS::string_view group, const CORE_NS::ResourceContextWeakPtr&) override;
+    bool SetResourceName(const ResourceIdContext& id, const BASE_NS::string& name) override;
+    CORE_NS::IResource::Ptr GetResourceByName(BASE_NS::string_view name, const ResourceContextPtr& context) override;
 
 private:
     CORE_NS::IResource::Ptr ConstructResource(const CORE_NS::ResourceIdContext& id);
@@ -167,10 +186,13 @@ private:
     void Notify(const BASE_NS::vector<ResourceIdContext>& id, IResourceListener::EventType type);
     void UpdateOptionsData(const BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>& data,
         const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection, const IObject::Ptr& depsContext);
+    CORE_NS::IResource::Ptr GetResourceFromGroup(
+        const BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>& resources,
+        BASE_NS::string_view name, const ResourceContextPtr& context);
 
 private:
     mutable std::shared_mutex mutex_;
-    BASE_NS::unordered_map<BASE_NS::Uid, CORE_NS::IResourceType::Ptr> types_;
+    BASE_NS::unordered_map<ResourceTypeKey, CORE_NS::IResourceType::Ptr> types_;
     BASE_NS::unordered_map<ResourceGroupContext,
         BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>>
         resources_;

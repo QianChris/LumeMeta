@@ -82,14 +82,14 @@ bool FileResourceManager::AddResourceType(CORE_NS::IResourceType::Ptr p)
 {
     if (p) {
         std::unique_lock lock { mutex_ };
-        types_[p->GetResourceType()] = p;
+        types_[ResourceTypeKey { p->GetResourceType(), p->GetVersion() }] = p;
     }
     return p != nullptr;
 }
-bool FileResourceManager::RemoveResourceType(const CORE_NS::ResourceType& type)
+bool FileResourceManager::RemoveResourceType(const CORE_NS::ResourceType& type, BASE_NS::string_view version)
 {
     std::unique_lock lock { mutex_ };
-    types_.erase(type);
+    types_.erase(ResourceTypeKey { type, BASE_NS::string(version) });
     return true;
 }
 BASE_NS::vector<CORE_NS::IResourceType::Ptr> FileResourceManager::GetResourceTypes() const
@@ -120,9 +120,16 @@ CORE_NS::ResourceIdContext FileResourceManager::ReadHeader(
     data->path = BASE_NS::string(path.data(), path.size());
     data->type = BASE_NS::StringToUid(BASE_NS::string_view(type.data(), type.size()));
 
+    data->options = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    if (!data->options) {
+        CORE_LOG_E("Invalid state");
+        return {};
+    }
     std::string opt;
     if (in >> opt) {
-        data->optionData = BASE_NS::Base64Decode(opt.c_str());
+        if (auto opts = interface_cast<IObjectResourceOptions>(data->options)) {
+            opts->SetOptionData(BASE_NS::Base64Decode(opt.c_str()));
+        }
     }
     auto& v = resources_[ResourceGroupContext { data->id.group, context }][data->id.name];
     if (v && v->object) {
@@ -264,10 +271,15 @@ BASE_NS::vector<CORE_NS::IResource::Ptr> FileResourceManager::GetResources(
 }
 static void SaveResourceHeader(const ResourceData& r, CORE_NS::IFile& file)
 {
+    auto opts = interface_cast<IObjectResourceOptions>(r.options);
+    if (!opts) {
+        return;
+    }
+
     std::ostringstream out;
     out << std::quoted(r.id.name.c_str()) << " " << std::quoted(r.id.group.c_str()) << " "
         << std::quoted(r.path.c_str()) << " " << BASE_NS::to_string(r.type).c_str() << " ";
-    out << BASE_NS::Base64Encode(r.optionData).c_str();
+    out << BASE_NS::Base64Encode(opts->GetOptionData()).c_str();
     out << "\n";
     auto buf = out.str();
     file.Write(buf.data(), buf.size());
@@ -277,7 +289,7 @@ FileResourceManager::Result FileResourceManager::SaveResourceData(const Resource
     if (!r.object) {
         return Result::NO_RESOURCE_DATA;
     }
-    auto it = types_.find(r.type);
+    auto it = types_.find(ResourceTypeKey { r.type, r.version });
     if (it == types_.end()) {
         CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(r.type).c_str());
         return Result::NO_RESOURCE_TYPE;
@@ -303,19 +315,15 @@ FileResourceManager::Result FileResourceManager::SaveResourceData(const Resource
 }
 bool FileResourceManager::UpdateOptions(ResourceData& r, CORE_NS::ResourceContextPtr context) const
 {
-    if (r.object) {
-        auto it = types_.find(r.type);
-        if (it == types_.end()) {
-            CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(r.type).c_str());
-            return false;
-        }
-        MemFile opts;
-        if (!it->second->SaveResource(r.object, CORE_NS::IResourceType::StorageInfo { &opts, nullptr, r.id, r.path,
-                                                    GetSelf<IResourceManager>(), context })) {
-            CORE_LOG_W("Failed to save resource options");
-            return false;
-        }
-        r.optionData = opts.Data();
+    auto it = types_.find(ResourceTypeKey { r.type, r.version });
+    if (it == types_.end()) {
+        CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(r.type).c_str());
+        return false;
+    }
+    if (!it->second->SaveResource(r.object, CORE_NS::IResourceType::StorageInfo { r.options, nullptr, r.id, r.path,
+                                                GetSelf<IResourceManager>(), context })) {
+        CORE_LOG_W("Failed to save resource options");
+        return false;
     }
     return true;
 }
@@ -363,7 +371,7 @@ bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource, B
     auto id = resource->GetResourceId();
     {
         std::unique_lock lock { mutex_ };
-        auto it = types_.find(resource->GetResourceType());
+        auto it = types_.find(ResourceTypeKey { resource->GetResourceType(), "" });
         if (it == types_.end()) {
             CORE_LOG_W(
                 "Resource type not registered [type=%s]", BASE_NS::to_string(resource->GetResourceType()).c_str());
@@ -374,13 +382,18 @@ bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource, B
         d.type = resource->GetResourceType();
         d.id = id;
         d.path = path;
-        MemFile opts;
-        if (!it->second->SaveResource(resource,
-                CORE_NS::IResourceType::StorageInfo { &opts, nullptr, d.id, d.path, GetSelf<IResourceManager>() })) {
+
+        d.options = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+        if (!d.options) {
+            CORE_LOG_E("Invalid state");
+            return false;
+        }
+
+        if (!it->second->SaveResource(resource, CORE_NS::IResourceType::StorageInfo {
+                                                    d.options, nullptr, d.id, d.path, GetSelf<IResourceManager>() })) {
             CORE_LOG_W("Failed to save resource options");
             return false;
         }
-        d.optionData = opts.Data();
         auto& v = resources_[ResourceGroupContext { id.group, resource->GetContext() }][id.name];
         if (v) {
             res = v->object;
@@ -391,12 +404,18 @@ bool FileResourceManager::AddResource(const CORE_NS::IResource::Ptr& resource, B
     return true;
 }
 bool FileResourceManager::AddResource(const ResourceIdContext& ric, const CORE_NS::ResourceType& type,
-    BASE_NS::string_view path, const CORE_NS::IResourceOptions::ConstPtr& options)
+    BASE_NS::string_view path, const CORE_NS::IResourceOptions::Ptr& os)
 {
+    CORE_NS::IResourceOptions::Ptr options =
+        os ? os
+           : META_NS::GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
+    if (!options) {
+        return false;
+    }
     CORE_NS::IResource::Ptr res;
     {
         std::unique_lock lock { mutex_ };
-        auto it = types_.find(type);
+        auto it = types_.find(ResourceTypeKey { type, "" });
         if (it == types_.end()) {
             CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(type).c_str());
             return false;
@@ -405,11 +424,7 @@ bool FileResourceManager::AddResource(const ResourceIdContext& ric, const CORE_N
         d.type = type;
         d.id = ric.id;
         d.path = path;
-        if (options) {
-            MemFile opts;
-            options->Save(opts, GetSelf<IResourceManager>(), nullptr);
-            d.optionData = opts.Data();
-        }
+        d.options = options;
         auto& v = resources_[ResourceGroupContext { ric }][ric.id.name];
         if (v) {
             res = v->object;
@@ -587,7 +602,7 @@ namespace {
 struct ResourceLoadInfo {
     CORE_NS::IResourceType::ConstPtr type;
     BASE_NS::string path;
-    BASE_NS::vector<uint8_t> optionData;
+    CORE_NS::IResourceOptions::Ptr options;
     CORE_NS::IFileManager::Ptr fileManager;
 };
 
@@ -602,9 +617,8 @@ CORE_NS::IResource::Ptr LoadResourceWithType(
             return nullptr;
         }
     }
-    MemFile opts(info.optionData);
     CORE_NS::IResource::Ptr resObj = info.type->LoadResource(
-        CORE_NS::IResourceType::StorageInfo { &opts, f.get(), ric.id, info.path, self, ric.context.lock() });
+        CORE_NS::IResourceType::StorageInfo { info.options, f.get(), ric.id, info.path, self, ric.context.lock() });
     if (resObj) {
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(resObj)) {
             auto rc = ric;
@@ -626,11 +640,11 @@ CORE_NS::IResource::Ptr FileResourceManager::ConstructResource(const CORE_NS::Re
         std::shared_lock lock { mutex_ };
         res = FindResource(ric);
         if (res) {
-            auto tit = types_.find(res->type);
+            auto tit = types_.find(ResourceTypeKey { res->type, res->version });
             if (tit != types_.end()) {
                 info.type = tit->second;
                 info.path = res->path;
-                info.optionData = res->optionData;
+                info.options = res->options;
                 info.fileManager = fileManager_;
             }
         }
@@ -775,24 +789,24 @@ bool FileResourceManager::ReapplyOptions(
     const CORE_NS::IResource::Ptr& resource, const CORE_NS::ResourceContextPtr& context)
 {
     CORE_NS::IFile::Ptr f;
-    MemFile opts;
+    CORE_NS::IResourceOptions::Ptr options;
     BASE_NS::string path;
     CORE_NS::IResourceType::Ptr type;
     auto id = resource->GetResourceId();
     {
         std::unique_lock lock { mutex_ };
-        auto it = types_.find(resource->GetResourceType());
+        auto res = FindResource({ id, resource->GetContext() });
+        if (!res) {
+            CORE_LOG_W("No such resource: %s", id.ToString().c_str());
+            return false;
+        }
+        auto it = types_.find(ResourceTypeKey { res->type, res->version });
         if (it == types_.end()) {
             CORE_LOG_W(
                 "Resource type not registered [type=%s]", BASE_NS::to_string(resource->GetResourceType()).c_str());
             return false;
         }
         type = it->second;
-        auto res = FindResource({ id, resource->GetContext() });
-        if (!res) {
-            CORE_LOG_W("No such resource: %s", id.ToString().c_str());
-            return false;
-        }
         path = res->path;
         if (!path.empty()) {
             f = fileManager_->OpenFile(path);
@@ -801,9 +815,9 @@ bool FileResourceManager::ReapplyOptions(
                 return false;
             }
         }
-        opts = MemFile(res->optionData);
+        options = res->options;
     }
-    CORE_NS::IResourceType::StorageInfo info { &opts, f.get(), id, path, GetSelf<IResourceManager>(), context };
+    CORE_NS::IResourceType::StorageInfo info { options, f.get(), id, path, GetSelf<IResourceManager>(), context };
     return type->ReloadResource(info, resource);
 }
 
@@ -835,6 +849,29 @@ ResourceData FileResourceManager::GetResource(const CORE_NS::ResourceIdContext& 
     return d ? *d : ResourceData {};
 }
 
+bool FileResourceManager::AddResource(ResourceData data, const CORE_NS::ResourceContextPtr& context)
+{
+    ResourceIdContext id { data.id, context };
+    CORE_NS::IResource::Ptr obj;
+    {
+        std::unique_lock lock { mutex_ };
+        auto it = types_.find(ResourceTypeKey { data.type, data.version });
+        if (it == types_.end()) {
+            CORE_LOG_W("Resource type not registered [type=%s, version=%s]", BASE_NS::to_string(data.type).c_str(),
+                data.version.c_str());
+            return false;
+        } else {
+            auto& v = resources_[ResourceGroupContext { data.id.group, context }][data.id.name];
+            if (v && v->object != data.object) {
+                obj = v->object;
+            }
+            v = BASE_NS::make_shared<ResourceData>(BASE_NS::move(data));
+        }
+    }
+    Notify({ id }, IResourceListener::EventType::ADDED);
+    return true;
+}
+
 void FileResourceManager::AddResources(
     const BASE_NS::array_view<const ResourceData> list, const ResourceContextPtr& context)
 {
@@ -843,7 +880,7 @@ void FileResourceManager::AddResources(
     {
         std::unique_lock lock { mutex_ };
         for (auto&& data : list) {
-            auto it = types_.find(data.type);
+            auto it = types_.find(ResourceTypeKey { data.type, data.version });
             if (it == types_.end()) {
                 CORE_LOG_W("Resource type not registered [type=%s]", BASE_NS::to_string(data.type).c_str());
             } else {
@@ -857,6 +894,45 @@ void FileResourceManager::AddResources(
         }
     }
     Notify(ids, IResourceListener::EventType::ADDED);
+}
+
+bool FileResourceManager::SetResourceName(const ResourceIdContext& id, const BASE_NS::string& name)
+{
+    std::unique_lock lock { mutex_ };
+    auto res = FindResource(id);
+    if (res) {
+        res->name = name;
+    }
+    return res != nullptr;
+}
+
+CORE_NS::IResource::Ptr FileResourceManager::GetResourceFromGroup(
+    const BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>& resources,
+    BASE_NS::string_view name, const ResourceContextPtr& context)
+{
+    for (auto&& res : resources) {
+        if (res.second->name == name) {
+            if (res.second->object) {
+                return res.second->object;
+            }
+            return ConstructResource({ res.second->id, context });
+        }
+    }
+    return nullptr;
+}
+
+CORE_NS::IResource::Ptr FileResourceManager::GetResourceByName(
+    BASE_NS::string_view name, const ResourceContextPtr& context)
+{
+    std::unique_lock lock { mutex_ };
+    for (auto&& g : resources_) {
+        if (IsCorrectContext(g.first, context)) {
+            if (auto r = GetResourceFromGroup(g.second, name, context)) {
+                return r;
+            }
+        }
+    }
+    return nullptr;
 }
 
 META_END_NAMESPACE()

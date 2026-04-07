@@ -38,6 +38,11 @@ public:
     bool SaveResource(const CORE_NS::IResource::ConstPtr&, const StorageInfo&) const override;
     bool ReloadResource(const StorageInfo&, const CORE_NS::IResource::Ptr&) const override;
 
+    BASE_NS::string GetVersion() const override
+    {
+        return {};
+    }
+
     void AddAnchorType(const META_NS::ObjectId& id) override
     {
         anchorTypes_.push_back(id);

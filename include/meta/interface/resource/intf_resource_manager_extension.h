@@ -27,6 +27,7 @@ META_BEGIN_NAMESPACE()
 
 struct ResourceData : CORE_NS::ResourceInfo {
     CORE_NS::IResource::Ptr object;
+    BASE_NS::string version;
 };
 
 class IResourceManagerExtension : public CORE_NS::IInterface {
@@ -50,6 +51,7 @@ public:
     /** Add resources with cached resource
      */
     virtual void AddResources(const BASE_NS::array_view<const ResourceData>, const CORE_NS::ResourceContextPtr&) = 0;
+    virtual bool AddResource(ResourceData, const CORE_NS::ResourceContextPtr&) = 0;
     virtual bool RemoveGroup(BASE_NS::string_view group, const CORE_NS::ResourceContextWeakPtr&) = 0;
 };
 
