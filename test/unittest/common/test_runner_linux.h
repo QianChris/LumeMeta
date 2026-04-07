@@ -78,7 +78,7 @@ private:
     BASE_NS::string m_lumeAppAssetPath { "./../../assets/test_data/" };
 
     // Window
-    xcb_connection_t* m_xcbConn;
+    xcb_connection_t* m_xcbConn {};
     xcb_window_t m_xcbWin;
 
     // GTest

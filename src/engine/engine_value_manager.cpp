@@ -485,6 +485,57 @@ BASE_NS::vector<IEngineValue*> EngineValueManager::StealDirtyValues(const CORE_N
     return result;
 }
 
+EngineValueManager::SyncResult EngineValueManager::SyncDirtyValues(
+    const CORE_NS::IComponentManager* componentManager, EngineSyncDirection dir)
+{
+    SyncResult result;
+    auto dirtyValues = StealDirtyValues(componentManager);
+    result.hadDirtyValues = !dirtyValues.empty();
+    for (auto* ev : dirtyValues) {
+        auto res = SyncValue(ev, dir);
+        if (res && res != AnyReturn::NOTHING_TO_DO) {
+            result.anyChanged = true;
+        }
+        result.allSucceeded = result.allSucceeded && res;
+    }
+    return result;
+}
+
+EngineValueManager::SyncResult EngineValueManager::SyncAllValues(
+    const CORE_NS::IComponentManager* componentManager, EngineSyncDirection dir, bool skipUnobserved)
+{
+    SyncResult result;
+    for (auto&& v : values_) {
+        bool skip = componentManager && Internal::GetComponentManager(v.value.get()) != componentManager;
+        if (!skip && skipUnobserved) {
+            skip = static_cast<EngineValue*>(v.value.get())->CanSkipFromEngineSync();
+        }
+        if (!skip) {
+            auto res = SyncValue(v.value.get(), dir);
+            if (res && res != AnyReturn::NOTHING_TO_DO) {
+                result.anyChanged = true;
+            }
+            result.allSucceeded = result.allSucceeded && res;
+        }
+    }
+    return result;
+}
+
+void EngineValueManager::ScheduleNotifySyncs()
+{
+    if (queue_.expired()) {
+        return;
+    }
+    if (auto queue = queue_.lock()) {
+        task_token_ = queue->AddTask(MakeCallback<ITaskQueueTask>([this] {
+            NotifySyncs();
+            return false;
+        }));
+    } else {
+        CORE_LOG_E("Invalid task queue id");
+    }
+}
+
 bool EngineValueManager::Sync(EngineSyncDirection dir, const CORE_NS::IComponentManager* componentManager)
 {
     bool ret = true;
@@ -492,65 +543,26 @@ bool EngineValueManager::Sync(EngineSyncDirection dir, const CORE_NS::IComponent
     {
         std::unique_lock lock { mutex_ };
 
-        auto syncAllValues = [&](EngineSyncDirection syncDir, bool skipUnobserved = false) {
-            for (auto&& v : values_) {
-                if (componentManager && Internal::GetComponentManager(v.value.get()) != componentManager) {
-                    continue;
-                }
-                // When syncing FROM_ENGINE, skip values that have no change callbacks registered.
-                // Nobody is observing the value, so pulling from engine is wasted work.
-                if (skipUnobserved) {
-                    if (auto* ev = static_cast<EngineValue*>(v.value.get()); ev->CanSkipFromEngineSync()) {
-                        continue;
-                    }
-                }
-                auto res = SyncValue(v.value.get(), syncDir);
-                if (res && res != AnyReturn::NOTHING_TO_DO) {
-                    notify = true;
-                }
-                ret = ret && res;
-            }
-        };
-
         if (dir == EngineSyncDirection::TO_ENGINE) {
-            // Only sync values that have been modified since last sync.
-            auto dirtyValues = StealDirtyValues(componentManager);
-            for (auto* ev : dirtyValues) {
-                auto res = SyncValue(ev, dir);
-                if (res && res != AnyReturn::NOTHING_TO_DO) {
-                    notify = true;
-                }
-                ret = ret && res;
-            }
+            auto result = SyncDirtyValues(componentManager, dir);
+            ret = result.allSucceeded;
+            notify = result.anyChanged;
         } else if (dir == EngineSyncDirection::AUTO) {
-            // Two-pass AUTO: first flush dirty values TO_ENGINE, then read all FROM_ENGINE.
-            // This ensures child writes (e.g. "vec.x") complete before parents read back,
-            // which matters because sorted iteration processes parents before children.
-            auto dirtyValues = StealDirtyValues(componentManager);
-            for (auto* ev : dirtyValues) {
-                auto res = SyncValue(ev, EngineSyncDirection::AUTO);
-                if (res && res != AnyReturn::NOTHING_TO_DO) {
-                    notify = true;
-                }
-                ret = ret && res;
-            }
-            // Skip unobserved values only when nothing was written to engine.
-            // If values were flushed, related values (e.g. vec.x after vec was written) must be re-read.
-            syncAllValues(EngineSyncDirection::FROM_ENGINE, dirtyValues.empty());
+            auto dirtyResult = SyncDirtyValues(componentManager, EngineSyncDirection::AUTO);
+            auto allResult =
+                SyncAllValues(componentManager, EngineSyncDirection::FROM_ENGINE, !dirtyResult.hadDirtyValues);
+            ret = dirtyResult.allSucceeded && allResult.allSucceeded;
+            notify = dirtyResult.anyChanged || allResult.anyChanged;
         } else {
-            syncAllValues(dir);
+            auto result = SyncAllValues(componentManager, dir, false);
+            ret = result.allSucceeded;
+            notify = result.anyChanged;
         }
+
         notify = notify && !task_token_;
-        if (notify && !queue_.expired()) {
-            if (auto queue = queue_.lock()) {
-                task_token_ = queue->AddTask(MakeCallback<ITaskQueueTask>([this] {
-                    NotifySyncs();
-                    return false;
-                }));
-            } else {
-                CORE_LOG_E("Invalid task queue id");
-            }
-            notify = false;
+        if (notify) {
+            ScheduleNotifySyncs();
+            notify = !task_token_;
         }
     }
     if (notify) {

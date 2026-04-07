@@ -60,9 +60,18 @@ public:
     bool Sync(EngineSyncDirection dir, const CORE_NS::IComponentManager* componentManager) override;
 
 private:
+    struct SyncResult {
+        bool allSucceeded { true };
+        bool anyChanged { false };
+        bool hadDirtyValues { false };
+    };
     void NotifySyncs();
     void RemoveDirtyValue(IEngineValue* value);
     BASE_NS::vector<IEngineValue*> StealDirtyValues(const CORE_NS::IComponentManager* componentManager);
+    SyncResult SyncDirtyValues(const CORE_NS::IComponentManager* componentManager, EngineSyncDirection dir);
+    SyncResult SyncAllValues(
+        const CORE_NS::IComponentManager* componentManager, EngineSyncDirection dir, bool skipUnobserved);
+    void ScheduleNotifySyncs();
     IEngineValue::Ptr AddValue(EnginePropertyParams p, EngineValueOptions options);
     IEngineValue::Ptr ConstructValueImplAdd(
         EnginePropertyParams params, BASE_NS::string pathTaken, EngineValueOptions options);
