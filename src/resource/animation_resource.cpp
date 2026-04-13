@@ -126,7 +126,7 @@ static void SaveTemplate(
     const CORE_NS::IResourceType::StorageInfo& s, const CORE_NS::IResource::ConstPtr& res, const ExportOptions& expOpts)
 {
     auto opts = interface_pointer_cast<META_NS::IObjectResourceOptions>(s.options);
-    if (!opts) {
+    if (!opts || !res) {
         return;
     }
 
