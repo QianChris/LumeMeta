@@ -30,14 +30,50 @@ struct EnginePropertyInfo {
     CORE_NS::PropertyTypeDecl type;
 };
 
+namespace Internal {
+
+/**
+ * @brief Returns true if a property should be traversed into by EnumerateEngineProperties
+ */
+inline bool ShouldTraverse(const CORE_NS::Property& property)
+{
+    auto& meta = property.metaData;
+    // Do not traverse into enum values
+    return meta.enumMetaData.empty() && !meta.memberProperties.empty();
+}
+
+/**
+ * @brief Recurses into member properties of a CORE_NS::Property
+ * @param members Members to recuree into.
+ * @param namePrefix Prefix to apply to output names.
+ * @param out Vector to append the the info to.
+ */
+inline void RecurseEngineProperties(BASE_NS::array_view<const CORE_NS::Property> members,
+    BASE_NS::string_view namePrefix, BASE_NS::vector<META_NS::EnginePropertyInfo>& out)
+{
+    const auto prefix = namePrefix.empty() ? "" : namePrefix + ".";
+    for (auto&& p : members) {
+        META_NS::EnginePropertyInfo info;
+        info.name = prefix + p.name;
+        info.type = p.type;
+        auto& ref = out.emplace_back(BASE_NS::move(info));
+        if (ShouldTraverse(p)) {
+            RecurseEngineProperties(p.metaData.memberProperties, ref.name, out);
+        }
+    }
+}
+
+} // namespace Internal
+
 /**
  * @brief Enumerate property names and types from a component manager without creating engine values.
  * @param manager The component manager to enumerate properties from
  * @param namePrefix Property name prefix
  * @param out Vector to append the the info to.
+ * @param recursive. If true, add also memberProperties of each top-level property.
  */
 inline void EnumerateEngineProperties(const CORE_NS::IComponentManager& manager, BASE_NS::string_view namePrefix,
-    BASE_NS::vector<EnginePropertyInfo>& out)
+    BASE_NS::vector<EnginePropertyInfo>& out, bool recursive = false)
 {
     for (auto& prop : manager.GetPropertyApi().MetaData()) {
         EnginePropertyInfo info;
@@ -47,7 +83,10 @@ inline void EnumerateEngineProperties(const CORE_NS::IComponentManager& manager,
             info.name = BASE_NS::string(namePrefix) + "." + prop.name;
         }
         info.type = prop.type;
-        out.push_back(BASE_NS::move(info));
+        auto& ref = out.emplace_back(BASE_NS::move(info));
+        if (recursive && Internal::ShouldTraverse(prop)) {
+            Internal::RecurseEngineProperties(prop.metaData.memberProperties, ref.name, out);
+        }
     }
 }
 
