@@ -26,20 +26,37 @@ META_BEGIN_NAMESPACE()
  * @brief Info about an engine property without creating engine values or bridges
  */
 struct EnginePropertyInfo {
-    BASE_NS::string name;
-    CORE_NS::PropertyTypeDecl type;
+    BASE_NS::string name;           ///< Property name
+    CORE_NS::PropertyTypeDecl type; ///< Property type
+};
+
+/** @brief EnumerateProperties configuration */
+struct EnginePropertyInfoConfig {
+    bool traverseMemberProperties {}; ///< If true, traverse also memberProperties of each property
+    bool includeStructs { true };     ///< If traverseMemberProperties = true, this parameter controls whether struct
+                                      ///< members are included or only their children
 };
 
 namespace Internal {
 
 /**
- * @brief Returns true if a property should be traversed into by EnumerateEngineProperties
+ * @brief Returns true if a property should be added to RecurseEngineProperties output based on config.
  */
-inline bool ShouldTraverse(const CORE_NS::Property& property)
+inline bool ShouldAdd(const CORE_NS::Property& property, const EnginePropertyInfoConfig& config)
+{
+    bool isLeaf = property.metaData.memberProperties.empty();
+    bool isEnum = !property.metaData.enumMetaData.empty(); // enum->leaf
+    return config.includeStructs ? !isEnum : isLeaf || isEnum;
+}
+
+/**
+ * @brief Returns true if a property should be traversed into by RecurseEngineProperties
+ */
+inline bool ShouldTraverse(const CORE_NS::Property& property, const EnginePropertyInfoConfig& config)
 {
     auto& meta = property.metaData;
     // Do not traverse into enum values
-    return meta.enumMetaData.empty() && !meta.memberProperties.empty();
+    return config.traverseMemberProperties && meta.enumMetaData.empty() && !meta.memberProperties.empty();
 }
 
 /**
@@ -49,16 +66,17 @@ inline bool ShouldTraverse(const CORE_NS::Property& property)
  * @param out Vector to append the the info to.
  */
 inline void RecurseEngineProperties(BASE_NS::array_view<const CORE_NS::Property> members,
-    BASE_NS::string_view namePrefix, BASE_NS::vector<META_NS::EnginePropertyInfo>& out)
+    BASE_NS::string_view namePrefix, BASE_NS::vector<META_NS::EnginePropertyInfo>& out,
+    const EnginePropertyInfoConfig& config)
 {
-    const auto prefix = namePrefix.empty() ? "" : namePrefix + ".";
     for (auto&& p : members) {
         META_NS::EnginePropertyInfo info;
-        info.name = prefix + p.name;
+        info.name = namePrefix.empty() ? p.name : namePrefix + "." + p.name;
         info.type = p.type;
-        auto& ref = out.emplace_back(BASE_NS::move(info));
-        if (ShouldTraverse(p)) {
-            RecurseEngineProperties(p.metaData.memberProperties, ref.name, out);
+        // Do not include if the property has members and includeStructs=False
+        auto& ref = ShouldAdd(p, config) ? out.emplace_back(BASE_NS::move(info)) : info;
+        if (ShouldTraverse(p, config)) {
+            RecurseEngineProperties(p.metaData.memberProperties, ref.name, out, config);
         }
     }
 }
@@ -73,21 +91,10 @@ inline void RecurseEngineProperties(BASE_NS::array_view<const CORE_NS::Property>
  * @param recursive. If true, add also memberProperties of each top-level property.
  */
 inline void EnumerateEngineProperties(const CORE_NS::IComponentManager& manager, BASE_NS::string_view namePrefix,
-    BASE_NS::vector<EnginePropertyInfo>& out, bool recursive = false)
+    BASE_NS::vector<EnginePropertyInfo>& out, const EnginePropertyInfoConfig& config = {})
 {
-    for (auto& prop : manager.GetPropertyApi().MetaData()) {
-        EnginePropertyInfo info;
-        if (namePrefix.empty()) {
-            info.name = BASE_NS::string(prop.name);
-        } else {
-            info.name = BASE_NS::string(namePrefix) + "." + prop.name;
-        }
-        info.type = prop.type;
-        auto& ref = out.emplace_back(BASE_NS::move(info));
-        if (recursive && Internal::ShouldTraverse(prop)) {
-            Internal::RecurseEngineProperties(prop.metaData.memberProperties, ref.name, out);
-        }
-    }
+    auto d = manager.GetPropertyApi().MetaData();
+    Internal::RecurseEngineProperties(d, namePrefix, out, config);
 }
 
 /**
