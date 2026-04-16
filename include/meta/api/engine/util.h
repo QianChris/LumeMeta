@@ -33,8 +33,7 @@ struct EnginePropertyInfo {
 /** @brief EnumerateProperties configuration */
 struct EnginePropertyInfoConfig {
     bool traverseMemberProperties {}; ///< If true, traverse also memberProperties of each property
-    bool includeStructs { true };     ///< If traverseMemberProperties = true, this parameter controls whether struct
-                                      ///< members are included or only their children
+    bool includeStructs { true };     ///< If true, include struct type properties in the output
 };
 
 namespace Internal {
@@ -45,8 +44,8 @@ namespace Internal {
 inline bool ShouldAdd(const CORE_NS::Property& property, const EnginePropertyInfoConfig& config)
 {
     bool isLeaf = property.metaData.memberProperties.empty();
-    bool isEnum = !property.metaData.enumMetaData.empty(); // enum->leaf
-    return config.includeStructs ? !isEnum : isLeaf || isEnum;
+    isLeaf |= !property.metaData.enumMetaData.empty(); // enums are considered a leaf even if it has a member
+    return config.includeStructs || isLeaf;
 }
 
 /**
