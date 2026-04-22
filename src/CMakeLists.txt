@@ -169,6 +169,10 @@ endif()
 include("${BASE_ROOT_DIRECTORY}/cmake/cmake_tools.cmake")
 append_link_flags(${PLUGIN_NAME} "${BASE_SO_LINK_FLAGS}")
 
+if (ANDROID OR OHOS)
+    append_link_flags(${PLUGIN_NAME} "-Wl,--exclude-libs,ALL")
+endif()
+
 # Disable RTTI and exceptions
 disable_rtti(${PLUGIN_NAME})
 disable_exceptions(${PLUGIN_NAME})
