@@ -67,8 +67,6 @@ target_sources(${PLUGIN_NAME} PRIVATE
     curves/bezier_curve.h
     curves/easing_curve.cpp
     curves/easing_curve.h
-    engine/engine_input_property_manager.cpp
-    engine/engine_input_property_manager.h
     engine/engine_value.cpp
     engine/engine_value.h
     engine/engine_value_manager.cpp

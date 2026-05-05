@@ -118,8 +118,6 @@ ohos_source_set("lume_metaobject_src") {
     "src/curves/bezier_curve.h",
     "src/curves/easing_curve.cpp",
     "src/curves/easing_curve.h",
-    "src/engine/engine_input_property_manager.cpp",
-    "src/engine/engine_input_property_manager.h",
     "src/engine/engine_value.cpp",
     "src/engine/engine_value.h",
     "src/engine/engine_value_manager.cpp",

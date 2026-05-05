@@ -129,7 +129,6 @@ set(test_sources
     src/interface/animation/interpolator_test.cpp
     src/interface/animation/easing_curve_test.cpp
     src/interface/engine/engine_test_property.h
-    src/interface/engine/intf_engine_input_property_manager_test.cpp
     src/interface/engine/intf_engine_value_manager_test.cpp
     src/interface/engine/engine_value_test.cpp
     src/interface/intf_any_test.cpp

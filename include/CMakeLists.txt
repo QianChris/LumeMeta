@@ -69,7 +69,6 @@ target_sources(${PLUGIN_NAME}API PUBLIC
     meta/interface/detail/multi_type_any.h
     meta/interface/detail/property.h
     meta/interface/engine/intf_engine_data.h
-    meta/interface/engine/intf_engine_input_property_manager.h
     meta/interface/engine/intf_engine_type.h
     meta/interface/engine/intf_engine_value.h
     meta/interface/engine/intf_engine_value_manager.h

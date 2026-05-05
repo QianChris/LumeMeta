@@ -728,5 +728,26 @@ UNIT_TEST_F(API_EngineManagerTest, Notification, testing::ext::TestSize.Level1)
     tr.UnregisterTaskQueue(queueId);
 }
 
+/**
+ * @tc.name: DefaultValueFromEngineValue
+ * @tc.desc: Property constructed after a FROM_ENGINE sync reflects the engine-side value.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, DefaultValueFromEngineValue, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop1::EngineTestProp> cman { prop1::ENGINE_TESTPROP_METADATA };
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+    EXPECT_TRUE(manager->ConstructValues(EnginePropertyHandle { &cman, cman.entityRef }));
+
+    EXPECT_TRUE(CORE_NS::SetPropertyValue(*cman.GetData(0), "value", 2));
+    manager->Sync(EngineSyncDirection::FROM_ENGINE);
+
+    auto p = manager->ConstructProperty<int32_t>("value");
+    ASSERT_TRUE(p);
+    EXPECT_EQ(p->GetValue(), 2);
+}
+
 } // namespace UTest
 META_END_NAMESPACE()

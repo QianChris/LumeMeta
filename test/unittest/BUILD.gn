@@ -118,7 +118,6 @@ ohos_unittest("lume_meta_api_test") {
     "api_unit_test/src/interface/animation/sequential_animation_test.cpp",
     # Interface - Engine
     "api_unit_test/src/interface/engine/engine_value_test.cpp",
-    "api_unit_test/src/interface/engine/intf_engine_input_property_manager_test.cpp",
     "api_unit_test/src/interface/engine/intf_engine_value_manager_test.cpp",
     # Interface - Property
     "api_unit_test/src/interface/property/array_property_test.cpp",

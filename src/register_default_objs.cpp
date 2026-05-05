@@ -23,7 +23,7 @@
 #include "container/object_container.h"
 #include "container/object_flat_container.h"
 #include "container_observer.h"
-#include "engine/engine_input_property_manager.h"
+#include "engine/engine_value_manager.h"
 #include "functions.h"
 #include "keep_alive.h"
 #include "number.h"
@@ -77,7 +77,6 @@ static constexpr ObjectTypeInfo OBJECTS[] = {
     Internal::Number::OBJECT_INFO,
     Connector::OBJECT_INFO,
     EngineValueManager::OBJECT_INFO,
-    EngineInputPropertyManager::OBJECT_INFO,
     ObjectName::OBJECT_INFO,
     FileResourceManager::OBJECT_INFO,
     ObjectResource::OBJECT_INFO,
