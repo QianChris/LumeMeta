@@ -22,32 +22,13 @@
 #include <core/log.h>
 #include <core/resources/intf_resource_manager.h>
 
+#include <meta/base/memfile.h>
 #include <meta/ext/object.h>
 #include <meta/interface/intf_object.h>
 #include <meta/interface/serialization/intf_global_serialization_data.h>
 
 META_BEGIN_NAMESPACE()
 namespace UTest {
-
-struct MemFile : public CORE_NS::IFile {
-    explicit MemFile(BASE_NS::vector<uint8_t> vec = {});
-
-    Mode GetMode() const override;
-    void Close() override;
-    uint64_t Read(void* buffer, uint64_t count) override;
-    uint64_t Write(const void* buffer, uint64_t count) override;
-    uint64_t Append(const void* buffer, uint64_t count, uint64_t flushSize) override;
-    uint64_t GetLength() const override;
-    bool Seek(uint64_t offset) override;
-    uint64_t GetPosition() const override;
-
-    BASE_NS::vector<uint8_t> Data() const;
-
-private:
-    void Destroy() override;
-    BASE_NS::vector<uint8_t> data_;
-    size_t pos_ {};
-};
 
 struct TestSerialiser {
     explicit TestSerialiser(BASE_NS::vector<uint8_t> data = {});

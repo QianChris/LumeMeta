@@ -34,68 +34,6 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
-MemFile::MemFile(BASE_NS::vector<uint8_t> vec) : data_(BASE_NS::move(vec)) {}
-
-MemFile::Mode MemFile::GetMode() const
-{
-    return Mode::READ_WRITE;
-}
-void MemFile::Close()
-{
-    data_.clear();
-}
-uint64_t MemFile::Read(void* buffer, uint64_t count)
-{
-    size_t read = std::min<size_t>(count, data_.size() - pos_);
-    if (read) {
-        std::memcpy(buffer, &data_[pos_], read);
-        pos_ += read;
-    }
-    return read;
-}
-uint64_t MemFile::Write(const void* buffer, uint64_t count)
-{
-    if (data_.size() < pos_ + count) {
-        data_.resize(pos_ + count);
-    }
-    std::memcpy(&data_[pos_], buffer, count);
-    pos_ += count;
-    return count;
-}
-uint64_t MemFile::Append(const void* buffer, uint64_t count, uint64_t flushSize)
-{
-    if (data_.size() < pos_ + count) {
-        data_.resize(pos_ + count);
-    }
-    std::memcpy(&data_[pos_], buffer, count);
-    pos_ += count;
-    return count;
-}
-uint64_t MemFile::GetLength() const
-{
-    return data_.size();
-}
-bool MemFile::Seek(uint64_t offset)
-{
-    bool ret = offset < data_.size();
-    if (ret) {
-        pos_ = offset;
-    }
-    return ret;
-}
-uint64_t MemFile::GetPosition() const
-{
-    return pos_;
-}
-BASE_NS::vector<uint8_t> MemFile::Data() const
-{
-    return data_;
-}
-void MemFile::Destroy()
-{
-    delete this;
-}
-
 TestSerialiser::TestSerialiser(BASE_NS::vector<uint8_t> vec) : data_(BASE_NS::move(vec)) {}
 
 bool TestSerialiser::Export(const IObject::Ptr& object)
