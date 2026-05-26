@@ -40,7 +40,7 @@ void PushToTaskQueueWithLongLastingTasks(benchmark::State& state)
 void PushToThreadedTaskQueue(benchmark::State& state)
 {
     auto q = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
-    std::atomic<int> value {};
+    std::atomic<int> value{};
     auto task = MakeCallback<ITaskQueueTask>([&] {
         ++value;
         return false;
@@ -64,7 +64,7 @@ void PushToThreadedTaskQueueLongLastingTasks(benchmark::State& state)
     for (int i = 0; i != 20; ++i) {
         q->AddTask(dummytask, TimeSpan::Seconds(10));
     }
-    std::atomic<int> value {};
+    std::atomic<int> value{};
     auto task = MakeCallback<ITaskQueueTask>([&] {
         ++value;
         return false;
@@ -86,5 +86,5 @@ BENCHMARK(PushToTaskQueueWithLongLastingTasks);
 BENCHMARK(PushToThreadedTaskQueue);
 BENCHMARK(PushToThreadedTaskQueueLongLastingTasks);
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

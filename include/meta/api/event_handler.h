@@ -42,7 +42,7 @@ public:
     }
 
     EventHandler(EventHandler&& other) noexcept
-        : event_ { BASE_NS::move(other.event_) }, token_ { BASE_NS::exchange(other.token_, {}) }
+        : event_{BASE_NS::move(other.event_)}, token_{BASE_NS::exchange(other.token_, {})}
     {}
 
     EventHandler& operator=(EventHandler&& other) noexcept
@@ -210,7 +210,7 @@ public:
 
 protected:
     IEvent::WeakPtr event_;
-    IEvent::Token token_ {};
+    IEvent::Token token_{};
 };
 
 META_END_NAMESPACE()

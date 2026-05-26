@@ -54,9 +54,9 @@ enum class CloneValueType { COPY_VALUE, DEFAULT_VALUE };
 
 struct AnyCloneOptions {
     /** Should value be cloned. Ignored if role != TypeIdRole::CURRENT */
-    CloneValueType value { CloneValueType::COPY_VALUE };
+    CloneValueType value{CloneValueType::COPY_VALUE};
     /** Type of Any (same as source, item or array type) the clone should be. */
-    TypeIdRole role { TypeIdRole::CURRENT };
+    TypeIdRole role{TypeIdRole::CURRENT};
 };
 
 class IAny : public CORE_NS::IInterface {
@@ -82,11 +82,11 @@ public:
     }
     IAny::Ptr Clone() const
     {
-        return Clone({ CloneValueType::COPY_VALUE });
+        return Clone({CloneValueType::COPY_VALUE});
     }
     IAny::Ptr Clone(bool withValue) const
     {
-        return Clone({ withValue ? CloneValueType::COPY_VALUE : CloneValueType::DEFAULT_VALUE });
+        return Clone({withValue ? CloneValueType::COPY_VALUE : CloneValueType::DEFAULT_VALUE});
     }
     template<typename T>
     AnyReturnValue GetValue(T& value) const

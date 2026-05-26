@@ -60,21 +60,21 @@ private:
     void PrintPaths(const BASE_NS::string& msg, const BASE_NS::string& path);
 
     struct TestData {
-        BASE_NS::vector<char*> gtestArgs; // Input data for Gtest
-        BASE_NS::string reportTestFile;   // Report log file
-        BASE_NS::string gtestTestFile;    // Gtest results file
-        int result = -1;                  // Gtest results exit code
+        BASE_NS::vector<char*> gtestArgs;  // Input data for Gtest
+        BASE_NS::string reportTestFile;    // Report log file
+        BASE_NS::string gtestTestFile;     // Gtest results file
+        int result = -1;                   // Gtest results exit code
         bool hasRunTests = false;
     };
 
-    BASE_NS::string m_lumeEngineRootPath { "./" };
-    BASE_NS::string m_lumeAppPath { "./" };
-    BASE_NS::string m_lumePluginPath { "./plugins/" };
-    BASE_NS::string m_lumeAppAssetPath { "./../../assets/test_data/" };
+    BASE_NS::string m_lumeEngineRootPath{"./"};
+    BASE_NS::string m_lumeAppPath{"./"};
+    BASE_NS::string m_lumePluginPath{"./plugins/"};
+    BASE_NS::string m_lumeAppAssetPath{"./../../assets/test_data/"};
 
     // Window
-    void* m_hWnd { nullptr };
-    void* m_hDC { nullptr };
+    void* m_hWnd{nullptr};
+    void* m_hDC{nullptr};
 
     // GTest
     TestData m_testData;
@@ -82,5 +82,5 @@ private:
 
 inline WindowsApp* g_windowsApp;
 
-} // namespace Test
-#endif // TEST_RUNNER_WINDOWS
+}  // namespace Test
+#endif  // TEST_RUNNER_WINDOWS

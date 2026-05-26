@@ -132,7 +132,7 @@ public:
     META_INTERFACE_OBJECT_PROPERTY(BASE_NS::Math::Vec2, ControlPoint2)
 };
 
-} // namespace Curves
+}  // namespace Curves
 
 /// Return a default object which implements ICubicBezier
 template<>
@@ -151,4 +151,4 @@ inline auto CreateObjectInstance<IEasingCurve>()
 
 META_END_NAMESPACE()
 
-#endif // META_API_CURVES_H
+#endif  // META_API_CURVES_H

@@ -47,7 +47,7 @@ public:
     }
     static const BASE_NS::array_view<const TypeId> StaticGetCompatibleTypes(CompatibilityDirection)
     {
-        static constexpr TypeId ids[] = { TYPE_ID, UidFromType<CompatType>()... };
+        static constexpr TypeId ids[] = {TYPE_ID, UidFromType<CompatType>()...};
         return ids;
     }
 

@@ -39,7 +39,7 @@ UNIT_TEST(API_ContainerInfoTest, Self, testing::ext::TestSize.Level1)
     */
 
     Object object(CreateInstance(ClassId::Object));
-    EXPECT_THAT(FindAllContainers(object), testing::SizeIs(1)); // attachments container
+    EXPECT_THAT(FindAllContainers(object), testing::SizeIs(1));  // attachments container
 }
 
 // TEST(API_ContainerInfoTest, Container)
@@ -129,5 +129,5 @@ UNIT_TEST(API_ContainerInfoTest, Self, testing::ext::TestSize.Level1)
 //     EXPECT_THAT(containers, UnorderedElementsAre(container, animation));
 //     EXPECT_EQ(info->FindAnyContainer<IAnimation>(), container);
 // }
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

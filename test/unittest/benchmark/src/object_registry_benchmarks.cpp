@@ -33,7 +33,7 @@ void ManyObjects(benchmark::State& state)
 {
     constexpr size_t objectCount = 50000;
     auto& objr = GetObjectRegistry();
-    objr.Purge(); // make sure there is nothing from other tests
+    objr.Purge();  // make sure there is nothing from other tests
     for (auto _ : state) {
         std::deque<IObject::Ptr> objects;
         for (size_t i = 0; i != objectCount; ++i) {
@@ -65,5 +65,5 @@ BENCHMARK(ConstructProperty);
 BENCHMARK(ManyObjects);
 BENCHMARK(ManyObjectsWithAddAndRemove);
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

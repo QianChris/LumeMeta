@@ -57,7 +57,7 @@ static bool SetValuesFromTemplate(const CORE_NS::IResource::ConstPtr& templ, con
         if (!target) {
             continue;
         }
-        if (PropertyLock lock { target }) {
+        if (PropertyLock lock{target}) {
             if (lock->IsDefaultValue()) {
                 CopyToDefaultAndReset(p, *target);
             }
@@ -73,7 +73,7 @@ static void LoadTemplateDerived(const CORE_NS::IResourceType::StorageInfo& s,
     if (auto i = interface_cast<META_NS::IDerivedFromTemplate>(res)) {
         auto base = opts.GetBaseResource();
         if (base.IsValid()) {
-            auto r = s.self->GetResource({ base, s.context });
+            auto r = s.self->GetResource({base, s.context});
             if (!r) {
                 CORE_LOG_W("Could not load base resource for %s", base.ToString().c_str());
             }
@@ -146,7 +146,7 @@ static void SaveTemplate(
     // need to set the export options
     if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {
         exporter->SetUserContext(interface_pointer_cast<IObject>(s.context));
-        exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("ObjectResourceOptions"));
+        exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({1, 0}).SetType("ObjectResourceOptions"));
         MemFile file;
         exporter->Export(file, interface_pointer_cast<IObject>(opts), expOpts);
         opts->SetOptionData(file.Data());
@@ -171,7 +171,7 @@ bool AnimationResourceType::SaveResource(const CORE_NS::IResource::ConstPtr& p, 
         }
         if (auto exporter = GetObjectRegistry().Create<IFileExporter>(META_NS::ClassId::JsonExporter)) {
             exporter->SetUserContext(interface_pointer_cast<IObject>(s.context));
-            exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("AnimationResource"));
+            exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({1, 0}).SetType("AnimationResource"));
             res = exporter->Export(*s.payload, interface_pointer_cast<IObject>(p), expOpts);
         }
     }

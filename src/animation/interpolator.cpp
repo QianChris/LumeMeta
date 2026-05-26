@@ -83,7 +83,7 @@ T InterpolateComponent(T a, T b, float t)
 {
     return static_cast<T>(BASE_NS::Math::round(a + (b - a) * t));
 }
-} // namespace
+}  // namespace
 
 // No math operations have been defined for integer type vec3/4, implement interpolators manually
 class UVec3Interpolator : public IntroduceInterfaces<BaseObject, IInterpolator> {
@@ -184,29 +184,29 @@ struct InterpolatorInfo {
 };
 
 static constexpr InterpolatorInfo BUILT_IN_INTERPOLATOR_INFO[] = {
-    { FloatInterpolator::OBJECT_INFO, UidFromType<float>(), ClassId::FloatInterpolator },
-    { DoubleInterpolator::OBJECT_INFO, UidFromType<double>(), ClassId::DoubleInterpolator },
-    { Vec2Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Vec2>(), ClassId::Vec2Interpolator },
-    { Vec3Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Vec3>(), ClassId::Vec3Interpolator },
-    { Vec4Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Vec4>(), ClassId::Vec4Interpolator },
-    { UVec2Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::UVec2>(), ClassId::UVec2Interpolator },
-    { UVec3Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::UVec3>(), ClassId::UVec3Interpolator },
-    { UVec4Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::UVec4>(), ClassId::UVec4Interpolator },
-    { IVec2Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::IVec2>(), ClassId::IVec2Interpolator },
-    { IVec3Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::IVec3>(), ClassId::IVec3Interpolator },
-    { IVec4Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::IVec4>(), ClassId::IVec4Interpolator },
-    { UInt8Interpolator::OBJECT_INFO, UidFromType<uint8_t>(), ClassId::UInt8Interpolator },
-    { UInt16Interpolator::OBJECT_INFO, UidFromType<uint16_t>(), ClassId::UInt16Interpolator },
-    { UInt32Interpolator::OBJECT_INFO, UidFromType<uint32_t>(), ClassId::UInt32Interpolator },
-    { UInt64Interpolator::OBJECT_INFO, UidFromType<uint64_t>(), ClassId::UInt64Interpolator },
-    { Int8Interpolator::OBJECT_INFO, UidFromType<int8_t>(), ClassId::Int8Interpolator },
-    { Int16Interpolator::OBJECT_INFO, UidFromType<int16_t>(), ClassId::Int16Interpolator },
-    { Int32Interpolator::OBJECT_INFO, UidFromType<int32_t>(), ClassId::Int32Interpolator },
-    { Int64Interpolator::OBJECT_INFO, UidFromType<int64_t>(), ClassId::Int64Interpolator },
-    { QuatInterpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Quat>(), ClassId::QuatInterpolator },
+    {FloatInterpolator::OBJECT_INFO, UidFromType<float>(), ClassId::FloatInterpolator},
+    {DoubleInterpolator::OBJECT_INFO, UidFromType<double>(), ClassId::DoubleInterpolator},
+    {Vec2Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Vec2>(), ClassId::Vec2Interpolator},
+    {Vec3Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Vec3>(), ClassId::Vec3Interpolator},
+    {Vec4Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Vec4>(), ClassId::Vec4Interpolator},
+    {UVec2Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::UVec2>(), ClassId::UVec2Interpolator},
+    {UVec3Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::UVec3>(), ClassId::UVec3Interpolator},
+    {UVec4Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::UVec4>(), ClassId::UVec4Interpolator},
+    {IVec2Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::IVec2>(), ClassId::IVec2Interpolator},
+    {IVec3Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::IVec3>(), ClassId::IVec3Interpolator},
+    {IVec4Interpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::IVec4>(), ClassId::IVec4Interpolator},
+    {UInt8Interpolator::OBJECT_INFO, UidFromType<uint8_t>(), ClassId::UInt8Interpolator},
+    {UInt16Interpolator::OBJECT_INFO, UidFromType<uint16_t>(), ClassId::UInt16Interpolator},
+    {UInt32Interpolator::OBJECT_INFO, UidFromType<uint32_t>(), ClassId::UInt32Interpolator},
+    {UInt64Interpolator::OBJECT_INFO, UidFromType<uint64_t>(), ClassId::UInt64Interpolator},
+    {Int8Interpolator::OBJECT_INFO, UidFromType<int8_t>(), ClassId::Int8Interpolator},
+    {Int16Interpolator::OBJECT_INFO, UidFromType<int16_t>(), ClassId::Int16Interpolator},
+    {Int32Interpolator::OBJECT_INFO, UidFromType<int32_t>(), ClassId::Int32Interpolator},
+    {Int64Interpolator::OBJECT_INFO, UidFromType<int64_t>(), ClassId::Int64Interpolator},
+    {QuatInterpolator::OBJECT_INFO, UidFromType<BASE_NS::Math::Quat>(), ClassId::QuatInterpolator},
 };
 
-} // namespace BuiltInInterpolators
+}  // namespace BuiltInInterpolators
 
 void RegisterDefaultInterpolators(IObjectRegistry& registry)
 {

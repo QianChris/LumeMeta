@@ -41,5 +41,5 @@ void ConstructEmptyMetadata(benchmark::State& state)
 BENCHMARK(MetadataGetPropertyByName);
 BENCHMARK(ConstructEmptyMetadata);
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

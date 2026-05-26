@@ -26,7 +26,7 @@ IObject::Ptr RefUriBuilder::ResolveProperty(
     const IProperty* property, RefUri& uri, const IObject::ConstPtr& previous) const
 {
     uint32_t index = -1;
-    if (ArrayPropertyLock lock { property }) {
+    if (ArrayPropertyLock lock{property}) {
         for (size_t i = 0; i != lock->GetSize(); ++i) {
             if (interface_pointer_cast<IObject>(GetConstPointer(lock->GetAnyAt(i))) == previous) {
                 index = i;
@@ -134,5 +134,5 @@ RefUri RefUriBuilder::BuildRefUri(IExporterState& state, const IObject::ConstPtr
     return {};
 }
 
-} // namespace Serialization
+}  // namespace Serialization
 META_END_NAMESPACE()

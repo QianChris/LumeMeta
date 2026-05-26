@@ -123,8 +123,8 @@ static void UnregisterTypes(IPropertyRegister& pr, TypeList<List...>)
 void RegisterAnys(IObjectRegistry& registry)
 {
     auto& pr = registry.GetPropertyRegister();
-    RegisterTypes(pr, BasicTypes {});
-    RegisterTypes(pr, ObjectTypes {});
+    RegisterTypes(pr, BasicTypes{});
+    RegisterTypes(pr, ObjectTypes{});
 
     RegisterTypeForBuiltinAny<StartableState>();
     RegisterTypeForBuiltinAny<StartBehavior>();
@@ -133,12 +133,12 @@ void RegisterAnys(IObjectRegistry& registry)
 void UnRegisterAnys(IObjectRegistry& registry)
 {
     auto& pr = registry.GetPropertyRegister();
-    UnregisterTypes(pr, ObjectTypes {});
-    UnregisterTypes(pr, BasicTypes {});
+    UnregisterTypes(pr, ObjectTypes{});
+    UnregisterTypes(pr, BasicTypes{});
 
     UnregisterTypeForBuiltinAny<StartableState>();
     UnregisterTypeForBuiltinAny<StartBehavior>();
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()

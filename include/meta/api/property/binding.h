@@ -34,8 +34,10 @@ public:
     Binding() noexcept = default;
     virtual ~Binding() = default;
 
-    explicit Binding(const IProperty::ConstPtr& source) noexcept : source_(source) {}
-    explicit Binding(const IFunction::ConstPtr& binding) noexcept : binding_(binding) {}
+    explicit Binding(const IProperty::ConstPtr& source) noexcept : source_(source)
+    {}
+    explicit Binding(const IFunction::ConstPtr& binding) noexcept : binding_(binding)
+    {}
 
     /**
      * @brief Called by the framework to initialize the binding.
@@ -78,8 +80,10 @@ public:
     ~TypedBinding() override = default;
     TypedBinding() noexcept = default;
 
-    explicit TypedBinding(const Property<const Type>& source) noexcept : Binding(source) {}
-    explicit TypedBinding(const PropertyType& source) noexcept : Binding(source) {}
+    explicit TypedBinding(const Property<const Type>& source) noexcept : Binding(source)
+    {}
+    explicit TypedBinding(const PropertyType& source) noexcept : Binding(source)
+    {}
 
     template<class Callback, typename = EnableIfBindFunction<Callback>>
     explicit TypedBinding(Callback&& callback) : Binding(META_NS::CreateBindFunction(BASE_NS::move(callback)))

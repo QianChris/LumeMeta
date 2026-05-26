@@ -156,7 +156,7 @@ public:
     }
 
 private:
-    bool locked_ {};
+    bool locked_{};
     Mutex* mutex_;
 };
 

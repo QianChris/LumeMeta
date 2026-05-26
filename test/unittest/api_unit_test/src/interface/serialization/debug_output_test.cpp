@@ -49,7 +49,7 @@ ISerNode::Ptr ExportAsTree(const IObject::Ptr& object)
     return importer->ImportAsTree(file);
 }
 
-} // namespace
+}  // namespace
 
 /**
  * @tc.name: CreateDebugOutputInstance
@@ -181,5 +181,5 @@ UNIT_TEST(API_DebugOutputTest, NestedObjects, testing::ext::TestSize.Level1)
     EXPECT_NE(result.find('\t'), BASE_NS::string::npos);
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

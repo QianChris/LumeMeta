@@ -189,7 +189,7 @@ private:
     void SetAnyPtrProperty(const PropertyType& p, const Type& value)
     {
         if (p) {
-            if (auto pv = p->GetValue()) { // IAny::Ptr
+            if (auto pv = p->GetValue()) {  // IAny::Ptr
                 pv->SetValue(value);
             } else {
                 p->SetValue(ConstructAny<Type>(value));
@@ -213,7 +213,7 @@ public:
     auto Keyframes() const
     {
         auto kf = GetKeyframesProperty();
-        return kf ? kf->GetValue() : decltype(kf->GetValue()) {};
+        return kf ? kf->GetValue() : decltype(kf->GetValue()){};
     }
     /// Set ITrackAnimation::Keyframes property from a typed array.
     auto& SetKeyframes(const BASE_NS::array_view<const T> keyframes)
@@ -233,7 +233,7 @@ public:
     T GetKeyframe(size_t index) const
     {
         auto kf = GetKeyframesProperty();
-        return kf ? kf->GetValueAt(index) : T {};
+        return kf ? kf->GetValueAt(index) : T{};
     }
     /// @see ITrackAnimation::KeyframeCurves
     META_INTERFACE_OBJECT_ARRAY_PROPERTY(ICurve1D::Ptr, KeyframeCurves, KeyframeCurve)
@@ -356,7 +356,7 @@ public:
     META_INTERFACE_OBJECT(Reverse, InterfaceObject<IAnimationModifier>, IAnimationModifier)
     META_INTERFACE_OBJECT_INSTANTIATE(Reverse, ClassId::ReverseAnimationModifier)
 };
-} // namespace AnimationModifiers
+}  // namespace AnimationModifiers
 
 /// Returns a default object which implements IPropertyAnimation
 template<>
@@ -398,4 +398,4 @@ inline auto CreateObjectInstance<ISequentialAnimation>()
 
 META_END_NAMESPACE()
 
-#endif // META_API_ANIMATION_H
+#endif  // META_API_ANIMATION_H

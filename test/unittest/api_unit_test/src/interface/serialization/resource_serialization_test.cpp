@@ -78,7 +78,7 @@ protected:
             m->AddProperty(ConstructProperty<int>("prop", 1));
         }
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-            i->SetResourceId({ "app://test_resource.json", context_ });
+            i->SetResourceId({"app://test_resource.json", context_});
         }
         ASSERT_TRUE(resources_->AddResource(res));
 
@@ -90,7 +90,8 @@ protected:
         }
     }
 
-    void TearDown() override {}
+    void TearDown() override
+    {}
 
     void BasicAnimationTest(BASE_NS::string_view animPath);
     void BasicAnimationTemplateTest(BASE_NS::string_view animPath);
@@ -112,7 +113,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, Basic, testing::ext::TestSize.Level1)
     {
         Object obj(CreateObjectInstance(ClassId::Object));
         auto prop = ConstructProperty<IObject::ConstPtr>(
-            "test", interface_pointer_cast<IObject>(resources_->GetResource({ "app://test_resource.json", context_ })));
+            "test", interface_pointer_cast<IObject>(resources_->GetResource({"app://test_resource.json", context_})));
         ASSERT_TRUE(prop);
         ASSERT_TRUE(prop->GetValue());
         Metadata(obj).AddProperty(prop);
@@ -126,7 +127,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, Basic, testing::ext::TestSize.Level1)
     ASSERT_TRUE(p);
     auto res = interface_pointer_cast<CORE_NS::IResource>(p->GetValue());
     ASSERT_TRUE(res);
-    EXPECT_EQ(res, resources_->GetResource({ "app://test_resource.json", context_ }));
+    EXPECT_EQ(res, resources_->GetResource({"app://test_resource.json", context_}));
     EXPECT_EQ(res->GetResourceId(), "app://test_resource.json");
     EXPECT_EQ(res->GetContext().lock(), context_);
     auto resm = interface_cast<IMetadata>(res);
@@ -153,7 +154,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, ResourceManagerSerialisation, testing
     resman->SetFileManager(CORE_NS::IFileManager::Ptr(&GetTestEnv()->engine->GetFileManager()));
     ASSERT_EQ(resman->Import("app://test.resources", context_), CORE_NS::IResourceManager::Result::OK);
 
-    auto res = resman->GetResource({ "app://test_resource.json", context_ });
+    auto res = resman->GetResource({"app://test_resource.json", context_});
     ASSERT_TRUE(res);
     EXPECT_EQ(res->GetResourceId(), "app://test_resource.json");
     auto resm = interface_cast<IMetadata>(res);
@@ -182,7 +183,7 @@ public:
             if (auto count = md.GetProperty<int>("count")) {
                 if (auto genmd = interface_cast<IMetadata>(&gen)) {
                     for (int i = 0; i != GetValue(count); ++i) {
-                        BASE_NS::string name { BASE_NS::to_string(i) };
+                        BASE_NS::string name{BASE_NS::to_string(i)};
                         if (!genmd->GetProperty(name)) {
                             genmd->AddProperty(ConstructProperty<BASE_NS::string>(BASE_NS::to_string(i)));
                         }
@@ -207,7 +208,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, ObjectTemplate, testing::ext::TestSiz
         auto res = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectTemplate);
         ASSERT_TRUE(res);
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-            i->SetResourceId({ "myobject", context_ });
+            i->SetResourceId({"myobject", context_});
         }
 
         Object obj(CreateNew);
@@ -227,7 +228,7 @@ UNIT_TEST_F(API_ResourceSerializationTest, ObjectTemplate, testing::ext::TestSiz
     }
 
     ASSERT_EQ(resources_->Import("app://test_template.resources", context_), CORE_NS::IResourceManager::Result::OK);
-    auto res = interface_pointer_cast<IObjectTemplate>(resources_->GetResource({ "myobject", context_ }));
+    auto res = interface_pointer_cast<IObjectTemplate>(resources_->GetResource({"myobject", context_}));
     ASSERT_TRUE(res);
 
     auto obj = res->Instantiate(nullptr);
@@ -254,8 +255,8 @@ void API_ResourceSerializationTest::BasicAnimationTest(BASE_NS::string_view anim
 
         auto property = object->First();
 
-        BASE_NS::vector<float> timestamps = { 0.0f, 0.5f, 1.f };
-        BASE_NS::vector<int> keyframes = { 10, 50, 100 };
+        BASE_NS::vector<float> timestamps = {0.0f, 0.5f, 1.f};
+        BASE_NS::vector<int> keyframes = {10, 50, 100};
 
         META_NS::TrackAnimation<int> anim(META_NS::CreateNew);
         anim.SetKeyframes(keyframes)
@@ -266,7 +267,7 @@ void API_ResourceSerializationTest::BasicAnimationTest(BASE_NS::string_view anim
         ASSERT_TRUE(anim.GetValid());
 
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(anim)) {
-            i->SetResourceId({ "animation", context_ });
+            i->SetResourceId({"animation", context_});
         }
 
         ASSERT_TRUE(resources_->AddResource(interface_pointer_cast<CORE_NS::IResource>(anim), animPath));
@@ -283,7 +284,7 @@ void API_ResourceSerializationTest::BasicAnimationTest(BASE_NS::string_view anim
 
     ASSERT_EQ(resources_->Import("app://test_anim_resource.resources", object), CORE_NS::IResourceManager::Result::OK);
 
-    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({ "animation", object }));
+    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({"animation", object}));
     ASSERT_TRUE(anim);
     EXPECT_TRUE(anim->Valid()->GetValue());
     interface_cast<META_NS::IStartableAnimation>(anim)->Start();
@@ -309,8 +310,8 @@ TEST_F(API_ResourceSerializationTest, AnimationWithoutPath)
 
 void API_ResourceSerializationTest::BasicAnimationTemplateTest(BASE_NS::string_view animPath)
 {
-    BASE_NS::vector<float> timestamps = { 0.0f, 0.5f, 1.f };
-    BASE_NS::vector<int> keyframes = { 10, 50, 100 };
+    BASE_NS::vector<float> timestamps = {0.0f, 0.5f, 1.f};
+    BASE_NS::vector<int> keyframes = {10, 50, 100};
     auto duration = TimeSpan::Milliseconds(100);
     {
         auto acc = GetObjectRegistry().Create<IResourceTemplateAccess>(META_NS::ClassId::TrackAnimationTemplateAccess);
@@ -350,10 +351,10 @@ void API_ResourceSerializationTest::BasicAnimationTemplateTest(BASE_NS::string_v
         ASSERT_TRUE(anim.GetValid());
 
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(templ)) {
-            i->SetResourceId({ "template", context_ });
+            i->SetResourceId({"template", context_});
         }
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(anim)) {
-            i->SetResourceId({ "animation", context_ });
+            i->SetResourceId({"animation", context_});
         }
 
         ASSERT_TRUE(resources_->AddResource(templ, "app://test_templ_anim_resource.template"));
@@ -372,7 +373,7 @@ void API_ResourceSerializationTest::BasicAnimationTemplateTest(BASE_NS::string_v
     ASSERT_EQ(
         resources_->Import("app://test_templ_anim_resource.resources", object), CORE_NS::IResourceManager::Result::OK);
 
-    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({ "animation", object }));
+    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({"animation", object}));
     ASSERT_TRUE(anim);
     EXPECT_TRUE(anim->Valid()->GetValue());
     interface_cast<META_NS::IStartableAnimation>(anim)->Start();
@@ -406,17 +407,17 @@ TEST_F(API_ResourceSerializationTest, ObjectResourceDeps)
     }
     if (auto m = interface_cast<IMetadata>(res)) {
         m->AddProperty(ConstructProperty<int>("prop", 1));
-        m->AddProperty(ConstructProperty<IObject::ConstPtr>("test",
-            interface_pointer_cast<IObject>(resources_->GetResource({ "app://test_resource.json", context_ }))));
+        m->AddProperty(ConstructProperty<IObject::ConstPtr>(
+            "test", interface_pointer_cast<IObject>(resources_->GetResource({"app://test_resource.json", context_}))));
     }
     if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-        i->SetResourceId({ "app://test_object_resource_deps.json", context_ });
+        i->SetResourceId({"app://test_object_resource_deps.json", context_});
     }
     ASSERT_TRUE(resources_->AddResource(res, "app://test_object_resource_deps.template"));
 
     auto ext = interface_cast<IResourceManagerExtension>(resources_);
     ASSERT_TRUE(ext);
-    auto deps = ext->UpdateOptionsData({ CORE_NS::ResourceId("app://test_object_resource_deps.json") }, context_);
+    auto deps = ext->UpdateOptionsData({CORE_NS::ResourceId("app://test_object_resource_deps.json")}, context_);
     ASSERT_EQ(deps.size(), 1);
     EXPECT_EQ(deps[0].id.ToString(), "app://test_resource.json");
     EXPECT_EQ(deps[0].context.lock(), context_);
@@ -445,7 +446,7 @@ TEST_F(API_ResourceSerializationTest, AnimationReloadResource)
     ASSERT_TRUE(animRes);
 
     CORE_NS::ResourceId rid;
-    CORE_NS::IResourceType::StorageInfo info { nullptr, nullptr, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, nullptr, rid};
     CORE_NS::IResource::Ptr res;
     EXPECT_FALSE(animRes->ReloadResource(info, res));
 }
@@ -458,8 +459,8 @@ TEST_F(API_ResourceSerializationTest, AnimationReloadResource)
 TEST_F(API_ResourceSerializationTest, AnimationTemplateWithBaseResource)
 {
     // Create a base template (the "parent" template)
-    BASE_NS::vector<float> baseTimestamps = { 0.0f, 1.f };
-    BASE_NS::vector<int> baseKeyframes = { 0, 200 };
+    BASE_NS::vector<float> baseTimestamps = {0.0f, 1.f};
+    BASE_NS::vector<int> baseKeyframes = {0, 200};
     auto baseDuration = TimeSpan::Milliseconds(200);
     {
         auto acc = GetObjectRegistry().Create<IResourceTemplateAccess>(META_NS::ClassId::TrackAnimationTemplateAccess);
@@ -481,7 +482,7 @@ TEST_F(API_ResourceSerializationTest, AnimationTemplateWithBaseResource)
         }
 
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(baseTempl)) {
-            i->SetResourceId({ "base_template", context_ });
+            i->SetResourceId({"base_template", context_});
         }
         ASSERT_TRUE(resources_->AddResource(baseTempl, "app://base_anim.template"));
 
@@ -497,13 +498,13 @@ TEST_F(API_ResourceSerializationTest, AnimationTemplateWithBaseResource)
 
         // Set template and set the template ID to the base template's resource ID
         ASSERT_TRUE(dt->SetTemplate(baseTempl));
-        dt->SetTemplateId({ "base_template", "resourceid" });
+        dt->SetTemplateId({"base_template", "resourceid"});
 
         anim.SetProperty(property);
         ASSERT_TRUE(anim.GetValid());
 
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(anim)) {
-            i->SetResourceId({ "derived_animation", context_ });
+            i->SetResourceId({"derived_animation", context_});
         }
 
         ASSERT_TRUE(resources_->AddResource(resource, ""));
@@ -520,9 +521,9 @@ TEST_F(API_ResourceSerializationTest, AnimationTemplateWithBaseResource)
     ASSERT_EQ(
         resources_->Import("app://test_base_anim_resource.resources", object), CORE_NS::IResourceManager::Result::OK);
 
-    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({ "derived_animation", object }));
+    auto anim = interface_pointer_cast<IAnimation>(resources_->GetResource({"derived_animation", object}));
     ASSERT_TRUE(anim);
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

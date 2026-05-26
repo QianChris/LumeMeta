@@ -25,17 +25,17 @@
 
 #if defined(__ANDROID__)
 #include <android/log.h>
-#include <fcntl.h> // O_* constants
+#include <fcntl.h>  // O_* constants
 #include <pthread.h>
 #include <unistd.h>
-#endif // defined(__ANDROID__)
+#endif  // defined(__ANDROID__)
 
 #if defined(__OHOS__)
-#include <fcntl.h> // O_* constants
+#include <fcntl.h>  // O_* constants
 #include <hilog/log.h>
 #include <unistd.h>
 #define LOG_DOMAIN 0x0000
-#endif // defined(__OHOS__)
+#endif  // defined(__OHOS__)
 
 #define LOG_TAG "meta_unit_test"
 
@@ -69,7 +69,7 @@ void StartOutputFileRedirect(const std::string& filePath, bool append);
 void StopOutputFileRedirect();
 void PrintLogFromFile(const std::string& filePath);
 int RunLoggingThread();
-#endif // #if defined(__ANDROID__)
+#endif  // #if defined(__ANDROID__)
 
 //
 // OHOS log support
@@ -86,8 +86,8 @@ void StartOutputFileRedirect(const std::string& filePath, bool append);
 void StopOutputFileRedirect();
 void PrintLogFromFile(const std::string& filePath);
 
-#endif // #if defined(__OHOS__)
+#endif  // #if defined(__OHOS__)
 
-} // namespace Test
+}  // namespace Test
 
-#endif // TEST_LOG_UTIL
+#endif  // TEST_LOG_UTIL

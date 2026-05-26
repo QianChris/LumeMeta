@@ -37,8 +37,8 @@ LogLevelScope::~LogLevelScope()
 #if defined(__ANDROID__)
 
 namespace {
-int fd {};
-} // namespace
+int fd{};
+}  // namespace
 
 void StartOutputFileRedirect(const std::string& filePath, bool append)
 {
@@ -65,7 +65,7 @@ void StopOutputFileRedirect()
 
 void PrintLogFromFile(const std::string& filePath)
 {
-    const int maxLogSize = 1024; // buffer size
+    const int maxLogSize = 1024;  // buffer size
 
     std::ifstream inFile(filePath);
     if (!inFile.is_open()) {
@@ -91,7 +91,7 @@ void PrintLogFromFile(const std::string& filePath)
 namespace {
 int pfd[2];
 pthread_t loggingThread;
-} // namespace
+}  // namespace
 
 void* LoggingFunction(void*)
 {
@@ -102,8 +102,8 @@ void* LoggingFunction(void*)
         if (buf[readSize - 1] == '\n') {
             --readSize;
         }
-        buf[readSize] = 0;                                   // add null-terminator
-        __android_log_write(ANDROID_LOG_INFO, LOG_TAG, buf); // Set any log level you want
+        buf[readSize] = 0;                                    // add null-terminator
+        __android_log_write(ANDROID_LOG_INFO, LOG_TAG, buf);  // Set any log level you want
     }
 
     return 0;
@@ -112,8 +112,8 @@ void* LoggingFunction(void*)
 // run this function to redirect your output to android log
 int RunLoggingThread()
 {
-    setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
-    setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
+    setvbuf(stdout, 0, _IOLBF, 0);  // make stdout line-buffered
+    setvbuf(stderr, 0, _IONBF, 0);  // make stderr unbuffered
 
     // create the pipe and redirect stdout and stderr
     pipe(pfd);
@@ -127,7 +127,7 @@ int RunLoggingThread()
     pthread_detach(loggingThread);
     return 0;
 }
-#endif // #if defined(__ANDROID__)
+#endif  // #if defined(__ANDROID__)
 
 //
 // OHOS log support
@@ -135,8 +135,8 @@ int RunLoggingThread()
 #if defined(__OHOS__)
 
 namespace {
-int fd {};
-} // namespace
+int fd{};
+}  // namespace
 
 void StartOutputFileRedirect(const std::string& filePath, bool append)
 {
@@ -163,7 +163,7 @@ void StopOutputFileRedirect()
 
 void PrintLogFromFile(const std::string& filePath)
 {
-    const int maxLogSize = 1024; // buffer size
+    const int maxLogSize = 1024;  // buffer size
 
     std::ifstream inFile(filePath);
     if (!inFile.is_open()) {
@@ -181,6 +181,6 @@ void PrintLogFromFile(const std::string& filePath)
     inFile.close();
 }
 
-#endif // #if defined(__OHOS__)
+#endif  // #if defined(__OHOS__)
 
-} // namespace Test
+}  // namespace Test

@@ -34,7 +34,7 @@ struct ManyInterfacesTest
     META_OBJECT(ManyInterfacesTest, ClassId::ManyInterfacesTest, IntroduceInterfaces)
 };
 
-} // namespace
+}  // namespace
 
 void ObjectGetInterface(benchmark::State& state)
 {
@@ -74,5 +74,5 @@ BENCHMARK(ObjectGetInterface);
 BENCHMARK(ObjectGetInterfaceMany);
 BENCHMARK(ObjectGetInterfaceFail);
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

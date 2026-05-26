@@ -61,5 +61,5 @@ BENCHMARK(SharedPtrMove);
 BENCHMARK(WeakPtrConstruct);
 BENCHMARK(WeakPtrLock);
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

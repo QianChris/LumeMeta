@@ -140,4 +140,4 @@ BASE_NS::vector<typename To::Ptr> PtrArrayCast(BASE_NS::vector<From>&& from)
 
 META_END_NAMESPACE()
 
-#endif // META_BASE_INTERFACE_UTILS_H
+#endif  // META_BASE_INTERFACE_UTILS_H

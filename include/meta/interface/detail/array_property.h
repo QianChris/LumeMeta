@@ -72,7 +72,7 @@ public:
         IAny::Ptr res;
         if (auto i = interface_cast<IPropertyInternalAny>(this->p_)) {
             if (auto internal = i->GetInternalAny()) {
-                res = internal->Clone({ CloneValueType::DEFAULT_VALUE, TypeIdRole::ITEM });
+                res = internal->Clone({CloneValueType::DEFAULT_VALUE, TypeIdRole::ITEM});
             }
         }
         return res;
@@ -160,7 +160,8 @@ public:
     using PropertyType = typename PropertyBaseType<Type>::PropertyType;
     using IndexType = IArrayAny::IndexType;
 
-    explicit ArrayPropertyInterface(PropertyType p) : Super(p) {}
+    explicit ArrayPropertyInterface(PropertyType p) : Super(p)
+    {}
 
     /**
      * @brief Get value at given location
@@ -183,7 +184,7 @@ public:
      */
     bool SetValueAt(IndexType index, const Type& v)
     {
-        return this->SetAnyAt(index, Any<ValueType> { v });
+        return this->SetAnyAt(index, Any<ValueType>{v});
     }
     /**
      * @brief Ad value at the end of array
@@ -202,7 +203,7 @@ public:
      */
     bool InsertValueAt(IndexType index, const Type& v)
     {
-        return this->InsertAnyAt(index, Any<ValueType> { v });
+        return this->InsertAnyAt(index, Any<ValueType>{v});
     }
     /// Get default value of the array property
     BASE_NS::vector<ValueType> GetDefaultValue() const
@@ -236,7 +237,7 @@ public:
     /// Get value of the array property
     BASE_NS::vector<ValueType> GetValue() const
     {
-        BASE_NS::vector<ValueType> v {};
+        BASE_NS::vector<ValueType> v{};
         this->GetValueAny().GetValue(v);
         return v;
     }
@@ -285,8 +286,10 @@ public:
     }
     explicit TypedArrayPropertyLock(PropertyType p) : TypedArrayPropertyLock(NOCHECK, CanConstructFrom(p) ? p : nullptr)
     {}
-    explicit TypedArrayPropertyLock(const IProperty::Ptr& p) : TypedArrayPropertyLock(p.get()) {}
-    explicit TypedArrayPropertyLock(const IProperty::ConstPtr& p) : TypedArrayPropertyLock(p.get()) {}
+    explicit TypedArrayPropertyLock(const IProperty::Ptr& p) : TypedArrayPropertyLock(p.get())
+    {}
+    explicit TypedArrayPropertyLock(const IProperty::ConstPtr& p) : TypedArrayPropertyLock(p.get())
+    {}
     ~TypedArrayPropertyLock()
     {
         if (auto i = interface_cast<ILockable>(this->GetProperty())) {
@@ -330,9 +333,11 @@ public:
         }
     }
 
-    explicit ArrayPropertyLock(Property* p) : ArrayPropertyLock(NOCHECK, CanConstructFrom(p) ? p : nullptr) {}
+    explicit ArrayPropertyLock(Property* p) : ArrayPropertyLock(NOCHECK, CanConstructFrom(p) ? p : nullptr)
+    {}
 
-    explicit ArrayPropertyLock(BASE_NS::shared_ptr<Property> p) : ArrayPropertyLock(p.get()) {}
+    explicit ArrayPropertyLock(BASE_NS::shared_ptr<Property> p) : ArrayPropertyLock(p.get())
+    {}
     ~ArrayPropertyLock()
     {
         if (auto i = interface_cast<ILockable>(this->GetProperty())) {

@@ -300,5 +300,5 @@ UNIT_TEST(API_SerializationTest, ExportImportBindToAttachmentProperty, testing::
     EXPECT_EQ(p2->GetValue(), 10);
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

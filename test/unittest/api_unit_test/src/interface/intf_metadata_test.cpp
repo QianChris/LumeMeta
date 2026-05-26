@@ -94,8 +94,8 @@ void TestGetSetValue(Set sp, Get gp)
     ASSERT_EQ(GetValue<float>(gp, "First"), 0);
     ASSERT_EQ(GetValue<float>(gp, "First", 1), 1);
 
-    ASSERT_FALSE(SetValue(Set {}, "First", 3));
-    Get nil {};
+    ASSERT_FALSE(SetValue(Set{}, "First", 3));
+    Get nil{};
     ASSERT_EQ(GetValue(nil, "First", 3), 3);
     ASSERT_EQ(GetValue<int>(nil, "First", 3), 3);
 }
@@ -163,8 +163,8 @@ UNIT_TEST(API_MetadataTest, StaticMetadata, testing::ext::TestSize.Level1)
 }
 
 struct MData {
-    const StaticMetadata* data {};
-    CORE_NS::IInterface* pointer {};
+    const StaticMetadata* data{};
+    CORE_NS::IInterface* pointer{};
 };
 
 class IMetadataTest : public CORE_NS::IInterface {
@@ -196,11 +196,12 @@ public:
     META_IMPLEMENT_READONLY_PROPERTY(int, ReadValue)
     META_IMPLEMENT_EVENT(IOnChanged, OnChanged)
 
-    void Func() override {}
+    void Func() override
+    {}
 
     void OnMetadataConstructed(const META_NS::StaticMetadata& m, CORE_NS::IInterface& i) override
     {
-        datas_.push_back(MData { &m, &i });
+        datas_.push_back(MData{&m, &i});
     }
 
     BASE_NS::vector<MData> GetDatas() const override
@@ -224,12 +225,11 @@ void TestMetadata(const ClassInfo& info)
     auto obj = r.Create<IMetadata>(info);
     ASSERT_TRUE(obj);
 
-    MetadataInfo valueMetaInfo { MetadataType::PROPERTY, "Value", IMetadataTest::UID, false,
-        TypeId(UidFromType<int>()) };
-    MetadataInfo readValueMetaInfo { MetadataType::PROPERTY, "ReadValue", IMetadataTest::UID, true,
-        TypeId(UidFromType<int>()) };
-    MetadataInfo onChangedMetaInfo { MetadataType::EVENT, "OnChanged", IMetadataTest::UID };
-    MetadataInfo funcMetaInfo { MetadataType::FUNCTION, "Func", IMetadataTest::UID };
+    MetadataInfo valueMetaInfo{MetadataType::PROPERTY, "Value", IMetadataTest::UID, false, TypeId(UidFromType<int>())};
+    MetadataInfo readValueMetaInfo{
+        MetadataType::PROPERTY, "ReadValue", IMetadataTest::UID, true, TypeId(UidFromType<int>())};
+    MetadataInfo onChangedMetaInfo{MetadataType::EVENT, "OnChanged", IMetadataTest::UID};
+    MetadataInfo funcMetaInfo{MetadataType::FUNCTION, "Func", IMetadataTest::UID};
 
     {
         auto vec = obj->GetAllMetadatas(MetadataType::PROPERTY);
@@ -264,8 +264,8 @@ void TestMetadata(const ClassInfo& info)
         ASSERT_EQ(vec.size(), 3);
         EXPECT_THAT(vec, testing::Contains(valueMetaInfo));
         EXPECT_THAT(vec, testing::Contains(readValueMetaInfo));
-        EXPECT_THAT(vec, testing::Contains(
-                             MetadataInfo { MetadataType::PROPERTY, "Test", {}, false, TypeId(UidFromType<float>()) }));
+        EXPECT_THAT(vec,
+            testing::Contains(MetadataInfo{MetadataType::PROPERTY, "Test", {}, false, TypeId(UidFromType<float>())}));
     }
     {
         interface_cast<IMetadataTest>(obj)->Value()->SetValue(1);
@@ -273,8 +273,8 @@ void TestMetadata(const ClassInfo& info)
         ASSERT_EQ(vec.size(), 3);
         EXPECT_THAT(vec, testing::Contains(valueMetaInfo));
         EXPECT_THAT(vec, testing::Contains(readValueMetaInfo));
-        EXPECT_THAT(vec, testing::Contains(
-                             MetadataInfo { MetadataType::PROPERTY, "Test", {}, false, TypeId(UidFromType<float>()) }));
+        EXPECT_THAT(vec,
+            testing::Contains(MetadataInfo{MetadataType::PROPERTY, "Test", {}, false, TypeId(UidFromType<float>())}));
     }
     {
         auto m = obj->GetMetadata(MetadataType::PROPERTY, "Value");
@@ -418,7 +418,8 @@ public:
     META_FORWARD_READONLY_PROPERTY(int, ReadValue, object_->ReadValue())
     META_FORWARD_EVENT(IOnChanged, OnChanged, object_->EventOnChanged)
 
-    void Func() override {}
+    void Func() override
+    {}
 
     bool Build(const IMetadata::Ptr& d) override
     {
@@ -628,5 +629,5 @@ UNIT_TEST(API_MetadataTest, ConstGetters, testing::ext::TestSize.Level1)
     r.UnregisterObjectType<MetadataTest>();
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

@@ -45,7 +45,7 @@ bool ForEachUnique(
             f(arg);
             return true;
         },
-        IterateStrategy { traversal, LockType::UNIQUE_LOCK });
+        IterateStrategy{traversal, LockType::UNIQUE_LOCK});
 }
 
 /**
@@ -66,7 +66,7 @@ bool ForEachShared(
             f(arg);
             return true;
         },
-        IterateStrategy { traversal, LockType::SHARED_LOCK });
+        IterateStrategy{traversal, LockType::SHARED_LOCK});
 }
 
 /**
@@ -82,7 +82,7 @@ template<typename Iterable, typename Func>
 bool IterateUnique(
     const BASE_NS::shared_ptr<Iterable>& c, Func&& func, TraversalType traversal = TraversalType::NO_HIERARCHY)
 {
-    return Internal::Iterate(c, BASE_NS::forward<Func>(func), IterateStrategy { traversal, LockType::UNIQUE_LOCK })
+    return Internal::Iterate(c, BASE_NS::forward<Func>(func), IterateStrategy{traversal, LockType::UNIQUE_LOCK})
                .value == IterationResult::STOP;
 }
 
@@ -99,7 +99,7 @@ template<typename Iterable, typename Func>
 bool IterateShared(
     const BASE_NS::shared_ptr<Iterable>& c, Func&& func, TraversalType traversal = TraversalType::NO_HIERARCHY)
 {
-    return Internal::ConstIterate(c, BASE_NS::forward<Func>(func), IterateStrategy { traversal, LockType::SHARED_LOCK })
+    return Internal::ConstIterate(c, BASE_NS::forward<Func>(func), IterateStrategy{traversal, LockType::SHARED_LOCK})
                .value == IterationResult::STOP;
 }
 

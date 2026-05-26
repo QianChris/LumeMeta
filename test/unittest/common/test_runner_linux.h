@@ -16,7 +16,7 @@
 #ifndef TEST_RUNNER_LINUX
 #define TEST_RUNNER_LINUX
 
-#include <xcb/xcb.h> // xcb window
+#include <xcb/xcb.h>  // xcb window
 
 #include <base/containers/string.h>
 #include <base/containers/vector.h>
@@ -65,20 +65,20 @@ private:
     void PrintPaths(const BASE_NS::string& msg, const BASE_NS::string& path);
 
     struct TestData {
-        BASE_NS::vector<char*> gtestArgs; // Input data for Gtest
-        BASE_NS::string reportTestFile;   // Report log file
-        BASE_NS::string gtestTestFile;    // Gtest results file
-        int result = 1;                   // Gtest results exit code
+        BASE_NS::vector<char*> gtestArgs;  // Input data for Gtest
+        BASE_NS::string reportTestFile;    // Report log file
+        BASE_NS::string gtestTestFile;     // Gtest results file
+        int result = 1;                    // Gtest results exit code
         bool hasRunTests = false;
     };
 
-    BASE_NS::string m_lumeEngineRootPath { "./" };
-    BASE_NS::string m_lumeAppPath { "./" };
-    BASE_NS::string m_lumePluginPath { "./plugins/" };
-    BASE_NS::string m_lumeAppAssetPath { "./../../assets/test_data/" };
+    BASE_NS::string m_lumeEngineRootPath{"./"};
+    BASE_NS::string m_lumeAppPath{"./"};
+    BASE_NS::string m_lumePluginPath{"./plugins/"};
+    BASE_NS::string m_lumeAppAssetPath{"./../../assets/test_data/"};
 
     // Window
-    xcb_connection_t* m_xcbConn {};
+    xcb_connection_t* m_xcbConn{};
     xcb_window_t m_xcbWin;
 
     // GTest
@@ -87,5 +87,5 @@ private:
 
 inline LinuxApp* g_linuxApp;
 
-} // namespace Test
-#endif // TEST_RUNNER_LINUX
+}  // namespace Test
+#endif  // TEST_RUNNER_LINUX

@@ -164,5 +164,5 @@ void UnRegisterBuiltInObjects(IObjectRegistry& registry)
     }
     registry.UnregisterObjectType<META_NS::Internal::BaseObject>();
 }
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()

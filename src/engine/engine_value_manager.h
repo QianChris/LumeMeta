@@ -61,9 +61,9 @@ public:
 
 private:
     struct SyncResult {
-        bool allSucceeded { true };
-        bool anyChanged { false };
-        bool hadDirtyValues { false };
+        bool allSucceeded{true};
+        bool anyChanged{false};
+        bool hadDirtyValues{false};
     };
     void NotifySyncs();
     void RemoveDirtyValue(IEngineValue* value);
@@ -94,12 +94,12 @@ private:
     mutable std::shared_mutex mutex_;
     ITaskQueue::WeakPtr queue_;
     ValueList values_;
-    ITaskQueue::Token task_token_ {};
+    ITaskQueue::Token task_token_{};
     IOnChanged::InterfaceTypePtr dirtyNotifier_;
     EngineDirtyList dirtyList_;
 };
 
-} // namespace Internal
+}  // namespace Internal
 
 META_END_NAMESPACE()
 

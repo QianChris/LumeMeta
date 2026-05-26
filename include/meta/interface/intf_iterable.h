@@ -39,8 +39,8 @@ enum class TraversalType : uint32_t {
 };
 
 struct IterateStrategy {
-    TraversalType traversal { TraversalType::NO_HIERARCHY };
-    LockType lock { LockType::UNIQUE_LOCK };
+    TraversalType traversal{TraversalType::NO_HIERARCHY};
+    LockType lock{LockType::UNIQUE_LOCK};
 };
 
 struct IterationParameters {
@@ -56,7 +56,8 @@ META_REGISTER_INTERFACE(IIterable, "76bfbc71-bbfe-476c-9ef5-9c01a3bf267d")
 struct IterationResult {
     enum Type { FAILED, STOP, CONTINUE } value;
 
-    IterationResult(Type v = CONTINUE) : value(v) {}
+    IterationResult(Type v = CONTINUE) : value(v)
+    {}
     IterationResult(bool) = delete;
 
     bool Continue() const

@@ -23,10 +23,10 @@ META_BEGIN_NAMESPACE()
 namespace Internal {
 template<typename Type>
 struct EnumValue {
-    Type value {};
+    Type value{};
     META_NS::EnumValue info;
 };
-} // namespace Internal
+}  // namespace Internal
 
 template<typename, typename>
 struct MapAnyType;
@@ -58,7 +58,7 @@ META_END_NAMESPACE()
     }                                                                             \
     ;
 
-#define META_ENUM_VALUE(Value, Name, Desc) { Value, { Name, Desc } },
+#define META_ENUM_VALUE(Value, Name, Desc) {Value, {Name, Desc}},
 
 #define META_ENUM_TYPE(MyEnum)                                                  \
     META_TYPE(MyEnum)                                                           \

@@ -50,8 +50,8 @@ protected:
     }
 
 private:
-    size_t startedCalled_ {};
-    size_t finishedCalled_ {};
+    size_t startedCalled_{};
+    size_t finishedCalled_{};
 };
 
 /**
@@ -491,6 +491,6 @@ UNIT_TEST_F(API_AnimationTest, ImplicitAnimationOnChanged, testing::ext::TestSiz
     EXPECT_TRUE(count >= 10);
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

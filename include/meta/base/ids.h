@@ -26,9 +26,11 @@ META_BEGIN_NAMESPACE()
 template<typename>
 class IdBase {
 public:
-    constexpr IdBase(const BASE_NS::Uid& id = {}) noexcept : id_(id) {}
+    constexpr IdBase(const BASE_NS::Uid& id = {}) noexcept : id_(id)
+    {}
 
-    explicit constexpr IdBase(const char (&str)[37]) noexcept : id_(str) {}
+    explicit constexpr IdBase(const char (&str)[37]) noexcept : id_(str)
+    {}
 
     BASE_NS::string ToString() const noexcept
     {
@@ -107,17 +109,17 @@ META_END_NAMESPACE()
 BASE_BEGIN_NAMESPACE()
 
 template<>
-inline uint64_t hash(const META_NS::TypeId& value) // NOLINT(readability-inconsistent-declaration-parameter-name)
+inline uint64_t hash(const META_NS::TypeId& value)  // NOLINT(readability-inconsistent-declaration-parameter-name)
 {
     return hash(value.ToUid());
 }
 template<>
-inline uint64_t hash(const META_NS::ObjectId& value) // NOLINT(readability-inconsistent-declaration-parameter-name)
+inline uint64_t hash(const META_NS::ObjectId& value)  // NOLINT(readability-inconsistent-declaration-parameter-name)
 {
     return hash(value.ToUid());
 }
 template<>
-inline uint64_t hash(const META_NS::InstanceId& value) // NOLINT(readability-inconsistent-declaration-parameter-name)
+inline uint64_t hash(const META_NS::InstanceId& value)  // NOLINT(readability-inconsistent-declaration-parameter-name)
 {
     return hash(value.ToUid());
 }

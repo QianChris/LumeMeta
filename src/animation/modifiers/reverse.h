@@ -33,16 +33,16 @@ class ReverseModifier final : public IntroduceInterfaces<AnimationModifierFwd, A
 public:
     bool Build(const IMetadata::Ptr& data) override;
 
-public: // IAnimationModifier
+public:  // IAnimationModifier
     bool ProcessOnGetDuration(DurationData& duration) const override;
     bool ProcessOnStep(StepData& step) const override;
 
-public: // AnimationModifiers::ISpeedModifier
+public:  // AnimationModifiers::ISpeedModifier
     float ModifySpeed(float progress) const override;
 };
 
-} // namespace AnimationModifiers
+}  // namespace AnimationModifiers
 
 META_END_NAMESPACE()
 
-#endif // META_SRC_ANIMATION_MODIFIERS_REVERSE_H
+#endif  // META_SRC_ANIMATION_MODIFIERS_REVERSE_H

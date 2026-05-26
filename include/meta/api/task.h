@@ -42,7 +42,8 @@ IAny::Ptr InvokeWaitableTaskFunction(Func&& func)
 template<typename Func>
 class QueueWaitableTask : public IntroduceInterfaces<ITaskQueueWaitableTask> {
 public:
-    QueueWaitableTask(Func func) : func_(BASE_NS::move(func)) {}
+    QueueWaitableTask(Func func) : func_(BASE_NS::move(func))
+    {}
 
     IAny::Ptr Invoke() override
     {

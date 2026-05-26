@@ -18,18 +18,18 @@ class BenchmarkEnvironment {
 public:
     BenchmarkEnvironment()
     {
-        const CORE_NS::PlatformCreateInfo info { "./", "./", "./plugins" };
+        const CORE_NS::PlatformCreateInfo info{"./", "./", "./plugins"};
         CORE_NS::CreatePluginRegistry(info);
-        constexpr BASE_NS::Uid uids[] { META_NS::META_OBJECT_PLUGIN_UID };
+        constexpr BASE_NS::Uid uids[]{META_NS::META_OBJECT_PLUGIN_UID};
         CORE_NS::GetPluginRegister().LoadPlugins(uids);
 
-        CORE_NS::VersionInfo versInfoEngine {
+        CORE_NS::VersionInfo versInfoEngine{
             "MetaObject_Benchmark_Runner",
             0,
             1,
             0,
         };
-        const CORE_NS::EngineCreateInfo engineCreateInfo { { "./", "./", "" }, versInfoEngine, {} };
+        const CORE_NS::EngineCreateInfo engineCreateInfo{{"./", "./", ""}, versInfoEngine, {}};
 
         auto factory = CORE_NS::GetInstance<CORE_NS::IEngineFactory>(CORE_NS::UID_ENGINE_FACTORY);
         engine_ = factory->Create(engineCreateInfo);
@@ -45,7 +45,7 @@ private:
     CORE_NS::IEngine::Ptr engine_;
 };
 
-} // namespace benchmarks
+}  // namespace benchmarks
 
 int main(int argc, char** argv)
 {

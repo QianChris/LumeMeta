@@ -44,7 +44,7 @@ public:
     }
     uint64_t CurrentThread() const
     {
-        return std::hash<std::thread::id> {}(std::this_thread::get_id());
+        return std::hash<std::thread::id>{}(std::this_thread::get_id());
     }
     bool SetExecutionThread()
     {
@@ -98,7 +98,7 @@ public:
             return;
         }
         TimeSpan ctime = Time();
-        std::unique_lock lock { mutex_ };
+        std::unique_lock lock{mutex_};
         if (ctime != lastTime_) {
             lastTime_ = ctime;
             execThread_ = std::this_thread::get_id();
@@ -124,6 +124,6 @@ IObjectFactory::Ptr GetPollingTaskQueueFactory()
     return PollingTaskQueue::GetFactory();
 }
 
-} // namespace Internal
+}  // namespace Internal
 
 META_END_NAMESPACE()

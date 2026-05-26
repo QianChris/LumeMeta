@@ -36,10 +36,10 @@ namespace Internal {
 struct EngineDirtyList {
     std::mutex mutex;
     BASE_NS::vector<IEngineValue*> values;
-    IEngineValueManager* owner {};
+    IEngineValueManager* owner{};
 };
 
-} // namespace Internal
+}  // namespace Internal
 
 META_END_NAMESPACE()
 

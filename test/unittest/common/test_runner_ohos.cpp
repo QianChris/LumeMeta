@@ -69,7 +69,7 @@ BASE_NS::string IXCCallbacks::GetXCN(OH_NativeXComponent* c)
     char idstr[OH_XCOMPONENT_ID_LEN_MAX + 1] = {};
     uint64_t idlen = OH_XCOMPONENT_ID_LEN_MAX + 1;
     OH_NativeXComponent_GetXComponentId(c, idstr, &idlen);
-    return { idstr, idlen };
+    return {idstr, idlen};
 }
 
 void IXCCallbacks::OnSurfaceCreatedCB(OH_NativeXComponent* component, void* window)
@@ -140,12 +140,14 @@ napi_value OHOSApp::TerminateCB(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-void OHOSApp::OnSurfaceChanged() {}
+void OHOSApp::OnSurfaceChanged()
+{}
 void OHOSApp::OnSurfaceDestroyed()
 {
     LOGI("OnSurfaceDestroyed...");
 }
-void OHOSApp::DispatchTouchEvent() {}
+void OHOSApp::DispatchTouchEvent()
+{}
 
 void* OHOSApp::GetWindowHandle()
 {
@@ -203,7 +205,7 @@ void OHOSApp::Init()
     napi_value nFunc;
     napi_get_named_property(m_env, nGlobal, "getContext", &nFunc);
 
-    napi_value nArgv[] = { m_exports };
+    napi_value nArgv[] = {m_exports};
     napi_call_function(m_env, nGlobal, nFunc, 1, nArgv, &m_context);
 
     // Create function to terminate application from c++ side
@@ -212,8 +214,15 @@ void OHOSApp::Init()
         napi_value nameVal;
         napi_create_string_latin1(m_env, "Terminate_Runtime", NAPI_AUTO_LENGTH, &nameVal);
         status = napi_create_threadsafe_function(
-            m_env, nullptr, nullptr, nameVal, 0 /*unlimited queue*/, 1, nullptr,
-            [](napi_env env, void* finalize_data, void* finalize_hint) {}, nullptr,
+            m_env,
+            nullptr,
+            nullptr,
+            nameVal,
+            0 /*unlimited queue*/,
+            1,
+            nullptr,
+            [](napi_env env, void* finalize_data, void* finalize_hint) {},
+            nullptr,
             [](napi_env env, napi_value js_callback, void* context, void* data) {
                 napi_status status;
                 napi_value nGlobal = nullptr;
@@ -223,7 +232,7 @@ void OHOSApp::Init()
                 status = napi_get_named_property(env, nGlobal, "getContext", &getCtx);
 
                 napi_value exp = nullptr;
-                napi_value nArgv[] = { exp };
+                napi_value nArgv[] = {exp};
                 napi_value nObj = nullptr;
                 status = napi_call_function(env, nGlobal, getCtx, 1, nArgv, &nObj);
 
@@ -233,7 +242,7 @@ void OHOSApp::Init()
                 napi_value fn = nullptr;
                 status = napi_create_function(env, nullptr, 0, TerminateCB, nullptr, &fn);
 
-                napi_value nArg[] = { fn };
+                napi_value nArg[] = {fn};
                 napi_value nObj2 = nullptr;
                 status = napi_call_function(env, nObj, term, 1, nArg, &nObj2);
             },
@@ -300,7 +309,7 @@ void OHOSApp::SetGtestEnv()
 {
     m_testData.reportTestFile = m_filesDir + "/report-All.txt";
     m_testData.gtestTestFile = m_filesDir + "/gtestReport_OHOS.xml";
-    m_testData.gtestArgs.emplace_back(new char[20] { "CoreTestRunner" });
+    m_testData.gtestArgs.emplace_back(new char[20]{"CoreTestRunner"});
     // Mutable copy char*:
     BASE_NS::string tmpStr = "--gtest_output=xml:" + m_testData.gtestTestFile;
     {
@@ -334,7 +343,7 @@ BASE_NS::string OHOSApp::GetNapiValueAsString(const BASE_NS::string& propName) c
     return outVal;
 }
 
-} // namespace Test
+}  // namespace Test
 
 EXTERN_C_START
 static napi_value Init(napi_env nEnv, napi_value nExports)
@@ -364,7 +373,7 @@ static napi_module nativeModule = {
     .nm_register_func = Init,
     .nm_modname = "entry",
     .nm_priv = ((void*)0),
-    .reserved = { 0 },
+    .reserved = {0},
 };
 
 extern "C" __attribute__((constructor)) void RegisterEntryModule(void)

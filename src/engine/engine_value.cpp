@@ -29,8 +29,11 @@ namespace Internal {
 
 EngineValue::EngineValue(
     BASE_NS::string name, IEngineInternalValueAccess::ConstPtr access, const EnginePropertyParams& p)
-    : Super(ObjectFlagBits::INTERNAL | ObjectFlagBits::SERIALIZE), params_(p), access_(BASE_NS::move(access)),
-      name_(BASE_NS::move(name)), value_(access_->CreateAny(p.property))
+    : Super(ObjectFlagBits::INTERNAL | ObjectFlagBits::SERIALIZE),
+      params_(p),
+      access_(BASE_NS::move(access)),
+      name_(BASE_NS::move(name)),
+      value_(access_->CreateAny(p.property))
 {}
 
 EngineValue::~EngineValue() = default;
@@ -114,7 +117,7 @@ void EngineValue::MarkDirty()
 {
     if (auto* list = dirtyList_) {
         {
-            std::lock_guard lock { list->mutex };
+            std::lock_guard lock{list->mutex};
             list->values.push_back(static_cast<IEngineValue*>(this));
         }
         if (list->owner) {
@@ -179,16 +182,17 @@ void EngineValue::InvokeChangeCallbacks()
 
 void ChangeCallbackList::Add(const INotifyOnChangeCallback::Ptr& cb, std::shared_mutex& mutex)
 {
-    std::unique_lock lock { mutex };
+    std::unique_lock lock{mutex};
     callbacks_.push_back(cb);
     count_.store(static_cast<uint8_t>(callbacks_.size()), std::memory_order_relaxed);
 }
 
 void ChangeCallbackList::Remove(const INotifyOnChangeCallback::Ptr& cb, std::shared_mutex& mutex)
 {
-    std::unique_lock lock { mutex };
-    auto it = std::find_if(callbacks_.begin(), callbacks_.end(),
-        [&cb](const INotifyOnChangeCallback::WeakPtr& w) { return w.lock() == cb; });
+    std::unique_lock lock{mutex};
+    auto it = std::find_if(callbacks_.begin(), callbacks_.end(), [&cb](const INotifyOnChangeCallback::WeakPtr& w) {
+        return w.lock() == cb;
+    });
     if (it != callbacks_.end()) {
         callbacks_.erase(it);
     }
@@ -199,7 +203,7 @@ BASE_NS::vector<INotifyOnChangeCallback::Ptr> ChangeCallbackList::GetCallbacks(s
 {
     BASE_NS::vector<INotifyOnChangeCallback::Ptr> locked;
     {
-        std::unique_lock lock { mutex };
+        std::unique_lock lock{mutex};
         for (auto& w : callbacks_) {
             if (auto cb = w.lock()) {
                 locked.push_back(BASE_NS::move(cb));
@@ -243,6 +247,6 @@ ReturnError EngineValue::Import(IImportContext&)
     return GenericError::FAIL;
 }
 
-} // namespace Internal
+}  // namespace Internal
 
 META_END_NAMESPACE()

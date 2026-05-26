@@ -34,14 +34,16 @@
 META_BEGIN_NAMESPACE()
 namespace Serialization {
 
-constexpr Version VERSION { 2, 0 };
-constexpr Version EXPORTER_VERSION { 1, 0 };
+constexpr Version VERSION{2, 0};
+constexpr Version EXPORTER_VERSION{1, 0};
 
 class Exporter : public IntroduceInterfaces<BaseObject, IExporter, IExportFunctions, IExporterState> {
     META_OBJECT(Exporter, ClassId::Exporter, IntroduceInterfaces)
 public:
-    Exporter() : registry_(GetObjectRegistry()), globalData_(registry_.GetGlobalSerializationData()) {}
-    explicit Exporter(IObjectRegistry& reg, IGlobalSerializationData& data) : registry_(reg), globalData_(data) {}
+    Exporter() : registry_(GetObjectRegistry()), globalData_(registry_.GetGlobalSerializationData())
+    {}
+    explicit Exporter(IObjectRegistry& reg, IGlobalSerializationData& data) : registry_(reg), globalData_(data)
+    {}
 
     ISerNode::Ptr Export(const IObject::ConstPtr& object, ExportOptions options) override;
     void SetInstanceIdMapping(BASE_NS::unordered_map<InstanceId, InstanceId>) override;
@@ -112,7 +114,7 @@ private:
     ExportOptions options_;
 
     RefUriBuilder defaultRefUriBuilder_;
-    IRefUriBuilder* refUriBuilder_ { &defaultRefUriBuilder_ };
+    IRefUriBuilder* refUriBuilder_{&defaultRefUriBuilder_};
 };
 
 class ExportContext : public IntroduceInterfaces<IExportContext> {
@@ -146,12 +148,12 @@ public:
 private:
     Exporter& exporter_;
     IObject::ConstPtr object_;
-    bool toplevel_ {};
+    bool toplevel_{};
     BASE_NS::vector<NamedNode> elements_;
     ISerNode::Ptr substNode_;
 };
 
-} // namespace Serialization
+}  // namespace Serialization
 META_END_NAMESPACE()
 
 #endif

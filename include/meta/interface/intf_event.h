@@ -101,7 +101,7 @@ public:
  */
 inline IEvent::Token AddHandler(const IEvent::Ptr& event, const ICallable::Ptr& callback, IEvent::Token userToken = {})
 {
-    return event && callback ? event->AddHandler(callback, userToken) : IEvent::Token {};
+    return event && callback ? event->AddHandler(callback, userToken) : IEvent::Token{};
 }
 
 /**
@@ -137,7 +137,7 @@ inline auto Invoke(const IEvent::Ptr& event, Args&&... args)
         CORE_LOG_W("Trying to Invoke wrong type of event");
     }
     if constexpr (!BASE_NS::is_same_v<typename MyEvent::ReturnType, void>) {
-        return typename MyEvent::ReturnType {};
+        return typename MyEvent::ReturnType{};
     }
 }
 
@@ -159,8 +159,8 @@ public:
     }
 
 private:
-    BASE_NS::shared_ptr<IEvent> event_ {};
-    IEvent::Token token_ {};
+    BASE_NS::shared_ptr<IEvent> event_{};
+    IEvent::Token token_{};
 };
 
 META_END_NAMESPACE()

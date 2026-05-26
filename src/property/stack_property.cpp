@@ -48,9 +48,10 @@ void UnsubscribeOnChanged(const T& obj, StackProperty& self, const ICallable::Pt
     }
 }
 
-} // namespace
+}  // namespace
 
-StackProperty::StackProperty(BASE_NS::string name) : Super(BASE_NS::move(name)) {}
+StackProperty::StackProperty(BASE_NS::string name) : Super(BASE_NS::move(name))
+{}
 
 void StackProperty::SubscribePendingCallbacks()
 {
@@ -89,7 +90,7 @@ AnyReturnValue StackProperty::TryToSetToValue(const IAny& v, IValue::Ptr& value)
 
     // INotifyOnChangeDirect values have deferred notifications, no need to suppress.
     auto noti = interface_cast<INotifyOnChangeDirect>(value) ? nullptr : interface_cast<INotifyOnChange>(value);
-    InterfaceUniqueLock lock { value };
+    InterfaceUniqueLock lock{value};
     if (noti) {
         noti->OnChanged()->EnableHandler(uintptr_t(this), false);
     }
@@ -195,7 +196,7 @@ const IAny& StackProperty::GetValueFromStack() const
             res = currentValue_->CopyFrom(*defaultValue_);
         } else {
             auto& v = values_.back();
-            InterfaceSharedLock lock { v };
+            InterfaceSharedLock lock{v};
             res = currentValue_->CopyFrom(v->GetValue());
         }
         if (!res) {
@@ -423,7 +424,7 @@ bool StackProperty::ProcessResetables(Vec& vec)
     for (int i = int(vec.size()) - 1; i >= 0; --i) {
         ResetResult res = ResetResult::RESET_REMOVE_ME;
         if (auto rable = interface_cast<IStackResetable>(vec[i])) {
-            InterfaceSharedLock lock { rable };
+            InterfaceSharedLock lock{rable};
             res = rable->ProcessOnReset(*defaultValue_);
         }
         if (res & RESET_REMOVE_ME) {
@@ -512,5 +513,5 @@ bool StackProperty::IsDefaultValue() const
     return HasDefaultValueFlag();
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()

@@ -26,10 +26,10 @@ META_BEGIN_NAMESPACE()
 
 /// Result the modifier evaluation functions return
 enum EvaluationResult : uint8_t {
-    EVAL_CONTINUE = 0,      /// Continue evaluation of the stack
-    EVAL_ERROR = 1,         /// Error happened
-    EVAL_RETURN = 2,        /// Stop stack evaluation and return value
-    EVAL_VALUE_CHANGED = 4, /// This modifier changed the value
+    EVAL_CONTINUE = 0,       /// Continue evaluation of the stack
+    EVAL_ERROR = 1,          /// Error happened
+    EVAL_RETURN = 2,         /// Stop stack evaluation and return value
+    EVAL_VALUE_CHANGED = 4,  /// This modifier changed the value
 };
 
 inline EvaluationResult operator|(EvaluationResult l, EvaluationResult r)

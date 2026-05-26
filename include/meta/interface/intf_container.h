@@ -35,8 +35,8 @@ META_REGISTER_INTERFACE(IOnChildChanged, "686e62cc-66b1-409d-821f-e5ac69e33863")
 META_REGISTER_INTERFACE(IOnChildMoved, "5890fe47-4829-42bb-bdb1-03f8a399ba0e")
 
 struct IOnChildChangedInfo {
-    constexpr static BASE_NS::Uid UID { META_NS::InterfaceId::IOnChildChanged };
-    constexpr static char const* NAME { "OnChildChanged" };
+    constexpr static BASE_NS::Uid UID{META_NS::InterfaceId::IOnChildChanged};
+    constexpr static char const* NAME{"OnChildChanged"};
 };
 
 class IContainer;
@@ -54,11 +54,11 @@ enum class ContainerChangeType : uint8_t {
  *        an object is added to or removed from an IContainer.
  */
 struct ChildChangedInfo {
-    ContainerChangeType type;                   ///< change type
-    IObject::Ptr object;                        ///< The object
-    BASE_NS::weak_ptr<const IContainer> parent; ///< The parent IContainer for the change
-    size_t from = size_t(-1);                   ///< From index (removed, moved)
-    size_t to = size_t(-1);                     ///< To index (added, moved)
+    ContainerChangeType type;                    ///< change type
+    IObject::Ptr object;                         ///< The object
+    BASE_NS::weak_ptr<const IContainer> parent;  ///< The parent IContainer for the change
+    size_t from = size_t(-1);                    ///< From index (removed, moved)
+    size_t to = size_t(-1);                      ///< To index (added, moved)
 };
 
 using IOnChildChanged = META_NS::SimpleEvent<IOnChildChangedInfo, void(const ChildChangedInfo&)>;
@@ -81,14 +81,14 @@ public:
          */
         BASE_NS::string name;
         /** Search mode */
-        TraversalType behavior { TraversalType::BREADTH_FIRST_ORDER };
+        TraversalType behavior{TraversalType::BREADTH_FIRST_ORDER};
         /** List of interface ids that the object must implement. If empty, no check is made */
         BASE_NS::vector<TypeId> uids;
         /** If true, the found object must implement all of the uids.
          *  If false, any uid is enough to consider the object as a match */
-        bool strict { false };
+        bool strict{false};
         /** Set to true so that also empty name is considered as valid name */
-        bool strictName { false };
+        bool strictName{false};
     };
     /**
      * @brief Returns the contained children.
@@ -218,7 +218,7 @@ public:
     template<class T>
     typename T::Ptr FindAny(BASE_NS::string_view name, TraversalType order) const
     {
-        return interface_pointer_cast<T>(FindAny({ BASE_NS::string(name), order, { T::UID }, false }));
+        return interface_pointer_cast<T>(FindAny({BASE_NS::string(name), order, {T::UID}, false}));
     }
     /**
      * @brief A helper template for finding a child item in this container that matches the name.
@@ -236,7 +236,7 @@ public:
     typename T::Ptr FindAnyFromHierarchy(BASE_NS::string_view name) const
     {
         return interface_pointer_cast<T>(
-            FindAny({ BASE_NS::string(name), TraversalType::BREADTH_FIRST_ORDER, { T::UID }, false, true }));
+            FindAny({BASE_NS::string(name), TraversalType::BREADTH_FIRST_ORDER, {T::UID}, false, true}));
     }
     /**
      * @brief Typed helper for IContainer::GetAll, returns all children which implement T.

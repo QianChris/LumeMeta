@@ -38,6 +38,6 @@ public:
     virtual void Terminate() = 0;
 };
 
-} // namespace Test
+}  // namespace Test
 
-#endif // TEST_RUNNER_COMMON
+#endif  // TEST_RUNNER_COMMON

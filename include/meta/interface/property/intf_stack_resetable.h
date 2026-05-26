@@ -24,9 +24,9 @@
 META_BEGIN_NAMESPACE()
 
 enum ResetResult : uint8_t {
-    RESET_CONTINUE = 0,  /// Continue evaluation of the stack (implied if no RESET_STOP)
-    RESET_STOP = 1,      /// Stop evaluating resets
-    RESET_REMOVE_ME = 2, /// Remove
+    RESET_CONTINUE = 0,   /// Continue evaluation of the stack (implied if no RESET_STOP)
+    RESET_STOP = 1,       /// Stop evaluating resets
+    RESET_REMOVE_ME = 2,  /// Remove
 };
 
 inline ResetResult operator|(ResetResult l, ResetResult r)

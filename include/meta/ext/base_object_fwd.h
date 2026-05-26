@@ -44,11 +44,11 @@ class BaseObjectFwd : public IntroduceInterfaces<IObjectInstance, IObjectFlags, 
     using Super = IntroduceInterfaces<IObjectInstance, IObjectFlags, IDerived, ILifecycle, IStaticMetadata>;
 
 public:
-    inline static const nullptr_t STATIC_METADATA {};
+    inline static const nullptr_t STATIC_METADATA{};
     static const StaticObjectMetadata* StaticMetadata()
     {
-        static const META_NS::StaticObjectMetadata objdata { nullptr, nullptr,
-            META_NS::GetAggregateMetadata(ClassId::BaseObject), nullptr, 0 };
+        static const META_NS::StaticObjectMetadata objdata{
+            nullptr, nullptr, META_NS::GetAggregateMetadata(ClassId::BaseObject), nullptr, 0};
         return &objdata;
     }
     const StaticObjectMetadata* GetStaticMetadata() const override
@@ -78,7 +78,7 @@ public:
         return static_cast<const Type*>(me->StaticGetInterface(Type::UID));
     }
 
-public: // IObject
+public:  // IObject
     InstanceId GetInstanceId() const override
     {
         return object_->GetInstanceId();
@@ -107,7 +107,7 @@ public: // IObject
         return Super::GetInterfacesVector();
     }
 
-public: // IObjectFlags
+public:  // IObjectFlags
     ObjectFlagBitsValue GetObjectFlags() const override
     {
         if (auto flags = interface_cast<IObjectFlags>(object_)) {
@@ -129,7 +129,7 @@ public: // IObjectFlags
         return {};
     }
 
-protected: // ILifecycle
+protected:  // ILifecycle
     bool Build(const IMetadata::Ptr& data) override
     {
 #ifdef _DEBUG
@@ -153,7 +153,7 @@ protected: // ILifecycle
         }
     }
 
-protected: // IDerived
+protected:  // IDerived
     void SetSuperInstance(const META_NS::IObject::Ptr& /*aggr*/, const META_NS::IObject::Ptr& super) override
     {
 #ifdef _DEBUG
@@ -162,7 +162,7 @@ protected: // IDerived
             CORE_LOG_E("Do not call SetSuperInstance explicitly from derived class!");
         }
 #endif
-        object_ = interface_pointer_cast<IObjectInstance>(super); // Save the strong reference to super.
+        object_ = interface_pointer_cast<IObjectInstance>(super);  // Save the strong reference to super.
         assert(object_);
     }
 
@@ -193,7 +193,7 @@ protected:
 private:
     IObjectInstance::Ptr object_;
 #ifdef _DEBUG
-    bool buildCalled_ {};
+    bool buildCalled_{};
 #endif
 };
 

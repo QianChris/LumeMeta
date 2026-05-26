@@ -31,7 +31,8 @@ public:
     using EventType = IEvent;
     using ValueType = BASE_NS::shared_ptr<IEvent>;
 
-    Event(const ValueType& ev = nullptr) : event_(ev) {}
+    Event(const ValueType& ev = nullptr) : event_(ev)
+    {}
 
     ValueType operator->() const
     {
@@ -63,7 +64,8 @@ public:
     using Event<IEvent>::Event;
     using ValueType = BASE_NS::shared_ptr<EventT>;
 
-    Event(const ValueType& ev = nullptr) : Event<IEvent>(interface_pointer_cast<IEvent>(ev)) {}
+    Event(const ValueType& ev = nullptr) : Event<IEvent>(interface_pointer_cast<IEvent>(ev))
+    {}
     BASE_NS::shared_ptr<ICallable> GetCallable() const
     {
         return interface_pointer_cast<ICallable>(event_);

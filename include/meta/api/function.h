@@ -83,7 +83,8 @@ public:
     {}
 
 protected:
-    DefaultFunction(const DefaultFunction& s) : name_(s.name_), obj_(s.obj_), func_(s.func_), context_(s.context_) {}
+    DefaultFunction(const DefaultFunction& s) : name_(s.name_), obj_(s.obj_), func_(s.func_), context_(s.context_)
+    {}
 
 protected:
     BASE_NS::string name_;
@@ -115,7 +116,7 @@ template<typename Func, typename = EnableIfBindFunction<Func>>
 IFunction::Ptr CreateBindFunction(Func func)
 {
     auto ccontext = []() {
-        ::BASE_NS::string_view arr[] = { "" };
+        ::BASE_NS::string_view arr[] = {""};
         return META_NS::ConstructAny<META_NS::ICallContext::Ptr>(
             CreateCallContextImpl<decltype(func())>(ParamNameToView(arr)));
     };
@@ -164,11 +165,11 @@ struct CallResult {
     /**
      * @brief True if it was possible to make the call (i.e. the argument types match the parameters).
      */
-    bool success {};
+    bool success{};
     /**
      * @brief Return value of the function call.
      */
-    Type value {};
+    Type value{};
 };
 
 template<>
@@ -179,7 +180,7 @@ struct CallResult<void> {
     }
 
     ICallContext::Ptr context;
-    bool success {};
+    bool success{};
 };
 
 template<typename Ret, typename... Args, size_t... Index>
@@ -193,26 +194,26 @@ CallResult<Ret> CallMetaFunctionImpl(const IFunction::Ptr& func, IndexSequence<I
     // Allow to use defaults from call context
     if (params.size() < sizeof...(Args)) {
         context->ReportError("invalid meta call");
-        return { context };
+        return {context};
     }
 
     if (!(true && ... && Set<PlainType_t<Args>>(context, params[Index].name, args))) {
         context->ReportError("invalid meta call");
-        return { context };
+        return {context};
     }
 
     func->Invoke(context);
     if (context->Succeeded()) {
         if constexpr (BASE_NS::is_same_v<Ret, void>) {
-            return CallResult<Ret> { context, true };
+            return CallResult<Ret>{context, true};
         }
         if constexpr (!BASE_NS::is_same_v<Ret, void>) {
             if (auto p = GetResult<Ret>(context)) {
-                return CallResult<Ret> { context, true, *p };
+                return CallResult<Ret>{context, true, *p};
             }
         }
     }
-    return { context };
+    return {context};
 }
 
 /**

@@ -47,7 +47,7 @@ public:
 
 private:
     BASE_NS::vector<INotifyOnChangeCallback::WeakPtr> callbacks_;
-    std::atomic<uint8_t> count_ {};
+    std::atomic<uint8_t> count_{};
 };
 
 META_REGISTER_CLASS(EngineValue, "a8a9c80f-3501-48da-b552-f1f323ee399b", ObjectCategoryBits::NO_CATEGORY)
@@ -123,14 +123,14 @@ private:
     mutable std::shared_mutex mutex_;
     EnginePropertyParams params_;
     IEngineInternalValueAccess::ConstPtr access_;
-    EnumBitField<ValueFlags, uint8_t> flags_ {};
+    EnumBitField<ValueFlags, uint8_t> flags_{};
     const BASE_NS::string name_;
     IAny::Ptr value_;
     ChangeCallbackList changeCallbacks_;
-    EngineDirtyList* dirtyList_ {};
+    EngineDirtyList* dirtyList_{};
 };
 
-} // namespace Internal
+}  // namespace Internal
 
 META_END_NAMESPACE()
 

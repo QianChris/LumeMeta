@@ -31,7 +31,8 @@ class Callback;
 template<typename Callable, typename Func, typename R, typename... ARG>
 class Callback<Callable, Func, R(ARG...)> : public IntroduceInterfaces<Callable> {
 public:
-    Callback(Func f) : func_(BASE_NS::move(f)) {}
+    Callback(Func f) : func_(BASE_NS::move(f))
+    {}
 
 protected:
     Func func_;
@@ -41,7 +42,7 @@ protected:
     }
 };
 
-} // namespace
+}  // namespace
 
 /**
  * @brief MakeCallable creates a generic callable from callable entity (e.g. lambda).

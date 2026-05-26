@@ -51,7 +51,7 @@ enum class EngineTestBitField {
     MY_VALUE_4 = 8,
 };
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()
 CORE_BEGIN_NAMESPACE()
@@ -86,42 +86,42 @@ META_TYPE(UTest::EngineTestBitField)
 namespace UTest {
 namespace prop1 {
 struct EngineTestProp {
-    int value {};
+    int value{};
     BASE_NS::vector<float> floats;
     BASE_NS::Math::IVec2 vec2;
     EngineTestType type;
-    uint32_t array[2] {};
-    CORE_NS::IPropertyHandle* handle {};
+    uint32_t array[2]{};
+    CORE_NS::IPropertyHandle* handle{};
 };
 
 constexpr size_t TEST_PROPERTY_COUNT = 6;
 constexpr size_t TEST_RECURSIVE_PROPERTY_COUNT = 11;
 
-PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value it is", 0), //
-    MEMBER_PROPERTY(floats, "Floats", 0),                                                         //
-    MEMBER_PROPERTY(vec2, "Vec2", 0),                                                             //
-    MEMBER_PROPERTY(type, "Type", 0),                                                             //
-    MEMBER_PROPERTY(array, "Array", 0),                                                           //
+PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value it is", 0),  //
+    MEMBER_PROPERTY(floats, "Floats", 0),                                                          //
+    MEMBER_PROPERTY(vec2, "Vec2", 0),                                                              //
+    MEMBER_PROPERTY(type, "Type", 0),                                                              //
+    MEMBER_PROPERTY(array, "Array", 0),                                                            //
     MEMBER_PROPERTY(handle, "Handle", 0))
 
-} // namespace prop1
+}  // namespace prop1
 
 namespace prop2 {
 struct EngineTestProp {
-    int value { 1 };
-    uint32_t array[2] { 1, 1 };
+    int value{1};
+    uint32_t array[2]{1, 1};
     EngineTestType complex[3];
-    BASE_NS::vector<EngineTestType> complexVec { EngineTestType { { 1, 2 } }, EngineTestType { { 8, 8 } } };
+    BASE_NS::vector<EngineTestType> complexVec{EngineTestType{{1, 2}}, EngineTestType{{8, 8}}};
 };
 
 constexpr size_t TEST_PROPERTY_COUNT = 4;
 
-PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value", 0), //
-    MEMBER_PROPERTY(array, "Array", 0),                                                     //
-    MEMBER_PROPERTY(complex, "Complex", 0),                                                 //
+PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(value, "Value", 0),  //
+    MEMBER_PROPERTY(array, "Array", 0),                                                      //
+    MEMBER_PROPERTY(complex, "Complex", 0),                                                  //
     MEMBER_PROPERTY(complexVec, "ComplexVec", 0))
 
-} // namespace prop2
+}  // namespace prop2
 
 namespace prop3 {
 struct EngineTestProp {
@@ -134,7 +134,7 @@ constexpr size_t TEST_PROPERTY_COUNT = 2;
 PROPERTY_LIST(EngineTestProp, ENGINE_TESTPROP_METADATA, MEMBER_PROPERTY(enum1, "My Enum", 0),
     BITFIELD_MEMBER_PROPERTY(enum2, "My Bitfield", CORE_NS::PropertyFlags::IS_BITFIELD, EngineTestBitField))
 
-} // namespace prop3
+}  // namespace prop3
 
 using EngineTestProp1Property = CORE_NS::PropertyApiImpl<prop1::EngineTestProp>;
 using EngineTestProp2Property = CORE_NS::PropertyApiImpl<prop2::EngineTestProp>;
@@ -146,16 +146,18 @@ public:
     {
         return 1;
     }
-    void Ref() noexcept override {}
-    void Unref() noexcept override {}
+    void Ref() noexcept override
+    {}
+    void Unref() noexcept override
+    {}
 };
 
 template<typename Property>
 class TestComponentManager final : public CORE_NS::IComponentManager {
 public:
-    CORE_NS::Entity ent { uint64_t(this) };
+    CORE_NS::Entity ent{uint64_t(this)};
     DummyRef ref;
-    CORE_NS::EntityReference entityRef { ent, CORE_NS::IEntityReferenceCounter::Ptr(&ref) };
+    CORE_NS::EntityReference entityRef{ent, CORE_NS::IEntityReferenceCounter::Ptr(&ref)};
     Property tprop;
     BASE_NS::unique_ptr<CORE_NS::PropertyApiImpl<Property>> property;
 
@@ -181,7 +183,7 @@ public:
     }
     CORE_NS::Entity GetEntity(IComponentManager::ComponentId index) const override
     {
-        return index == 0 ? ent : CORE_NS::Entity {};
+        return index == 0 ? ent : CORE_NS::Entity{};
     }
     uint32_t GetComponentGeneration(IComponentManager::ComponentId index) const override
     {
@@ -195,7 +197,8 @@ public:
     {
         return entity == ent ? 0 : INVALID_COMPONENT_ID;
     }
-    void Create(CORE_NS::Entity entity) override {}
+    void Create(CORE_NS::Entity entity) override
+    {}
     bool Destroy(CORE_NS::Entity entity) override
     {
         if (entity == ent) {
@@ -203,8 +206,10 @@ public:
         }
         return true;
     }
-    void Gc() override {}
-    void Destroy(BASE_NS::array_view<const CORE_NS::Entity> gcList) override {}
+    void Gc() override
+    {}
+    void Destroy(BASE_NS::array_view<const CORE_NS::Entity> gcList) override
+    {}
     BASE_NS::vector<CORE_NS::Entity> GetAddedComponents() override
     {
         return {};
@@ -225,12 +230,14 @@ public:
     {
         return 0;
     }
-    void ClearModifiedFlags() override {}
+    void ClearModifiedFlags() override
+    {}
     uint32_t GetGenerationCounter() const override
     {
         return 0;
     }
-    void SetData(CORE_NS::Entity entity, const CORE_NS::IPropertyHandle& data) override {}
+    void SetData(CORE_NS::Entity entity, const CORE_NS::IPropertyHandle& data) override
+    {}
     const CORE_NS::IPropertyHandle* GetData(CORE_NS::Entity entity) const override
     {
         if (!property) {
@@ -245,7 +252,8 @@ public:
         }
         return entity == ent ? property->GetData() : nullptr;
     }
-    void SetData(ComponentId index, const CORE_NS::IPropertyHandle& data) override {}
+    void SetData(ComponentId index, const CORE_NS::IPropertyHandle& data) override
+    {}
     const CORE_NS::IPropertyHandle* GetData(ComponentId index) const override
     {
         if (!property) {
@@ -298,5 +306,5 @@ inline void UnregisterEngineTestType()
     r.GetEngineData().UnregisterInternalValueAccess(MetaType<UTest::EngineTestBitField>::coreType);
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

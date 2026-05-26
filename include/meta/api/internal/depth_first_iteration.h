@@ -46,7 +46,7 @@ IterationResult DepthFirstOrderIterate(const Iterable& i, Func& func, IterateStr
 
     IterationCallable<InterableCallable, decltype(f)> ff(BASE_NS::move(f));
     InterfaceLock lock(is.lock, ite);
-    return ite->Iterate(IterationParameters { ff, is });
+    return ite->Iterate(IterationParameters{ff, is});
 }
 
 template<template<typename> class InterableCallable, typename Iterable>
@@ -62,7 +62,7 @@ IterationResult DepthFirstOrderIterate(const Iterable& i, ICallable& func, Itera
     return DepthFirstOrderIterate<InterableCallable>(i, lf, is);
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()
 
 #endif

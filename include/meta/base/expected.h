@@ -42,9 +42,11 @@ template<typename Type, typename Error>
 class Expected {
 public:
     /* NOLINTNEXTLINE(*-explicit-constructor) */
-    constexpr Expected(Type t) : hasValue_(true), value_(BASE_NS::move(t)) {}
+    constexpr Expected(Type t) : hasValue_(true), value_(BASE_NS::move(t))
+    {}
     /* NOLINTNEXTLINE(*-explicit-constructor) */
-    constexpr Expected(Error e) : error_(BASE_NS::move(e)) {}
+    constexpr Expected(Error e) : error_(BASE_NS::move(e))
+    {}
 
     ~Expected()
     {
@@ -85,7 +87,7 @@ public:
 
     constexpr Error GetError() const
     {
-        return !hasValue_ ? error_ : Error {};
+        return !hasValue_ ? error_ : Error{};
     }
 
     constexpr const Type& GetValue() const
@@ -100,7 +102,7 @@ public:
     }
 
 private:
-    bool hasValue_ {};
+    bool hasValue_{};
     union {
         Error error_;
         Type value_;
@@ -113,7 +115,8 @@ class Expected<void, GenericError> {
 public:
     constexpr Expected() = default;
     /* NOLINTNEXTLINE(*-explicit-constructor) */
-    constexpr Expected(GenericError e) : error_(e) {}
+    constexpr Expected(GenericError e) : error_(e)
+    {}
 
     /* NOLINTNEXTLINE(*-explicit-constructor) */
     constexpr operator bool() const
@@ -127,7 +130,7 @@ public:
     }
 
 private:
-    GenericError error_ {};
+    GenericError error_{};
 };
 
 using ReturnError = Expected<void, GenericError>;
@@ -137,7 +140,8 @@ template<typename Enum>
 class ReturnValue {
 public:
     /* NOLINTNEXTLINE(*-explicit-constructor) */
-    constexpr ReturnValue(Enum code) : code_(code) {}
+    constexpr ReturnValue(Enum code) : code_(code)
+    {}
 
     /* NOLINTNEXTLINE(*-explicit-constructor) */
     constexpr operator bool() const
@@ -161,7 +165,7 @@ public:
     }
 
 private:
-    Enum code_ {};
+    Enum code_{};
 };
 
 META_END_NAMESPACE()

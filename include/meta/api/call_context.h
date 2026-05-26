@@ -126,7 +126,7 @@ bool DefineResult(const ICallContext::Ptr& context)
         return context->DefineResult(nullptr);
     }
     if constexpr (!BASE_NS::is_same_v<Type, void>) {
-        return DefineResult(context, Type {});
+        return DefineResult(context, Type{});
     }
 }
 
@@ -193,7 +193,8 @@ BASE_NS::array_view<BASE_NS::string_view> ParamNameToView(BASE_NS::string_view (
 template<typename T, bool Ref = BASE_NS::is_same_v<T, PlainType_t<T>&>>
 struct CallArg {
     using Type = PlainType_t<T>;
-    explicit CallArg(IAny::Ptr any) : any_(any) {}
+    explicit CallArg(IAny::Ptr any) : any_(any)
+    {}
 
     /* NOLINTNEXTLINE(*-explicit-constructor) */
     operator Type() const
@@ -262,10 +263,10 @@ struct CallFunctionImpl {
             return false;
         }
         if constexpr (sizeof...(Args) != 0) {
-            IAny::Ptr args[] = { params[Index].value... };
+            IAny::Ptr args[] = {params[Index].value...};
             return Call(context, func, args, ind);
         } else {
-            return Call(context, func, BASE_NS::array_view<IAny::Ptr> {}, ind);
+            return Call(context, func, BASE_NS::array_view<IAny::Ptr>{}, ind);
         }
     }
 
@@ -279,10 +280,10 @@ struct CallFunctionImpl {
             return false;
         }
         if constexpr (sizeof...(Args) != 0) {
-            IAny::Ptr args[] = { context->Get(names[Index])... };
+            IAny::Ptr args[] = {context->Get(names[Index])...};
             return Call(context, func, args, ind);
         } else {
-            return Call(context, func, BASE_NS::array_view<IAny::Ptr> {}, ind);
+            return Call(context, func, BASE_NS::array_view<IAny::Ptr>{}, ind);
         }
     }
 };

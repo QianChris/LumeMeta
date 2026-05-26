@@ -47,8 +47,8 @@ protected:
     static void OnSurfaceDestroyedCB(OH_NativeXComponent* component, void* window);
     static void DispatchTouchEventCB(OH_NativeXComponent* component, void* window);
 
-    OH_NativeXComponent* m_component { nullptr };
-    void* m_window { nullptr };
+    OH_NativeXComponent* m_component{nullptr};
+    void* m_window{nullptr};
     virtual void OnSurfaceChanged() = 0;
     virtual void OnSurfaceDestroyed() = 0;
     virtual void DispatchTouchEvent() = 0;
@@ -58,8 +58,10 @@ protected:
 };
 
 inline BASE_NS::unordered_map<BASE_NS::string, BASE_NS::unique_ptr<IXCCallbacks>> IXCCallbacks::m_instances;
-inline OH_NativeXComponent_Callback IXCCallbacks::m_cb { IXCCallbacks::OnSurfaceCreatedCB,
-    IXCCallbacks::OnSurfaceChangedCB, IXCCallbacks::OnSurfaceDestroyedCB, IXCCallbacks::DispatchTouchEventCB };
+inline OH_NativeXComponent_Callback IXCCallbacks::m_cb{IXCCallbacks::OnSurfaceCreatedCB,
+    IXCCallbacks::OnSurfaceChangedCB,
+    IXCCallbacks::OnSurfaceDestroyedCB,
+    IXCCallbacks::DispatchTouchEventCB};
 
 // xComponent impl for Gtests
 class OHOSApp : public TestApp, public IXCCallbacks {
@@ -68,7 +70,8 @@ public:
     {
         Init();
     }
-    ~OHOSApp() {}
+    ~OHOSApp()
+    {}
 
     void OnSurfaceCreated() override;
     void OnSurfaceChanged() override;
@@ -98,23 +101,23 @@ private:
     void CleanGtestEnv();
 
     struct TestData {
-        std::mutex mtx;                   // Mutex
-        BASE_NS::vector<char*> gtestArgs; // Input data for Gtest
-        BASE_NS::string reportTestFile;   // Report log file
-        BASE_NS::string gtestTestFile;    // Gtest results file
-        int result = -1;                  // Gtest results exit code
+        std::mutex mtx;                    // Mutex
+        BASE_NS::vector<char*> gtestArgs;  // Input data for Gtest
+        BASE_NS::string reportTestFile;    // Report log file
+        BASE_NS::string gtestTestFile;     // Gtest results file
+        int result = -1;                   // Gtest results exit code
     };
-    napi_env m_env { nullptr };
-    napi_value m_exports { nullptr };
-    napi_value m_context { nullptr };
-    napi_threadsafe_function m_termFun { nullptr };
-    NativeResourceManager* m_nativeRsManager { nullptr };
+    napi_env m_env{nullptr};
+    napi_value m_exports{nullptr};
+    napi_value m_context{nullptr};
+    napi_threadsafe_function m_termFun{nullptr};
+    NativeResourceManager* m_nativeRsManager{nullptr};
     BASE_NS::string m_cacheDir, m_filesDir, m_tempDir, m_nativeLibDir;
     TestData m_testData;
 };
 
 inline OHOSApp* g_ohosApp;
 
-} // namespace Test
+}  // namespace Test
 
-#endif // TEST_RUNNER_OHOS
+#endif  // TEST_RUNNER_OHOS

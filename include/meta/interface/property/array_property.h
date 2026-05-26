@@ -30,7 +30,8 @@ public:
     using IndexType = typename ArrayPropertyInterface<Type>::IndexType;
 
     ArrayProperty() = default;
-    ArrayProperty(nullptr_t) {}
+    ArrayProperty(nullptr_t)
+    {}
 
     template<typename Prop, typename = BASE_NS::enable_if_t<BASE_NS::is_convertible_v<Prop*, PropertyInterfaceType*>>>
     ArrayProperty(BASE_NS::shared_ptr<Prop> p) : p_(BASE_NS::move(p))

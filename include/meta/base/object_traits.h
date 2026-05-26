@@ -34,4 +34,4 @@ constexpr bool IsIObjectPtr_v = BASE_NS::is_same_v<BASE_NS::remove_const_t<Type>
 
 META_END_NAMESPACE()
 
-#endif // META_BASE_OBJECT_TRAITS_H
+#endif  // META_BASE_OBJECT_TRAITS_H

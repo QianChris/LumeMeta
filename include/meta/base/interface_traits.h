@@ -48,7 +48,7 @@ class HasGetInterfaceMethod final {
     static BASE_NS::false_type Test(...);
 
 public:
-    static constexpr bool value = decltype(Test<C>(nullptr))::value; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = decltype(Test<C>(nullptr))::value;  // NOLINT(readability-identifier-naming)
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -81,7 +81,7 @@ struct HasEqualOperator {
  * @brief Check if the type can be compared with equality operators.
  */
 template<class C>
-inline constexpr bool HasEqualOperator_v = HasEqualOperator<C>::type::value; // NOLINT(readability-identifier-naming)
+inline constexpr bool HasEqualOperator_v = HasEqualOperator<C>::type::value;  // NOLINT(readability-identifier-naming)
 
 template<class T>
 struct HasInEqualOperator {
@@ -132,13 +132,13 @@ using EnableIfBindFunction = decltype(CallTestFunc(BASE_NS::declval<Func>()()));
 
 template<typename Func, typename InvokeType, typename = void>
 struct CanInvokeWithArgumentsImpl {
-    constexpr static bool value = false; // NOLINT(readability-identifier-naming)
+    constexpr static bool value = false;  // NOLINT(readability-identifier-naming)
 };
 
 template<typename Func, typename Ret, typename... Args>
 struct CanInvokeWithArgumentsImpl<Func, Ret(Args...),
     decltype(BASE_NS::declval<Func>()(BASE_NS::declval<Args>()...), void())> {
-    constexpr static bool value = true; // NOLINT(readability-identifier-naming)
+    constexpr static bool value = true;  // NOLINT(readability-identifier-naming)
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -199,63 +199,63 @@ using EnableIfCompatibleBaseProperty = BASE_NS::enable_if_t<IsCompatibleBaseProp
  */
 template<typename>
 struct IsSharedPtr {
-    static constexpr bool value = false; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = false;  // NOLINT(readability-identifier-naming)
 };
 
 template<typename T>
 struct IsSharedPtr<BASE_NS::shared_ptr<T>> {
-    static constexpr bool value = true; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = true;  // NOLINT(readability-identifier-naming)
     template<typename Type>
     using rebind = BASE_NS::shared_ptr<Type>;
 };
 
 template<typename>
 struct IsWeakPtr {
-    static constexpr bool value = false; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = false;  // NOLINT(readability-identifier-naming)
 };
 
 template<typename T>
 struct IsWeakPtr<BASE_NS::weak_ptr<T>> {
-    static constexpr bool value = true; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = true;  // NOLINT(readability-identifier-naming)
     template<typename Type>
     using rebind = BASE_NS::weak_ptr<Type>;
 };
 
 template<typename Type>
-constexpr bool IsWeakPtr_v = IsWeakPtr<Type>::value; // NOLINT(readability-identifier-naming)
+constexpr bool IsWeakPtr_v = IsWeakPtr<Type>::value;  // NOLINT(readability-identifier-naming)
 
 /**
  * @brief Check if type is shared_ptr or weak_ptr
  */
 template<typename>
 struct IsSharedOrWeakPtr {
-    static constexpr bool value = false; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = false;  // NOLINT(readability-identifier-naming)
 };
 
 template<typename T>
 struct IsSharedOrWeakPtr<BASE_NS::shared_ptr<T>> {
-    static constexpr bool value = true; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = true;  // NOLINT(readability-identifier-naming)
     template<typename Type>
     using rebind = BASE_NS::shared_ptr<Type>;
-    static constexpr bool is_const = BASE_NS::is_const_v<T>; // NOLINT(readability-identifier-naming)
+    static constexpr bool is_const = BASE_NS::is_const_v<T>;  // NOLINT(readability-identifier-naming)
 };
 
 template<typename T>
 struct IsSharedOrWeakPtr<BASE_NS::weak_ptr<T>> {
-    static constexpr bool value = true; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = true;  // NOLINT(readability-identifier-naming)
     template<typename Type>
     using rebind = BASE_NS::weak_ptr<Type>;
-    static constexpr bool is_const = BASE_NS::is_const_v<T>; // NOLINT(readability-identifier-naming)
+    static constexpr bool is_const = BASE_NS::is_const_v<T>;  // NOLINT(readability-identifier-naming)
 };
 
 template<typename Type>
-constexpr bool IsConstPtr_v = IsSharedOrWeakPtr<Type>::is_const; // NOLINT(readability-identifier-naming)
+constexpr bool IsConstPtr_v = IsSharedOrWeakPtr<Type>::is_const;  // NOLINT(readability-identifier-naming)
 
 /**
  * @brief Check if type is shared_ptr or weak_ptr
  */
 template<typename T>
-constexpr bool IsSharedOrWeakPtr_v = IsSharedOrWeakPtr<T>::value; // NOLINT(readability-identifier-naming)
+constexpr bool IsSharedOrWeakPtr_v = IsSharedOrWeakPtr<T>::value;  // NOLINT(readability-identifier-naming)
 
 template<typename Type>
 using InterfaceCheck = META_NS::BoolWrap<IsKindOfIInterface_v<BASE_NS::remove_const_t<typename Type::element_type>*>>;

@@ -12,7 +12,7 @@ class BenchmarkType : public IntroduceInterfaces<ObjectFwd, IBenchmarkType> {
     META_OBJECT(BenchmarkType, ClassId::BenchmarkType, IntroduceInterfaces)
 };
 
-} // namespace
+}  // namespace
 
 void RegisterBenchmarkTypes()
 {
@@ -35,5 +35,5 @@ IBenchmarkType::Ptr CreateBenchmarkType()
     return META_NS::GetObjectRegistry().Create<IBenchmarkType>(ClassId::BenchmarkType);
 }
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

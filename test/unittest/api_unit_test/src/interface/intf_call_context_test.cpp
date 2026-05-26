@@ -120,8 +120,10 @@ struct TestClass : IntroduceInterfaces<IObjectInstance> {
     {
         return a + 10 * b;
     }
-    void TestFunc3(int a, int b, float c) {}
-    void ConstFunc() const {}
+    void TestFunc3(int a, int b, float c)
+    {}
+    void ConstFunc() const
+    {}
     void RefFunc(const int& in, int& out)
     {
         out = in + 1;
@@ -157,9 +159,9 @@ struct TestClass : IntroduceInterfaces<IObjectInstance> {
         return {};
     }
 
-    IObject::WeakPtr self_ {};
+    IObject::WeakPtr self_{};
 };
-} // namespace
+}  // namespace
 
 /**
  * @tc.name: CreateCallContext
@@ -168,7 +170,7 @@ struct TestClass : IntroduceInterfaces<IObjectInstance> {
  */
 UNIT_TEST(API_CallContextTest, CreateCallContext, testing::ext::TestSize.Level1)
 {
-    BASE_NS::string_view arr[] = { "1", "2", "3" };
+    BASE_NS::string_view arr[] = {"1", "2", "3"};
     EXPECT_FALSE(CreateCallContext(&TestClass::TestFunc2, arr));
     auto c = CreateCallContext(&TestClass::TestFunc, arr);
     ASSERT_TRUE(c);
@@ -184,7 +186,7 @@ UNIT_TEST(API_CallContextTest, CreateCallContext, testing::ext::TestSize.Level1)
     BASE_NS::shared_ptr<TestClass> t(new TestClass);
     t->self_ = t;
     auto f = CreateFunction("test", t, &TestClass::TestFunc, [] {
-        BASE_NS::string_view arr[] = { "1", "2", "3" };
+        BASE_NS::string_view arr[] = {"1", "2", "3"};
         return META_NS::ConstructAny<META_NS::ICallContext::Ptr>(CreateCallContext(&TestClass::TestFunc, arr));
     });
     ASSERT_TRUE(f);
@@ -200,7 +202,7 @@ UNIT_TEST(API_CallContextTest, CreateCallContext, testing::ext::TestSize.Level1)
  */
 UNIT_TEST(API_CallContextTest, BadCallFunction, testing::ext::TestSize.Level1)
 {
-    BASE_NS::string_view arr[] = { "1", "2", "3" };
+    BASE_NS::string_view arr[] = {"1", "2", "3"};
     auto c = CreateCallContext(&TestClass::TestFunc, arr);
     BASE_NS::shared_ptr<TestClass> t(new TestClass);
     t->self_ = t;
@@ -243,7 +245,7 @@ UNIT_TEST(API_CallContextTest, ConstFunctions, testing::ext::TestSize.Level1)
 UNIT_TEST(API_CallContextTest, ReferenceArgs, testing::ext::TestSize.Level1)
 {
     auto context = [] {
-        BASE_NS::string_view arr[] = { "in", "out" };
+        BASE_NS::string_view arr[] = {"in", "out"};
         return META_NS::ConstructAny<META_NS::ICallContext::Ptr>(CreateCallContext(&TestClass::RefFunc, arr));
     };
     auto c = context();
@@ -270,7 +272,7 @@ UNIT_TEST(API_CallContextTest, ReferenceArgs, testing::ext::TestSize.Level1)
  */
 UNIT_TEST(API_CallContextTest, CallArgumentOrder, testing::ext::TestSize.Level1)
 {
-    BASE_NS::string_view arr[] = { "1", "2" };
+    BASE_NS::string_view arr[] = {"1", "2"};
 
     {
         auto c = CreateCallContext(&TestClass::TestFunc2, arr);
@@ -289,7 +291,7 @@ UNIT_TEST(API_CallContextTest, CallArgumentOrder, testing::ext::TestSize.Level1)
         Set<int>(c, "2", 2);
         BASE_NS::shared_ptr<TestClass> t(new TestClass);
         t->self_ = t;
-        BASE_NS::string_view order[] = { "2", "1" };
+        BASE_NS::string_view order[] = {"2", "1"};
         EXPECT_TRUE(CallFunction(c, t.get(), &TestClass::TestFunc2, order));
         auto res = GetResult<int>(c);
         ASSERT_TRUE(res);
@@ -371,5 +373,5 @@ UNIT_TEST(API_CallContextTest, DefineParameterDuplicate, testing::ext::TestSize.
     EXPECT_EQ(context->GetParameters().size(), 1);
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

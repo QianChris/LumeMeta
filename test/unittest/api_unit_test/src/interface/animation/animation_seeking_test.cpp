@@ -57,7 +57,7 @@ Animation CreateAnimation<KeyframeAnimation<float>>(const IProperty::WeakPtr& pr
     return animation;
 }
 
-} // namespace
+}  // namespace
 
 template<typename AnimationType>
 class API_AnimationSeekingTest : public API_AnimationTestBase {
@@ -157,5 +157,5 @@ TYPED_TEST(API_AnimationSeekingTest, SeekingToBeginningDoesNotStopAnimation)
     EXPECT_THAT(animationRunningChangeInvoke, testing::Eq(false));
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

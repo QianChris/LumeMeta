@@ -33,7 +33,8 @@ class ContinuationFunction : public IntroduceInterfaces<IFutureContinuation> {
         IntroduceInterfaces<IFutureContinuation>, ContinuationFunction, "f4736552-7365-4c8f-bbe9-a065e2c30382");
 
 public:
-    ContinuationFunction(Func func) : func_(BASE_NS::move(func)) {}
+    ContinuationFunction(Func func) : func_(BASE_NS::move(func))
+    {}
 
     IAny::Ptr Invoke(const IAny::Ptr& value) override
     {
@@ -91,7 +92,7 @@ Result CallResultHelper(Func func, const IAny::Ptr& v)
 {
     if constexpr (!BASE_NS::is_same_v<Param, void>) {
         if (v) {
-            Param value {};
+            Param value{};
             if (v->GetValue(value)) {
                 return func(value);
             }
@@ -101,7 +102,7 @@ Result CallResultHelper(Func func, const IAny::Ptr& v)
         return func();
     }
     if constexpr (!BASE_NS::is_same_v<Result, void>) {
-        return Result {};
+        return Result{};
     }
 }
 
@@ -110,7 +111,8 @@ class Future {
 public:
     using StateType = IFuture::StateType;
 
-    Future(IFuture::Ptr fut = nullptr) : fut_(BASE_NS::move(fut)) {}
+    Future(IFuture::Ptr fut = nullptr) : fut_(BASE_NS::move(fut))
+    {}
     /// @see IFuture::GetState
     StateType GetState() const
     {
@@ -166,9 +168,9 @@ public:
     Type GetResult() const
     {
         if (fut_) {
-            return fut_->GetResultOr<Type>(Type {});
+            return fut_->GetResultOr<Type>(Type{});
         }
-        return Type {};
+        return Type{};
     }
     /// Returns the underlying IFuture object
     IFuture::Ptr GetFuture() const

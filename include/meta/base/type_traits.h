@@ -27,24 +27,24 @@ struct TypeList {};
 
 template<bool B>
 struct BoolWrap {
-    constexpr static bool value = B; // NOLINT(readability-identifier-naming)
+    constexpr static bool value = B;  // NOLINT(readability-identifier-naming)
 };
 
 // same concept as https://en.cppreference.com/w/cpp/experimental/is_detected but simplified for our needs
 template<typename Void, template<class...> class Op, typename... Args>
 struct IsDetected {
-    static constexpr bool value = false; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = false;  // NOLINT(readability-identifier-naming)
     using type = BoolWrap<false>;
 };
 
 template<template<class...> class Op, typename... Args>
 struct IsDetected<decltype(BASE_NS::declval<Op<Args...>>(), void()), Op, Args...> {
-    static constexpr bool value = true; // NOLINT(readability-identifier-naming)
+    static constexpr bool value = true;  // NOLINT(readability-identifier-naming)
     using type = Op<Args...>;
 };
 
 template<template<class...> class Op, typename... Args>
-constexpr bool IsDetected_v = IsDetected<void, Op, Args...>::value; // NOLINT(readability-identifier-naming)
+constexpr bool IsDetected_v = IsDetected<void, Op, Args...>::value;  // NOLINT(readability-identifier-naming)
 
 // NOLINTBEGIN(readability-identifier-naming)
 template<template<class...> class Op, typename... Args>
@@ -52,7 +52,7 @@ constexpr bool IsDetectedWithValue_v = IsDetected<void, Op, Args...>::type::valu
 // NOLINTEND(readability-identifier-naming)
 
 template<typename T>
-using PlainType_t = BASE_NS::remove_const_t<BASE_NS::remove_reference_t<T>>; // NOLINT(readability-identifier-naming)
+using PlainType_t = BASE_NS::remove_const_t<BASE_NS::remove_reference_t<T>>;  // NOLINT(readability-identifier-naming)
 
 template<size_t... Ints>
 struct IndexSequence {};
@@ -81,7 +81,7 @@ template<typename Type>
 using NonDeduced_t = typename NonDeduced<Type>::type;
 
 template<typename T>
-constexpr bool is_enum_v = __is_enum(T); // NOLINT(readability-identifier-naming)
+constexpr bool is_enum_v = __is_enum(T);  // NOLINT(readability-identifier-naming)
 
 template<typename T, bool = is_enum_v<T>>
 struct RealType {
@@ -94,7 +94,7 @@ struct RealType<T, true> {
 };
 
 template<typename T>
-using RealType_t = typename RealType<T>::type; // NOLINT(readability-identifier-naming)
+using RealType_t = typename RealType<T>::type;  // NOLINT(readability-identifier-naming)
 
 META_END_NAMESPACE()
 

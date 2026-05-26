@@ -66,8 +66,8 @@ struct TestSerialiser {
 
 private:
     MemFile data_;
-    std::size_t writePos_ {};
-    std::size_t readPos_ {};
+    std::size_t writePos_{};
+    std::size_t readPos_{};
     BASE_NS::unordered_map<InstanceId, InstanceId> mapping_;
     CORE_NS::IResourceManager::Ptr resources_;
     IObject::Ptr userContext_;
@@ -76,8 +76,8 @@ private:
 
 void WriteToFile(const BASE_NS::vector<uint8_t>&, BASE_NS::string_view file);
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()
 
-#endif // META_TEST_SERIALISATION_UTILS_HEADER
+#endif  // META_TEST_SERIALISATION_UTILS_HEADER

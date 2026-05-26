@@ -56,7 +56,7 @@ public:
 
     uint64_t CurrentThread() const
     {
-        return std::hash<std::thread::id> {}(std::this_thread::get_id());
+        return std::hash<std::thread::id>{}(std::this_thread::get_id());
     }
     bool CurrentThreadIsExecutionThread() const override
     {
@@ -136,7 +136,7 @@ public:
 
     void ProcessTasks()
     {
-        std::unique_lock lock { mutex_ };
+        std::unique_lock lock{mutex_};
         execThread_ = std::this_thread::get_id();
 
 #if defined(__OHOS_PLATFORM__) && !defined(BUILD_PUBLIC_VERSION)
@@ -144,8 +144,8 @@ public:
         CORE_LOG_I("set engine child thread qos %s", ret == 0 ? "success" : "failed");
         auto tid = syscall(SYS_gettid);
         if (tid > 0) {
-            std::unordered_map<std::string, std::string> mapPayload { { "pid", std::to_string(getpid()) },
-                { "tid", std::to_string(tid) } };
+            std::unordered_map<std::string, std::string> mapPayload{
+                {"pid", std::to_string(getpid())}, {"tid", std::to_string(tid)}};
             CORE_LOG_I("ReportEngineResType %s %s", mapPayload["pid"].c_str(), mapPayload["tid"].c_str());
             OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(
                 RES_TYPE_EXT_ENGINE_SET_QOS, 1, mapPayload);
@@ -169,15 +169,15 @@ public:
         }
 
 #if defined(__OHOS_PLATFORM__) && !defined(BUILD_PUBLIC_VERSION)
-        std::unordered_map<std::string, std::string> mapPayload { { "pid", std::to_string(getpid()) },
-            { "tid", std::to_string(tid) } };
+        std::unordered_map<std::string, std::string> mapPayload{
+            {"pid", std::to_string(getpid())}, {"tid", std::to_string(tid)}};
         CORE_LOG_I("ReportEngineResType %s %s", mapPayload["pid"].c_str(), mapPayload["tid"].c_str());
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(RES_TYPE_EXT_ENGINE_SET_QOS, 0, mapPayload);
 #endif
     }
 
 private:
-    uint64_t threadId_ { 0 };
+    uint64_t threadId_{0};
     std::condition_variable addCondition_;
     std::thread thread_;
 };
@@ -189,6 +189,6 @@ IObjectFactory::Ptr GetThreadedTaskQueueFactory()
     return ThreadedTaskQueue::GetFactory();
 }
 
-} // namespace Internal
+}  // namespace Internal
 
 META_END_NAMESPACE()

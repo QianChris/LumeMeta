@@ -41,7 +41,7 @@ BASE_NS::string GetName(const Interface& obj)
 inline IObjectName::Ptr GetObjectNameAttachment(const IAttach::ConstPtr& att)
 {
     if (auto cont = att->GetAttachmentContainer(false)) {
-        auto res = cont->FindAny({ "", TraversalType::NO_HIERARCHY, { IObjectName::UID }, false });
+        auto res = cont->FindAny({"", TraversalType::NO_HIERARCHY, {IObjectName::UID}, false});
         if (auto oname = interface_pointer_cast<IObjectName>(res)) {
             return oname;
         }

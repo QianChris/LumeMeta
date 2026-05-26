@@ -76,7 +76,7 @@ public:
 inline IEvent::Token AddOnChangedHandler(
     const IProperty::Ptr& property, const ICallable::Ptr& callback, IEvent::Token userToken = {})
 {
-    return property ? AddHandler(property->OnChanged(), callback, userToken) : IEvent::Token {};
+    return property ? AddHandler(property->OnChanged(), callback, userToken) : IEvent::Token{};
 }
 
 /**

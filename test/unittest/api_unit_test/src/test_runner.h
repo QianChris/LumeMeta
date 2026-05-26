@@ -70,30 +70,34 @@ CORE_NS::IEngine::Ptr CreateEngine();
 
 namespace {
 
-std::unique_ptr<TestEnvironment> g_testEnv {};
+std::unique_ptr<TestEnvironment> g_testEnv{};
 
 class TestRunnerEnv : public ::testing::Environment {
 public:
-    TestRunnerEnv(int argc, char** argv) {}
+    TestRunnerEnv(int argc, char** argv)
+    {}
 
     void SetUp() override
     {
 #if defined(__ANDROID__)
-        const CORE_NS::PlatformCreateInfo info { ::Test::g_androidApp->GetEnv(),
-            *(::Test::g_androidApp->GetContext()) };
+        const CORE_NS::PlatformCreateInfo info{::Test::g_androidApp->GetEnv(), *(::Test::g_androidApp->GetContext())};
         const BASE_NS::string appAssetPath = "";
 #elif defined(__OHOS__)
-        const CORE_NS::PlatformCreateInfo info { ::Test::g_ohosApp->GetEnv(), ::Test::g_ohosApp->GetContext(), nullptr,
-            ::Test::g_ohosApp->GetRsManager(), ::Test::g_ohosApp->GetNativeLibDir() };
+        const CORE_NS::PlatformCreateInfo info{::Test::g_ohosApp->GetEnv(),
+            ::Test::g_ohosApp->GetContext(),
+            nullptr,
+            ::Test::g_ohosApp->GetRsManager(),
+            ::Test::g_ohosApp->GetNativeLibDir()};
         const BASE_NS::string appAssetPath = "";
 #elif defined(_WIN32)
-        const CORE_NS::PlatformCreateInfo info { ::Test::g_windowsApp->GetEngineDir(),
-            ::Test::g_windowsApp->GetAppDir(), ::Test::g_windowsApp->GetPluginsDir() };
+        const CORE_NS::PlatformCreateInfo info{::Test::g_windowsApp->GetEngineDir(),
+            ::Test::g_windowsApp->GetAppDir(),
+            ::Test::g_windowsApp->GetPluginsDir()};
 
         const BASE_NS::string appAssetPath = ::Test::g_windowsApp->GetAssetDir();
 #elif defined(__linux__)
-        const CORE_NS::PlatformCreateInfo info { ::Test::g_linuxApp->GetEngineDir(), ::Test::g_linuxApp->GetAppDir(),
-            ::Test::g_linuxApp->GetPluginsDir() };
+        const CORE_NS::PlatformCreateInfo info{
+            ::Test::g_linuxApp->GetEngineDir(), ::Test::g_linuxApp->GetAppDir(), ::Test::g_linuxApp->GetPluginsDir()};
 
         const BASE_NS::string appAssetPath = ::Test::g_linuxApp->GetAssetDir();
 #endif
@@ -104,7 +108,7 @@ public:
         m_engineLib.Load("AGPEngineDLL");
 #elif defined(__ANDROID__) || defined(__OHOS__)
         m_engineLib.Load("libAGPEngineDLL");
-#else // Linux
+#else  // Linux
         m_engineLib.Load("./libAGPEngineDLL");
 #endif
 
@@ -121,11 +125,11 @@ public:
         m_engineLib.LoadFunction<decltype(CORE_NS::GetPluginRegister)>(
             CORE_NS::GetPluginRegister, "_ZN4Core17GetPluginRegisterEv");
 #endif
-#endif // defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
+#endif  // defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
 
         CORE_NS::CreatePluginRegistry(info);
 
-        constexpr BASE_NS::Uid uids[] { META_NS::META_OBJECT_PLUGIN_UID };
+        constexpr BASE_NS::Uid uids[]{META_NS::META_OBJECT_PLUGIN_UID};
         ASSERT_TRUE(CORE_NS::GetPluginRegister().LoadPlugins(uids));
 
         g_testEnv = std::make_unique<TestEnvironment>();
@@ -147,9 +151,9 @@ private:
     Test::DynamicLibrary m_engineLib;
 #endif
 };
-} // namespace
+}  // namespace
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()
 
-#endif // META_TEST_RUNNER
+#endif  // META_TEST_RUNNER

@@ -34,7 +34,7 @@ public:
     AttachmentContainer();
     ~AttachmentContainer() override;
 
-protected: // IContainer
+protected:  // IContainer
     bool Add(const IObject::Ptr& object) override;
     bool Insert(IContainer::SizeType index, const IObject::Ptr& object) override;
     bool Remove(IContainer::SizeType index) override;
@@ -43,7 +43,7 @@ protected: // IContainer
     void RemoveAll() override;
     bool SetRequiredInterfaces(const BASE_NS::vector<TypeId>& interfaces) override;
 
-protected: // IAttachmentContainer
+protected:  // IAttachmentContainer
     bool Initialize(const META_NS::IAttach::Ptr& owner) override;
     using IAttachmentContainer::Attach;
     bool Attach(const IObject::Ptr& attachment, const IObject::Ptr& dataContext) override;

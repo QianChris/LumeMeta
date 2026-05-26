@@ -116,16 +116,16 @@ protected:
     }
 
 private:
-    mutable std::atomic<bool> requiresEvaluation_ {};
+    mutable std::atomic<bool> requiresEvaluation_{};
     IAny::Ptr currentValue_;
     IAny::Ptr defaultValue_;
     BASE_NS::vector<IValue::Ptr> values_;
     BASE_NS::vector<IModifier::Ptr> modifiers_;
     ICallable::Ptr onChangedCallback_;
-    mutable bool evaluating_ {};
+    mutable bool evaluating_{};
 };
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()
 
 #endif

@@ -15,10 +15,10 @@
 
 #include "test_runner_linux.h"
 
-#include <algorithm> // std::replace
-#include <cstring>   // memcpy
+#include <algorithm>  // std::replace
+#include <cstring>    // memcpy
 #include <filesystem>
-#include <iostream> // cout
+#include <iostream>  // cout
 
 #include <base/containers/unique_ptr.h>
 
@@ -39,7 +39,8 @@ LinuxApp::~LinuxApp()
     Terminate();
 }
 
-void LinuxApp::Init() {}
+void LinuxApp::Init()
+{}
 
 void LinuxApp::Run()
 {
@@ -56,12 +57,12 @@ void LinuxApp::Terminate()
 
 BASE_NS::string LinuxApp::GetCPUVendor() const
 {
-    int regs[4] = { 0 };
+    int regs[4] = {0};
     char vendor[13];
     __asm__ __volatile__("cpuid" : "=a"(regs[0]), "=b"(regs[1]), "=c"(regs[2]), "=d"(regs[3]) : "a"(0));
-    std::memcpy(vendor, &regs[1], 4);     // EBX
-    std::memcpy(vendor + 4, &regs[3], 4); // EDX
-    std::memcpy(vendor + 8, &regs[2], 4); // ECX
+    std::memcpy(vendor, &regs[1], 4);      // EBX
+    std::memcpy(vendor + 4, &regs[3], 4);  // EDX
+    std::memcpy(vendor + 8, &regs[2], 4);  // ECX
     vendor[12] = '\0';
     BASE_NS::string cpuVendor(vendor);
 
@@ -120,16 +121,19 @@ void LinuxApp::CreateNativeWindow(uint32_t width, uint32_t height, const BASE_NS
     }
 
     // Create window
-    xcb_create_window(m_xcbConn,       // Connection
-        XCB_COPY_FROM_PARENT,          // Depth
-        m_xcbWin,                      // Window id
-        screen->root,                  // Parent window
-        0, 0,                          // x, y position
-        width, height,                 // width, height
-        10,                            // border_width
-        XCB_WINDOW_CLASS_INPUT_OUTPUT, // Class
-        screen->root_visual,           // Visual
-        0, nullptr);                   // masks
+    xcb_create_window(m_xcbConn,  // Connection
+        XCB_COPY_FROM_PARENT,     // Depth
+        m_xcbWin,                 // Window id
+        screen->root,             // Parent window
+        0,
+        0,  // x, y position
+        width,
+        height,                         // width, height
+        10,                             // border_width
+        XCB_WINDOW_CLASS_INPUT_OUTPUT,  // Class
+        screen->root_visual,            // Visual
+        0,
+        nullptr);  // masks
 
     // Set title
     xcb_change_property(
@@ -215,7 +219,7 @@ void LinuxApp::ParseArguments(int argc, char** argv)
     }
 }
 
-} // namespace Test
+}  // namespace Test
 
 int main(int argc, char** argv)
 {

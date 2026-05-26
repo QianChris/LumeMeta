@@ -28,7 +28,8 @@
 META_BEGIN_NAMESPACE()
 
 struct MemFile : public CORE_NS::IFile {
-    explicit MemFile(BASE_NS::vector<uint8_t> vec = {}) : data_(BASE_NS::move(vec)) {}
+    explicit MemFile(BASE_NS::vector<uint8_t> vec = {}) : data_(BASE_NS::move(vec))
+    {}
 
     Mode GetMode() const override
     {
@@ -97,7 +98,7 @@ private:
     }
 
     BASE_NS::vector<uint8_t> data_;
-    size_t pos_ {};
+    size_t pos_{};
 };
 
 META_END_NAMESPACE()

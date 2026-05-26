@@ -43,18 +43,27 @@ inline constexpr auto CorePropertyTypeDeclFromType()
     if constexpr (CORE_NS::PropertySystem::is_defined<T>().value) {
         return CORE_NS::PropertySystem::PropertyTypeDeclFromType<T, B>();
     }
-    return CORE_NS::PropertyTypeDecl {};
+    return CORE_NS::PropertyTypeDecl{};
 }
 
 inline constexpr BASE_NS::Uid MakeUidImpl(uint64_t hash, const char (&type)[9])
 {
-    uint8_t data[16u] { static_cast<uint8_t>((hash >> 56) & 0xFF), static_cast<uint8_t>((hash >> 48) & 0xFF),
-        static_cast<uint8_t>((hash >> 40) & 0xFF), static_cast<uint8_t>((hash >> 32) & 0xFF),
-        static_cast<uint8_t>((hash >> 24) & 0xFF), static_cast<uint8_t>((hash >> 16) & 0xFF),
-        static_cast<uint8_t>((hash >> 8) & 0xFF), static_cast<uint8_t>(hash & 0xFF), static_cast<uint8_t>(type[0]),
-        static_cast<uint8_t>(type[1]), static_cast<uint8_t>(type[2]), static_cast<uint8_t>(type[3]),
-        static_cast<uint8_t>(type[4]), static_cast<uint8_t>(type[5]), static_cast<uint8_t>(type[6]),
-        static_cast<uint8_t>(type[7]) };
+    uint8_t data[16u]{static_cast<uint8_t>((hash >> 56) & 0xFF),
+        static_cast<uint8_t>((hash >> 48) & 0xFF),
+        static_cast<uint8_t>((hash >> 40) & 0xFF),
+        static_cast<uint8_t>((hash >> 32) & 0xFF),
+        static_cast<uint8_t>((hash >> 24) & 0xFF),
+        static_cast<uint8_t>((hash >> 16) & 0xFF),
+        static_cast<uint8_t>((hash >> 8) & 0xFF),
+        static_cast<uint8_t>(hash & 0xFF),
+        static_cast<uint8_t>(type[0]),
+        static_cast<uint8_t>(type[1]),
+        static_cast<uint8_t>(type[2]),
+        static_cast<uint8_t>(type[3]),
+        static_cast<uint8_t>(type[4]),
+        static_cast<uint8_t>(type[5]),
+        static_cast<uint8_t>(type[6]),
+        static_cast<uint8_t>(type[7])};
     return BASE_NS::Uid(data);
 }
 
@@ -70,10 +79,10 @@ template<typename Type>
 using EnableIfDefined = decltype(sizeof(Type));
 
 template<typename Type>
-constexpr bool IsDefined_v = META_NS::IsDetected_v<EnableIfDefined, Type>; // NOLINT(readability-identifier-naming)
+constexpr bool IsDefined_v = META_NS::IsDetected_v<EnableIfDefined, Type>;  // NOLINT(readability-identifier-naming)
 
 template<typename Type>
-constexpr bool HasUid_v = IsDefined_v<MetaType<Type>>; // NOLINT(readability-identifier-naming)
+constexpr bool HasUid_v = IsDefined_v<MetaType<Type>>;  // NOLINT(readability-identifier-naming)
 
 /**
  * @brief Generate UID from registered type and type string.
@@ -90,8 +99,8 @@ inline constexpr uint64_t CombineHash(uint64_t hash)
 {
     static_assert(HasUid_v<Type>, "META_TYPE missing for given type");
     return hash ^
-           (BASE_NS::CompileTime::FNV1aHash(MetaType<Type>::name) + 0x9e3779b97f4a7c15LLU + (hash << 12) + // 12: bits
-               (hash >> 4));                                                                               //  4: bits
+           (BASE_NS::CompileTime::FNV1aHash(MetaType<Type>::name) + 0x9e3779b97f4a7c15LLU + (hash << 12) +  // 12: bits
+               (hash >> 4));                                                                                //  4: bits
 }
 
 /**
@@ -100,7 +109,7 @@ inline constexpr uint64_t CombineHash(uint64_t hash)
 template<typename... Types>
 inline constexpr BASE_NS::Uid MakeUidFromTypes(const char (&type)[9])
 {
-    uint64_t hash {};
+    uint64_t hash{};
     if constexpr (sizeof...(Types) != 0) {
         hash = (CombineHash<Types>(hash), ...);
     }

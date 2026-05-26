@@ -33,14 +33,14 @@ namespace UTest {
 namespace {
 
 struct IOnTestInfo {
-    constexpr static BASE_NS::Uid UID { "3e55eee7-f0e4-4363-b4fc-65d8b3574a4e" };
-    constexpr static char const* NAME { "OnTest" };
+    constexpr static BASE_NS::Uid UID{"3e55eee7-f0e4-4363-b4fc-65d8b3574a4e"};
+    constexpr static char const* NAME{"OnTest"};
 };
 using IOnTest = SimpleEvent<IOnTestInfo, void(int)>;
 
 using Callable = SimpleEvent<IOnTestInfo, void()>::InterfaceType;
 
-} // namespace
+}  // namespace
 
 /**
  * @tc.name: CallWithCallable
@@ -180,6 +180,6 @@ UNIT_TEST(API_DeferredCallbackTest, PropertyChangedHandlerId, testing::ext::Test
     META_NS::GetTaskQueueRegistry().UnregisterTaskQueue(queueId.ToUid());
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

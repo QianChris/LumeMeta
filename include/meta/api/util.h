@@ -72,14 +72,14 @@ inline BASE_NS::shared_ptr<Interface> GetPointer(const IAny& any)
 /// Returns IIinterface pointer if property contains a pointer that can be converted to it.
 inline BASE_NS::shared_ptr<CORE_NS::IInterface> GetPointer(const IProperty::ConstPtr& p)
 {
-    InterfaceSharedLock lock { p };
+    InterfaceSharedLock lock{p};
     return lock ? GetPointer(p->GetValue()) : nullptr;
 }
 
 /// Returns IIinterface pointer if property contains a pointer that can be converted to it.
 inline BASE_NS::shared_ptr<const CORE_NS::IInterface> GetConstPointer(const IProperty::ConstPtr& p)
 {
-    InterfaceSharedLock lock { p };
+    InterfaceSharedLock lock{p};
     return lock ? GetConstPointer(p->GetValue()) : nullptr;
 }
 
@@ -126,7 +126,7 @@ inline bool SetPointer(IAny& any, const BASE_NS::shared_ptr<const CORE_NS::IInte
 /// Set IIinterface pointer for property if it is compatible
 inline bool SetPointer(const IProperty::Ptr& p, const BASE_NS::shared_ptr<CORE_NS::IInterface>& ptr)
 {
-    if (InterfaceSharedLock lock { p }) {
+    if (InterfaceSharedLock lock{p}) {
         if (auto inany = GetInternalAny(p)) {
             if (auto any = inany->Clone(false)) {
                 if (any->SetValue(ptr)) {
@@ -141,7 +141,7 @@ inline bool SetPointer(const IProperty::Ptr& p, const BASE_NS::shared_ptr<CORE_N
 /// Set IIinterface pointer for property if it is compatible
 inline bool SetPointer(const IProperty::Ptr& p, const BASE_NS::shared_ptr<const CORE_NS::IInterface>& ptr)
 {
-    if (InterfaceSharedLock lock { p }) {
+    if (InterfaceSharedLock lock{p}) {
         if (auto inany = GetInternalAny(p)) {
             if (auto any = inany->Clone(false)) {
                 if (any->SetValue(ptr)) {
@@ -170,7 +170,7 @@ inline bool SetPointer(const IProperty::Ptr& p, const BASE_NS::shared_ptr<Interf
 inline IProperty::Ptr DuplicatePropertyType(IObjectRegistry& obr, IProperty::ConstPtr p, BASE_NS::string_view name = {})
 {
     IProperty::Ptr dup;
-    PropertyLock lock { p };
+    PropertyLock lock{p};
     if (auto obj = interface_cast<IObject>(p)) {
         dup = obr.GetPropertyRegister().Create(obj->GetClassId(), name.empty() ? p->GetName() : name);
         if (auto dupi = interface_cast<IPropertyInternalAny>(dup)) {
@@ -311,7 +311,7 @@ inline AnyReturnValue Interpolate(IInterpolator::ConstPtr inter, const IProperty
 {
     if (from && to) {
         if (auto i = interface_cast<IPropertyInternalAny>(output)) {
-            PropertyLock lock { output };
+            PropertyLock lock{output};
             if (auto iany = i->GetInternalAny()) {
                 auto ret = inter->Interpolate(*iany, *from, *to, t);
                 lock.SetValueAny(*iany);
@@ -346,8 +346,8 @@ template<typename Interface>
 typename Interface::Ptr GetFirstValueFromProperty(const IProperty::ConstPtr& p)
 {
     if (auto i = interface_cast<IStackProperty>(p)) {
-        PropertyLock lock { p };
-        TypeId ids[] = { Interface::UID };
+        PropertyLock lock{p};
+        TypeId ids[] = {Interface::UID};
         auto values = i->GetValues(ids, false);
         if (!values.empty()) {
             return interface_pointer_cast<Interface>(values.back());

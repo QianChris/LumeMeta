@@ -220,5 +220,5 @@ BENCHMARK_CAPTURE(
     SettingPropertyValueWithValidator, ClampedPropertyFloat, 20.0F, CreateShared<ClampValidator<float>>(0.0F, 10.0F));
 */
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()

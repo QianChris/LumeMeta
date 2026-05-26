@@ -150,7 +150,7 @@ void AndroidApp::SetGtestEnv()
         BASE_NS::string gtestFilterVal = GetIntentExtra(m_env, m_state->activity->clazz, "gtest_filter");
         BASE_NS::string gtestOutputVal = GetIntentExtra(m_env, m_state->activity->clazz, "gtest_output");
 
-        m_testData.gtestArgs.emplace_back(new char[20] { "MetaTestRunner" });
+        m_testData.gtestArgs.emplace_back(new char[20]{"MetaTestRunner"});
         BASE_NS::string tmpStr = "--gtest_filter=*";
         if (!gtestFilterVal.empty()) {
             tmpStr = "--gtest_filter=" + gtestFilterVal;
@@ -258,7 +258,7 @@ BASE_NS::string AndroidApp::GetIntentExtra(JNIEnv* env, jobject context, const B
     return {};
 }
 
-} // namespace Test
+}  // namespace Test
 
 //
 // A simple native activity for running tests by running an android app (without the android test

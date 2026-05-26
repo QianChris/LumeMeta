@@ -74,23 +74,23 @@ public:
 
     void SetOptionData(BASE_NS::vector<uint8_t> d) override
     {
-        std::unique_lock lock { mutex_ };
+        std::unique_lock lock{mutex_};
         optionsData_ = BASE_NS::move(d);
     }
     BASE_NS::vector<uint8_t> GetOptionData() const override
     {
-        std::unique_lock lock { mutex_ };
+        std::unique_lock lock{mutex_};
         return optionsData_;
     }
 
     void SetBaseResource(CORE_NS::ResourceId id) override
     {
-        std::unique_lock lock { mutex_ };
+        std::unique_lock lock{mutex_};
         baseResource_ = BASE_NS::move(id);
     }
     CORE_NS::ResourceId GetBaseResource() const override
     {
-        std::unique_lock lock { mutex_ };
+        std::unique_lock lock{mutex_};
         return baseResource_;
     }
 

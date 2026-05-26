@@ -24,7 +24,7 @@ META_BEGIN_NAMESPACE()
 /// Get shared_ptr of IInterface from an array any in given location, or nullptr if not compatible
 inline BASE_NS::shared_ptr<CORE_NS::IInterface> GetPointerAt(IArrayAny::IndexType index, const IProperty::ConstPtr& p)
 {
-    ArrayPropertyLock lock { p };
+    ArrayPropertyLock lock{p};
     return lock ? GetPointer(lock->GetAnyAt(index)) : nullptr;
 }
 
@@ -32,7 +32,7 @@ inline BASE_NS::shared_ptr<CORE_NS::IInterface> GetPointerAt(IArrayAny::IndexTyp
 inline BASE_NS::shared_ptr<const CORE_NS::IInterface> GetConstPointerAt(
     IArrayAny::IndexType index, const IProperty::ConstPtr& p)
 {
-    ArrayPropertyLock lock { p };
+    ArrayPropertyLock lock{p};
     return lock ? GetConstPointer(lock->GetAnyAt(index)) : nullptr;
 }
 
@@ -54,7 +54,7 @@ inline BASE_NS::shared_ptr<Interface> GetConstPointerAt(IArrayAny::IndexType ind
 inline bool SetPointerAt(
     IArrayAny::IndexType index, const IProperty::Ptr& p, const BASE_NS::shared_ptr<CORE_NS::IInterface>& ptr)
 {
-    if (ArrayPropertyLock lock { p }) {
+    if (ArrayPropertyLock lock{p}) {
         if (auto any = lock->ConstructItemAny()) {
             if (any->SetValue(ptr)) {
                 return lock->SetAnyAt(index, *any);
@@ -68,7 +68,7 @@ inline bool SetPointerAt(
 inline bool SetPointerAt(
     IArrayAny::IndexType index, const IProperty::Ptr& p, const BASE_NS::shared_ptr<const CORE_NS::IInterface>& ptr)
 {
-    if (ArrayPropertyLock lock { p }) {
+    if (ArrayPropertyLock lock{p}) {
         if (auto any = lock->ConstructItemAny()) {
             if (any->SetValue(ptr)) {
                 return lock->SetAnyAt(index, *any);

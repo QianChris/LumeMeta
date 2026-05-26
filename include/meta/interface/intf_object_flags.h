@@ -131,4 +131,4 @@ META_TYPE(META_NS::IObjectFlags::WeakPtr);
 META_TYPE(META_NS::IObjectFlags::ConstPtr);
 META_TYPE(META_NS::IObjectFlags::ConstWeakPtr);
 
-#endif // META_INTERFACE_IOBJECT_FLAGS_H
+#endif  // META_INTERFACE_IOBJECT_FLAGS_H

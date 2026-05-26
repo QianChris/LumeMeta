@@ -34,7 +34,8 @@
 META_BEGIN_NAMESPACE()
 namespace UTest {
 
-TestSerialiser::TestSerialiser(BASE_NS::vector<uint8_t> vec) : data_(BASE_NS::move(vec)) {}
+TestSerialiser::TestSerialiser(BASE_NS::vector<uint8_t> vec) : data_(BASE_NS::move(vec))
+{}
 
 bool TestSerialiser::Export(const IObject::Ptr& object)
 {
@@ -78,7 +79,7 @@ bool TestSerialiser::LoadFile(BASE_NS::string_view path)
     BASE_NS::vector<uint8_t> vec;
     vec.resize(f->GetLength());
     f->Read(vec.data(), vec.size());
-    data_ = MemFile { BASE_NS::move(vec) };
+    data_ = MemFile{BASE_NS::move(vec)};
     return true;
 }
 
@@ -132,6 +133,6 @@ void WriteToFile(const BASE_NS::vector<uint8_t>& vec, BASE_NS::string_view file)
     }
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

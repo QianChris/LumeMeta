@@ -38,12 +38,12 @@ META_BEGIN_NAMESPACE()
 META_REGISTER_INTERFACE(IMetadata, "5ad7917a-e744-48bb-b789-9446d3712cf9")
 
 struct MetadataInfo {
-    MetadataType type {};
+    MetadataType type{};
     BASE_NS::string name;
     TypeId interfaceId;
-    bool readOnly {};
+    bool readOnly{};
     TypeId propertyType;
-    const StaticMetadata* data {};
+    const StaticMetadata* data{};
 
     bool IsValid() const
     {

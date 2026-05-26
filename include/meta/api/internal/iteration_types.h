@@ -41,7 +41,8 @@ using IterationForwardArgType = typename IterationFuncType<FuncToSignature_t<T>>
 template<template<typename> class Intf, typename Func>
 class IterationCallable : public IntroduceInterfaces<Intf<IterationArgType<Func>>> {
 public:
-    IterationCallable(Func f) : func_(BASE_NS::move(f)) {}
+    IterationCallable(Func f) : func_(BASE_NS::move(f))
+    {}
 
 protected:
     Func func_;
@@ -77,17 +78,17 @@ auto CallIterate(const Iterable& i, Func&& func, IterateStrategy is)
 {
     IterationCallable<InterableCallable, Func> f(BASE_NS::forward<Func>(func));
     InterfaceLock lock(is.lock, i);
-    return i->Iterate(IterationParameters { f, is });
+    return i->Iterate(IterationParameters{f, is});
 }
 
 template<template<typename> class InterableCallable, typename Iterable>
 auto CallIterate(const Iterable& i, ICallable& func, IterateStrategy is)
 {
     InterfaceLock lock(is.lock, i);
-    return i->Iterate(IterationParameters { func, is });
+    return i->Iterate(IterationParameters{func, is});
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()
 
 #endif

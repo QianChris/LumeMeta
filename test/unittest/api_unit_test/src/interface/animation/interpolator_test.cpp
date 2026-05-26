@@ -149,6 +149,6 @@ TYPED_TEST(API_InterpolatorTest, InterpolateInvalid)
     EXPECT_EQ(interpolator->Interpolate(output, v1, invalid, 0.f), isDefault);
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

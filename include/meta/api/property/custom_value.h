@@ -28,11 +28,12 @@ META_BEGIN_NAMESPACE()
 template<typename Type, typename GetFunc, typename SetFunc>
 class CustomValue : public IntroduceInterfaces<IValue> {
 public:
-    CustomValue(GetFunc gfunc, SetFunc sfunc) : gfunc_(BASE_NS::move(gfunc)), sfunc_(BASE_NS::move(sfunc)) {}
+    CustomValue(GetFunc gfunc, SetFunc sfunc) : gfunc_(BASE_NS::move(gfunc)), sfunc_(BASE_NS::move(sfunc))
+    {}
 
     AnyReturnValue SetValue(const IAny& any) override
     {
-        Type value {};
+        Type value{};
         auto res = any.GetValue(value);
         if (res) {
             if (sfunc_(value)) {
@@ -86,7 +87,7 @@ bool AddGetSetCustomValue(const Property<Type>& p, Obj* obj, Type (Obj::*getf)()
         if (auto lock = weak.lock()) {
             return (obj->*getf)();
         }
-        return Type {};
+        return Type{};
     };
     auto sf = [obj, setf, weak = BASE_NS::weak_ptr<IObject>(obj->GetSelf())](const Type& value) -> bool {
         if (auto lock = weak.lock()) {

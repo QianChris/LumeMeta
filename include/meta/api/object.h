@@ -252,7 +252,7 @@ public:
     template<class T>
     auto Attach(const T& object)
     {
-        return Attach(interface_pointer_cast<IObject>(object), META_NS::IObject::Ptr {});
+        return Attach(interface_pointer_cast<IObject>(object), META_NS::IObject::Ptr{});
     }
     template<class T>
     auto Detach(const T& object)
@@ -356,4 +356,4 @@ inline auto CreateObjectInstance<IContainer>()
 
 META_END_NAMESPACE()
 
-#endif // META_API_OBJECT_H
+#endif  // META_API_OBJECT_H

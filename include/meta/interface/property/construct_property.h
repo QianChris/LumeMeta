@@ -49,7 +49,7 @@ struct PropertyType<ValuePtr<T, ClassInfo>> {
     using Type = typename ValuePtr<T, ClassInfo>::TypePtr;
 };
 template<typename T>
-using PropertyType_v = typename PropertyType<T>::Type; // NOLINT(readability-identifier-naming)
+using PropertyType_v = typename PropertyType<T>::Type;  // NOLINT(readability-identifier-naming)
 
 /**
  * @brief Construct property

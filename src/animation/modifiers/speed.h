@@ -35,7 +35,7 @@ class SpeedModifier final : public IntroduceInterfaces<AnimationModifierFwd, Ani
 public:
     bool Build(const IMetadata::Ptr& data) override;
 
-public: // IAnimationModifier
+public:  // IAnimationModifier
     bool ProcessOnGetDuration(DurationData& duration) const override;
     bool ProcessOnStep(StepData& step) const override;
 
@@ -46,15 +46,15 @@ public: // IAnimationModifier
     META_IMPLEMENT_PROPERTY(float, SpeedFactor)
     META_IMPLEMENT_EVENT(IOnChanged, OnChanged)
 
-public: // AnimationModifiers::ISpeedModifier
+public:  // AnimationModifiers::ISpeedModifier
     float ModifySpeed(float speed) const override;
 
 private:
     PropertyChangedEventHandler speedFactorChanged_;
 };
 
-} // namespace AnimationModifiers
+}  // namespace AnimationModifiers
 
 META_END_NAMESPACE()
 
-#endif // META_SRC_ANIMATION_MODIFIERS_SPEED_H
+#endif  // META_SRC_ANIMATION_MODIFIERS_SPEED_H

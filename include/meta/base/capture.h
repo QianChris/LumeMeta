@@ -47,7 +47,7 @@ struct CaptureWrapper {
 template<typename Type>
 CaptureWrapper<BASE_NS::weak_ptr<Type>> CaptureWrap(BASE_NS::shared_ptr<Type> p)
 {
-    return { p };
+    return {p};
 }
 
 /**
@@ -56,7 +56,7 @@ CaptureWrapper<BASE_NS::weak_ptr<Type>> CaptureWrap(BASE_NS::shared_ptr<Type> p)
 template<typename Type>
 CaptureWrapper<BASE_NS::weak_ptr<Type>> CaptureWrap(BASE_NS::weak_ptr<Type> p)
 {
-    return { BASE_NS::move(p) };
+    return {BASE_NS::move(p)};
 }
 
 /**
@@ -65,7 +65,7 @@ CaptureWrapper<BASE_NS::weak_ptr<Type>> CaptureWrap(BASE_NS::weak_ptr<Type> p)
 template<typename T>
 struct CaptureUnWrapper {
     T value;
-    bool valid { true };
+    bool valid{true};
 };
 
 /**
@@ -75,7 +75,7 @@ struct CaptureUnWrapper {
 template<typename Type>
 CaptureUnWrapper<Type> CaptureUnWrap(Type&& obj)
 {
-    return CaptureUnWrapper<Type> { BASE_NS::forward<Type>(obj) };
+    return CaptureUnWrapper<Type>{BASE_NS::forward<Type>(obj)};
 }
 
 /**
@@ -85,7 +85,7 @@ template<typename Type>
 CaptureUnWrapper<BASE_NS::shared_ptr<Type>> CaptureUnWrap(const CaptureWrapper<BASE_NS::weak_ptr<Type>>& p)
 {
     auto v = p.value.lock();
-    return CaptureUnWrapper<BASE_NS::shared_ptr<Type>> { v, v != nullptr };
+    return CaptureUnWrapper<BASE_NS::shared_ptr<Type>>{v, v != nullptr};
 }
 
 /**
@@ -103,7 +103,7 @@ struct CaptureCallImpl {
                 if constexpr (BASE_NS::is_same_v<type, void>) {
                     return;
                 } else {
-                    return type {};
+                    return type{};
                 }
             }
         }
@@ -120,7 +120,7 @@ auto CaptureImpl(Lambda func, Args&&... args)
     };
 }
 
-} // namespace Details
+}  // namespace Details
 
 /**
  * @brief Replaces all shared pointers provided as args into weak pointers to avoid extending

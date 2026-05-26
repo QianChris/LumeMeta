@@ -45,7 +45,8 @@ class MapNode : public IntroduceInterfaces<BaseObject, IMapNode> {
     META_OBJECT(MapNode, ClassId::MapNode, IntroduceInterfaces)
 public:
     MapNode() = default;
-    MapNode(BASE_NS::vector<NamedNode> elements) : elements(BASE_NS::move(elements)) {}
+    MapNode(BASE_NS::vector<NamedNode> elements) : elements(BASE_NS::move(elements))
+    {}
 
     BASE_NS::vector<NamedNode> GetMembers() const override
     {
@@ -64,7 +65,7 @@ public:
 
     void AddNode(BASE_NS::string_view name, ISerNode::Ptr n) override
     {
-        elements.push_back(NamedNode { BASE_NS::string(name), BASE_NS::move(n) });
+        elements.push_back(NamedNode{BASE_NS::string(name), BASE_NS::move(n)});
     }
 
     void Apply(ISerNodeVisitor& v) const override
@@ -80,7 +81,8 @@ class ArrayNode : public IntroduceInterfaces<BaseObject, IArrayNode> {
     META_OBJECT(ArrayNode, ClassId::ArrayNode, IntroduceInterfaces)
 public:
     ArrayNode() = default;
-    ArrayNode(BASE_NS::vector<ISerNode::Ptr> elements) : elements(BASE_NS::move(elements)) {}
+    ArrayNode(BASE_NS::vector<ISerNode::Ptr> elements) : elements(BASE_NS::move(elements))
+    {}
 
     BASE_NS::vector<ISerNode::Ptr> GetMembers() const override
     {
@@ -107,7 +109,10 @@ public:
     ObjectNode() = default;
     ObjectNode(BASE_NS::string className, BASE_NS::string name, const ObjectId& oid, const InstanceId& iid,
         ISerNode::Ptr members)
-        : className(BASE_NS::move(className)), name(BASE_NS::move(name)), objectType(oid), instance(iid),
+        : className(BASE_NS::move(className)),
+          name(BASE_NS::move(name)),
+          objectType(oid),
+          instance(iid),
           members(BASE_NS::move(members))
     {}
 
@@ -170,7 +175,8 @@ class RootNode : public IntroduceInterfaces<BaseObject, IRootNode> {
     META_OBJECT(RootNode, ClassId::RootNode, IntroduceInterfaces)
 public:
     RootNode() = default;
-    RootNode(ISerNode::Ptr obj, SerMetadata m) : object(BASE_NS::move(obj)), metadata(BASE_NS::move(m)) {}
+    RootNode(ISerNode::Ptr obj, SerMetadata m) : object(BASE_NS::move(obj)), metadata(BASE_NS::move(m))
+    {}
 
     SerMetadata GetMetadata() const override
     {
@@ -197,7 +203,7 @@ public:
 
 public:
     ISerNode::Ptr object;
-    SerMetadata metadata {};
+    SerMetadata metadata{};
 };
 
 template<typename Type, const META_NS::ClassInfo& ClassInfo>
@@ -208,7 +214,8 @@ public:
     using InterfaceType = IBuiltinValueNode<Type>;
 
     BuiltinValueNode() = default;
-    BuiltinValueNode(const Type& v) : value(v) {}
+    BuiltinValueNode(const Type& v) : value(v)
+    {}
 
     Type GetValue() const override
     {
@@ -226,7 +233,7 @@ public:
     }
 
 public:
-    Type value {};
+    Type value{};
 };
 
 using BoolNode = BuiltinValueNode<bool, ClassId::BoolNode>;
@@ -248,7 +255,7 @@ struct SupportedType {
 
     static AnyReturnValue ExtractValue(const ISerNode::ConstPtr& n, IAny& any)
     {
-        Type v {};
+        Type v{};
         if (auto node = interface_cast<typename NodeType::InterfaceType>(n)) {
             v = static_cast<Type>(node->GetValue());
         } else {
@@ -281,7 +288,7 @@ using SupportedBuiltins = TypeList<
     >;
 // clang-format on
 
-} // namespace Serialization
+}  // namespace Serialization
 META_END_NAMESPACE()
 
 #endif

@@ -56,8 +56,8 @@ public:
 };
 
 template<typename Type>
-inline constexpr ClassInfo BASIC_SER_TYPE_INFO { MakeUid<Type>("BasicTyp"), "BasicType",
-    ObjectCategoryBits::NO_CATEGORY, false };
+inline constexpr ClassInfo BASIC_SER_TYPE_INFO{
+    MakeUid<Type>("BasicTyp"), "BasicType", ObjectCategoryBits::NO_CATEGORY, false};
 
 template<typename Type>
 struct BasicSerType : public IntroduceInterfaces<BaseObjectFwd, IBasicSerType<Type>, ISerializable> {
@@ -88,7 +88,7 @@ struct BasicSerType : public IntroduceInterfaces<BaseObjectFwd, IBasicSerType<Ty
         vector = s;
     }
 
-    Type value {};
+    Type value{};
     BASE_NS::vector<Type> vector;
 };
 
@@ -144,7 +144,8 @@ public:
     Type value1;
     Type value2;
 
-    API_BasicSerialisationTest() : value1(BasicTestData.GetValue<Type>(0)), value2(BasicTestData.GetValue<Type>(1)) {}
+    API_BasicSerialisationTest() : value1(BasicTestData.GetValue<Type>(0)), value2(BasicTestData.GetValue<Type>(1))
+    {}
 
     Type GetDefValue() const
     {
@@ -164,11 +165,11 @@ public:
     }
     BASE_NS::vector<Type> GetVector1() const
     {
-        return { GetValue1(), GetValue2(), GetValue1() };
+        return {GetValue1(), GetValue2(), GetValue1()};
     }
     BASE_NS::vector<Type> GetVector2() const
     {
-        return { GetValue2(), GetValue1(), GetValue2() };
+        return {GetValue2(), GetValue1(), GetValue2()};
     }
     typename IBasicSerType<Type>::Ptr CreateBasicType()
     {
@@ -484,5 +485,5 @@ UNIT_TEST(API_SerializationTest, NonSerializablePropertyInProperty, testing::ext
     EXPECT_EQ(p->GetValue(), 3);
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

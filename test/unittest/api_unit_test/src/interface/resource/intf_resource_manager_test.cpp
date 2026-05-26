@@ -60,7 +60,8 @@ public:
         context = GetObjectRegistry().Create(META_NS::ClassId::Object);
         context2 = GetObjectRegistry().Create(META_NS::ClassId::Object);
     }
-    void TearDown() override {}
+    void TearDown() override
+    {}
 
     CORE_NS::IResource::Ptr CreateTestResource(const CORE_NS::ResourceId& id)
     {
@@ -69,7 +70,7 @@ public:
             i->SetResourceType(ClassId::TestResource);
         }
         if (auto i = interface_cast<CORE_NS::ISetResourceId>(res)) {
-            i->SetResourceId({ id, context });
+            i->SetResourceId({id, context});
         }
         return res;
     }
@@ -106,7 +107,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithObject, testing::ext::TestSize.L
 {
     BASE_NS::shared_ptr<Listener> listener(new Listener);
     resources->AddListener(listener);
-    resources->AddListener(listener); // again, should be a no-op
+    resources->AddListener(listener);  // again, should be a no-op
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("app://test.scene")));
@@ -142,7 +143,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ReloadResource, testing::ext::TestSize.
     auto res = CreateTestResource("app://test.scene");
     ASSERT_TRUE(resources->AddResource(res, "app://test.json"));
     auto groupsBefore = resources->GetResourceGroups(context);
-    EXPECT_FALSE(resources->ReloadResource(res)); // ObjectResource fails to reload
+    EXPECT_FALSE(resources->ReloadResource(res));  // ObjectResource fails to reload
     auto groupsAfter = resources->GetResourceGroups(context);
     EXPECT_THAT(groupsBefore, ::testing::ElementsAreArray(groupsAfter));
 }
@@ -177,9 +178,9 @@ UNIT_TEST_F(API_FileResourceManagerTest, ResourceQuery, testing::ext::TestSize.L
     auto groups = resources->GetResourceGroups(context);
     for (auto&& group : groups) {
         const auto match = CORE_NS::MatchingResourceId(group);
-        auto alive = query->FindAliveResources({ match }, context);
+        auto alive = query->FindAliveResources({match}, context);
         EXPECT_FALSE(alive.empty());
-        EXPECT_EQ(query->GetAliveCount({ match }, context), alive.size());
+        EXPECT_EQ(query->GetAliveCount({match}, context), alive.size());
     }
 }
 
@@ -222,7 +223,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AddWithoutObject, testing::ext::TestSiz
     MakeEmptyJsonFile();
     BASE_NS::shared_ptr<Listener> listener(new Listener);
     resources->AddListener(listener);
-    CORE_NS::ResourceIdContext ctx { "test", context };
+    CORE_NS::ResourceIdContext ctx{"test", context};
     ASSERT_TRUE(resources->AddResource(ctx, ClassId::TestResource.Id().ToUid(), "app://test.json"));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("test")));
     auto queried = resources->GetResource(ctx);
@@ -240,11 +241,13 @@ UNIT_TEST_F(API_FileResourceManagerTest, OptionsData, testing::ext::TestSize.Lev
     auto opts = GetObjectRegistry().Create<IObjectResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
     ASSERT_TRUE(opts);
     opts->SetProperty("test", uint32_t(2));
-    ASSERT_TRUE(resources->AddResource({ "test", context }, ClassId::TestResource.Id().ToUid(), "app://test.json",
+    ASSERT_TRUE(resources->AddResource({"test", context},
+        ClassId::TestResource.Id().ToUid(),
+        "app://test.json",
         interface_pointer_cast<CORE_NS::IResourceOptions>(opts)));
     auto queried = resources->GetResource(CORE_NS::ResourceIdContext("test", context));
     ASSERT_TRUE(queried);
-    auto info = resources->GetResourceInfo({ "test", context });
+    auto info = resources->GetResourceInfo({"test", context});
     EXPECT_EQ(info.id, "test");
     EXPECT_EQ(info.type, ClassId::TestResource.Id().ToUid());
     EXPECT_EQ(info.path, "app://test.json");
@@ -286,7 +289,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportAll, testing::ext::TestSize
  */
 UNIT_TEST_F(API_FileResourceManagerTest, ExportImportGroups, testing::ext::TestSize.Level1)
 {
-    BASE_NS::vector<BASE_NS::string> groups { "hips", "hops", "some", "" };
+    BASE_NS::vector<BASE_NS::string> groups{"hips", "hops", "some", ""};
     for (auto&& g : groups) {
         for (int i = 0; i != 10; ++i) {
             BASE_NS::string name("test_" + BASE_NS::to_string(i));
@@ -295,7 +298,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportGroups, testing::ext::TestS
         }
     }
     for (auto&& g : groups) {
-        ASSERT_EQ(resources->Export("app://test_" + g + ".resources", { CORE_NS::MatchingResourceId(g) }, context),
+        ASSERT_EQ(resources->Export("app://test_" + g + ".resources", {CORE_NS::MatchingResourceId(g)}, context),
             CORE_NS::IResourceManager::Result::OK);
     }
     resources->RemoveAllResources();
@@ -309,18 +312,18 @@ UNIT_TEST_F(API_FileResourceManagerTest, ExportImportGroups, testing::ext::TestS
     }
 
     EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext("test_1", context)));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context)));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "some" }, context)));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({"test_1", "hops"}, context)));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({"test_1", "some"}, context)));
 
-    resources->RemoveResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context));
+    resources->RemoveResource(CORE_NS::ResourceIdContext({"test_1", "hops"}, context));
     EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext("test_1", context)));
-    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context)));
-    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "some" }, context)));
+    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({"test_1", "hops"}, context)));
+    EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext({"test_1", "some"}, context)));
 
     resources->RemoveGroup("some", context);
     EXPECT_TRUE(resources->GetResource(CORE_NS::ResourceIdContext("test_1", context)));
-    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "hops" }, context)));
-    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({ "test_1", "some" }, context)));
+    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({"test_1", "hops"}, context)));
+    EXPECT_FALSE(resources->GetResource(CORE_NS::ResourceIdContext({"test_1", "some"}, context)));
     EXPECT_EQ(resources->GetResources("some", context).size(), 0);
 
     EXPECT_EQ(resources->GetResourceInfos("hips", context).size(), 10);
@@ -344,11 +347,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, Rename, testing::ext::TestSize.Level1)
         EXPECT_EQ(queried, res);
     }
     listener->added.clear();
-    resources->RenameResource({ "app://test.scene", context }, { "ggg", context });
+    resources->RenameResource({"app://test.scene", context}, {"ggg", context});
     EXPECT_THAT(listener->removed, testing::ElementsAre(CORE_NS::ResourceId("app://test.scene")));
     EXPECT_THAT(listener->added, testing::ElementsAre(CORE_NS::ResourceId("ggg")));
     {
-        EXPECT_FALSE(resources->GetResource({ CORE_NS::ResourceId("app://test.scene"), context }));
+        EXPECT_FALSE(resources->GetResource({CORE_NS::ResourceId("app://test.scene"), context}));
         auto queried = resources->GetResource(CORE_NS::ResourceIdContext("ggg", context));
         ASSERT_TRUE(queried);
         EXPECT_EQ(queried, res);
@@ -371,7 +374,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, Purge, testing::ext::TestSize.Level1)
     }
     CORE_NS::IResource::WeakPtr w = res;
     res.reset();
-    resources->PurgeResource({ "app://test.scene", context });
+    resources->PurgeResource({"app://test.scene", context});
     EXPECT_TRUE(w.expired());
     {
         auto queried = resources->GetResource(CORE_NS::ResourceIdContext("app://test.scene", context));
@@ -406,7 +409,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, SaveResourceNullPtr, testing::ext::Test
 
     MemFile file;
     CORE_NS::ResourceId rid("test_save_null");
-    CORE_NS::IResourceType::StorageInfo info { nullptr, &file, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, &file, rid};
     EXPECT_FALSE(resType->SaveResource(nullptr, info));
 }
 
@@ -436,7 +439,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, LoadResourceTypeMismatch, testing::ext:
 
     MemFile payload(data);
     CORE_NS::ResourceId rid("test_mismatch");
-    CORE_NS::IResourceType::StorageInfo info { nullptr, &payload, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, &payload, rid, "", resources, context};
     auto result = resType->LoadResource(info);
     EXPECT_FALSE(result);
 }
@@ -474,7 +477,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ObjectResourceReloadResource, testing::
     ASSERT_TRUE(resType);
 
     CORE_NS::ResourceId rid;
-    CORE_NS::IResourceType::StorageInfo info { nullptr, nullptr, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, nullptr, rid};
     CORE_NS::IResource::Ptr res;
     EXPECT_FALSE(resType->ReloadResource(info, res));
 }
@@ -523,7 +526,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ImportFileNotFound, testing::ext::TestS
 UNIT_TEST_F(API_FileResourceManagerTest, ImportInvalidFile, testing::ext::TestSize.Level1)
 {
     // Write garbage data to a file
-    BASE_NS::vector<uint8_t> garbage = { 0xFF, 0xFE, 0x00, 0x01, 0x02 };
+    BASE_NS::vector<uint8_t> garbage = {0xFF, 0xFE, 0x00, 0x01, 0x02};
     WriteToFile(garbage, "app://garbage.resources");
     EXPECT_EQ(resources->Import("app://garbage.resources", context), CORE_NS::IResourceManager::Result::INVALID_FILE);
 }
@@ -550,7 +553,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, RenameToExistingTarget, testing::ext::T
     auto res2 = CreateTestResource("app://res2");
     ASSERT_TRUE(resources->AddResource(res1, "app://res1.json"));
     ASSERT_TRUE(resources->AddResource(res2, "app://res2.json"));
-    EXPECT_FALSE(resources->RenameResource({ "app://res1", context }, { "app://res2", context }));
+    EXPECT_FALSE(resources->RenameResource({"app://res1", context}, {"app://res2", context}));
 }
 
 /**
@@ -586,8 +589,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, RemoveAllResourcesWithContext, testing:
 
     // Add resources under context2 via the overload that takes a ResourceIdContext
     MakeEmptyJsonFile();
-    ASSERT_TRUE(
-        resources->AddResource({ "ctx2_res", context2 }, ClassId::TestResource.Id().ToUid(), "app://test.json"));
+    ASSERT_TRUE(resources->AddResource({"ctx2_res", context2}, ClassId::TestResource.Id().ToUid(), "app://test.json"));
 
     // Remove only context's resources
     BASE_NS::shared_ptr<Listener> listener(new Listener);
@@ -692,7 +694,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ObjectTemplateReloadResource, testing::
     auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::ObjectTemplateType);
     ASSERT_TRUE(resType);
     CORE_NS::ResourceId rid;
-    CORE_NS::IResourceType::StorageInfo info { nullptr, nullptr, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, nullptr, rid};
     CORE_NS::IResource::Ptr res;
     EXPECT_FALSE(resType->ReloadResource(info, res));
 }
@@ -721,7 +723,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ObjectTemplateIterate, testing::ext::Te
             called = true;
             return true;
         });
-        IterationParameters params { *func, {} };
+        IterationParameters params{*func, {}};
         auto result = static_cast<const IIterable*>(iterable)->Iterate(params);
         EXPECT_TRUE(result);
         EXPECT_FALSE(called);
@@ -742,7 +744,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, ObjectTemplateIterate, testing::ext::Te
             EXPECT_TRUE(obj);
             return true;
         });
-        IterationParameters params { *func, {} };
+        IterationParameters params{*func, {}};
         auto result = static_cast<const IIterable*>(iterable)->Iterate(params);
         EXPECT_TRUE(called);
     }
@@ -771,7 +773,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, SaveResourceTypeMismatch, testing::ext:
 
     MemFile file;
     CORE_NS::ResourceId rid("test_type_mismatch");
-    CORE_NS::IResourceType::StorageInfo info { nullptr, &file, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, &file, rid};
     EXPECT_FALSE(resType->SaveResource(res, info));
 }
 
@@ -797,7 +799,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationResourceReloadResource, testin
     auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::AnimationResourceType);
     ASSERT_TRUE(resType);
     CORE_NS::ResourceId rid;
-    CORE_NS::IResourceType::StorageInfo info { nullptr, nullptr, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, nullptr, rid};
     CORE_NS::IResource::Ptr res;
     EXPECT_FALSE(resType->ReloadResource(info, res));
 }
@@ -814,7 +816,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationSaveResourceNullPtr, testing::
 
     MemFile file;
     CORE_NS::ResourceId rid("test_anim_null");
-    CORE_NS::IResourceType::StorageInfo info { nullptr, &file, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, &file, rid};
     EXPECT_FALSE(resType->SaveResource(nullptr, info));
 }
 
@@ -828,10 +830,10 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationLoadResourceInvalidPayload, te
     auto resType = GetObjectRegistry().Create<CORE_NS::IResourceType>(META_NS::ClassId::AnimationResourceType);
     ASSERT_TRUE(resType);
 
-    BASE_NS::vector<uint8_t> garbage = { 0xFF, 0xFE, 0x00, 0x01, 0x02 };
+    BASE_NS::vector<uint8_t> garbage = {0xFF, 0xFE, 0x00, 0x01, 0x02};
     MemFile payload(garbage);
     CORE_NS::ResourceId rid("test_anim_invalid");
-    CORE_NS::IResourceType::StorageInfo info { nullptr, &payload, rid };
+    CORE_NS::IResourceType::StorageInfo info{nullptr, &payload, rid};
     auto result = resType->LoadResource(info);
     EXPECT_FALSE(result);
 }
@@ -853,12 +855,12 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationSaveLoadRoundTrip, testing::ex
     // Save
     MemFile saveFile;
     CORE_NS::ResourceId rid("test_anim_roundtrip");
-    CORE_NS::IResourceType::StorageInfo saveInfo { nullptr, &saveFile, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo saveInfo{nullptr, &saveFile, rid, "", resources, context};
     EXPECT_TRUE(resType->SaveResource(anim, saveInfo));
 
     // Load from saved data
     MemFile loadFile(saveFile.Data());
-    CORE_NS::IResourceType::StorageInfo loadInfo { nullptr, &loadFile, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo loadInfo{nullptr, &loadFile, rid, "", resources, context};
     auto loaded = resType->LoadResource(loadInfo);
     EXPECT_TRUE(loaded);
 }
@@ -881,7 +883,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationSaveLoadWithOptions, testing::
     auto saveOpts = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
     ASSERT_TRUE(saveOpts);
     CORE_NS::ResourceId rid("test_anim_options");
-    CORE_NS::IResourceType::StorageInfo saveInfo { saveOpts, nullptr, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo saveInfo{saveOpts, nullptr, rid, "", resources, context};
     EXPECT_TRUE(resType->SaveResource(anim, saveInfo));
 
     // Load with options
@@ -892,7 +894,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationSaveLoadWithOptions, testing::
             lo->SetOptionData(so->GetOptionData());
         }
     }
-    CORE_NS::IResourceType::StorageInfo loadInfo { loadOpts, nullptr, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo loadInfo{loadOpts, nullptr, rid, "", resources, context};
     auto loaded = resType->LoadResource(loadInfo);
     EXPECT_TRUE(loaded);
 }
@@ -927,7 +929,7 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationLoadWithBaseTemplate, testing:
         m->AddProperty(ConstructProperty<bool>("Enabled", true));
     }
     if (auto i = interface_cast<CORE_NS::ISetResourceId>(baseRes)) {
-        i->SetResourceId({ "base_anim_template", context });
+        i->SetResourceId({"base_anim_template", context});
     }
     ASSERT_TRUE(resources->AddResource(baseRes, "app://base_anim_template.json"));
 
@@ -935,14 +937,14 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationLoadWithBaseTemplate, testing:
     auto anim = GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::PropertyAnimation);
     ASSERT_TRUE(anim);
     if (auto dt = interface_cast<IDerivedFromTemplate>(anim)) {
-        dt->SetTemplateId({ "base_anim_template" });
+        dt->SetTemplateId({"base_anim_template"});
     }
 
     // Save the animation via AnimationResourceType with empty path (triggers SaveTemplate)
     auto saveOpts = GetObjectRegistry().Create<CORE_NS::IResourceOptions>(META_NS::ClassId::ObjectResourceOptions);
     ASSERT_TRUE(saveOpts);
     CORE_NS::ResourceId rid("derived_anim");
-    CORE_NS::IResourceType::StorageInfo saveInfo { saveOpts, nullptr, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo saveInfo{saveOpts, nullptr, rid, "", resources, context};
     EXPECT_TRUE(animResType->SaveResource(anim, saveInfo));
 
     // Load it back — LoadTemplate finds the base, calls SetValuesFromTemplate
@@ -953,11 +955,11 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationLoadWithBaseTemplate, testing:
             lo->SetOptionData(so->GetOptionData());
         }
     }
-    CORE_NS::IResourceType::StorageInfo loadInfo { loadOpts, nullptr, rid, "", resources, context };
+    CORE_NS::IResourceType::StorageInfo loadInfo{loadOpts, nullptr, rid, "", resources, context};
     auto loaded = animResType->LoadResource(loadInfo);
     EXPECT_TRUE(loaded);
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

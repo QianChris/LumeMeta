@@ -124,7 +124,8 @@ void RegisterValueSerializers(IObjectRegistry& registry)
         idImport);
 
     RegisterSerializer<TimeSpan>(
-        data, [](IExportFunctions& f, const auto& v) { return f.ExportToNode(Any<int64_t>(v.ToMicroseconds())); },
+        data,
+        [](IExportFunctions& f, const auto& v) { return f.ExportToNode(Any<int64_t>(v.ToMicroseconds())); },
         [](IImportFunctions& f, const ISerNode::ConstPtr& node, auto& out) {
             Any<int64_t> any;
             if (f.ImportFromNode(node, any)) {
@@ -161,5 +162,5 @@ void UnRegisterValueSerializers(IObjectRegistry& registry)
     UnregisterSerializer<BASE_NS::Math::Vec2>(data);
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()

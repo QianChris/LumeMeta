@@ -45,7 +45,7 @@ public:
             return AnyPC<Type>::template GetCompatibleTypes<Type>(dir);
         }
 
-        static constexpr TypeId uids[] = { TYPE_ID };
+        static constexpr TypeId uids[] = {TYPE_ID};
         return uids;
     }
 
@@ -190,7 +190,8 @@ class Any : public BaseTypedAny<Type> {
     using Super = BaseTypedAny<Type>;
 
 public:
-    explicit Any(Type v = {}) : value_(BASE_NS::move(v)) {}
+    explicit Any(Type v = {}) : value_(BASE_NS::move(v))
+    {}
     AnyReturnValue InternalSetValue(const Type& value) override
     {
         if (!Compare::Equal(value, value_)) {
@@ -206,7 +207,7 @@ public:
     IAny::Ptr Clone(const AnyCloneOptions& options) const override;
     IAny::Ptr Clone(bool withValue) const
     {
-        return Clone({ withValue ? CloneValueType::COPY_VALUE : CloneValueType::DEFAULT_VALUE });
+        return Clone({withValue ? CloneValueType::COPY_VALUE : CloneValueType::DEFAULT_VALUE});
     }
 
     bool operator==(const Any<Type>& other) const noexcept
@@ -250,7 +251,7 @@ public:
 
     const BASE_NS::array_view<const TypeId> GetCompatibleTypes(CompatibilityDirection dir) const override
     {
-        static constexpr TypeId uids[] = { ARRAY_TYPE_ID, VECTOR_TYPE_ID };
+        static constexpr TypeId uids[] = {ARRAY_TYPE_ID, VECTOR_TYPE_ID};
         return uids;
     }
     const BASE_NS::array_view<const TypeId> GetItemCompatibleTypes(CompatibilityDirection dir) const override
@@ -356,10 +357,13 @@ public:
     static constexpr auto ITEM_SIZE = sizeof(ItemType); /*NOLINT(bugprone-sizeof-expression)*/
 
 public:
-    explicit constexpr ArrayAny(ArrayType v = {}) : value_(BASE_NS::move(v)) {}
-    explicit constexpr ArrayAny(const BASE_NS::array_view<const Type>& v) : value_(v.begin(), v.end()) {}
+    explicit constexpr ArrayAny(ArrayType v = {}) : value_(BASE_NS::move(v))
+    {}
+    explicit constexpr ArrayAny(const BASE_NS::array_view<const Type>& v) : value_(v.begin(), v.end())
+    {}
 #ifdef BASE_VECTOR_HAS_INITIALIZE_LIST
-    constexpr ArrayAny(std::initializer_list<Type> v) : value_(ArrayType(v)) {}
+    constexpr ArrayAny(std::initializer_list<Type> v) : value_(ArrayType(v))
+    {}
 #endif
     // todo: support same conversions as single value any
     AnyReturnValue GetDataAt(size_t index, const TypeId& id, void* data, size_t size) const override
@@ -425,7 +429,7 @@ public:
     IAny::Ptr Clone(const AnyCloneOptions& options) const override;
     IAny::Ptr Clone(bool withValue) const
     {
-        return Clone({ withValue ? CloneValueType::COPY_VALUE : CloneValueType::DEFAULT_VALUE });
+        return Clone({withValue ? CloneValueType::COPY_VALUE : CloneValueType::DEFAULT_VALUE});
     }
 
     const ArrayType& InternalGetValue() const override
@@ -468,7 +472,7 @@ IAny::Ptr Any<Type, Compare>::Clone(const AnyCloneOptions& options) const
     if (options.role == TypeIdRole::ARRAY) {
         return IAny::Ptr(new ArrayAny<Type, typename Compare::template Rebind<BASE_NS::vector<Type>>>());
     }
-    return IAny::Ptr(new Any { options.value == CloneValueType::COPY_VALUE ? value_ : Type {} });
+    return IAny::Ptr(new Any{options.value == CloneValueType::COPY_VALUE ? value_ : Type{}});
 }
 
 template<class Type, class Compare>
@@ -477,7 +481,7 @@ IAny::Ptr ArrayAny<Type, Compare>::Clone(const AnyCloneOptions& options) const
     if (options.role == TypeIdRole::ITEM) {
         return IAny::Ptr(new Any<Type, typename Compare::template Rebind<Type>>());
     }
-    return IAny::Ptr(new ArrayAny { options.value == CloneValueType::COPY_VALUE ? value_ : ArrayType {} });
+    return IAny::Ptr(new ArrayAny{options.value == CloneValueType::COPY_VALUE ? value_ : ArrayType{}});
 }
 
 META_END_NAMESPACE()

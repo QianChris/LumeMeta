@@ -33,17 +33,17 @@ struct EngineValueOptions {
     /// prefix that is added before the name (plus '.')
     BASE_NS::string namePrefix;
     /// optional output vector to put all matching values
-    BASE_NS::vector<IEngineValue::Ptr>* values {};
+    BASE_NS::vector<IEngineValue::Ptr>* values{};
     /**
      * @brief Push value directly to engine when set, if this is enabled,
      *        the values can only be set in the engine task queue thread
      **/
-    bool pushValuesDirectlyToEngine {};
+    bool pushValuesDirectlyToEngine{};
     /**
      * @brief If true, also recursively handle known struct types. E.g. Vec4 would be expanded into x, y, z, and w
      * properties.
      */
-    bool recurseKnownStructs {};
+    bool recurseKnownStructs{};
 };
 
 /**

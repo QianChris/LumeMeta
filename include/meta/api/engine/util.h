@@ -26,14 +26,14 @@ META_BEGIN_NAMESPACE()
  * @brief Info about an engine property without creating engine values or bridges
  */
 struct EnginePropertyInfo {
-    BASE_NS::string name;           ///< Property name
-    CORE_NS::PropertyTypeDecl type; ///< Property type
+    BASE_NS::string name;            ///< Property name
+    CORE_NS::PropertyTypeDecl type;  ///< Property type
 };
 
 /** @brief EnumerateProperties configuration */
 struct EnginePropertyInfoConfig {
-    bool traverseMemberProperties {}; ///< If true, traverse also memberProperties of each property
-    bool includeStructs { true };     ///< If true, include struct type properties in the output
+    bool traverseMemberProperties{};  ///< If true, traverse also memberProperties of each property
+    bool includeStructs{true};        ///< If true, include struct type properties in the output
 };
 
 namespace Internal {
@@ -44,7 +44,7 @@ namespace Internal {
 inline bool ShouldAdd(const CORE_NS::Property& property, const EnginePropertyInfoConfig& config)
 {
     bool isLeaf = property.metaData.memberProperties.empty();
-    isLeaf |= !property.metaData.enumMetaData.empty(); // enums are considered a leaf even if it has a member
+    isLeaf |= !property.metaData.enumMetaData.empty();  // enums are considered a leaf even if it has a member
     return config.includeStructs || isLeaf;
 }
 
@@ -80,7 +80,7 @@ inline void RecurseEngineProperties(BASE_NS::array_view<const CORE_NS::Property>
     }
 }
 
-} // namespace Internal
+}  // namespace Internal
 
 /**
  * @brief Enumerate property names and types from a component manager without creating engine values.
@@ -155,8 +155,8 @@ inline bool SetEngineValueToProperty(const IProperty::Ptr& p, const IEngineValue
 {
     if (p && value && value->IsCompatible(p->GetTypeId())) {
         if (auto i = interface_cast<IStackProperty>(p)) {
-            PropertyLock lock { p };
-            TypeId ids[] = { IEngineValue::UID };
+            PropertyLock lock{p};
+            TypeId ids[] = {IEngineValue::UID};
             for (auto&& v : i->GetValues(ids, false)) {
                 i->RemoveValue(v);
             }

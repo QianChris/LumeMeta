@@ -32,7 +32,8 @@ public:
     using BaseValueType = uint64_t;
 
     constexpr BitField() noexcept = default;
-    constexpr BitField(const BaseValueType& value) noexcept : value_(value) {}
+    constexpr BitField(const BaseValueType& value) noexcept : value_(value)
+    {}
     constexpr bool operator==(const BitField& other) const noexcept
     {
         return value_ == other.value_;
@@ -82,7 +83,7 @@ public:
     }
 
 protected:
-    BaseValueType value_ {};
+    BaseValueType value_{};
 };
 
 /**
@@ -251,13 +252,15 @@ private:
 template<class EnumType, class TopEnumBitField, size_t Offset, size_t Count>
 class SubEnumBitField : public EnumBitField<EnumType, typename TopEnumBitField::BaseValueType, Offset, Count> {
     using Super = EnumBitField<EnumType, typename TopEnumBitField::BaseValueType, Offset, Count>;
-    static_assert(Offset + Count < sizeof(typename TopEnumBitField::BaseValueType) * 8, // 8: bits
+    static_assert(Offset + Count < sizeof(typename TopEnumBitField::BaseValueType) * 8,  // 8: bits
         "invalid bit offset and/or count");
 
 public:
     using Super::Super;
-    constexpr SubEnumBitField(Super s) : Super(s) {}
-    constexpr SubEnumBitField(TopEnumBitField e) : Super(e.GetValue()) {}
+    constexpr SubEnumBitField(Super s) : Super(s)
+    {}
+    constexpr SubEnumBitField(TopEnumBitField e) : Super(e.GetValue())
+    {}
 
     constexpr SubEnumBitField(const SubEnumBitField&) = default;
     constexpr SubEnumBitField(SubEnumBitField&&) = default;
@@ -273,4 +276,4 @@ public:
 
 META_END_NAMESPACE()
 
-#endif // META_BASE_BIT_FIELD_H
+#endif  // META_BASE_BIT_FIELD_H

@@ -71,7 +71,8 @@ public:
     void OnSerializeChanged()
     {
         if (auto cont = META_ACCESS_PROPERTY(Content)) {
-            META_NS::SetObjectFlags(cont.GetProperty(), ObjectFlagBits::SERIALIZE,
+            META_NS::SetObjectFlags(cont.GetProperty(),
+                ObjectFlagBits::SERIALIZE,
                 GetObjectFlags().IsSet(ObjectFlagBits::SERIALIZE_HIERARCHY));
         }
     }

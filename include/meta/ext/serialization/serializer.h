@@ -24,7 +24,8 @@ META_BEGIN_NAMESPACE()
 
 template<typename Type>
 struct NamedValue {
-    NamedValue(BASE_NS::string_view name, Type& v) : name(name), value(v) {}
+    NamedValue(BASE_NS::string_view name, Type& v) : name(name), value(v)
+    {}
 
     BASE_NS::string_view name;
     Type& value;
@@ -58,13 +59,14 @@ public:
     }
 
 protected:
-    ReturnError state_ { GenericError::SUCCESS };
+    ReturnError state_{GenericError::SUCCESS};
 };
 
 /// Helper class to export and return the status
 class ExportSerializer : public SerializerBase {
 public:
-    ExportSerializer(IExportContext& context) : context_(context) {}
+    ExportSerializer(IExportContext& context) : context_(context)
+    {}
 
     template<typename Type>
     ExportSerializer& operator&(const NamedValue<Type>& nv)
@@ -126,7 +128,8 @@ private:
 /// Helper class to import and return the status
 class ImportSerializer : public SerializerBase {
 public:
-    ImportSerializer(IImportContext& context) : context_(context) {}
+    ImportSerializer(IImportContext& context) : context_(context)
+    {}
 
     template<typename Type>
     ImportSerializer& operator&(const NamedValue<Type>& nv)
@@ -134,7 +137,7 @@ public:
         if (state_) {
             if constexpr (is_enum_v<BASE_NS::remove_const_t<Type>>) {
                 using UT = BASE_NS::underlying_type_t<BASE_NS::remove_const_t<Type>>;
-                UT v {};
+                UT v{};
                 if (SetState(context_.ImportValue(nv.name, v))) {
                     nv.value = static_cast<Type>(v);
                 }
@@ -201,13 +204,15 @@ class Serializer {
 template<>
 class Serializer<IImportContext> : public ImportSerializer {
 public:
-    Serializer(IImportContext& c) : ImportSerializer(c) {}
+    Serializer(IImportContext& c) : ImportSerializer(c)
+    {}
 };
 
 template<>
 class Serializer<IExportContext> : public ExportSerializer {
 public:
-    Serializer(IExportContext& c) : ExportSerializer(c) {}
+    Serializer(IExportContext& c) : ExportSerializer(c)
+    {}
 };
 
 META_END_NAMESPACE()

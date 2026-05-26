@@ -57,7 +57,7 @@ IterationResult BreadthFirstOrderIterate(const Iterable& i, Func& func, IterateS
     while (!queue.empty()) {
         auto i = queue[0];
         queue.erase(queue.begin());
-        res = i->Iterate(IterationParameters { ff, is });
+        res = i->Iterate(IterationParameters{ff, is});
         if (res.value != IterationResult::CONTINUE) {
             return res;
         }
@@ -78,7 +78,7 @@ IterationResult BreadthFirstOrderIterate(const Iterable& i, ICallable& func, Ite
     return BreadthFirstOrderIterate<InterableCallable>(i, lf, is);
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()
 
 #endif

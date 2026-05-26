@@ -124,8 +124,8 @@ bool operator<=(const BASE_NS::Math::Vec2& lhs, const BASE_NS::Math::Vec2& rhs)
     return ((lhs.x <= rhs.x) && (lhs.y <= rhs.y));
 }
 
-} // namespace Math
-} // namespace BASE_NS
+}  // namespace Math
+}  // namespace BASE_NS
 
 namespace META_NS {
 std::ostream& operator<<(std::ostream& os, const META_NS::TimeSpan& ts)
@@ -133,4 +133,4 @@ std::ostream& operator<<(std::ostream& os, const META_NS::TimeSpan& ts)
     return os << ts.ToMicroseconds() << "us";
 }
 
-} // namespace META_NS
+}  // namespace META_NS

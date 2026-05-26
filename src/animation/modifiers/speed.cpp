@@ -49,6 +49,6 @@ float SpeedModifier::ModifySpeed(float speed) const
     return speed * META_ACCESS_PROPERTY_VALUE(SpeedFactor);
 }
 
-} // namespace AnimationModifiers
+}  // namespace AnimationModifiers
 
 META_END_NAMESPACE()

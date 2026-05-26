@@ -197,15 +197,13 @@ UNIT_TEST_F(API_TimerTests, BadQueue, testing::ext::TestSize.Level1)
 {
     {
         Timer t(
-            TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING,
-            BASE_NS::Uid { "b63ceb45-bdb3-4f23-bd95-bb640eba9144" });
+            TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, BASE_NS::Uid{"b63ceb45-bdb3-4f23-bd95-bb640eba9144"});
         EXPECT_TRUE(!t.IsRunning());
     }
     {
         Timer t;
         EXPECT_FALSE(t.Start(
-            TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING,
-            BASE_NS::Uid { "b63ceb45-bdb3-4f23-bd95-bb640eba9144" }));
+            TimeSpan::Milliseconds(20), [] {}, Timer::RECURRING, BASE_NS::Uid{"b63ceb45-bdb3-4f23-bd95-bb640eba9144"}));
         EXPECT_TRUE(!t.IsRunning());
     }
     {
@@ -242,6 +240,6 @@ UNIT_TEST_F(API_TimerTests, Debug, testing::ext::TestSize.Level1)
     META_WAIT_TIMED(200);
 }
 */
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

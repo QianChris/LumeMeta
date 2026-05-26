@@ -56,7 +56,8 @@ struct ResourceGroupContext {
     ResourceGroupContext(BASE_NS::string group, const ResourceContextWeakPtr& context)
         : group(BASE_NS::move(group)), context(ResolveContext(context))
     {}
-    explicit ResourceGroupContext(const ResourceIdContext& ric) : ResourceGroupContext(ric.id.group, ric.context) {}
+    explicit ResourceGroupContext(const ResourceIdContext& ric) : ResourceGroupContext(ric.id.group, ric.context)
+    {}
     explicit ResourceGroupContext(const CORE_NS::IResource::Ptr& r)
         : ResourceGroupContext(r->GetResourceId().group, r->GetContext())
     {}
@@ -81,7 +82,7 @@ inline bool IsCorrectContext(const ResourceGroupContext& gc, const ResourceConte
 
 struct ResourceTypeKey {
     BASE_NS::Uid uid;
-    BASE_NS::string version {};
+    BASE_NS::string version{};
 
     bool operator==(const ResourceTypeKey& o) const
     {

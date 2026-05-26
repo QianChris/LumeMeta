@@ -31,7 +31,8 @@ class QueueTask : public IntroduceInterfaces<ITaskQueueTask> {
     META_INTERFACE(IntroduceInterfaces<ITaskQueueTask>, QueueTask, "426c3d10-89e5-4cf7-a314-a5155ede1595")
 
 public:
-    QueueTask(Func func) : func_(BASE_NS::move(func)) {}
+    QueueTask(Func func) : func_(BASE_NS::move(func))
+    {}
 
     bool Invoke() override
     {
@@ -53,7 +54,8 @@ template<typename Func, typename Interface, typename... Args>
 class DeferredCallable<Func, Interface, void(Args...)> : public IntroduceInterfaces<Interface> {
     template<typename F>
     struct ControlBlock {
-        ControlBlock(F f) : func_(BASE_NS::move(f)) {}
+        ControlBlock(F f) : func_(BASE_NS::move(f))
+        {}
 
         void Call(Args... args) const
         {

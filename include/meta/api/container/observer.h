@@ -67,7 +67,7 @@ public:
     {
         auto p = OnHierarchyChanged();
         return p ? p->AddHandler(MakeCallback<IOnHierarchyChanged>(BASE_NS::forward<Callback>(callback)))
-                 : IEvent::Token {};
+                 : IEvent::Token{};
     }
 };
 
@@ -102,7 +102,7 @@ public:
     {
         auto p = OnDescendantChanged();
         return p ? p->AddHandler(MakeCallback<IOnChildChanged>(BASE_NS::forward<Callback>(callback)))
-                 : META_NS::IEvent::Token {};
+                 : META_NS::IEvent::Token{};
     }
 };
 
@@ -121,4 +121,4 @@ inline auto CreateObjectInstance<IContainerObserver>()
 
 META_END_NAMESPACE()
 
-#endif // META_API_CONTAINER_OBSERVER_H
+#endif  // META_API_CONTAINER_OBSERVER_H

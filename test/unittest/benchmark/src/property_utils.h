@@ -13,8 +13,8 @@
 META_BEGIN_NAMESPACE()
 
 namespace benchmarks {
-namespace {} // namespace
-} // namespace benchmarks
+namespace {}  // namespace
+}  // namespace benchmarks
 META_END_NAMESPACE()
 
 #endif

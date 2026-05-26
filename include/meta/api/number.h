@@ -30,7 +30,8 @@ META_REGISTER_CLASS(Number, "751c6067-4fb8-404b-a240-4fa6f32c725a", ObjectCatego
 
 class Number {
 public:
-    Number() : number_(META_NS::GetObjectRegistry().Create<IAny>(META_NS::ClassId::Number)) {}
+    Number() : number_(META_NS::GetObjectRegistry().Create<IAny>(META_NS::ClassId::Number))
+    {}
 
     template<typename T, typename = EnableIfBasicType<T>>
     Number(T t) : Number()

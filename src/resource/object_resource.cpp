@@ -87,7 +87,7 @@ bool ObjectResourceType::SaveResource(const CORE_NS::IResource::ConstPtr& p, con
             exporter->SetUserContext(interface_pointer_cast<IObject>(s.context));
             exporter->SetResourceManager(s.self);
             exporter->SetMetadata(META_NS::SerMetadataValues()
-                                      .SetVersion({ 1, 0 })
+                                      .SetVersion({1, 0})
                                       .SetType("ObjectResource")
                                       .Set("sub-type", type_.ToString()));
             res = exporter->Export(sink, interface_pointer_cast<IObject>(p));
@@ -159,14 +159,14 @@ bool ObjectResourceOptions::Save(
     }
     exporter->SetResourceManager(rman);
     exporter->SetUserContext(interface_pointer_cast<IObject>(context));
-    exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({ 1, 0 }).SetType("ObjectResourceOptions"));
+    exporter->SetMetadata(META_NS::SerMetadataValues().SetVersion({1, 0}).SetType("ObjectResourceOptions"));
     if (!exporter->Export(options, GetSelf())) {
         return false;
     }
     if (auto collect = interface_cast<META_NS::ICollectResources>(context)) {
         auto bres = GetBaseResource();
         if (bres.IsValid()) {
-            collect->AddResource(CORE_NS::ResourceIdContext { bres });
+            collect->AddResource(CORE_NS::ResourceIdContext{bres});
         }
     }
     return true;

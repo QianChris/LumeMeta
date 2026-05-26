@@ -36,7 +36,8 @@ public:
 
     Timer() = default;
     Timer(const Timer&) = delete;
-    Timer(Timer&& t) noexcept : control_(BASE_NS::move(t.control_)) {}
+    Timer(Timer&& t) noexcept : control_(BASE_NS::move(t.control_))
+    {}
     ~Timer()
     {
         Stop();
@@ -90,7 +91,7 @@ public:
                 bool ret = type == RECURRING;
                 if (!ret) {
                     if (control) {
-                        CORE_NS::UniqueLock lock { control->mutex };
+                        CORE_NS::UniqueLock lock{control->mutex};
                         control->token = {};
                     }
                 }
@@ -120,7 +121,7 @@ public:
     void Stop()
     {
         if (control_) {
-            CORE_NS::UniqueLock lock { control_->mutex };
+            CORE_NS::UniqueLock lock{control_->mutex};
             if (control_->queue && control_->token) {
                 control_->queue->CancelTask(control_->token);
             }
@@ -133,9 +134,9 @@ public:
      */
     ITaskQueue::Token Detach()
     {
-        ITaskQueue::Token ret {};
+        ITaskQueue::Token ret{};
         if (control_) {
-            CORE_NS::UniqueLock lock { control_->mutex };
+            CORE_NS::UniqueLock lock{control_->mutex};
             ret = control_->token;
         }
         control_.reset();
@@ -148,8 +149,8 @@ public:
     bool IsRunning() const
     {
         if (control_) {
-            CORE_NS::UniqueLock lock { control_->mutex };
-            return control_->token != ITaskQueue::Token {};
+            CORE_NS::UniqueLock lock{control_->mutex};
+            return control_->token != ITaskQueue::Token{};
         }
         return false;
     }
@@ -158,7 +159,7 @@ private:
     struct Control {
         mutable CORE_NS::Mutex mutex;
         ITaskQueue::Ptr queue;
-        ITaskQueue::Token token {};
+        ITaskQueue::Token token{};
     };
     BASE_NS::shared_ptr<Control> control_;
 };

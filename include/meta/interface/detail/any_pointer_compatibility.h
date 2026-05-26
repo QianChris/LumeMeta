@@ -44,26 +44,26 @@ struct AnyPointerCompatibility {
         static constexpr TypeId typeId = UidFromType<Type>();
         if (dir == CompatibilityDirection::GET) {
             if constexpr (IsConst) {
-                static TypeId uids[] = { typeId, SharedPtrConstIInterfaceId };
+                static TypeId uids[] = {typeId, SharedPtrConstIInterfaceId};
                 return uids;
             }
-            static TypeId uids[] = { typeId, SharedPtrIInterfaceId, SharedPtrConstIInterfaceId };
+            static TypeId uids[] = {typeId, SharedPtrIInterfaceId, SharedPtrConstIInterfaceId};
             return uids;
         }
         if (dir == CompatibilityDirection::SET) {
             if constexpr (IsConst) {
-                static TypeId uids[] = { typeId, SharedPtrIInterfaceId, SharedPtrConstIInterfaceId };
+                static TypeId uids[] = {typeId, SharedPtrIInterfaceId, SharedPtrConstIInterfaceId};
                 return uids;
             }
-            static TypeId uids[] = { typeId, SharedPtrIInterfaceId };
+            static TypeId uids[] = {typeId, SharedPtrIInterfaceId};
             return uids;
         }
         if constexpr (IsConst) {
-            static TypeId uids[] = { typeId, SharedPtrConstIInterfaceId };
+            static TypeId uids[] = {typeId, SharedPtrConstIInterfaceId};
             return uids;
         }
 
-        static TypeId uids[] = { typeId, SharedPtrIInterfaceId };
+        static TypeId uids[] = {typeId, SharedPtrIInterfaceId};
         return uids;
     }
 
@@ -133,28 +133,34 @@ struct AnyPointerCompatibility<IsConst, true> {
         static constexpr TypeId typeId = UidFromType<Type>();
         if (dir == CompatibilityDirection::GET) {
             if constexpr (IsConst) {
-                static TypeId uids[] = { typeId, SharedPtrConstIInterfaceId, WeakPtrConstIInterfaceId };
+                static TypeId uids[] = {typeId, SharedPtrConstIInterfaceId, WeakPtrConstIInterfaceId};
                 return uids;
             }
-            static TypeId uids[] = { typeId, SharedPtrIInterfaceId, SharedPtrConstIInterfaceId, WeakPtrIInterfaceId,
-                WeakPtrConstIInterfaceId };
+            static TypeId uids[] = {typeId,
+                SharedPtrIInterfaceId,
+                SharedPtrConstIInterfaceId,
+                WeakPtrIInterfaceId,
+                WeakPtrConstIInterfaceId};
             return uids;
         }
         if (dir == CompatibilityDirection::SET) {
             if constexpr (IsConst) {
-                static TypeId uids[] = { typeId, SharedPtrIInterfaceId, SharedPtrConstIInterfaceId, WeakPtrIInterfaceId,
-                    WeakPtrConstIInterfaceId };
+                static TypeId uids[] = {typeId,
+                    SharedPtrIInterfaceId,
+                    SharedPtrConstIInterfaceId,
+                    WeakPtrIInterfaceId,
+                    WeakPtrConstIInterfaceId};
                 return uids;
             }
-            static TypeId uids[] = { typeId, SharedPtrIInterfaceId, WeakPtrIInterfaceId };
+            static TypeId uids[] = {typeId, SharedPtrIInterfaceId, WeakPtrIInterfaceId};
             return uids;
         }
         if constexpr (IsConst) {
-            static TypeId uids[] = { typeId, SharedPtrConstIInterfaceId, WeakPtrConstIInterfaceId };
+            static TypeId uids[] = {typeId, SharedPtrConstIInterfaceId, WeakPtrConstIInterfaceId};
             return uids;
         }
 
-        static TypeId uids[] = { typeId, SharedPtrIInterfaceId, WeakPtrIInterfaceId };
+        static TypeId uids[] = {typeId, SharedPtrIInterfaceId, WeakPtrIInterfaceId};
         return uids;
     }
 

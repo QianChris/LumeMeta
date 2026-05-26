@@ -33,7 +33,7 @@ inline auto InvokeByName(const MyObj& obj, BASE_NS::string_view name, Args&&... 
         CORE_LOG_W("Trying to Invoke event by name with type that doesn't support IMetadata");
     }
     if constexpr (!BASE_NS::is_same_v<typename MyEvent::ReturnType, void>) {
-        return typename MyEvent::ReturnType {};
+        return typename MyEvent::ReturnType{};
     }
 }
 

@@ -24,14 +24,14 @@ namespace Internal {
 template<typename Type, typename Out>
 AnyReturnValue ExtractAnyValue(const IAny& value, Out& out)
 {
-    Type v {};
+    Type v{};
     auto res = value.GetValue<Type>(v);
     if (res) {
         out = static_cast<Out>(v);
     }
     return res;
 }
-} // namespace Internal
+}  // namespace Internal
 
 /**
  * @brief Try to get value from property using list of known types

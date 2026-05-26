@@ -44,7 +44,7 @@ using GIFuncType = CORE_NS::IInterface*(void*);
 
 struct UidInfo {
     BASE_NS::Uid uid;
-    GIFuncType* getInterface {};
+    GIFuncType* getInterface{};
 };
 
 template<size_t Size>
@@ -151,7 +151,7 @@ constexpr static CORE_NS::IInterface* SearchInterface(
     return BinarySearch(uid, me, info.data, Size);
 }
 
-} // namespace Internal
+}  // namespace Internal
 
 template<typename... Interfaces>
 class IntroduceInterfaces;
@@ -227,7 +227,7 @@ struct GetInterfacesImpl final {
     constexpr void FillArrayDepth(size_t& index)
     {
         if constexpr (IsIntroduceInterface<I>::VALUE) {
-            FillArrayDepthIntroduce<Path...>(index, typename I::deducer {});
+            FillArrayDepthIntroduce<Path...>(index, typename I::deducer{});
         } else if (!HasUid(I::UID, index)) {
             if constexpr (!BASE_NS::is_same_v<I, CORE_NS::IInterface>) {
                 arr_.data[index].uid = I::UID;
@@ -241,7 +241,7 @@ struct GetInterfacesImpl final {
     }
 
 private:
-    Internal::UIDArray<SIZE> arr_ {};
+    Internal::UIDArray<SIZE> arr_{};
 };
 
 template<typename Me, typename... Interfaces>
@@ -261,7 +261,7 @@ BASE_NS::vector<BASE_NS::Uid> GetInterfacesVector()
 template<>
 inline BASE_NS::vector<BASE_NS::Uid> GetInterfacesVector<>()
 {
-    return BASE_NS::vector<BASE_NS::Uid> {};
+    return BASE_NS::vector<BASE_NS::Uid>{};
 }
 
 /**
@@ -286,7 +286,7 @@ template<typename... Interfaces>
 class IntroduceInterfaces : public Interfaces... {
 public:
     using deducer = Deducer<Interfaces...>;
-    static constexpr bool INTRODUCE_INTERFACES_TAG {};
+    static constexpr bool INTRODUCE_INTERFACES_TAG{};
     using IntroduceInterfacesType = IntroduceInterfaces;
 
     template<typename... Args>
@@ -331,7 +331,7 @@ public:
     template<size_t... Index>
     static BASE_NS::vector<BASE_NS::Uid> GetInterfacesVectorImpl(IndexSequence<Index...>)
     {
-        return { IntsImpl().data[Index].uid... };
+        return {IntsImpl().data[Index].uid...};
     }
 
     static BASE_NS::vector<BASE_NS::Uid> GetInterfacesVector()
@@ -348,14 +348,14 @@ public:
     }
     constexpr static size_t SIZE = GetInterfacesImpl<IntroduceInterfaces, Interfaces...>::SIZE;
 
-    int32_t refcnt_ { 0 };
+    int32_t refcnt_{0};
 };
 
 template<>
 class IntroduceInterfaces<> {
 public:
     using deducer = Deducer<>;
-    static constexpr bool INTRODUCE_INTERFACES_TAG {};
+    static constexpr bool INTRODUCE_INTERFACES_TAG{};
     using IntroduceInterfacesType = IntroduceInterfaces;
 
     CORE_NS::IInterface* GetInterface(const BASE_NS::Uid& uid)

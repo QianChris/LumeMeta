@@ -40,6 +40,6 @@ float ReverseModifier::ModifySpeed(float speed) const
     return speed * -1.f;
 }
 
-} // namespace AnimationModifiers
+}  // namespace AnimationModifiers
 
 META_END_NAMESPACE()

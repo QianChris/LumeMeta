@@ -29,7 +29,8 @@ public:
     using PropertyType = BASE_NS::shared_ptr<PropertyInterfaceType>;
 
     Property() = default;
-    Property(nullptr_t) {}
+    Property(nullptr_t)
+    {}
 
     template<typename Prop, typename = BASE_NS::enable_if_t<BASE_NS::is_convertible_v<Prop*, PropertyInterfaceType*>>>
     Property(BASE_NS::shared_ptr<Prop> p) : p_(BASE_NS::move(p))

@@ -37,7 +37,8 @@ namespace Test {
 
 class AndroidApp : public TestApp {
 public:
-    AndroidApp(android_app* state) : m_state(state) {}
+    AndroidApp(android_app* state) : m_state(state)
+    {}
     AndroidApp(JNIEnv* env, jobject thiz, jobject context, jobject surface, jstring outputFile, jobjectArray arguments)
         : m_env(env), m_context(context), m_surface(surface), m_outputFile(outputFile), m_arguments(arguments)
     {}
@@ -72,27 +73,27 @@ private:
     BASE_NS::string GetIntentExtra(JNIEnv* env, jobject context, const BASE_NS::string& parameter);
 
     struct TestData {
-        BASE_NS::vector<char*> gtestArgs; // Input data for Gtest
-        BASE_NS::string reportTestFile;   // Report log file
-        BASE_NS::string gtestTestFile;    // Gtest results file
-        int result = -1;                  // Gtest results exit code
+        BASE_NS::vector<char*> gtestArgs;  // Input data for Gtest
+        BASE_NS::string reportTestFile;    // Report log file
+        BASE_NS::string gtestTestFile;     // Gtest results file
+        int result = -1;                   // Gtest results exit code
         bool hasRunTests = false;
-        ANativeWindow* window { nullptr }; // Window
+        ANativeWindow* window{nullptr};  // Window
     };
 
-    JNIEnv* m_env { nullptr };
-    jobject m_context { nullptr };
-    android_app* m_state { nullptr };
-    AAssetManager* m_rsManager { nullptr };
+    JNIEnv* m_env{nullptr};
+    jobject m_context{nullptr};
+    android_app* m_state{nullptr};
+    AAssetManager* m_rsManager{nullptr};
     BASE_NS::string m_internalDir, m_externalDir, m_cacheDir, m_filesDir;
-    jobject m_surface { nullptr };
-    jstring m_outputFile { nullptr };
-    jobjectArray m_arguments { nullptr };
+    jobject m_surface{nullptr};
+    jstring m_outputFile{nullptr};
+    jobjectArray m_arguments{nullptr};
     TestData m_testData;
 };
 
 inline AndroidApp* g_androidApp;
 
-} // namespace Test
+}  // namespace Test
 
-#endif // TEST_RUNNER_ANDROID
+#endif  // TEST_RUNNER_ANDROID

@@ -231,5 +231,5 @@ UNIT_TEST(API_SerializationCompatTest, LocalStringProperties, testing::ext::Test
 //     }
 // }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

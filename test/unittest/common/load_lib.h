@@ -84,6 +84,6 @@ bool DynamicLibrary::LoadFunction(T& fn, const BASE_NS::string& fName)
     return true;
 }
 
-} // namespace Test
+}  // namespace Test
 
-#endif // TEST_LOAD_LIB
+#endif  // TEST_LOAD_LIB

@@ -123,7 +123,7 @@ public:
     template<class T>
     BASE_NS::vector<typename T::Ptr> GetAttachments() const
     {
-        return PtrArrayCast<T>(GetAttachments({ T::UID }, false));
+        return PtrArrayCast<T>(GetAttachments({T::UID}, false));
     }
 };
 

@@ -113,35 +113,35 @@ struct MyComparableTestType {
     }
     constexpr MyComparableTestType operator*(float value) const
     {
-        return MyComparableTestType { i * value };
+        return MyComparableTestType{i * value};
     }
     constexpr MyComparableTestType operator/(float value) const
     {
-        return MyComparableTestType { i / value };
+        return MyComparableTestType{i / value};
     }
     constexpr MyComparableTestType operator-(float value) const
     {
-        return MyComparableTestType { i - value };
+        return MyComparableTestType{i - value};
     }
     constexpr MyComparableTestType operator+(float value) const
     {
-        return MyComparableTestType { i + value };
+        return MyComparableTestType{i + value};
     }
     constexpr MyComparableTestType operator*(MyComparableTestType value) const
     {
-        return MyComparableTestType { i * value.i };
+        return MyComparableTestType{i * value.i};
     }
     constexpr MyComparableTestType operator/(MyComparableTestType value) const
     {
-        return MyComparableTestType { i / value.i };
+        return MyComparableTestType{i / value.i};
     }
     constexpr MyComparableTestType operator-(MyComparableTestType value) const
     {
-        return MyComparableTestType { i - value.i };
+        return MyComparableTestType{i - value.i};
     }
     constexpr MyComparableTestType operator+(MyComparableTestType value) const
     {
-        return MyComparableTestType { i + value.i };
+        return MyComparableTestType{i + value.i};
     }
 };
 
@@ -307,7 +307,7 @@ struct MyTestType {
 
 enum TestEnum { TestEnumA = 1, TestEnumB = 2 };
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()
 
 #define META_INTERFACE_TYPE_IMP(a, n)           \
@@ -324,4 +324,4 @@ META_TYPE_IMPL(META_NS::UTest::MyTestType, "META_NS::Test::MyTestType")
 META_TYPE_IMPL(META_NS::UTest::MyComparableTestType, "META_NS::Test::MyComparableTestType")
 META_TYPE_IMPL(META_NS::UTest::TestEnum, "META_NS::Test::TestEnum")
 
-#endif // META_TEST_TESTING_OBJECTS_HEADER
+#endif  // META_TEST_TESTING_OBJECTS_HEADER

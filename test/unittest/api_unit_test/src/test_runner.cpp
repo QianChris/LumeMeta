@@ -19,8 +19,8 @@
 
 #if defined(CORE_DYNAMIC) && (CORE_DYNAMIC == 1)
 CORE_BEGIN_NAMESPACE()
-IPluginRegister& (*GetPluginRegister)() { nullptr };
-void (*CreatePluginRegistry)(const struct PlatformCreateInfo& platformCreateInfo) { nullptr };
+IPluginRegister& (*GetPluginRegister)(){nullptr};
+void (*CreatePluginRegistry)(const struct PlatformCreateInfo& platformCreateInfo){nullptr};
 CORE_END_NAMESPACE()
 #endif
 
@@ -101,16 +101,16 @@ CORE_NS::IEngine::Ptr CreateEngine()
     const ::Test::LogLevelScope logLevel =
         ::Test::LogLevelScope(CORE_NS::GetLogger(), CORE_NS::ILogger::LogLevel::LOG_ERROR);
 
-    const CORE_NS::EngineCreateInfo engineCreateInfo { GetTestEnv()->platformCreateInfo,
+    const CORE_NS::EngineCreateInfo engineCreateInfo{GetTestEnv()->platformCreateInfo,
         // applicationVersion
         {
-            "test", // name
-            0,      // versionMajor
-            1,      // versionMinor
-            0,      // versionPatch
+            "test",  // name
+            0,       // versionMajor
+            1,       // versionMinor
+            0,       // versionPatch
         },
         // applicationContext
-        {} };
+        {}};
 
     auto factory = CORE_NS::GetInstance<CORE_NS::IEngineFactory>(CORE_NS::UID_ENGINE_FACTORY);
     auto engine = factory->Create(engineCreateInfo);
@@ -124,7 +124,7 @@ CORE_NS::IEngine::Ptr CreateEngine()
     return engine;
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()
 
 namespace Test {
@@ -145,4 +145,4 @@ int RunGoogleTest(int argc, char** argv)
     return result;
 }
 
-} // namespace Test
+}  // namespace Test

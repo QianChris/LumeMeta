@@ -39,7 +39,8 @@ class Task : public IntroduceInterfaces<ITaskQueueTask> {
     META_INTERFACE(IntroduceInterfaces<ITaskQueueTask>, Task, "20779859-b4c9-426d-92f1-9143520e6917")
 
 public:
-    Task(Func func) : func_(BASE_NS::move(func)) {}
+    Task(Func func) : func_(BASE_NS::move(func))
+    {}
 
     bool Invoke() override
     {
@@ -50,11 +51,12 @@ private:
     Func func_;
 };
 
-} // namespace
+}  // namespace
 
 class API_TaskQueueTest : public ::testing::TestWithParam<ClassInfo> {
 public:
-    API_TaskQueueTest() : queue(GetObjectRegistry().Create<ITaskQueue>(GetParam())) {}
+    API_TaskQueueTest() : queue(GetObjectRegistry().Create<ITaskQueue>(GetParam()))
+    {}
 
     void Process()
     {
@@ -193,7 +195,7 @@ UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level
         20_ms);
 
     Wait(200);
-    this->queue->CancelTask(token); // no-op as the task is already cancelled.
+    this->queue->CancelTask(token);  // no-op as the task is already cancelled.
     EXPECT_TRUE(count == 2);
 
     count = 0;
@@ -207,7 +209,7 @@ UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level
         },
         20_ms);
     Wait(200);
-    this->queue->CancelTask(token); // no-op as the task is already cancelled.
+    this->queue->CancelTask(token);  // no-op as the task is already cancelled.
     EXPECT_TRUE(count == 3);
 
     count = 0;
@@ -218,7 +220,7 @@ UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level
         },
         20_ms);
     Wait(200);
-    this->queue->CancelTask(token); // actually cancels the task now.
+    this->queue->CancelTask(token);  // actually cancels the task now.
     EXPECT_TRUE(count > 2);
     int curCount = count;
     Wait(100);
@@ -482,7 +484,7 @@ UNIT_TEST(API_TaskQueueTest, FutureCancel, testing::ext::TestSize.Level1)
     }
 
     {
-        std::atomic<int> value {};
+        std::atomic<int> value{};
         auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
         queue->AddWaitableTask(CreateWaitableTask([] { std::this_thread::sleep_for(std::chrono::milliseconds(20)); }));
         auto f = queue->AddWaitableTask(CreateWaitableTask([&] {
@@ -494,7 +496,7 @@ UNIT_TEST(API_TaskQueueTest, FutureCancel, testing::ext::TestSize.Level1)
         EXPECT_EQ(value, 0);
     }
     {
-        std::atomic<int> value {};
+        std::atomic<int> value{};
         auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
         auto f = queue->AddWaitableTask(
             CreateWaitableTask([] { std::this_thread::sleep_for(std::chrono::milliseconds(20)); }));
@@ -653,7 +655,7 @@ UNIT_TEST(API_TaskQueueTest, ApiFuture, testing::ext::TestSize.Level1)
  */
 UNIT_TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly, testing::ext::TestSize.Level1)
 {
-    std::atomic<int> value {};
+    std::atomic<int> value{};
     auto queue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
     auto f = AddFutureTaskOrRunDirectly(queue, [&] {
         ++value;
@@ -674,8 +676,8 @@ UNIT_TEST(API_TaskQueueTest, AddFutureTaskOrRunDirectly, testing::ext::TestSize.
  */
 UNIT_TEST(API_TaskQueueTest, CancelRunningTask, testing::ext::TestSize.Level1)
 {
-    std::atomic<bool> start {};
-    std::atomic<bool> done {};
+    std::atomic<bool> start{};
+    std::atomic<bool> done{};
     auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
     auto h = queue->AddTask(MakeCallback<ITaskQueueTask>([&] {
         start = true;
@@ -699,7 +701,7 @@ UNIT_TEST(API_TaskQueueTest, NestedTaskQueues, testing::ext::TestSize.Level1)
     auto top = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
     auto nested = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
 
-    std::atomic<bool> done {};
+    std::atomic<bool> done{};
     top->AddTask(MakeCallback<ITaskQueueTask>([&] {
         nested->ProcessTasks();
 
@@ -721,7 +723,7 @@ UNIT_TEST(API_TaskQueueTest, OutsideQueuesTask, testing::ext::TestSize.Level1)
 {
     auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
 
-    std::atomic<bool> done {};
+    std::atomic<bool> done{};
 
     q->ProcessTasks();
 
@@ -740,11 +742,12 @@ UNIT_TEST(API_TaskQueueTest, TaskDestructionTask, testing::ext::TestSize.Level1)
 {
     auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
 
-    std::atomic<bool> done {};
+    std::atomic<bool> done{};
     q->ProcessTasks();
 
     struct obj {
-        obj(IPollingTaskQueue::Ptr queue, std::atomic<bool>& done) : queue(queue), done(done) {}
+        obj(IPollingTaskQueue::Ptr queue, std::atomic<bool>& done) : queue(queue), done(done)
+        {}
         ~obj()
         {
             auto f = AddFutureTaskOrRunDirectly(queue, [&] { done = true; });
@@ -753,7 +756,7 @@ UNIT_TEST(API_TaskQueueTest, TaskDestructionTask, testing::ext::TestSize.Level1)
         IPollingTaskQueue::Ptr queue;
         std::atomic<bool>& done;
     };
-    q->AddTask(MakeCallback<ITaskQueueTask>([o = obj { q, done }] { return false; }));
+    q->AddTask(MakeCallback<ITaskQueueTask>([o = obj{q, done}] { return false; }));
     q->ProcessTasks();
 
     EXPECT_TRUE(done);
@@ -762,5 +765,5 @@ UNIT_TEST(API_TaskQueueTest, TaskDestructionTask, testing::ext::TestSize.Level1)
 INSTANTIATE_TEST_SUITE_P(
     API_TaskQueueTest, API_TaskQueueTest, ::testing::Values(ClassId::PollingTaskQueue, ClassId::ThreadedTaskQueue));
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

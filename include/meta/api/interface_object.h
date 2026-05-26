@@ -88,7 +88,7 @@ constexpr auto ArrayCast(BASE_NS::vector<From>&& from) noexcept
     }
 }
 
-} // namespace Internal
+}  // namespace Internal
 
 /**
  * @brief The InterfaceObject class is the base BASE_NS::shared_ptr<T> wrapper inherited by actual interface wrapper
@@ -105,8 +105,10 @@ public:
     using WeakPtr = BASE_NS::weak_ptr<UnderlyingType>;
     using IInterfacePtr = BASE_NS::shared_ptr<CORE_NS::IInterface>;
     InterfaceObject() = delete;
-    explicit InterfaceObject(const Ptr& p) noexcept : ptr_(p) {}
-    explicit InterfaceObject(const IInterfacePtr& p) : ptr_(interface_pointer_cast<UnderlyingType>(p)) {}
+    explicit InterfaceObject(const Ptr& p) noexcept : ptr_(p)
+    {}
+    explicit InterfaceObject(const IInterfacePtr& p) : ptr_(interface_pointer_cast<UnderlyingType>(p))
+    {}
     /// Assignment operator
     auto& operator=(const IInterfacePtr& p) noexcept
     {
@@ -148,7 +150,7 @@ protected:
         auto* p = interface_cast<Interface>(ptr_);
         using Result = BASE_NS::remove_reference_t<decltype(fn(*p))>;
         if constexpr (!BASE_NS::is_void_v<Result>) {
-            return p ? fn(*p) : Result {};
+            return p ? fn(*p) : Result{};
         } else if (p) {
             fn(*p);
         }
@@ -217,7 +219,7 @@ public:                                                        \
     {                                                                                                     \
         auto pr = PropertyName();                                                                         \
         using ReturnType = decltype(pr->GetValue());                                                      \
-        auto value = pr ? pr->GetValue() : ReturnType {};                                                 \
+        auto value = pr ? pr->GetValue() : ReturnType{};                                                  \
         return META_NS::Internal::ArrayCast<Type, typename ReturnType::value_type>(BASE_NS::move(value)); \
     }                                                                                                     \
     auto Get##AccessorName##Count() const                                                                 \
@@ -228,7 +230,7 @@ public:                                                        \
     auto Get##AccessorName##At(size_t index) const                                                        \
     {                                                                                                     \
         auto pr = PropertyName();                                                                         \
-        return Type(pr ? pr->GetValueAt(index) : decltype(pr->GetValueAt(index)) {});                     \
+        return Type(pr ? pr->GetValueAt(index) : decltype(pr->GetValueAt(index)){});                      \
     }
 
 // InterfaceObject default array property wrapper
@@ -269,12 +271,12 @@ constexpr InitializationType CreateNew;
 /// Some methods support specifying whether the call should be asynchronous or synchronous through AsyncCallType
 /// template parameter.
 struct AsyncCallType {
-    bool async {};
+    bool async{};
 };
 /// Call should be synchronous and directly return the asynchronous call return value.
-constexpr AsyncCallType Sync { false };
+constexpr AsyncCallType Sync{false};
 /// Call should be asynchronous and return a Future object as its return value.
-constexpr AsyncCallType Async { true };
+constexpr AsyncCallType Async{true};
 
 #define META_API_ASYNC template<const META_NS::AsyncCallType& CallType = META_NS::Sync>
 
@@ -310,4 +312,4 @@ T* interface_cast(const META_NS::InterfaceObject<S>& io)
 
 // NOLINTEND(readability-identifier-naming) to keep std like syntax
 
-#endif // META_API_INTERFACE_OBJECT_H
+#endif  // META_API_INTERFACE_OBJECT_H

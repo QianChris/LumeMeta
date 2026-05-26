@@ -23,7 +23,7 @@ void UnregisterBenchmarkTypes();
 
 IBenchmarkType::Ptr CreateBenchmarkType();
 
-} // namespace benchmarks
+}  // namespace benchmarks
 META_END_NAMESPACE()
 
 META_TYPE(META_NS::benchmarks::IBenchmarkType::Ptr)

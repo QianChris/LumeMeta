@@ -47,7 +47,7 @@ UNIT_TEST(API_ObjectTest, ObjectBaseAPI, testing::ext::TestSize.Level1)
     META_NS::Object object3(nullptr);
     EXPECT_TRUE(object != object3);
     EXPECT_FALSE(object == object3);
-    EXPECT_FALSE(object3); // not initialized yet
+    EXPECT_FALSE(object3);  // not initialized yet
     EXPECT_EQ(object3.GetPtr<IObject>(), nullptr);
 }
 
@@ -65,7 +65,7 @@ UNIT_TEST(API_ObjectTest, TypeConversion, testing::ext::TestSize.Level1)
     EXPECT_TRUE(o2);
     EXPECT_NE(o1.GetClassId(), o2.GetClassId());
 
-    o1 = o2; // Changes type
+    o1 = o2;  // Changes type
     EXPECT_TRUE(o1);
     EXPECT_EQ(o1.GetPtr(), o2.GetPtr());
     EXPECT_EQ(o1.GetClassId(), o2.GetClassId());
@@ -153,7 +153,7 @@ UNIT_TEST(API_ObjectTest, LazyInitBase, testing::ext::TestSize.Level1)
 
     EXPECT_FALSE(o1);
     EXPECT_FALSE(o2);
-    o2 = o1; // Does nothing
+    o2 = o1;  // Does nothing
     EXPECT_FALSE(o1);
     EXPECT_FALSE(o2);
     o1 = CreateObjectInstance(ClassId::Object);
@@ -556,6 +556,6 @@ UNIT_TEST(API_ObjectTest, ObjectNameSerialise, testing::ext::TestSize.Level1)
     EXPECT_TRUE(GetObjectNameAttachment(interface_pointer_cast<IAttach>(in)));
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

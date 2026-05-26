@@ -83,7 +83,7 @@ IterationResult ConstIterate(const IIterable* c, Func&& func, IterateStrategy is
     return IterateImpl<IIterableConstCallable>(c, BASE_NS::forward<Func>(func), is);
 }
 
-} // namespace Internal
+}  // namespace Internal
 META_END_NAMESPACE()
 
 #endif

@@ -15,13 +15,13 @@
 
 #include "test_runner_windows.h"
 
-#include <algorithm> // std::replace
-#include <cstring>   // memcpy
+#include <algorithm>  // std::replace
+#include <cstring>    // memcpy
 #include <filesystem>
-#include <intrin.h> // __cpuid
+#include <intrin.h>  // __cpuid
 #include <iostream>
 #include <memory>
-#include <Windows.h> // window
+#include <Windows.h>  // window
 
 #include <base/containers/unique_ptr.h>
 
@@ -42,7 +42,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l)
     }
     return DefWindowProc(hwnd, msg, w, l);
 }
-} // namespace
+}  // namespace
 
 WindowsApp::WindowsApp(int argc, char** argv)
 {
@@ -59,7 +59,8 @@ WindowsApp::~WindowsApp()
     Terminate();
 }
 
-void WindowsApp::Init() {}
+void WindowsApp::Init()
+{}
 
 void WindowsApp::Run()
 {
@@ -77,12 +78,12 @@ void WindowsApp::Terminate()
 
 BASE_NS::string WindowsApp::GetCPUVendor() const
 {
-    int regs[4] = { 0 };
+    int regs[4] = {0};
     char vendor[13];
     __cpuid(regs, 0);
-    std::memcpy(vendor, &regs[1], 4);     // EBX
-    std::memcpy(vendor + 4, &regs[3], 4); // EDX
-    std::memcpy(vendor + 8, &regs[2], 4); // ECX
+    std::memcpy(vendor, &regs[1], 4);      // EBX
+    std::memcpy(vendor + 4, &regs[3], 4);  // EDX
+    std::memcpy(vendor + 8, &regs[2], 4);  // ECX
     vendor[12] = '\0';
     BASE_NS::string cpuVendor(vendor);
 
@@ -122,7 +123,7 @@ void WindowsApp::CreateNativeWindow(uint32_t width, uint32_t height, const BASE_
     }
 
     HINSTANCE hInstance = GetModuleHandle(nullptr);
-    WNDCLASS wc = { 0 };
+    WNDCLASS wc = {0};
     wc.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
@@ -130,10 +131,20 @@ void WindowsApp::CreateNativeWindow(uint32_t width, uint32_t height, const BASE_
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     RegisterClass(&wc);
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE;
-    RECT rect = { 0, 0, static_cast<int>(width), static_cast<int>(height) };
+    RECT rect = {0, 0, static_cast<int>(width), static_cast<int>(height)};
     AdjustWindowRect(&rect, style, false);
-    m_hWnd = CreateWindowEx(0, wc.lpszClassName, TEXT(title.c_str()), style, CW_USEDEFAULT, CW_USEDEFAULT,
-        rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, hInstance, nullptr);
+    m_hWnd = CreateWindowEx(0,
+        wc.lpszClassName,
+        TEXT(title.c_str()),
+        style,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        rect.right - rect.left,
+        rect.bottom - rect.top,
+        nullptr,
+        nullptr,
+        hInstance,
+        nullptr);
     m_hDC = GetDC((HWND)m_hWnd);
 }
 
@@ -207,7 +218,7 @@ void WindowsApp::ParseArguments(int argc, char** argv)
     }
 }
 
-} // namespace Test
+}  // namespace Test
 
 int main(int argc, char** argv)
 {

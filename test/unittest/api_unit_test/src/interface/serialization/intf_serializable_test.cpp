@@ -61,7 +61,7 @@ struct SerType : public IntroduceInterfaces<ObjectFwd, ISerType, ISerializable> 
     META_END_STATIC_DATA()
     META_IMPLEMENT_PROPERTY(uint32_t, IntProp)
 
-    int32_t value { 0 };
+    int32_t value{0};
     BASE_NS::vector<BASE_NS::string> strings;
 };
 
@@ -157,7 +157,7 @@ UNIT_TEST(API_SerializationTest, JsonExportExplicitSer, testing::ext::TestSize.L
         auto obj = reg.Create<ISerType>(ClassId::ExplicitSerType);
         ASSERT_TRUE(obj);
         obj->SetValue(2);
-        obj->SetStrings({ "hips", "hops" });
+        obj->SetStrings({"hips", "hops"});
         obj->IntProp()->SetDefaultValue(2);
         obj->IntProp()->SetValue(3);
 
@@ -167,7 +167,7 @@ UNIT_TEST(API_SerializationTest, JsonExportExplicitSer, testing::ext::TestSize.L
     auto obj = ser.Import<ISerType>();
     ASSERT_TRUE(obj);
     EXPECT_EQ(obj->GetValue(), 2);
-    EXPECT_EQ(obj->GetStrings(), (BASE_NS::vector<BASE_NS::string> { "hips", "hops" }));
+    EXPECT_EQ(obj->GetStrings(), (BASE_NS::vector<BASE_NS::string>{"hips", "hops"}));
     EXPECT_EQ(obj->IntProp()->GetDefaultValue(), 2);
     EXPECT_EQ(obj->IntProp()->GetValue(), 3);
 
@@ -189,7 +189,7 @@ UNIT_TEST(API_SerializationTest, JsonExportAutoSer, testing::ext::TestSize.Level
         auto obj = reg.Create<ISerType>(ClassId::AutoSerType);
         ASSERT_TRUE(obj);
         obj->SetValue(2);
-        obj->SetStrings({ "hips", "hops" });
+        obj->SetStrings({"hips", "hops"});
         obj->IntProp()->SetDefaultValue(2);
         obj->IntProp()->SetValue(3);
 
@@ -199,7 +199,7 @@ UNIT_TEST(API_SerializationTest, JsonExportAutoSer, testing::ext::TestSize.Level
     auto obj = ser.Import<ISerType>();
     ASSERT_TRUE(obj);
     EXPECT_EQ(obj->GetValue(), 2);
-    EXPECT_EQ(obj->GetStrings(), (BASE_NS::vector<BASE_NS::string> { "hips", "hops" }));
+    EXPECT_EQ(obj->GetStrings(), (BASE_NS::vector<BASE_NS::string>{"hips", "hops"}));
     EXPECT_EQ(obj->IntProp()->GetDefaultValue(), 2);
     EXPECT_EQ(obj->IntProp()->GetValue(), 3);
 
@@ -225,7 +225,8 @@ struct SecondLevelSerType : public IntroduceInterfaces<MetaObject, ISerializable
 struct TopLevelSerType : public IntroduceInterfaces<MetaObject, ISerializable> {
     META_OBJECT(TopLevelSerType, ClassId::TopLevelSerType, IntroduceInterfaces)
 public:
-    TopLevelSerType() : obj(GetObjectRegistry().Create(ClassId::SecondLevelSerType)) {}
+    TopLevelSerType() : obj(GetObjectRegistry().Create(ClassId::SecondLevelSerType))
+    {}
 
     ReturnError Export(IExportContext& c) const override
     {
@@ -259,5 +260,5 @@ UNIT_TEST(API_SerializationTest, TopLevelObject, testing::ext::TestSize.Level1)
     reg.UnregisterObjectType<SecondLevelSerType>();
 }
 
-} // namespace UTest
+}  // namespace UTest
 META_END_NAMESPACE()

@@ -324,6 +324,6 @@ UNIT_TEST(API_SubBitfieldTest, SetSubBits, testing::ext::TestSize.Level1)
     EXPECT_FALSE(ext2.IsSet(ExtTestFlagBits::FLAG1));
 }
 
-} // namespace UTest
+}  // namespace UTest
 
 META_END_NAMESPACE()

@@ -23,8 +23,8 @@ META_BEGIN_NAMESPACE()
 
 namespace GlobalObjectInstance {
 /** Instance id of the default object context instance */
-[[maybe_unused]] constexpr static BASE_NS::Uid DEFAULT_OBJECT_CONTEXT { "3fe40d0f-4ec5-455c-a66d-dcd749b08194" };
-} // namespace GlobalObjectInstance
+[[maybe_unused]] constexpr static BASE_NS::Uid DEFAULT_OBJECT_CONTEXT{"3fe40d0f-4ec5-455c-a66d-dcd749b08194"};
+}  // namespace GlobalObjectInstance
 
 /** Base objects */
 META_REGISTER_CLASS(BaseObject, "211f0da1-1a09-422c-8dd0-fbc493a72d08", ObjectCategoryBits::NO_CATEGORY)
