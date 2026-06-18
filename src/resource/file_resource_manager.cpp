@@ -764,13 +764,14 @@ public:
     ResourceContextPtr context;
 };
 
-void FileResourceManager::UpdateOptionsData(
-    const BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>& data,
-    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection, const IObject::Ptr& depsContext)
+void FileResourceManager::CollectMatching(
+    const BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>& group,
+    const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection,
+    BASE_NS::vector<BASE_NS::shared_ptr<ResourceData>>& matched) const
 {
-    for (auto&& v : data) {
+    for (auto&& v : group) {
         if (IsResourceMatch(selection, v.second->id)) {
-            UpdateOptions(*v.second, depsContext);
+            matched.push_back(v.second);
         }
     }
 }
@@ -780,28 +781,42 @@ BASE_NS::vector<CORE_NS::ResourceIdContext> FileResourceManager::UpdateOptionsDa
 {
     DependencyCollector deps{context};
     IObject::Ptr depsContext(&deps, [](auto) {});
-    std::unique_lock lock{mutex_};
-    for (auto&& v : selection) {
+    BASE_NS::vector<BASE_NS::shared_ptr<ResourceData>> matched;
+    {
+        std::unique_lock lock{mutex_};
         for (auto&& g : resources_) {
             if (IsCorrectContext(g.first, context)) {
-                UpdateOptionsData(g.second, selection, depsContext);
+                CollectMatching(g.second, selection, matched);
             }
         }
+    }
+    for (auto&& r : matched) {
+        UpdateOptions(*r, depsContext);
     }
     return deps.resources;
 }
 BASE_NS::vector<CORE_NS::ResourceIdContext> FileResourceManager::UpdateOptionsData(
     const BASE_NS::array_view<const CORE_NS::ResourceIdContext>& res)
 {
-    BASE_NS::vector<CORE_NS::ResourceIdContext> list;
-    std::unique_lock lock{mutex_};
-    for (auto&& v : res) {
-        if (auto r = FindResource(v)) {
-            DependencyCollector deps{v.context.lock()};
-            IObject::Ptr depsContext(&deps, [](auto) {});
-            UpdateOptions(*r, depsContext);
-            list.insert(list.end(), deps.resources.begin(), deps.resources.end());
+    struct Matched {
+        BASE_NS::shared_ptr<ResourceData> data;
+        ResourceContextPtr context;
+    };
+    BASE_NS::vector<Matched> matched;
+    {
+        std::unique_lock lock{mutex_};
+        for (auto&& v : res) {
+            if (auto r = FindResource(v)) {
+                matched.push_back({r, v.context.lock()});
+            }
         }
+    }
+    BASE_NS::vector<CORE_NS::ResourceIdContext> list;
+    for (auto&& m : matched) {
+        DependencyCollector deps{m.context};
+        IObject::Ptr depsContext(&deps, [](auto) {});
+        UpdateOptions(*m.data, depsContext);
+        list.insert(list.end(), deps.resources.begin(), deps.resources.end());
     }
     return list;
 }

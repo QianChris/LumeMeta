@@ -48,7 +48,8 @@ namespace {
 // Read-only in-memory IFile over the fuzz bytes (stack-owned; Destroy is a no-op).
 class MemoryFile final : public CORE_NS::IFile {
 public:
-    MemoryFile(const uint8_t* data, uint64_t size) : data_(data), size_(size) {}
+    MemoryFile(const uint8_t* data, uint64_t size) : data_(data), size_(size)
+    {}
 
     Mode GetMode() const override
     {
@@ -95,7 +96,8 @@ public:
     }
 
 private:
-    void Destroy() override {}
+    void Destroy() override
+    {}
     const uint8_t* data_;
     uint64_t size_;
     uint64_t pos_ = 0;
