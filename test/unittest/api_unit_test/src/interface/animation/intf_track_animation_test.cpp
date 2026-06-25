@@ -706,7 +706,8 @@ UNIT_TEST_F(API_TrackAnimationTest, EditKeyframeWhilePaused, testing::ext::TestS
     auto newVal = ConstructProperty<int>("v", 20);
     ASSERT_NE(animation.AddKeyframe(1.0f, newVal->GetValueAny().Clone(true)), ITrackAnimation::INVALID_INDEX);
 
-    // This pause is required because the animation state went to invalid and cannot be restored (might be paused, running etc)
+    // This pause is required because the animation state went to invalid and cannot be restored (might be paused,
+    // running etc)
     animation.Pause();
     animation.Seek(progress);
 

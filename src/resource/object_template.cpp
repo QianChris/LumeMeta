@@ -30,6 +30,11 @@ CORE_NS::ResourceType ObjectTemplate::GetResourceType() const
     return ClassId::ObjectTemplate.Id().ToUid();
 }
 
+BASE_NS::string ObjectTemplate::GetName() const
+{
+    return GetValue(Name());
+}
+
 IObject::Ptr ObjectTemplate::Instantiate(const SharedPtrIInterface& context) const
 {
     IObject::Ptr res;
