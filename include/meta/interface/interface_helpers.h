@@ -98,8 +98,11 @@ constexpr static void SortUidArray(UIDArray<Size>& array) noexcept
 constexpr static CORE_NS::IInterface* BinarySearch(
     const BASE_NS::Uid& uid, void* me, const UidInfo* info, size_t size) noexcept
 {
+    if (size == 0) {
+        return {};
+    }
     int32_t lo = 0;
-    int32_t hi = static_cast<int32_t>(size);
+    int32_t hi = static_cast<int32_t>(size) - 1;
     auto* p = info;
     while (lo <= hi) {
         const auto mid = lo + (hi - lo) / 2;

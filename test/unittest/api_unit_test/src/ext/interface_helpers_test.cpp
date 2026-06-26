@@ -82,6 +82,16 @@ constexpr bool Contains(Internal::UIDArray<S> arr, const BASE_NS::Uid& uid)
 }  // namespace
 
 /**
+ * @tc.name: EmptyBinarySearch
+ * @tc.desc: Tests for binary search helper. [AUTO-GENERATED]
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_InterfaceHelpers, EmptyBinarySearch, testing::ext::TestSize.Level1)
+{
+    EXPECT_FALSE(Internal::BinarySearch({}, nullptr, nullptr, 0));
+}
+
+/**
  * @tc.name: IntroduceInterfaces
  * @tc.desc: Tests for Introduce Interfaces. [AUTO-GENERATED]
  * @tc.type: FUNC
