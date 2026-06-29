@@ -31,9 +31,7 @@ struct StaticCastConv {
 };
 
 template<typename Type, typename Conv, typename... CompatType>
-class MultiTypeAny : public IntroduceInterfaces<IAny, IValue> {
-    using Super = IntroduceInterfaces;
-
+class MultiTypeAny : public AnyBase {
 public:
     static constexpr TypeId TYPE_ID = UidFromType<Type>();
 
@@ -50,26 +48,39 @@ public:
         static constexpr TypeId ids[] = {TYPE_ID, UidFromType<CompatType>()...};
         return ids;
     }
-
-    ObjectId GetClassId() const override
+    TypeId GetTypeId() const
     {
-        return StaticGetClassId();
+        return TYPE_ID;
     }
 
-    const BASE_NS::array_view<const TypeId> GetCompatibleTypes(CompatibilityDirection dir) const override
+protected:
+    static constexpr AnyTypeInfo TYPE_INFO {
+        StaticGetClassId(),
+        TYPE_ID,
+        ArrayUidFromType<Type>(),
+        ItemUidFromType<Type>(),
+        StaticGetTypeIdString(),
+        sizeof(Type), /*NOLINT(bugprone-sizeof-expression)*/
+        &StaticGetCompatibleTypes,
+    };
+    const AnyTypeInfo& Info() const override
     {
-        return StaticGetCompatibleTypes(dir);
+        return TYPE_INFO;
     }
-    AnyReturnValue GetData(const TypeId& id, void* data, size_t size) const override
+    AnyReturnValue RawGet(void* data) const override
+    {
+        *static_cast<Type*>(data) = InternalGetValue();
+        return AnyReturn::SUCCESS;
+    }
+    AnyReturnValue RawSet(const void* data) override
+    {
+        return InternalSetValue(*static_cast<const Type*>(data));
+    }
+    AnyReturnValue RawGetCompat(const TypeId& id, void* data, size_t size) const override
     {
         if (!data) {
             return AnyReturn::INVALID_ARGUMENT;
         }
-        if (sizeof(Type) == size && id == TYPE_ID) { /*NOLINT(bugprone-sizeof-expression)*/
-            *static_cast<Type*>(data) = InternalGetValue();
-            return AnyReturn::SUCCESS;
-        }
-
         AnyReturnValue res = AnyReturn::INVALID_ARGUMENT;
         [[maybe_unused]] bool r = ((res = [&]() -> AnyReturnValue {
             if (sizeof(CompatType) == size && id == UidFromType<CompatType>()) { /*NOLINT(bugprone-sizeof-expression)*/
@@ -80,13 +91,10 @@ public:
         }()) || ...);
         return res;
     }
-    AnyReturnValue SetData(const TypeId& id, const void* data, size_t size) override
+    AnyReturnValue RawSetCompat(const TypeId& id, const void* data, size_t size) override
     {
         if (!data) {
             return AnyReturn::INVALID_ARGUMENT;
-        }
-        if (sizeof(Type) == size && id == TYPE_ID) { /*NOLINT(bugprone-sizeof-expression)*/
-            return InternalSetValue(*static_cast<const Type*>(data));
         }
         AnyReturnValue res = AnyReturn::INVALID_ARGUMENT;
         [[maybe_unused]] bool r = ((res = [&]() -> AnyReturnValue {
@@ -97,7 +105,7 @@ public:
         }()) || ...);
         return res;
     }
-    AnyReturnValue CopyFrom(const IAny& any) override
+    AnyReturnValue RawCopyFrom(const IAny& any) override
     {
         if (META_NS::IsCompatible(any, TYPE_ID, CompatibilityDirection::GET)) {
             Type value;
@@ -118,46 +126,11 @@ public:
         }()) || ...);
         return res;
     }
-
-    TypeId GetTypeId(TypeIdRole role) const override
+    AnyReturnValue RawReset() override
     {
-        if (role == TypeIdRole::ARRAY) {
-            return ArrayUidFromType<Type>();
-        }
-        if (role == TypeIdRole::ITEM) {
-            return ItemUidFromType<Type>();
-        }
-        return TYPE_ID;
-    }
-    TypeId GetTypeId() const
-    {
-        return TYPE_ID;
-    }
-    BASE_NS::string GetTypeIdString() const override
-    {
-        return BASE_NS::string(StaticGetTypeIdString());
-    }
-    using IAny::SetValue;
-    AnyReturnValue SetValue(const IAny& value) override
-    {
-        return CopyFrom(value);
-    }
-    using IAny::GetValue;
-    const IAny& GetValue() const override
-    {
-        return *this;
-    }
-    bool IsCompatible(const TypeId& id) const override
-    {
-        return META_NS::IsCompatible(*this, id);
+        return InternalSetValue(Type {});
     }
 
-    AnyReturnValue ResetValue() override
-    {
-        return InternalSetValue({});
-    }
-
-protected:
     virtual AnyReturnValue InternalSetValue(const Type& value) = 0;
     virtual const Type& InternalGetValue() const = 0;
 };

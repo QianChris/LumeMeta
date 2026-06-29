@@ -28,6 +28,8 @@
 #include <meta/interface/metadata_query.h>
 #include <meta/interface/property/construct_array_property.h>
 #include <meta/interface/property/construct_property.h>
+#include <meta/interface/property/intf_property_internal.h>
+#include <meta/interface/property/intf_stack_property.h>
 
 /**
  * @brief Access property variable introduced with META_IMPLEMENT_*_PROPERTY
@@ -81,6 +83,43 @@ inline BASE_NS::shared_ptr<CORE_NS::IInterface> CreateFunctionConstructorObject(
 
 }  // namespace Internal
 
+// Typeless property construction. The entry's runtimeValue factory already produces an IAny
+// of the concrete property type, so the property can be built without the static type. This
+// collapses the per-type CreatePropertyImpl/ConstructProperty/ConstructPropertyAny tower into
+// a single function shared by every property entry (instantiated only per flags value).
+//
+// Mirrors the typed ConstructProperty<T>(name, {}) + SetDefaultValueAny(value) semantics:
+//   - the internal any (a type-only clone) fixes the property type,
+//   - the default value carries the entry's default.
+// Arrays need no special case: an array entry's runtimeValue is an IArrayAny, and a type-only
+// clone of it is the empty typed array.
+inline IProperty::Ptr CreatePropertyTypeless(
+    BASE_NS::string_view name, Internal::MetaValue* def, ObjectFlagBitsValue flags)
+{
+    flags |= ObjectFlagBits::NATIVE;
+    auto value = Internal::AnyFromValue(def);
+    if (!value) {
+        return nullptr;
+    }
+    auto p = GetObjectRegistry().GetPropertyRegister().Create(ClassId::StackProperty, name);
+    if (auto i = interface_cast<IPropertyInternalAny>(p)) {
+        i->SetInternalAny(value->Clone(false));
+    }
+    if (auto s = interface_cast<IStackProperty>(p)) {
+        s->SetDefaultValue(*value);
+    }
+    if (auto f = interface_cast<IObjectFlags>(p)) {
+        f->SetObjectFlags(flags);
+    }
+    return p;
+}
+
+// True for ValuePtr<T, ClassId> property types (incl. arrays of them).
+template<typename Type>
+inline constexpr bool IS_VALUE_PTR = BASE_NS::is_convertible_v<BASE_NS::remove_extent_t<Type>*, ValuePtrBase*>;
+
+// ValuePtr properties need the internal any created from the registered class id (T::ID), which
+// the runtime value any does not carry, so type erasure is lossy for them. Keep the typed path.
 template<typename Type>
 IProperty::Ptr CreatePropertyImpl(BASE_NS::string_view name, Internal::MetaValue* def, ObjectFlagBitsValue flags)
 {
@@ -95,14 +134,29 @@ IProperty::Ptr CreatePropertyImpl(BASE_NS::string_view name, Internal::MetaValue
     }
 }
 
-template<typename Type, uint64_t Flags>
-Internal::MetadataCtor* CreatePropertyConstructor()
+// Shared, type-independent property ctor: one instantiation per flags value for the whole binary.
+template<uint64_t Flags>
+Internal::MetadataCtor* CreatePropertyConstructorTypeless()
 {
     return [](const BASE_NS::shared_ptr<IOwner>& owner, const StaticMetadata& d) {
         return Internal::CreatePropertyConstructorObject(owner,
             d,
-            BASE_NS::move(META_NS::CreatePropertyImpl<Type>(d.name, d.runtimeValue, ObjectFlagBitsValue(Flags))));
+            BASE_NS::move(META_NS::CreatePropertyTypeless(d.name, d.runtimeValue, ObjectFlagBitsValue(Flags))));
     };
+}
+
+template<typename Type, uint64_t Flags>
+Internal::MetadataCtor* CreatePropertyConstructor()
+{
+    if constexpr (IS_VALUE_PTR<Type>) {
+        return [](const BASE_NS::shared_ptr<IOwner>& owner, const StaticMetadata& d) {
+            return Internal::CreatePropertyConstructorObject(owner,
+                d,
+                BASE_NS::move(META_NS::CreatePropertyImpl<Type>(d.name, d.runtimeValue, ObjectFlagBitsValue(Flags))));
+        };
+    } else {
+        return CreatePropertyConstructorTypeless<Flags>();
+    }
 }
 
 template<typename Type>

@@ -50,9 +50,14 @@ void RegisterUserAny()
 
 /// Register user type using built-in any type
 template<typename Type>
+void RegisterTypeForBuiltinArrayAny();
+template<typename Type>
 void RegisterTypeForBuiltinAny()
 {
     GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateShared<DefaultAnyBuilder<AnyType<Type>>>());
+    // Also register the array variant so Any/Enum Clone(role=ARRAY) can construct it via the
+    // registry instead of force-instantiating the array template in the per-type clone path.
+    RegisterTypeForBuiltinArrayAny<Type>();
 }
 
 /// Register user type using built-in array any type
@@ -71,8 +76,11 @@ void UnregisterUserAny()
 
 /// Unregister, counter part for RegisterTypeForBuiltinAny
 template<typename Type>
+void UnregisterTypeForBuiltinArrayAny();
+template<typename Type>
 void UnregisterTypeForBuiltinAny()
 {
+    UnregisterTypeForBuiltinArrayAny<Type>();
     GetObjectRegistry().GetPropertyRegister().UnregisterAny(AnyType<Type>::StaticGetClassId());
 }
 

@@ -42,7 +42,9 @@ public:
     }
 
     using IAny::Clone;
-    IAny::Ptr Clone(const AnyCloneOptions& options) const override;
+
+protected:
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override;
 
 private:
     AnyReturnValue InternalSetValue(const Type& value) override
@@ -73,7 +75,8 @@ public:
         return EnumBase<Type>::StaticGetCompatibleTypes(dir);
     }
 
-    IAny::Ptr Clone(const AnyCloneOptions& options) const override
+protected:
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override
     {
         if (options.role == TypeIdRole::ITEM) {
             return IAny::Ptr(new EnumBase<Type>);
@@ -84,10 +87,10 @@ public:
 };
 
 template<typename Type>
-IAny::Ptr EnumBase<Type>::Clone(const AnyCloneOptions& options) const
+IAny::Ptr EnumBase<Type>::RawClone(const AnyCloneOptions& options) const
 {
     if (options.role == TypeIdRole::ARRAY) {
-        return IAny::Ptr(new ArrayEnumBase<Type>());
+        return ConstructRegisteredAny(MakeUid<Type>(MULTI_TYPE_ARRAY_ANY_TAG));
     }
     return IAny::Ptr(new EnumBase{options.value == CloneValueType::COPY_VALUE ? this->value_ : Type{}});
 }
@@ -167,7 +170,9 @@ public:
     }
 
     using IAny::Clone;
-    IAny::Ptr Clone(const AnyCloneOptions& options) const override;
+
+protected:
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override;
 
 private:
     AnyReturnValue InternalSetValue(const Type& value) override
@@ -202,7 +207,8 @@ public:
         return Enum<EnumType>::StaticGetCompatibleTypes(dir);
     }
 
-    IAny::Ptr Clone(const AnyCloneOptions& options) const override
+protected:
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override
     {
         if (options.role == TypeIdRole::ITEM) {
             return IAny::Ptr(new Enum<EnumType>);
@@ -213,10 +219,10 @@ public:
 };
 
 template<typename EnumType>
-IAny::Ptr Enum<EnumType>::Clone(const AnyCloneOptions& options) const
+IAny::Ptr Enum<EnumType>::RawClone(const AnyCloneOptions& options) const
 {
     if (options.role == TypeIdRole::ARRAY) {
-        return IAny::Ptr(new ArrayEnum<EnumType>());
+        return ConstructRegisteredAny(MakeUid<Type>(MULTI_TYPE_ARRAY_ANY_TAG));
     }
     return IAny::Ptr(new Enum{options.value == CloneValueType::COPY_VALUE ? this->value_ : EnumType::DEFAULT_VALUE});
 }

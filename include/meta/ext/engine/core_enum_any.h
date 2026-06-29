@@ -125,7 +125,9 @@ public:
     }
 
     using IAny::Clone;
-    IAny::Ptr Clone(const AnyCloneOptions& options) const override;
+
+protected:
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override;
 
 private:
     AnyReturnValue InternalSetValue(const Type& value) override
@@ -164,7 +166,7 @@ public:
         return CoreEnumAny<Type, Conv, CoreType...>::StaticGetCompatibleTypes(dir);
     }
 
-    IAny::Ptr Clone(const AnyCloneOptions& options) const override
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override
     {
         if (options.role == TypeIdRole::ITEM) {
             return IAny::Ptr(new CoreEnumAny<Type, Conv, CoreType...>(prop_));
@@ -178,7 +180,7 @@ private:
 };
 
 template<typename Type, typename Conv, typename... CoreType>
-IAny::Ptr CoreEnumAny<Type, Conv, CoreType...>::Clone(const AnyCloneOptions& options) const
+IAny::Ptr CoreEnumAny<Type, Conv, CoreType...>::RawClone(const AnyCloneOptions& options) const
 {
     if (options.role == TypeIdRole::ARRAY) {
         return IAny::Ptr(new ArrayCoreEnumAny<Type, Conv, CoreType...>(prop_));

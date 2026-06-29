@@ -27,6 +27,7 @@
 #include <meta/interface/intf_meta_object_lib.h>
 #include <meta/interface/object_type_info.h>
 #include <meta/interface/property/intf_property.h>
+#include <meta/interface/property/intf_property_register.h>
 #include <meta/interface/serialization/intf_global_serialization_data.h>
 
 META_BEGIN_NAMESPACE()
@@ -388,6 +389,13 @@ public:
 inline META_NS::IObjectRegistry& GetObjectRegistry()
 {
     return GetMetaObjectLib().GetObjectRegistry();
+}
+
+// Construct a registered builtin Any/ArrayAny by its class id (used by Any/ArrayAny Clone to avoid
+// force-instantiating the sibling template for every type).
+inline IAny::Ptr ConstructRegisteredAny(const ObjectId& id)
+{
+    return GetObjectRegistry().GetPropertyRegister().ConstructAny(id);
 }
 
 /**
