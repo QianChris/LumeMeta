@@ -251,46 +251,60 @@ float EaseStepEnd(float t)
     return t < 1.f ? 0.f : 1.f;
 }
 
-// Declares the implementation
-#define IMPLEMENT_EASING_CURVE(name)                  \
-    float name##EasingCurve::Transform(float t) const \
-    {                                                 \
-        return Ease##name(t);                         \
+// One data-driven EasingCurve factory per built-in curve: ClassId -> transform function.
+#define EASING_CURVE_ENTRY(name)               \
+    {                                          \
+        ClassId::name##EasingCurve, Ease##name \
     }
+static EasingCurveFactory g_easingCurveFactories[] = {
+    EASING_CURVE_ENTRY(Linear),
+    EASING_CURVE_ENTRY(InQuad),
+    EASING_CURVE_ENTRY(OutQuad),
+    EASING_CURVE_ENTRY(InOutQuad),
+    EASING_CURVE_ENTRY(InCubic),
+    EASING_CURVE_ENTRY(OutCubic),
+    EASING_CURVE_ENTRY(InOutCubic),
+    EASING_CURVE_ENTRY(InSine),
+    EASING_CURVE_ENTRY(OutSine),
+    EASING_CURVE_ENTRY(InOutSine),
+    EASING_CURVE_ENTRY(InQuart),
+    EASING_CURVE_ENTRY(OutQuart),
+    EASING_CURVE_ENTRY(InOutQuart),
+    EASING_CURVE_ENTRY(InQuint),
+    EASING_CURVE_ENTRY(OutQuint),
+    EASING_CURVE_ENTRY(InOutQuint),
+    EASING_CURVE_ENTRY(InExpo),
+    EASING_CURVE_ENTRY(OutExpo),
+    EASING_CURVE_ENTRY(InOutExpo),
+    EASING_CURVE_ENTRY(InCirc),
+    EASING_CURVE_ENTRY(OutCirc),
+    EASING_CURVE_ENTRY(InOutCirc),
+    EASING_CURVE_ENTRY(InBack),
+    EASING_CURVE_ENTRY(OutBack),
+    EASING_CURVE_ENTRY(InOutBack),
+    EASING_CURVE_ENTRY(InElastic),
+    EASING_CURVE_ENTRY(OutElastic),
+    EASING_CURVE_ENTRY(InOutElastic),
+    EASING_CURVE_ENTRY(InBounce),
+    EASING_CURVE_ENTRY(OutBounce),
+    EASING_CURVE_ENTRY(InOutBounce),
+    EASING_CURVE_ENTRY(StepStart),
+    EASING_CURVE_ENTRY(StepEnd),
+};
+#undef EASING_CURVE_ENTRY
 
-IMPLEMENT_EASING_CURVE(Linear)
-IMPLEMENT_EASING_CURVE(InQuad)
-IMPLEMENT_EASING_CURVE(OutQuad)
-IMPLEMENT_EASING_CURVE(InOutQuad)
-IMPLEMENT_EASING_CURVE(InCubic)
-IMPLEMENT_EASING_CURVE(OutCubic)
-IMPLEMENT_EASING_CURVE(InOutCubic)
-IMPLEMENT_EASING_CURVE(InSine)
-IMPLEMENT_EASING_CURVE(OutSine)
-IMPLEMENT_EASING_CURVE(InOutSine)
-IMPLEMENT_EASING_CURVE(InQuart)
-IMPLEMENT_EASING_CURVE(OutQuart)
-IMPLEMENT_EASING_CURVE(InOutQuart)
-IMPLEMENT_EASING_CURVE(InQuint)
-IMPLEMENT_EASING_CURVE(OutQuint)
-IMPLEMENT_EASING_CURVE(InOutQuint)
-IMPLEMENT_EASING_CURVE(InExpo)
-IMPLEMENT_EASING_CURVE(OutExpo)
-IMPLEMENT_EASING_CURVE(InOutExpo)
-IMPLEMENT_EASING_CURVE(InCirc)
-IMPLEMENT_EASING_CURVE(OutCirc)
-IMPLEMENT_EASING_CURVE(InOutCirc)
-IMPLEMENT_EASING_CURVE(InBack)
-IMPLEMENT_EASING_CURVE(OutBack)
-IMPLEMENT_EASING_CURVE(InOutBack)
-IMPLEMENT_EASING_CURVE(InElastic)
-IMPLEMENT_EASING_CURVE(OutElastic)
-IMPLEMENT_EASING_CURVE(InOutElastic)
-IMPLEMENT_EASING_CURVE(InBounce)
-IMPLEMENT_EASING_CURVE(OutBounce)
-IMPLEMENT_EASING_CURVE(InOutBounce)
-IMPLEMENT_EASING_CURVE(StepStart)
-IMPLEMENT_EASING_CURVE(StepEnd)
+void RegisterEasingCurves(IObjectRegistry& registry)
+{
+    for (auto& f : g_easingCurveFactories) {
+        registry.RegisterObjectType(IObjectFactory::Ptr{&f});
+    }
+}
+void UnregisterEasingCurves(IObjectRegistry& registry)
+{
+    for (auto& f : g_easingCurveFactories) {
+        registry.UnregisterObjectType(IObjectFactory::Ptr{&f});
+    }
+}
 
 }  // namespace Easing
 }  // namespace Curves

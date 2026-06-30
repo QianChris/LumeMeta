@@ -16,9 +16,11 @@
 #define META_SRC_EASING_CURVE_H
 
 #include <meta/base/namespace.h>
+#include <meta/ext/object_factory.h>
 #include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/curves/intf_easing_curve.h>
+#include <meta/interface/intf_object_registry.h>
 
 #include "../base_object.h"
 
@@ -27,48 +29,79 @@ META_BEGIN_NAMESPACE()
 namespace Curves {
 namespace Easing {
 
-// Declares a class which implements IEasingCurve interface
-#define META_DECLARE_EASING_CURVE(name)                                                          \
-    class name##EasingCurve final : public IntroduceInterfaces<BaseObject, IEasingCurve> {       \
-        META_OBJECT(name##EasingCurve, META_NS::ClassId::name##EasingCurve, IntroduceInterfaces) \
-        float Transform(float t) const override;                                                 \
-    };
+/**
+ * @brief A single data-driven easing curve. Every built-in easing curve (Linear, InQuad, OutBack, …)
+ *        is this one class configured with the transform function for that curve, registered under
+ *        its own ClassId via EasingCurveFactory. This replaces ~33 near-identical wrapper classes
+ *        (each of which cost a vtable + object factory + metadata) with one class + a function table.
+ */
+class EasingCurve final : public IntroduceInterfaces<BaseObject, IEasingCurve> {
+    META_OBJECT_NO_CLASSINFO(EasingCurve, IntroduceInterfaces)
+public:
+    using TransformFunc = float (*)(float);
 
-META_DECLARE_EASING_CURVE(Linear)
-META_DECLARE_EASING_CURVE(InQuad)
-META_DECLARE_EASING_CURVE(OutQuad)
-META_DECLARE_EASING_CURVE(InOutQuad)
-META_DECLARE_EASING_CURVE(InCubic)
-META_DECLARE_EASING_CURVE(OutCubic)
-META_DECLARE_EASING_CURVE(InOutCubic)
-META_DECLARE_EASING_CURVE(InSine)
-META_DECLARE_EASING_CURVE(OutSine)
-META_DECLARE_EASING_CURVE(InOutSine)
-META_DECLARE_EASING_CURVE(InQuart)
-META_DECLARE_EASING_CURVE(OutQuart)
-META_DECLARE_EASING_CURVE(InOutQuart)
-META_DECLARE_EASING_CURVE(InQuint)
-META_DECLARE_EASING_CURVE(OutQuint)
-META_DECLARE_EASING_CURVE(InOutQuint)
-META_DECLARE_EASING_CURVE(InExpo)
-META_DECLARE_EASING_CURVE(OutExpo)
-META_DECLARE_EASING_CURVE(InOutExpo)
-META_DECLARE_EASING_CURVE(InCirc)
-META_DECLARE_EASING_CURVE(OutCirc)
-META_DECLARE_EASING_CURVE(InOutCirc)
-META_DECLARE_EASING_CURVE(InBack)
-META_DECLARE_EASING_CURVE(OutBack)
-META_DECLARE_EASING_CURVE(InOutBack)
-META_DECLARE_EASING_CURVE(InElastic)
-META_DECLARE_EASING_CURVE(OutElastic)
-META_DECLARE_EASING_CURVE(InOutElastic)
-META_DECLARE_EASING_CURVE(InBounce)
-META_DECLARE_EASING_CURVE(OutBounce)
-META_DECLARE_EASING_CURVE(InOutBounce)
-META_DECLARE_EASING_CURVE(StepStart)
-META_DECLARE_EASING_CURVE(StepEnd)
+    // Bound to a specific built-in curve by EasingCurveFactory at construction.
+    EasingCurve(const ObjectId& id, BASE_NS::string_view name, TransformFunc fn)
+        : classId_(id), className_(name), func_(fn)
+    {}
 
-#undef META_DECLARE_EASING_CURVE
+    float Transform(float t) const override
+    {
+        return func_ ? func_(t) : t;
+    }
+
+    // Per-instance class identity (instead of META_OBJECT's single hard-coded ClassId).
+    ObjectId GetClassId() const override
+    {
+        return classId_;
+    }
+    BASE_NS::string_view GetClassName() const override
+    {
+        return className_;
+    }
+    BASE_NS::vector<BASE_NS::Uid> GetInterfaces() const override
+    {
+        return GetInterfacesVector();
+    }
+
+private:
+    ObjectId classId_;
+    BASE_NS::string_view className_;
+    TransformFunc func_{};
+};
+
+/**
+ * @brief Data-driven factory: one factory instance per built-in easing curve, carrying that curve's
+ *        ClassInfo + transform function. Shares EasingCurve's metadata/interfaces.
+ */
+class EasingCurveFactory final : public ObjectFactory {
+public:
+    EasingCurveFactory(const ClassInfo& info, EasingCurve::TransformFunc fn) : ObjectFactory(info), func_(fn)
+    {}
+    IObject::Ptr CreateInstance() const override
+    {
+        return IObject::Ptr{new EasingCurve(GetClassInfo().Id(), GetClassInfo().Name(), func_)};
+    }
+    const StaticObjectMetadata* GetClassStaticMetadata() const override
+    {
+        return EasingCurve::StaticMetadata();
+    }
+    const BASE_NS::vector<BASE_NS::Uid>& GetClassInterfaces() const override
+    {
+        static auto interfaces = EasingCurve::GetInterfacesVector();
+        return interfaces;
+    }
+    ClassConstructionType ConstructionType() const override
+    {
+        return ClassConstructionType::BUILD;
+    }
+
+private:
+    EasingCurve::TransformFunc func_;
+};
+
+void RegisterEasingCurves(IObjectRegistry& registry);
+void UnregisterEasingCurves(IObjectRegistry& registry);
 
 }  // namespace Easing
 }  // namespace Curves

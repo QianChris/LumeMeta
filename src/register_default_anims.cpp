@@ -48,39 +48,8 @@ static constexpr ObjectTypeInfo OBJECTS[] = {
     AnimationModifiers::ReverseModifier::OBJECT_INFO,
     AnimationModifiers::SpeedModifier::OBJECT_INFO,
 
-    Curves::Easing::LinearEasingCurve::OBJECT_INFO,
-    Curves::Easing::InQuadEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutQuadEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutQuadEasingCurve::OBJECT_INFO,
-    Curves::Easing::InCubicEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutCubicEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutCubicEasingCurve::OBJECT_INFO,
-    Curves::Easing::InSineEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutSineEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutSineEasingCurve::OBJECT_INFO,
-    Curves::Easing::InQuartEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutQuartEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutQuartEasingCurve::OBJECT_INFO,
-    Curves::Easing::InQuintEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutQuintEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutQuintEasingCurve::OBJECT_INFO,
-    Curves::Easing::InExpoEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutExpoEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutExpoEasingCurve::OBJECT_INFO,
-    Curves::Easing::InCircEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutCircEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutCircEasingCurve::OBJECT_INFO,
-    Curves::Easing::InBackEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutBackEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutBackEasingCurve::OBJECT_INFO,
-    Curves::Easing::InElasticEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutElasticEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutElasticEasingCurve::OBJECT_INFO,
-    Curves::Easing::InBounceEasingCurve::OBJECT_INFO,
-    Curves::Easing::OutBounceEasingCurve::OBJECT_INFO,
-    Curves::Easing::InOutBounceEasingCurve::OBJECT_INFO,
-    Curves::Easing::StepStartEasingCurve::OBJECT_INFO,
-    Curves::Easing::StepEndEasingCurve::OBJECT_INFO,
+    // The 33 built-in easing curves are registered data-driven via RegisterEasingCurves() below
+    // (one shared EasingCurve class instead of a class per curve). CubicBezier stays its own class.
     Curves::Easing::CubicBezierEasingCurve::OBJECT_INFO,
 };
 
@@ -90,6 +59,7 @@ void RegisterBuiltInAnimations(IObjectRegistry& registry)
         registry.RegisterObjectType(t.GetFactory());
     }
 
+    Curves::Easing::RegisterEasingCurves(registry);
     RegisterDefaultInterpolators(registry);
 }
 void UnRegisterBuiltInAnimations(IObjectRegistry& registry)
@@ -98,6 +68,7 @@ void UnRegisterBuiltInAnimations(IObjectRegistry& registry)
         registry.UnregisterObjectType(t.GetFactory());
     }
 
+    Curves::Easing::UnregisterEasingCurves(registry);
     UnRegisterDefaultInterpolators(registry);
 }
 }  // namespace Internal

@@ -18,6 +18,7 @@
 #include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/animation/intf_animation.h>
 #include <meta/interface/builtin_objects.h>
+#include <meta/ext/any_builder.h>
 #include <meta/interface/detail/any.h>
 #include <meta/interface/engine/intf_engine_data.h>
 #include <meta/interface/intf_object_registry.h>
@@ -47,6 +48,33 @@ UNIT_TEST(API_AnyTest, BasicCompatibility, testing::ext::TestSize.Level1)
     EXPECT_TRUE(IsGetCompatible(any, uid));
     EXPECT_TRUE(IsGetCompatibleWith<uint32_t>(any));
     EXPECT_EQ(any.GetTypeId(), uid);
+}
+
+/**
+ * @tc.name: DefaultAnyBuilderTyped
+ * @tc.desc: DefaultAnyBuilder<T> still works directly. Any registration now goes through
+ *           GenericAnyBuilder (via CreateAnyBuilder), so this guards the typed builder for direct
+ *           callers and checks the generic builder yields an equivalent result.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_AnyTest, DefaultAnyBuilderTyped, testing::ext::TestSize.Level1)
+{
+    DefaultAnyBuilder<Any<float>> builder;
+    AnyBuilder& b = builder;
+    EXPECT_EQ(b.GetObjectId(), Any<float>::StaticGetClassId());
+    EXPECT_EQ(b.GetTypeName(), BASE_NS::string(Any<float>::StaticGetTypeIdString()));
+
+    auto any = b.Construct();
+    ASSERT_TRUE(any);
+    EXPECT_TRUE(IsSetCompatibleWith<float>(*any));
+    EXPECT_TRUE(IsGetCompatibleWith<float>(*any));
+
+    // GenericAnyBuilder (what registration uses) yields an equivalent builder.
+    auto generic = CreateAnyBuilder<Any<float>>();
+    ASSERT_TRUE(generic);
+    EXPECT_EQ(generic->GetObjectId(), b.GetObjectId());
+    EXPECT_EQ(generic->GetTypeName(), b.GetTypeName());
+    EXPECT_TRUE(IsSetCompatibleWith<float>(*generic->Construct()));
 }
 
 /**

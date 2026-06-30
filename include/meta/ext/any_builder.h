@@ -41,11 +41,56 @@ public:
     }
 };
 
+/**
+ * @brief Non-templated any builder whose per-type behaviour — construction, object id, type name — is
+ *        supplied at construction time (a construct thunk plus the type's static id/name as data).
+ *
+ * This is what CreateAnyBuilder<T>() (and hence the RegisterAny helpers below) uses to register any
+ * types. Prefer it over DefaultAnyBuilder<T>: because it is not a template, one builder class — and one
+ * CreateShared instantiation — serves every registered any type, instead of a separate builder class
+ * (vtable + accessors) and a separate shared-storage block per type. DefaultAnyBuilder<T> is retained
+ * for direct callers; the two are behaviourally equivalent.
+ */
+class GenericAnyBuilder final : public AnyBuilder {
+public:
+    using ConstructFunc = IAny::Ptr (*)();
+    GenericAnyBuilder(ConstructFunc construct, const ObjectId& id, BASE_NS::string_view typeName)
+        : construct_(construct), id_(id), typeName_(typeName)
+    {}
+    IAny::Ptr Construct() override
+    {
+        return construct_();
+    }
+    ObjectId GetObjectId() const override
+    {
+        return id_;
+    }
+    BASE_NS::string GetTypeName() const override
+    {
+        return BASE_NS::string(typeName_);
+    }
+
+private:
+    ConstructFunc construct_;
+    ObjectId id_;
+    BASE_NS::string_view typeName_;  // backed by AnyType::StaticGetTypeIdString()'s static storage
+};
+
+/// Create a shared any builder for AnyType, configured via GenericAnyBuilder (one class for all types).
+template<typename AnyType>
+BASE_NS::shared_ptr<AnyBuilder> CreateAnyBuilder()
+{
+    return CreateShared<GenericAnyBuilder>(
+        +[]() -> IAny::Ptr { return IAny::Ptr(new AnyType); },
+        AnyType::StaticGetClassId(),
+        AnyType::StaticGetTypeIdString());
+}
+
 /// Register user defined any type
 template<typename AnyType>
 void RegisterUserAny()
 {
-    GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateShared<DefaultAnyBuilder<AnyType>>());
+    GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateAnyBuilder<AnyType>());
 }
 
 /// Register user type using built-in any type
@@ -54,7 +99,7 @@ void RegisterTypeForBuiltinArrayAny();
 template<typename Type>
 void RegisterTypeForBuiltinAny()
 {
-    GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateShared<DefaultAnyBuilder<AnyType<Type>>>());
+    GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateAnyBuilder<AnyType<Type>>());
     // Also register the array variant so Any/Enum Clone(role=ARRAY) can construct it via the
     // registry instead of force-instantiating the array template in the per-type clone path.
     RegisterTypeForBuiltinArrayAny<Type>();
@@ -64,7 +109,7 @@ void RegisterTypeForBuiltinAny()
 template<typename Type>
 void RegisterTypeForBuiltinArrayAny()
 {
-    GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateShared<DefaultAnyBuilder<ArrayAnyType<Type>>>());
+    GetObjectRegistry().GetPropertyRegister().RegisterAny(CreateAnyBuilder<ArrayAnyType<Type>>());
 }
 
 /// Unregister, counter part for RegisterUserAny

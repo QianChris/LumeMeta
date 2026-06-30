@@ -109,8 +109,8 @@ namespace Internal {
 template<typename... List>
 static void RegisterTypes(IPropertyRegister& pr, TypeList<List...>)
 {
-    (pr.RegisterAny(CreateShared<DefaultAnyBuilder<Any<List>>>()), ...);
-    (pr.RegisterAny(CreateShared<DefaultAnyBuilder<ArrayAny<List>>>()), ...);
+    (pr.RegisterAny(CreateAnyBuilder<Any<List>>()), ...);
+    (pr.RegisterAny(CreateAnyBuilder<ArrayAny<List>>()), ...);
 }
 
 template<typename... List>

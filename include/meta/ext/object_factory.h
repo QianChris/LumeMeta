@@ -105,16 +105,71 @@ public:
 };
 
 /**
- *  Helper macro for creating ObjectTypeInfo with machinery to register a class using the default object
- *  factory and creating instances of it.
+ * @brief Non-templated object factory whose per-type behaviour — construction, static metadata, and
+ *        implemented interfaces — is supplied as function pointers at construction time.
+ *
+ * This is the factory META_OBJECT uses (via META_DEFINE_OBJECT_TYPE_INFO) to register object types.
+ * Prefer it over DefaultObjectFactory<T>: because it is not a template, one factory class serves
+ * every registered type, instead of instantiating a separate factory class — with its own vtable and
+ * accessor methods — per registered type. DefaultObjectFactory<T> is retained for callers that want a
+ * typed factory directly; the two are behaviourally equivalent.
+ */
+class GenericObjectFactory final : public ObjectFactory {
+public:
+    using CreateFunc = IObject::Ptr (*)();
+    using MetadataFunc = const StaticObjectMetadata* (*)();
+    using InterfacesFunc = BASE_NS::vector<BASE_NS::Uid> (*)();
+
+    GenericObjectFactory(const META_NS::ClassInfo& info, CreateFunc create, MetadataFunc metadata,
+        InterfacesFunc interfaces, ClassConstructionType constructionType)
+        : ObjectFactory(info),
+          create_(create),
+          metadata_(metadata),
+          interfaces_(interfaces()),
+          constructionType_(constructionType)
+    {}
+    IObject::Ptr CreateInstance() const override
+    {
+        return create_();
+    }
+    const StaticObjectMetadata* GetClassStaticMetadata() const override
+    {
+        return metadata_();
+    }
+    const BASE_NS::vector<BASE_NS::Uid>& GetClassInterfaces() const override
+    {
+        return interfaces_;
+    }
+    ClassConstructionType ConstructionType() const override
+    {
+        return constructionType_;
+    }
+
+private:
+    CreateFunc create_;
+    MetadataFunc metadata_;
+    BASE_NS::vector<BASE_NS::Uid> interfaces_;
+    ClassConstructionType constructionType_;
+};
+
+/**
+ *  Helper macro emitting GetFactory()/OBJECT_INFO so a class can be registered with the object
+ *  registry. Constructs a shared GenericObjectFactory configured with the type's
+ *  create/metadata/interfaces functions, so no per-type factory class is instantiated.
  */
 #define META_DEFINE_OBJECT_TYPE_INFO(FinalClass, ClassInfo)                                                 \
+    /* Keep DefaultObjectFactory<T> usable on this class (it constructs via new T directly). */             \
     friend class META_NS::DefaultObjectFactory<FinalClass>;                                                 \
                                                                                                             \
 public:                                                                                                     \
     static META_NS::IObjectFactory::Ptr GetFactory()                                                        \
     {                                                                                                       \
-        static META_NS::DefaultObjectFactory<FinalClass> factory(ClassInfo);                                \
+        static META_NS::GenericObjectFactory factory(                                                       \
+            ClassInfo,                                                                                      \
+            +[]() -> META_NS::IObject::Ptr { return META_NS::IObject::Ptr{new FinalClass}; },               \
+            &FinalClass::StaticMetadata,                                                                    \
+            &FinalClass::GetInterfacesVector,                                                               \
+            META_NS::ClassConstructionType::BUILD);                                                         \
         return META_NS::IObjectFactory::Ptr{&factory};                                                      \
     }                                                                                                       \
     static constexpr const META_NS::ObjectTypeInfo OBJECT_INFO{{META_NS::ObjectTypeInfo::UID}, GetFactory}; \

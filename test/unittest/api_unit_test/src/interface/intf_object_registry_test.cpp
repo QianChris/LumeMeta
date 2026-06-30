@@ -772,6 +772,35 @@ UNIT_TEST(API_ObjectRegistryTest, ConstructWithDefaultObjectFactory, testing::ex
     UnregisterObjectType<TestSuper>();
 }
 
+/**
+ * @tc.name: TypedDefaultObjectFactory
+ * @tc.desc: DefaultObjectFactory<T> still works when used directly. META_OBJECT now registers via the
+ *           shared GenericObjectFactory, so this guards the typed factory for any direct callers.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, TypedDefaultObjectFactory, testing::ext::TestSize.Level1)
+{
+    META_NS::DefaultObjectFactory<TestDerived> factory(ClassId::TestDerived);
+    META_NS::IObjectFactory& fac = factory;
+
+    EXPECT_EQ(fac.GetClassInfo(), ClassId::TestDerived);
+    EXPECT_EQ(fac.ConstructionType(), META_NS::ClassConstructionType::BUILD);
+
+    auto interfaces = fac.GetClassInterfaces();
+    EXPECT_TRUE(Contains(interfaces, ITestDerived::UID));
+    EXPECT_TRUE(Contains(interfaces, IObject::UID));
+
+    auto sm = fac.GetClassStaticMetadata();
+    ASSERT_TRUE(sm);
+    ASSERT_TRUE(sm->classInfo);
+    EXPECT_EQ(*sm->classInfo, ClassId::TestDerived);
+
+    auto object = fac.CreateInstance();
+    ASSERT_NE(object, nullptr);
+    EXPECT_EQ(object->GetClassId(), ClassId::TestDerived.Id());
+    EXPECT_NE(interface_cast<ITestDerived>(object), nullptr);
+}
+
 META_REGISTER_CLASS(TestFail, "abcd6e8b-36d4-44e4-802d-b2d80e50c612", META_NS::ObjectCategoryBits::APPLICATION)
 
 class TestFail final : public META_NS::ObjectFwd {
