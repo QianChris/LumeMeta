@@ -14,9 +14,12 @@
  */
 #include <test_framework.h>
 
+#include <base/containers/unordered_map.h>
 #include <core/resources/intf_resource_manager.h>
 
 #include <meta/api/animation.h>
+#include <meta/ext/implementation_macros.h>
+#include <meta/ext/minimal_object.h>
 #include <meta/api/iteration.h>
 #include <meta/interface/animation/builtin_animations.h>
 #include <meta/interface/builtin_objects.h>
@@ -958,6 +961,132 @@ UNIT_TEST_F(API_FileResourceManagerTest, AnimationLoadWithBaseTemplate, testing:
     CORE_NS::IResourceType::StorageInfo loadInfo{loadOpts, nullptr, rid, "", resources, context};
     auto loaded = animResType->LoadResource(loadInfo);
     EXPECT_TRUE(loaded);
+}
+
+// Regression coverage for the self-referential / cyclic scene resource DoS:
+// a resource type whose LoadResource requests another resource id while the
+// current one is still being constructed. This mirrors what a malicious scene's
+// SceneExternalNodeSer does (LoadExternalNode -> GetResource) at the resource
+// manager layer, so it exercises FileResourceManager::ConstructResource's
+// re-entrancy guard directly without dragging in the scene importer.
+META_REGISTER_CLASS(
+    RecursiveResourceType, "e936196e-6d99-45ee-9713-060607bdb707", META_NS::ObjectCategoryBits::NO_CATEGORY)
+
+static constexpr CORE_NS::ResourceType RECURSIVE_RESOURCE_UID{"eeeb8c9a-9f16-4060-a2ab-35e19ea96e79"};
+
+// Safety cap so a regressed (unguarded) build fails the assertions below instead
+// of crashing the whole test runner with a stack overflow.
+static constexpr int RECURSION_CAP = 64;
+
+struct RecursionState {
+    // Maps a resource name to the resource name to request while loading it.
+    // name -> name forms a self-reference, A -> B and B -> A forms a cycle.
+    BASE_NS::unordered_map<BASE_NS::string, BASE_NS::string> next;
+    int loadCount{};
+};
+static RecursionState g_recursion;
+
+class RecursiveResourceType : public IntroduceInterfaces<MinimalObject, CORE_NS::IResourceType> {
+    META_OBJECT(RecursiveResourceType, ClassId::RecursiveResourceType, IntroduceInterfaces)
+public:
+    BASE_NS::string GetResourceName() const override
+    {
+        return "RecursiveResource";
+    }
+    CORE_NS::ResourceType GetResourceType() const override
+    {
+        return RECURSIVE_RESOURCE_UID;
+    }
+    BASE_NS::string GetVersion() const override
+    {
+        return "";
+    }
+    CORE_NS::IResource::Ptr LoadResource(const StorageInfo& s) const override
+    {
+        if (++g_recursion.loadCount > RECURSION_CAP) {
+            return nullptr;
+        }
+        auto it = g_recursion.next.find(s.id.name);
+        if (s.self && it != g_recursion.next.end()) {
+            s.self->GetResource(CORE_NS::ResourceIdContext{CORE_NS::ResourceId{it->second}, s.context});
+        }
+        return GetObjectRegistry().Create<CORE_NS::IResource>(META_NS::ClassId::ObjectResource);
+    }
+    bool SaveResource(const CORE_NS::IResource::ConstPtr&, const StorageInfo&) const override
+    {
+        return false;
+    }
+    bool ReloadResource(const StorageInfo&, const CORE_NS::IResource::Ptr&) const override
+    {
+        return false;
+    }
+};
+
+class API_RecursiveResourceTest : public API_FileResourceManagerTest {
+public:
+    void SetUp() override
+    {
+        API_FileResourceManagerTest::SetUp();
+        g_recursion = RecursionState{};
+        RegisterObjectType<RecursiveResourceType>();
+        auto type = GetObjectRegistry().Create<CORE_NS::IResourceType>(ClassId::RecursiveResourceType);
+        ASSERT_TRUE(type);
+        ASSERT_TRUE(resources->AddResourceType(type));
+    }
+
+    void AddRecursiveResource(const CORE_NS::ResourceId& id)
+    {
+        ASSERT_TRUE(resources->AddResource(
+            CORE_NS::ResourceIdContext{id, context}, RECURSIVE_RESOURCE_UID, BASE_NS::string_view {}, {}));
+    }
+};
+
+/**
+ * @tc.name: SelfReferentialResource
+ * @tc.desc: A resource whose loader requests itself must not recurse infinitely.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_RecursiveResourceTest, SelfReferentialResource, testing::ext::TestSize.Level1)
+{
+    g_recursion.next["self.scene"] = "self.scene";
+    AddRecursiveResource("self.scene");
+
+    auto res = resources->GetResource(CORE_NS::ResourceIdContext("self.scene", context));
+    EXPECT_TRUE(res);                        // outermost load still completes
+    EXPECT_EQ(g_recursion.loadCount, 1);     // re-entry is rejected, no recursion
+}
+
+/**
+ * @tc.name: CyclicResources
+ * @tc.desc: Two resources referencing each other must not recurse infinitely.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_RecursiveResourceTest, CyclicResources, testing::ext::TestSize.Level1)
+{
+    g_recursion.next["A"] = "B";
+    g_recursion.next["B"] = "A";
+    AddRecursiveResource("A");
+    AddRecursiveResource("B");
+
+    auto res = resources->GetResource(CORE_NS::ResourceIdContext("A", context));
+    EXPECT_TRUE(res);
+    EXPECT_EQ(g_recursion.loadCount, 2);     // A loads B, B's back-reference to A is rejected
+}
+
+/**
+ * @tc.name: LegitimateNestedResource
+ * @tc.desc: A non-cyclic nested reference must still load normally.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_RecursiveResourceTest, LegitimateNestedResource, testing::ext::TestSize.Level1)
+{
+    g_recursion.next["A"] = "B";  // B has no further reference
+    AddRecursiveResource("A");
+    AddRecursiveResource("B");
+
+    auto res = resources->GetResource(CORE_NS::ResourceIdContext("A", context));
+    EXPECT_TRUE(res);
+    EXPECT_EQ(g_recursion.loadCount, 2);     // both A and B load, no rejection
 }
 
 }  // namespace UTest

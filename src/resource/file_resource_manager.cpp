@@ -647,10 +647,74 @@ CORE_NS::IResource::Ptr LoadResourceWithType(
     }
     return resObj;
 }
+
+// Per-thread guard against re-entrant construction of the same resource. A scene
+// resource whose external node references itself (A -> A) or forms a cycle
+// (A -> B -> A) would otherwise recurse through GetResource/ConstructResource
+// without bound: the object is only written into the cache after LoadResource
+// returns, so each re-entry sees an empty cache and constructs again, exhausting
+// the stack. The load chain is always synchronous on one thread, so a
+// thread_local stack of in-progress keys detects the cycle precisely without
+// rejecting legitimate concurrent loads of the same resource on other threads.
+// The string views point into the ResourceId of the in-flight ConstructResource
+// call. A key only stays on the construction stack for the duration of that call
+// (pushed/popped by the guard below), and any nested re-entrant call runs while
+// that frame — and therefore its ResourceId — is still alive, so the views never
+// dangle.
+struct ConstructionKey {
+    bool operator==(const ConstructionKey& o) const
+    {
+        return manager == o.manager && context == o.context && group == o.group && name == o.name;
+    }
+
+    const void* manager{};
+    const void* context{};
+    BASE_NS::string_view group;
+    BASE_NS::string_view name;
+};
+
+using ConstructionStack = BASE_NS::vector<ConstructionKey>;
+
+class ConstructionGuard {
+public:
+    ConstructionGuard(ConstructionStack& stack, ConstructionKey key) : stack_(stack), key_(BASE_NS::move(key))
+    {
+        for (auto&& k : stack_) {
+            if (k == key_) {
+                cyclic_ = true;
+                return;
+            }
+        }
+        stack_.push_back(key_);
+    }
+    ~ConstructionGuard()
+    {
+        if (!cyclic_) {
+            stack_.pop_back();
+        }
+    }
+    bool IsCyclic() const
+    {
+        return cyclic_;
+    }
+
+private:
+    ConstructionStack& stack_;
+    ConstructionKey key_;
+    bool cyclic_{};
+};
 }  // namespace
 
 CORE_NS::IResource::Ptr FileResourceManager::ConstructResource(const CORE_NS::ResourceIdContext& ric)
 {
+    static thread_local ConstructionStack constructing;
+    ConstructionGuard guard{
+        constructing, ConstructionKey{this, ResolveContext(ric.context).lock().get(), ric.id.group, ric.id.name}};
+    if (guard.IsCyclic()) {
+        CORE_LOG_W("Cyclic resource dependency detected while loading: %s", ric.id.ToString().c_str());
+        return nullptr;
+    }
+
     BASE_NS::shared_ptr<ResourceData> res;
     ResourceLoadInfo info;
     {
