@@ -135,9 +135,12 @@ IAny::Ptr ConstructRegisteredAny(const ObjectId& id);
 
 template<typename Type>
 class BaseTypedAny : public AnyBase {
+    // Interface-pointer types are served by the shared InterfacePtrAny (see interface_any.h) via
+    // Any/ArrayAny partial specialisations, so they never reach this per-type base.
+    static_assert(!IsInterfacePtr_v<Type>, "Interface-pointer types must use InterfacePtrAny, not BaseTypedAny");
+
 public:
     static constexpr TypeId TYPE_ID = UidFromType<Type>();
-    static constexpr bool IS_PTR_TYPE = IsInterfacePtr_v<Type>;
 
     static constexpr ObjectId StaticGetClassId()
     {
@@ -147,12 +150,8 @@ public:
     {
         return MetaType<Type>::name;
     }
-    static const BASE_NS::array_view<const TypeId> StaticGetCompatibleTypes(CompatibilityDirection dir)
+    static const BASE_NS::array_view<const TypeId> StaticGetCompatibleTypes(CompatibilityDirection)
     {
-        if constexpr (IS_PTR_TYPE) {
-            return AnyPC<Type>::template GetCompatibleTypes<Type>(dir);
-        }
-
         static constexpr TypeId uids[] = {TYPE_ID};
         return uids;
     }
@@ -163,7 +162,7 @@ public:
     }
 
 protected:
-    static constexpr AnyTypeInfo TYPE_INFO {
+    static constexpr AnyTypeInfo TYPE_INFO{
         StaticGetClassId(),
         TYPE_ID,
         ArrayUidFromType<Type>(),
@@ -185,53 +184,25 @@ protected:
     {
         return InternalSetValue(*static_cast<const Type*>(data));
     }
-    AnyReturnValue RawGetCompat(const TypeId& id, void* data, size_t size) const override
+    AnyReturnValue RawGetCompat(const TypeId&, void*, size_t) const override
     {
-        if constexpr (IS_PTR_TYPE) {
-            if (data && AnyPC<Type>::IsValidGetArgs(id, data, size)) {
-                using IIType = typename AnyPC<Type>::IIType;
-                return AnyPC<Type>::GetData(id, data, interface_pointer_cast<IIType>(InternalGetValue()));
-            }
-        }
         return AnyReturn::INVALID_ARGUMENT;
     }
-    AnyReturnValue RawSetCompat(const TypeId& id, const void* data, size_t size) override
+    AnyReturnValue RawSetCompat(const TypeId&, const void*, size_t) override
     {
-        if constexpr (IS_PTR_TYPE) {
-            if (data && AnyPC<Type>::IsValidSetArgs(id, data, size)) {
-                typename AnyPC<Type>::IIPtrType p;
-                if (AnyPC<Type>::SetData(id, data, p)) {
-                    if (auto ptr = interface_pointer_cast<typename Type::element_type>(p); ptr || !p) {
-                        return InternalSetValue(ptr);
-                    }
-                }
-                // Matches the original best-effort fall-through: the id is a compatible pointer id but
-                // the value is not castable to the target interface; store the punned value anyway.
-                return InternalSetValue(*static_cast<const Type*>(data));
-            }
-        }
         return AnyReturn::INVALID_ARGUMENT;
     }
     AnyReturnValue RawCopyFrom(const IAny& any) override
     {
-        if constexpr (IS_PTR_TYPE) {
-            typename AnyPC<Type>::IIPtrType p;
-            if (any.GetValue(p)) {
-                if (auto ptr = interface_pointer_cast<typename Type::element_type>(p); ptr || !p) {
-                    return InternalSetValue(ptr);
-                }
-            }
-        } else {
-            Type value;
-            if (any.GetValue(value)) {
-                return InternalSetValue(value);
-            }
+        Type value;
+        if (any.GetValue(value)) {
+            return InternalSetValue(value);
         }
         return AnyReturn::FAIL;
     }
     AnyReturnValue RawReset() override
     {
-        return InternalSetValue(Type {});
+        return InternalSetValue(Type{});
     }
 
     virtual AnyReturnValue InternalSetValue(const Type& value) = 0;
@@ -253,13 +224,13 @@ struct DefaultCompare {
     using Rebind = DefaultCompare<NewType>;
 };
 
-template<typename Type, typename Compare>
+template<typename Type, typename Compare, typename Enable>
 class ArrayAny;
 
 /**
  * @brief Default IAny implementation which supports a single type.
  */
-template<typename Type, typename Compare = DefaultCompare<Type>>
+template<typename Type, typename Compare = DefaultCompare<Type>, typename = EnableSpecialisationType>
 class Any : public BaseTypedAny<Type> {
     using Super = BaseTypedAny<Type>;
 
@@ -295,7 +266,7 @@ protected:
         if (options.role == TypeIdRole::ARRAY) {
             return ConstructRegisteredAny(MakeUid<Type>(BUILTIN_ARRAY_ANY_TAG));
         }
-        return IAny::Ptr(new Any {options.value == CloneValueType::COPY_VALUE ? value_ : Type {}});
+        return IAny::Ptr(new Any{options.value == CloneValueType::COPY_VALUE ? value_ : Type{}});
     }
 
 private:
@@ -480,7 +451,7 @@ public:
     }
 
 protected:
-    static constexpr ArrayAnyTypeInfo TYPE_INFO {
+    static constexpr ArrayAnyTypeInfo TYPE_INFO{
         StaticGetClassId(),
         ARRAY_TYPE_ID,
         ITEM_TYPE_ID,
@@ -533,7 +504,7 @@ protected:
     }
     AnyReturnValue RawReset() override
     {
-        return InternalSetValue(ArrayType {});
+        return InternalSetValue(ArrayType{});
     }
 
     virtual AnyReturnValue InternalSetValue(const ArrayType& value) = 0;
@@ -543,7 +514,8 @@ protected:
 /**
  * @brief Default IArrayAny implementation which supports a single type.
  */
-template<typename Type, typename Compare = DefaultCompare<BASE_NS::vector<Type>>>
+template<typename Type, typename Compare = DefaultCompare<BASE_NS::vector<Type>>,
+    typename Enable = EnableSpecialisationType>
 class ArrayAny : public BaseTypedArrayAny<Type> {
     using Super = BaseTypedArrayAny<Type>;
 
@@ -624,7 +596,7 @@ protected:
         if (options.role == TypeIdRole::ITEM) {
             return IAny::Ptr(new Any<Type, typename Compare::template Rebind<Type>>());
         }
-        return IAny::Ptr(new ArrayAny {options.value == CloneValueType::COPY_VALUE ? value_ : ArrayType {}});
+        return IAny::Ptr(new ArrayAny{options.value == CloneValueType::COPY_VALUE ? value_ : ArrayType{}});
     }
 
 private:

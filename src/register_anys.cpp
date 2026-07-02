@@ -109,15 +109,17 @@ namespace Internal {
 template<typename... List>
 static void RegisterTypes(IPropertyRegister& pr, TypeList<List...>)
 {
-    (pr.RegisterAny(CreateAnyBuilder<Any<List>>()), ...);
-    (pr.RegisterAny(CreateAnyBuilder<ArrayAny<List>>()), ...);
+    // Route through AnyType/ArrayAnyType (MapAnyType) so interface-pointer types adopt the shared generic
+    // InterfacePtrAny/InterfacePtrArrayAny instead of instantiating a concrete Any<T>/ArrayAny<T> per type.
+    (pr.RegisterAny(CreateAnyBuilder<AnyType<List>>()), ...);
+    (pr.RegisterAny(CreateAnyBuilder<ArrayAnyType<List>>()), ...);
 }
 
 template<typename... List>
 static void UnregisterTypes(IPropertyRegister& pr, TypeList<List...>)
 {
-    (pr.UnregisterAny(ArrayAny<List>::StaticGetClassId()), ...);
-    (pr.UnregisterAny(Any<List>::StaticGetClassId()), ...);
+    (pr.UnregisterAny(ArrayAnyType<List>::StaticGetClassId()), ...);
+    (pr.UnregisterAny(AnyType<List>::StaticGetClassId()), ...);
 }
 
 void RegisterAnys(IObjectRegistry& registry)

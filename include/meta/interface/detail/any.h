@@ -17,6 +17,7 @@
 
 #include <meta/interface/detail/base_any.h>
 #include <meta/interface/detail/enum.h>
+#include <meta/interface/detail/interface_any.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -36,6 +37,9 @@ struct MapAnyType<Type, EnableSpecialisation<is_enum_v<Type>>> {
     using AnyType = EnumBase<Type>;
     using ArrayAnyType = ArrayEnumBase<Type>;
 };
+
+// Interface-pointer types (IXxx::Ptr / ::ConstPtr / ::WeakPtr / ::ConstWeakPtr) Any<T>/ArrayAny<T> are themselves
+// partially specialised (in interface_any.h) to resolve to the shared InterfacePtrAny/InterfacePtrArrayAny.
 
 template<typename Type>
 using AnyType = typename MapAnyType<Type>::AnyType;
