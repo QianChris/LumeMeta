@@ -55,13 +55,199 @@ IAny::Ptr ConstructCoreAny(const CORE_NS::Property& p)
         return IAny::Ptr(new CoreAny<Type, StaticCastConv, CompatType...>(p));
     }
 }
+
+/**
+ * @brief Per-type identity descriptor for the generic scalar engine-value access. Only DATA differs per
+ *        engine type (uid/size + a few constructor/compat thunks); the vtable + sync method bodies are
+ *        shared (see EngineValueAccessImpl), so they fold to a single copy instead of one
+ *        EngineInternalValueAccess<Type> instantiation (vtable + sync code) per engine type.
+ */
+struct EngineValueAccessInfo {
+    BASE_NS::Uid typeUid;  // UidFromType<Type>() — the engine (core) type
+    size_t typeSize;       // sizeof(Type)
+    IAny::Ptr (*createAny)(const CORE_NS::Property&);
+    IAny::Ptr (*createSerializable)();
+    IAny::Ptr (*createEngineTemp)();  // SyncTempType (Any<Type>/ArrayAny<ItemType>) for the SyncToEngine probe
+    bool (*isCompatible)(const CORE_NS::PropertyTypeDecl&);
+};
+
+/**
+ * @brief One shared implementation for all scalar engine-value access objects, parameterised only via a
+ *        per-INSTANCE EngineValueAccessInfo. The engine read/write is already type-independent: the lock
+ *        (IPropertyHandle::R/WLock) returns void*, CalcLocation is uintptr arithmetic, and the value copy
+ *        goes through IAny::Get/SetData(uid, ptr, size) which does the typed copy inside the Any. So the
+ *        only per-type inputs are {uid, size} + the any-constructor thunks in the descriptor.
+ */
+class EngineValueAccessImpl : public IntroduceInterfaces<IEngineInternalValueAccess> {
+public:
+    explicit EngineValueAccessImpl(const EngineValueAccessInfo& info) : info_(info)
+    {}
+
+    IAny::Ptr CreateAny(const CORE_NS::Property& p) const override
+    {
+        return info_.createAny(p);
+    }
+    IAny::Ptr CreateSerializableAny() const override
+    {
+        return info_.createSerializable();
+    }
+    bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const override
+    {
+        return info_.isCompatible(type);
+    }
+
+    // Byte address of the value inside the locked engine property (0 = out of range).
+    static uintptr_t CalcLocation(uintptr_t base, const EnginePropertyParams& params)
+    {
+        if (auto* cont = params.containerMethods) {
+            uintptr_t arrOffset = base + params.arraySubsOffset;
+            if (params.index >= cont->size(arrOffset)) {
+                return 0;
+            }
+            return cont->get(arrOffset, params.index) + params.Offset();
+        }
+        return base + params.Offset();
+    }
+
+    AnyReturnValue SyncToEngine(const IAny& value, const EnginePropertyParams& params) const override
+    {
+        // Probe: value must convert to the engine type and the property must be readable. Only write on an
+        // exact SUCCESS; otherwise return the probe result verbatim (NOTHING_TO_DO must NOT become FAIL,
+        // callers treat it as "already in sync").
+        IAny::Ptr temp = info_.createEngineTemp();
+        AnyReturnValue res = (temp && temp->CopyFrom(value)) ? SyncFromEngine(params, *temp) : AnyReturn::FAIL;
+        if (res != AnyReturn::SUCCESS) {
+            return res;
+        }
+        CORE_NS::ScopedHandle<uint8_t> guard{params.handle.Handle()};
+        uintptr_t loc = guard ? CalcLocation(reinterpret_cast<uintptr_t>(&*guard), params) : 0;
+        return loc ? value.GetData(info_.typeUid, reinterpret_cast<void*>(loc), info_.typeSize) : AnyReturn::FAIL;
+    }
+    AnyReturnValue SyncFromEngine(const EnginePropertyParams& params, IAny& out) const override
+    {
+        CORE_NS::ScopedHandle<const uint8_t> guard{params.handle.Handle()};
+        uintptr_t loc = guard ? CalcLocation(reinterpret_cast<uintptr_t>(&*guard), params) : 0;
+        return loc ? out.SetData(info_.typeUid, reinterpret_cast<const void*>(loc), info_.typeSize) : AnyReturn::FAIL;
+    }
+
+private:
+    const EngineValueAccessInfo& info_;
+};
+
+/**
+ * @brief Per-type descriptor for the generic array engine-value access (see EngineValueAccessInfo). Note it
+ *        does NOT store the array — the Any does; this only marshals engine memory <-> the Any element by
+ *        element via the Any's own typed Get/SetDataAt, so there is no per-type element-copy code and no
+ *        risky byte-buffer/memcpy (non-trivially-copyable elements like string/EntityReference are handled
+ *        correctly by the Any's typed element copy).
+ */
+struct ArrayEngineValueAccessInfo {
+    BASE_NS::Uid itemUid;  // UidFromType<Type>() — the array ELEMENT (core) type
+    size_t itemSize;       // sizeof(Type)
+    IAny::Ptr (*createAny)(const CORE_NS::Property&);
+    IAny::Ptr (*createSerializable)();
+    IAny::Ptr (*createArrayTemp)();  // ArrayAny<Type> temp for the SyncToEngine round-trip
+    IAny::Ptr (*createItemAny)();    // Any<Type> scalar item, used to fill the target array on read
+    bool (*isCompatible)(const CORE_NS::PropertyTypeDecl&);
+};
+
+/// One shared implementation for all array engine-value access objects (see EngineValueAccessImpl).
+class ArrayEngineValueAccessImpl : public IntroduceInterfaces<IEngineInternalValueAccess> {
+public:
+    explicit ArrayEngineValueAccessImpl(const ArrayEngineValueAccessInfo& info) : info_(info)
+    {}
+
+    IAny::Ptr CreateAny(const CORE_NS::Property& p) const override
+    {
+        return info_.createAny(p);
+    }
+    IAny::Ptr CreateSerializableAny() const override
+    {
+        return info_.createSerializable();
+    }
+    bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const override
+    {
+        return info_.isCompatible(type);
+    }
+    AnyReturnValue SyncFromEngine(const EnginePropertyParams& params, IAny& out) const override
+    {
+        auto* arr = interface_cast<IArrayAny>(&out);
+        auto* cont = params.property.metaData.containerMethods;
+        if (!arr || !cont) {
+            return AnyReturn::FAIL;
+        }
+        CORE_NS::ScopedHandle<const uint8_t> guard{params.handle.Handle()};
+        IAny::Ptr item = guard ? info_.createItemAny() : nullptr;
+        if (!item) {
+            return AnyReturn::FAIL;
+        }
+        uintptr_t base = reinterpret_cast<uintptr_t>(&*guard);
+        size_t n = params.property.type.isArray ? params.property.count : cont->size(base + params.Offset());
+        arr->RemoveAll();
+        for (size_t i = 0; i != n; ++i) {
+            item->SetData(info_.itemUid, reinterpret_cast<const void*>(ElementAddr(base, params, i)), info_.itemSize);
+            arr->InsertAnyAt(i, *item);
+        }
+        return AnyReturn::SUCCESS;
+    }
+    AnyReturnValue SyncToEngine(const IAny& value, const EnginePropertyParams& params) const override
+    {
+        IAny::Ptr tempAny = info_.createArrayTemp();
+        auto* temp = interface_cast<IArrayAny>(tempAny.get());
+        if (!temp || SyncFromEngine(params, *tempAny) != AnyReturn::SUCCESS) {
+            return AnyReturn::FAIL;
+        }
+        AnyReturnValue res = tempAny->CopyFrom(value);
+        if (res == AnyReturn::SUCCESS) {
+            auto* cont = params.property.metaData.containerMethods;
+            CORE_NS::ScopedHandle<uint8_t> guard{params.handle.Handle()};
+            if (guard && cont) {
+                uintptr_t base = reinterpret_cast<uintptr_t>(&*guard);
+                size_t n = temp->GetSize();
+                if (params.property.type.isArray) {
+                    n = params.property.count < n ? params.property.count : n;
+                } else {
+                    cont->resize(base + params.Offset(), n);
+                }
+                for (size_t i = 0; i != n; ++i) {
+                    temp->GetDataAt(
+                        i, info_.itemUid, reinterpret_cast<void*>(ElementAddr(base, params, i)), info_.itemSize);
+                }
+            }
+        }
+        return res;
+    }
+
+private:
+    // Byte address of array element i inside the locked engine property.
+    uintptr_t ElementAddr(uintptr_t base, const EnginePropertyParams& params, size_t i) const
+    {
+        if (params.property.type.isArray) {
+            return base + params.Offset() + i * info_.itemSize;
+        }
+        return params.property.metaData.containerMethods->get(base + params.Offset(), i);
+    }
+
+    const ArrayEngineValueAccessInfo& info_;
+};
 }  // namespace Internal
 
-/// Class that encapsulates the reading and writing to the core property and the any type used
+/// Class that encapsulates the reading and writing to the core property and the any type used.
+/// Thin per-type facade so EngineInternalValueAccess<Type> stays a concrete constructible type (external
+/// code registers custom engine types via it). Adds no virtuals, so its vtable is identical to
+/// Internal::EngineValueAccessImpl's and folds to one copy; the only per-type residue is the static
+/// descriptor + thunks.
 template<typename Type, typename AccessType = Type>
-class EngineInternalValueAccess : public IntroduceInterfaces<IEngineInternalValueAccess> {
+class EngineInternalValueAccess : public Internal::EngineValueAccessImpl {
 public:
-    IAny::Ptr CreateAny(const CORE_NS::Property& p) const override
+    EngineInternalValueAccess() : Internal::EngineValueAccessImpl(INFO)
+    {}
+
+    using SyncTempType = BASE_NS::conditional_t<Internal::IsArray<Type>::VALUE,
+        ArrayAny<typename Internal::IsArray<Type>::ItemType>, Any<Type>>;
+
+private:
+    static IAny::Ptr CreateAnyThunk(const CORE_NS::Property& p)
     {
         if constexpr (BASE_NS::is_same_v<Type, AccessType>) {
             return Internal::ConstructCoreAny<AccessType>(p);
@@ -69,7 +255,7 @@ public:
             return Internal::ConstructCoreAny<AccessType, Type>(p);
         }
     }
-    IAny::Ptr CreateSerializableAny() const override
+    static IAny::Ptr CreateSerializableThunk()
     {
         if constexpr (Internal::IsArray<AccessType>::VALUE) {
             using ItemType = typename Internal::IsArray<AccessType>::ItemType;
@@ -78,118 +264,61 @@ public:
             return IAny::Ptr(new AnyType<AccessType>{});
         }
     }
-    bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const override
+    static IAny::Ptr CreateEngineTempThunk()
+    {
+        return IAny::Ptr(new SyncTempType{});
+    }
+    static bool IsCompatibleThunk(const CORE_NS::PropertyTypeDecl& type)
     {
         return MetaType<Type>::coreType == type;
     }
-    template<typename T>
-    static T* CalcLocation(T* data, const EnginePropertyParams& params)
-    {
-        uintptr_t offset = uintptr_t(data) + params.Offset();
-        auto cont = params.containerMethods;
-        if (cont) {
-            auto arroffset = uintptr_t(data) + params.arraySubsOffset;
-            if (params.index >= cont->size(arroffset)) {
-                return nullptr;
-            }
-            offset = uintptr_t(cont->get(arroffset, params.index)) + params.Offset();
-        }
-        return (T*)offset;
-    }
 
-    using SyncTempType = BASE_NS::conditional_t<Internal::IsArray<Type>::VALUE,
-        ArrayAny<typename Internal::IsArray<Type>::ItemType>, Any<Type>>;
-
-    AnyReturnValue SyncToEngine(const IAny& value, const EnginePropertyParams& params) const override
-    {
-        SyncTempType temp;
-        AnyReturnValue res = temp.CopyFrom(value) ? SyncFromEngine(params, temp) : AnyReturn::FAIL;
-        if (res == AnyReturn::SUCCESS) {
-            if (CORE_NS::ScopedHandle<Type> guard{params.handle.Handle()}) {
-                if (Type* location = CalcLocation(&*guard, params)) {
-                    return value.GetData(
-                        UidFromType<Type>(), location, sizeof(Type)); /*NOLINT(bugprone-sizeof-expression)*/
-                }
-            }
-            res = AnyReturn::FAIL;
-        }
-        return res;
-    }
-    AnyReturnValue SyncFromEngine(const EnginePropertyParams& params, IAny& out) const override
-    {
-        if (CORE_NS::ScopedHandle<const Type> guard{params.handle.Handle()}) {
-            if (const Type* location = CalcLocation(&*guard, params)) {
-                return out.SetData(UidFromType<Type>(), location, sizeof(Type)); /*NOLINT(bugprone-sizeof-expression)*/
-            }
-        }
-        return AnyReturn::FAIL;
-    }
+    static constexpr Internal::EngineValueAccessInfo INFO{UidFromType<Type>(),
+        sizeof(Type),
+        &CreateAnyThunk,
+        &CreateSerializableThunk,
+        &CreateEngineTempThunk,
+        &IsCompatibleThunk};
 };
 
-/// Class that encapsulates the reading and writing to the core array property and the any type used
+/// Class that encapsulates the reading and writing to the core array property and the any type used.
+/// Thin per-type facade (see EngineInternalValueAccess for the scalar rationale).
 template<typename Type>
-class EngineInternalArrayValueAccess : public IntroduceInterfaces<IEngineInternalValueAccess> {
+class EngineInternalArrayValueAccess : public Internal::ArrayEngineValueAccessImpl {
 public:
     using InternalType = BASE_NS::vector<Type>;
+    EngineInternalArrayValueAccess() : Internal::ArrayEngineValueAccessImpl(INFO)
+    {}
 
-    IAny::Ptr CreateAny(const CORE_NS::Property& p) const override
+private:
+    static IAny::Ptr CreateAnyThunk(const CORE_NS::Property& p)
     {
         return Internal::ConstructCoreAny<InternalType>(p);
     }
-    IAny::Ptr CreateSerializableAny() const override
+    static IAny::Ptr CreateSerializableThunk()
     {
         return IAny::Ptr(new ArrayAnyType<Type>{});
     }
-    bool IsCompatible(const CORE_NS::PropertyTypeDecl& type) const override
+    static IAny::Ptr CreateArrayTempThunk()
+    {
+        return IAny::Ptr(new ArrayAny<Type>{});
+    }
+    static IAny::Ptr CreateItemThunk()
+    {
+        return IAny::Ptr(new Any<Type>{});
+    }
+    static bool IsCompatibleThunk(const CORE_NS::PropertyTypeDecl& type)
     {
         return MetaType<Type[]>::coreType == type;
     }
-    AnyReturnValue SyncToEngine(const IAny& value, const EnginePropertyParams& params) const override
-    {
-        AnyReturnValue res = AnyReturn::FAIL;
-        ArrayAny<Type> temp;
-        if (SyncFromEngine(params, temp) && (res = temp.CopyFrom(value)) == AnyReturn::SUCCESS) {
-            CORE_NS::ScopedHandle<Type[]> guard{params.handle.Handle()};
-            if (guard && params.property.metaData.containerMethods) {
-                const BASE_NS::vector<Type>& vec = temp.InternalGetValue();
-                if (params.property.type.isArray) {
-                    size_t size = params.property.count < vec.size() ? params.property.count : vec.size();
-                    for (size_t i = 0; i != size; ++i) {
-                        ((Type*)((uintptr_t)(&(*guard)) + params.Offset()))[i] = vec[i];
-                    }
-                } else {
-                    auto cont = params.property.metaData.containerMethods;
-                    cont->resize((uintptr_t)(&(*guard)) + params.Offset(), vec.size());
-                    for (size_t i = 0; i != vec.size(); ++i) {
-                        *((Type*)cont->get((uintptr_t)(&(*guard)) + params.Offset(), i)) = vec[i];
-                    }
-                }
-            }
-        }
-        return res;
-    }
-    AnyReturnValue SyncFromEngine(const EnginePropertyParams& params, IAny& out) const override
-    {
-        AnyReturnValue res = AnyReturn::FAIL;
-        CORE_NS::ScopedHandle<const Type[]> guard{params.handle.Handle()};
-        if (guard && params.property.metaData.containerMethods) {
-            BASE_NS::vector<Type> vec;
-            if (params.property.type.isArray) {
-                vec.resize(params.property.count);
-                for (size_t i = 0; i != vec.size(); ++i) {
-                    vec[i] = ((const Type*)((uintptr_t)(&(*guard)) + params.Offset()))[i];
-                }
-            } else {
-                auto cont = params.property.metaData.containerMethods;
-                vec.resize(cont->size((uintptr_t)(&(*guard)) + params.Offset()));
-                for (size_t i = 0; i != vec.size(); ++i) {
-                    vec[i] = *((const Type*)cont->get((uintptr_t)(&(*guard)) + params.Offset(), i));
-                }
-            }
-            res = out.SetData(UidFromType<InternalType>(), &vec, sizeof(InternalType));
-        }
-        return res;
-    }
+
+    static constexpr Internal::ArrayEngineValueAccessInfo INFO{UidFromType<Type>(),
+        sizeof(Type),
+        &CreateAnyThunk,
+        &CreateSerializableThunk,
+        &CreateArrayTempThunk,
+        &CreateItemThunk,
+        &IsCompatibleThunk};
 };
 
 META_END_NAMESPACE()
