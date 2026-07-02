@@ -61,6 +61,18 @@ struct UIDArray {
     UidInfo data[Size];
 };
 
+// Shared (non-templated) uid extraction, so every IntroduceInterfaces instantiation reuses one
+// loop instead of emitting a per-class pack-expansion over its interface table.
+inline BASE_NS::vector<BASE_NS::Uid> ToUidVector(const UidInfo* data, size_t size)
+{
+    BASE_NS::vector<BASE_NS::Uid> uids;
+    uids.reserve(size);
+    for (size_t i = 0; i != size; ++i) {
+        uids.push_back(data[i].uid);
+    }
+    return uids;
+}
+
 constexpr static void SwapUidInfo(UidInfo& l, UidInfo& r) noexcept
 {
     UidInfo tmp = BASE_NS::move(l);
@@ -152,6 +164,26 @@ constexpr static CORE_NS::IInterface* SearchInterface(
         return LinearSearch(uid, me, info.data, Size);
     }
     return BinarySearch(uid, me, info.data, Size);
+}
+
+// Shared (non-templated) GetInterface body: the IInterface fast-path plus the table search. Every
+// IntroduceInterfaces instantiation calls this instead of emitting its own copy, so the per-class
+// GetInterface/StaticGetInterface shrink to just supplying their table pointer and size.
+inline CORE_NS::IInterface* GetInterfaceFrom(
+    const BASE_NS::Uid& uid, void* me, const UidInfo* data, size_t size) noexcept
+{
+    if (uid == CORE_NS::IInterface::UID) {
+        // CORE_NS::IInterface is implicitly implemented by everyone
+        return static_cast<CORE_NS::IInterface*>(me);
+    }
+    constexpr auto linearSearchThreshold = 10;
+    if (size == 0) {
+        return {};
+    }
+    if (size < linearSearchThreshold) {
+        return LinearSearch(uid, me, data, size);
+    }
+    return BinarySearch(uid, me, data, size);
 }
 
 }  // namespace Internal
@@ -312,13 +344,9 @@ public:
         }
     }
 
-    constexpr CORE_NS::IInterface* StaticGetInterface(const BASE_NS::Uid& uid)
+    CORE_NS::IInterface* StaticGetInterface(const BASE_NS::Uid& uid)
     {
-        if (uid == CORE_NS::IInterface::UID) {
-            // CORE_NS::IInterface is implicitly implemented by everyone
-            return static_cast<CORE_NS::IInterface*>(static_cast<void*>(this));
-        }
-        return Internal::SearchInterface(uid, this, IntsImpl());
+        return Internal::GetInterfaceFrom(uid, static_cast<void*>(this), IntsImpl().data, SIZE);
     }
 
     CORE_NS::IInterface* GetInterface(const BASE_NS::Uid& uid) override
@@ -331,15 +359,9 @@ public:
         return me->IntroduceInterfaces::GetInterface(uid);
     }
 
-    template<size_t... Index>
-    static BASE_NS::vector<BASE_NS::Uid> GetInterfacesVectorImpl(IndexSequence<Index...>)
-    {
-        return {IntsImpl().data[Index].uid...};
-    }
-
     static BASE_NS::vector<BASE_NS::Uid> GetInterfacesVector()
     {
-        return GetInterfacesVectorImpl(MakeIndexSequence<SIZE>());
+        return Internal::ToUidVector(IntsImpl().data, SIZE);
     }
 
     static auto& IntsImpl()

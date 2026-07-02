@@ -1037,7 +1037,7 @@ public:
     void AddRecursiveResource(const CORE_NS::ResourceId& id)
     {
         ASSERT_TRUE(resources->AddResource(
-            CORE_NS::ResourceIdContext{id, context}, RECURSIVE_RESOURCE_UID, BASE_NS::string_view {}, {}));
+            CORE_NS::ResourceIdContext{id, context}, RECURSIVE_RESOURCE_UID, BASE_NS::string_view{}, {}));
     }
 };
 
@@ -1052,8 +1052,8 @@ UNIT_TEST_F(API_RecursiveResourceTest, SelfReferentialResource, testing::ext::Te
     AddRecursiveResource("self.scene");
 
     auto res = resources->GetResource(CORE_NS::ResourceIdContext("self.scene", context));
-    EXPECT_TRUE(res);                        // outermost load still completes
-    EXPECT_EQ(g_recursion.loadCount, 1);     // re-entry is rejected, no recursion
+    EXPECT_TRUE(res);                     // outermost load still completes
+    EXPECT_EQ(g_recursion.loadCount, 1);  // re-entry is rejected, no recursion
 }
 
 /**
@@ -1070,7 +1070,7 @@ UNIT_TEST_F(API_RecursiveResourceTest, CyclicResources, testing::ext::TestSize.L
 
     auto res = resources->GetResource(CORE_NS::ResourceIdContext("A", context));
     EXPECT_TRUE(res);
-    EXPECT_EQ(g_recursion.loadCount, 2);     // A loads B, B's back-reference to A is rejected
+    EXPECT_EQ(g_recursion.loadCount, 2);  // A loads B, B's back-reference to A is rejected
 }
 
 /**
@@ -1086,7 +1086,7 @@ UNIT_TEST_F(API_RecursiveResourceTest, LegitimateNestedResource, testing::ext::T
 
     auto res = resources->GetResource(CORE_NS::ResourceIdContext("A", context));
     EXPECT_TRUE(res);
-    EXPECT_EQ(g_recursion.loadCount, 2);     // both A and B load, no rejection
+    EXPECT_EQ(g_recursion.loadCount, 2);  // both A and B load, no rejection
 }
 
 }  // namespace UTest

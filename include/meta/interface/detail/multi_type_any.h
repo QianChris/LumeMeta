@@ -54,7 +54,7 @@ public:
     }
 
 protected:
-    static constexpr AnyTypeInfo TYPE_INFO {
+    static constexpr AnyTypeInfo TYPE_INFO{
         StaticGetClassId(),
         TYPE_ID,
         ArrayUidFromType<Type>(),
@@ -128,7 +128,7 @@ protected:
     }
     AnyReturnValue RawReset() override
     {
-        return InternalSetValue(Type {});
+        return InternalSetValue(Type{});
     }
 
     virtual AnyReturnValue InternalSetValue(const Type& value) = 0;
