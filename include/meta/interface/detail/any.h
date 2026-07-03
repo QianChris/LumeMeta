@@ -17,6 +17,7 @@
 
 #include <meta/interface/detail/base_any.h>
 #include <meta/interface/detail/enum.h>
+#include <meta/interface/detail/enum_any.h>
 #include <meta/interface/detail/interface_any.h>
 
 META_BEGIN_NAMESPACE()
@@ -27,15 +28,12 @@ struct MapAnyType {
     using ArrayAnyType = ArrayAny<Type>;
 };
 
-/*
-    Use something like this for partial specialising:
-    template<typename Type>
-    struct MapAnyType<Type, EnableSpecialisation<is_enum_v<Type>> {};
-*/
+// Enum types (without META_ENUM_TYPE metadata) map to the shared Internal::EnumAny/EnumArrayAny, so the
+// whole per-enum implementation collapses to a single copy driven by a per-enum descriptor.
 template<typename Type>
 struct MapAnyType<Type, EnableSpecialisation<is_enum_v<Type>>> {
-    using AnyType = EnumBase<Type>;
-    using ArrayAnyType = ArrayEnumBase<Type>;
+    using AnyType = Internal::EnumAny<Type>;
+    using ArrayAnyType = Internal::EnumArrayAny<Type>;
 };
 
 // Interface-pointer types (IXxx::Ptr / ::ConstPtr / ::WeakPtr / ::ConstWeakPtr) Any<T>/ArrayAny<T> are themselves

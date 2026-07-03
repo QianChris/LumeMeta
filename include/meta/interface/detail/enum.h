@@ -15,6 +15,7 @@
 #ifndef META_INTERFACE_DETAIL_ENUM_H
 #define META_INTERFACE_DETAIL_ENUM_H
 
+#include <meta/interface/detail/enum_any.h>
 #include <meta/interface/detail/multi_type_any.h>
 #include <meta/interface/enum_macros.h>
 
@@ -22,16 +23,12 @@ META_BEGIN_NAMESPACE()
 namespace Internal {
 
 template<typename Enum, size_t... Index>
-BASE_NS::array_view<const META_NS::EnumValue> GetValues(const EnumValue<Enum>* const values, IndexSequence<Index...>)
+BASE_NS::vector<META_NS::EnumValue> GetValues(const EnumValue<Enum>* const values, IndexSequence<Index...>)
 {
-    static const META_NS::EnumValue arr[]{values[Index].info...};
-    return BASE_NS::array_view<const META_NS::EnumValue>{arr};
+    return BASE_NS::vector<META_NS::EnumValue>{values[Index].info...};
 }
 
 }  // namespace Internal
-
-template<typename T>
-using EnumCompatType = BASE_NS::conditional_t<BASE_NS::is_unsigned_v<BASE_NS::underlying_type_t<T>>, uint64_t, int64_t>;
 
 template<typename Type>
 class EnumBase : public MultiTypeAny<Type, StaticCastConv, EnumCompatType<Type>> {
@@ -119,7 +116,7 @@ public:
     {
         return EnumType::ENUM_TYPE;
     }
-    BASE_NS::array_view<const EnumValue> GetValues() const override
+    BASE_NS::vector<EnumValue> GetValues() const override
     {
         return Internal::GetValues(EnumType::VALUES, MakeIndexSequence<EnumType::VALUES_SIZE>());
     }

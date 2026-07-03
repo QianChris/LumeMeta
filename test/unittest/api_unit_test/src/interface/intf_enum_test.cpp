@@ -58,6 +58,18 @@ enum class PlainEnum : uint32_t { Hops = 1 };
 
 META_TYPE(PlainEnum)
 
+enum class SignedEnum : int32_t { Neg = -5, Pos = 7 };
+
+META_TYPE(SignedEnum)
+
+enum class SignedByteEnum : int8_t { Neg = -1, Pos = 100 };
+
+META_TYPE(SignedByteEnum)
+
+enum class Unsigned64Enum : uint64_t { Lo = 1, Hi = 0x8000000000000000ULL };
+
+META_TYPE(Unsigned64Enum)
+
 namespace UTest {
 
 /**
@@ -281,6 +293,121 @@ UNIT_TEST(API_EnumTest, PlainEnum, testing::ext::TestSize.Level1)
     ASSERT_TRUE(prop);
     prop->SetValue(1);
     EXPECT_EQ(prop->GetValue(), 1);
+}
+
+/**
+ * @tc.name: SignedNegative
+ * @tc.desc: Negative values of a signed enum round-trip through the erased enum any (int64 compat read must
+ *           be sign-extended; the typed read truncates back). Covers 4-byte and 1-byte underlying widths.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_EnumTest, SignedNegative, testing::ext::TestSize.Level1)
+{
+    {
+        auto p = ConstructProperty<SignedEnum>("test");
+        ASSERT_TRUE(p);
+        Property<int64_t> prop{p.GetProperty()};
+        ASSERT_TRUE(prop);
+
+        prop->SetValue(-5);
+        EXPECT_EQ(prop->GetValue(), -5);            // int64 compat read is sign-extended
+        EXPECT_EQ(p->GetValue(), SignedEnum::Neg);  // typed read truncates back
+
+        prop->SetValue(7);
+        EXPECT_EQ(prop->GetValue(), 7);
+        EXPECT_EQ(p->GetValue(), SignedEnum::Pos);
+    }
+    {
+        // Smallest width: the sign bit is at bit 7 and the mask is 0xFF.
+        auto p = ConstructProperty<SignedByteEnum>("test");
+        ASSERT_TRUE(p);
+        Property<int64_t> prop{p.GetProperty()};
+        ASSERT_TRUE(prop);
+
+        prop->SetValue(-1);
+        EXPECT_EQ(prop->GetValue(), -1);
+        EXPECT_EQ(p->GetValue(), SignedByteEnum::Neg);
+
+        prop->SetValue(100);
+        EXPECT_EQ(prop->GetValue(), 100);
+        EXPECT_EQ(p->GetValue(), SignedByteEnum::Pos);
+    }
+}
+
+/**
+ * @tc.name: ArrayEnumSignedNegative
+ * @tc.desc: SetAnyAt/GetAnyAt on the erased plain-enum array any (byte-buffer ByteArrayAnyImpl) round-trip a
+ *           negative element correctly (int64 item view sign-extended, typed view truncated).
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_EnumTest, ArrayEnumSignedNegative, testing::ext::TestSize.Level1)
+{
+    // ArrayAnyType<SignedEnum> is the erased byte-buffer array any (via MapAnyType), unlike ArrayEnum<>.
+    ArrayAnyType<SignedEnum> arr{BASE_NS::vector<SignedEnum>{SignedEnum::Pos, SignedEnum::Pos}};
+    ASSERT_EQ(arr.GetSize(), 2u);
+
+    auto item = arr.Clone({CloneValueType::DEFAULT_VALUE, TypeIdRole::ITEM});
+    ASSERT_TRUE(item);
+
+    // SetAnyAt a negative element via the item any
+    ASSERT_TRUE(item->SetValue<int64_t>(-5));
+    EXPECT_TRUE(arr.SetAnyAt(0, *item));
+
+    // GetAnyAt reads it back: int64 item view is sign-extended, typed view truncated
+    EXPECT_TRUE(arr.GetAnyAt(0, *item));
+    EXPECT_EQ(GetValue<int64_t>(*item), -5);
+    EXPECT_EQ(GetValue<SignedEnum>(*item), SignedEnum::Neg);
+
+    // element 1 is untouched
+    EXPECT_TRUE(arr.GetAnyAt(1, *item));
+    EXPECT_EQ(GetValue<SignedEnum>(*item), SignedEnum::Pos);
+}
+
+// A plain builtin Any<Unsigned64Enum> (BaseTypedAny) whose GetData records the alignment of the buffer it
+// is handed. SetAnyAt passes its internal scratch `tmp` to value.GetData(itemId, tmp, 8), so this probe
+// observes that exact buffer without any instrumentation in the implementation.
+class AlignmentProbeAny : public Any<Unsigned64Enum> {
+public:
+    using Any<Unsigned64Enum>::Any;
+    AnyReturnValue GetData(const TypeId& id, void* data, size_t size) const override
+    {
+        if (reinterpret_cast<uintptr_t>(data) % alignof(Unsigned64Enum) != 0) {
+            misaligned = true;
+        }
+        return Any<Unsigned64Enum>::GetData(id, data, size);
+    }
+    mutable bool misaligned = false;
+};
+
+/**
+ * @tc.name: SetAnyAtFromPlainAny
+ * @tc.desc: SetAnyAt on the erased byte-buffer array any (ByteArrayAnyImpl) fed a plain builtin Any<enum>
+ *           (BaseTypedAny). SetAnyAt hands the value's GetData its internal `uint8_t tmp[8]`, and a builtin
+ *           Any<enum>'s RawGet does *static_cast<Unsigned64Enum*>(tmp) — an 8-byte typed store that requires
+ *           tmp to be 8-aligned (the erased item any uses memcpy and doesn't). The probe asserts tmp was
+ *           aligned; the element must also round-trip.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_EnumTest, SetAnyAtFromPlainAny, testing::ext::TestSize.Level1)
+{
+    // Erased byte-buffer array any (ByteArrayAnyImpl via MapAnyType), unlike ArrayEnum<>. 64-bit underlying
+    // -> ItemSize() == 8, so the typed store below is a full uint64_t-width write into tmp.
+    ArrayAnyType<Unsigned64Enum> arr{BASE_NS::vector<Unsigned64Enum>{Unsigned64Enum::Lo, Unsigned64Enum::Lo}};
+    ASSERT_EQ(arr.GetSize(), 2u);
+
+    AlignmentProbeAny value{Unsigned64Enum::Hi};
+    EXPECT_TRUE(arr.SetAnyAt(0, value));
+
+    // The 8-byte typed store landed on SetAnyAt's tmp buffer, which must be 8-aligned.
+    EXPECT_FALSE(value.misaligned);
+
+    // element 0 now holds the value written through the typed cast; element 1 is untouched.
+    auto item = arr.Clone({CloneValueType::DEFAULT_VALUE, TypeIdRole::ITEM});
+    ASSERT_TRUE(item);
+    EXPECT_TRUE(arr.GetAnyAt(0, *item));
+    EXPECT_EQ(GetValue<Unsigned64Enum>(*item), Unsigned64Enum::Hi);
+    EXPECT_TRUE(arr.GetAnyAt(1, *item));
+    EXPECT_EQ(GetValue<Unsigned64Enum>(*item), Unsigned64Enum::Lo);
 }
 
 }  // namespace UTest

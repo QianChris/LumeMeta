@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include <base/containers/vector.h>
 #include <meta/interface/intf_info.h>
 
 META_BEGIN_NAMESPACE()
@@ -37,8 +38,8 @@ class IEnum : public IInfo {
 public:
     /// Get which type of enum this is
     virtual EnumType GetEnumType() const = 0;
-    /// Get array of the possible enum values
-    virtual BASE_NS::array_view<const EnumValue> GetValues() const = 0;
+    /// Get the possible enum values (built on demand; rarely called, so returned by value)
+    virtual BASE_NS::vector<EnumValue> GetValues() const = 0;
     /// Get index of the current value, returns -1 for values not returned by GetValues (like bit fields)
     virtual size_t GetValueIndex() const = 0;
     /// Set current value based on the index

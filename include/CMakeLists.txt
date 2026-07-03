@@ -66,6 +66,7 @@ target_sources(${PLUGIN_NAME}API PUBLIC
     meta/interface/detail/any_pointer_compatibility.h
     meta/interface/detail/array_property.h
     meta/interface/detail/enum.h
+    meta/interface/detail/enum_any.h
     meta/interface/detail/interface_any.h
     meta/interface/detail/multi_type_any.h
     meta/interface/detail/property.h

@@ -16,36 +16,57 @@
 #define META_EXT_ENGINE_CORE_ENUM_ANY_H
 
 #include <meta/base/type_traits.h>
-#include <meta/interface/detail/multi_type_any.h>
+#include <meta/interface/detail/enum_any.h>
 #include <meta/interface/engine/intf_engine_type.h>
 #include <meta/interface/intf_enum.h>
 
 META_BEGIN_NAMESPACE()
 
 /**
- * @brief Any type for Core enum property
- *
- * Supports compatibility with the primary type and additional types via conversion traits.
- * Implements the IEnum and IEngineType interfaces to get information about the Core enum type.
+ * @brief Per-enum identity descriptor for the generic Core enum scalar any. Only DATA differs per enum type
+ *        (uids/size/signedness + the compat list + the array-clone thunk); the code/vtable is shared
+ *        (see CoreEnumAnyImpl), so it folds to a single copy instead of a CoreEnumAny<EnumT> (+ its
+ *        MultiTypeAny<EnumT>) instantiation per enum type.
  */
-template<typename Type, typename Conv, typename... CoreType>
-class CoreEnumAny : public IntroduceInterfaces<MultiTypeAny<Type, Conv, CoreType..., int64_t>, IEnum, IEngineType> {
-public:
-    using Super = IntroduceInterfaces<MultiTypeAny<Type, Conv, CoreType..., int64_t>, IEnum, IEngineType>;
-    using RealType = RealType_t<Type>;
+struct CoreEnumAnyInfo {
+    AnyTypeInfo any;                                    // size == the enum's underlying size
+    bool isUnsigned;                                    // underlying signedness (for compat sign-extension)
+    BASE_NS::array_view<const EnumCompatEntry> compat;  // e.g. {..CoreType.., int64_t}
+    IAny::Ptr (*makeArray)(const CORE_NS::Property&);   // scalar->array Clone (builds ArrayCoreEnumAny<EnumT>(prop))
+};
 
-    explicit CoreEnumAny(const CORE_NS::Property& p, const Type& v = {})
-        : value_(v),
+/// Per-enum identity descriptor for the generic Core enum array any (see CoreEnumAnyInfo).
+struct ArrayCoreEnumAnyInfo {
+    ArrayAnyTypeInfo array;                                         // itemSize == the enum's underlying size
+    const CoreEnumAnyInfo* scalar;                                  // for array->item Clone (builds the scalar impl)
+    void (*bytesToVector)(const uint8_t*, size_t count, void*);     // RawGetVector: bytes -> vector<EnumT>
+    void (*vectorToBytes)(const void*, BASE_NS::vector<uint8_t>&);  // RawSetVector: vector<EnumT> -> bytes
+    bool (*anyToBytes)(const IAny&, BASE_NS::vector<uint8_t>&);     // RawCopyFrom: extract vector<EnumT> from any
+};
+
+/**
+ * @brief One shared implementation for all Core enum scalar anys, parameterised only by a per-INSTANCE
+ *        CoreEnumAnyInfo. An enum value is just an integer, and the IEnum/IEngineType metadata is read live
+ *        from the CORE_NS::Property, so nothing here is per-enum-type: the value is stored as raw bits and
+ *        marshalled by the descriptor's size; the enum member table comes from prop_.metaData.enumMetaData.
+ */
+class CoreEnumAnyImpl : public IntroduceInterfaces<AnyBase, IEnum, IEngineType> {
+public:
+    CoreEnumAnyImpl(const CoreEnumAnyInfo* info, const CORE_NS::Property& p, uint64_t bits = 0)
+        : info_(info),
           prop_(p),
           type_(p.flags & uint32_t(CORE_NS::PropertyFlags::IS_BITFIELD) ? META_NS::EnumType::BIT_FIELD
-                                                                        : META_NS::EnumType::SINGLE_VALUE)
+                                                                        : META_NS::EnumType::SINGLE_VALUE),
+          bits_(bits & Internal::EnumBitMask(info->any.size))
     {}
 
+    // IEngineType
     CORE_NS::PropertyTypeDecl GetTypeDecl() const override
     {
         return prop_.type;
     }
 
+    // IInfo
     BASE_NS::string_view GetName() const override
     {
         return prop_.name;
@@ -54,138 +75,349 @@ public:
     {
         return prop_.displayName;
     }
+
+    // IEnum
     META_NS::EnumType GetEnumType() const override
     {
         return type_;
     }
-    BASE_NS::vector<EnumValue> ConstructValues() const
+    BASE_NS::vector<EnumValue> GetValues() const override
     {
         BASE_NS::vector<EnumValue> values;
+        values.reserve(prop_.metaData.enumMetaData.size());
         for (auto&& v : prop_.metaData.enumMetaData) {
             values.push_back(EnumValue{v.name, v.displayName});
         }
         return values;
     }
-    BASE_NS::array_view<const EnumValue> GetValues() const override
-    {
-        static BASE_NS::vector<EnumValue> values = ConstructValues();
-        return BASE_NS::array_view<const EnumValue>(values);
-    }
-    size_t GetValueIndex(const Type& v) const
-    {
-        for (size_t i = 0; i != prop_.metaData.enumMetaData.size(); ++i) {
-            if (DefaultCompare<Type>::Equal(v, Type(prop_.metaData.enumMetaData[i].value))) {
-                return i;
-            }
-        }
-        return -1;
-    }
     size_t GetValueIndex() const override
     {
-        return GetValueIndex(value_);
+        return IndexOfBits(bits_);
     }
     bool SetValueIndex(size_t index) override
     {
         if (index < prop_.metaData.enumMetaData.size()) {
-            value_ = Type(prop_.metaData.enumMetaData[index].value);
+            bits_ = uint64_t(prop_.metaData.enumMetaData[index].value) & Mask();
             return true;
         }
         return false;
     }
     bool IsValueSet(size_t index) const override
     {
-        if constexpr (BASE_NS::is_integral_v<RealType>) {
-            if (index < prop_.metaData.enumMetaData.size()) {
-                if (type_ == META_NS::EnumType::BIT_FIELD) {
-                    return RealType(value_) & RealType(prop_.metaData.enumMetaData[index].value);
-                }
-                return RealType(value_) == RealType(prop_.metaData.enumMetaData[index].value);
+        if (index < prop_.metaData.enumMetaData.size()) {
+            const uint64_t mv = uint64_t(prop_.metaData.enumMetaData[index].value) & Mask();
+            if (type_ == META_NS::EnumType::BIT_FIELD) {
+                return (bits_ & mv) != 0;
             }
+            return bits_ == mv;
         }
         return false;
     }
     bool FlipValue(size_t index, bool isSet) override
     {
-        if constexpr (BASE_NS::is_integral_v<RealType>) {
-            if (type_ == META_NS::EnumType::BIT_FIELD && index < prop_.metaData.enumMetaData.size()) {
-                if (isSet) {
-                    value_ = Type(RealType(value_) | RealType(prop_.metaData.enumMetaData[index].value));
-                } else {
-                    value_ = Type(RealType(value_) & ~RealType(prop_.metaData.enumMetaData[index].value));
-                }
-                return true;
-            }
+        if (type_ == META_NS::EnumType::BIT_FIELD && index < prop_.metaData.enumMetaData.size()) {
+            const uint64_t mv = uint64_t(prop_.metaData.enumMetaData[index].value) & Mask();
+            bits_ = (isSet ? (bits_ | mv) : (bits_ & ~mv)) & Mask();
+            return true;
         }
         return false;
-    }
-
-    AnyReturnValue ResetValue() override
-    {
-        return InternalSetValue({});
     }
 
     using IAny::Clone;
 
 protected:
-    IAny::Ptr RawClone(const AnyCloneOptions& options) const override;
+    const AnyTypeInfo& Info() const override
+    {
+        return info_->any;
+    }
+    AnyReturnValue RawGet(void* data) const override
+    {
+        BASE_NS::CloneData(data, info_->any.size, &bits_, info_->any.size);  // low bytes == the enum value
+        return AnyReturn::SUCCESS;
+    }
+    AnyReturnValue RawSet(const void* data) override
+    {
+        uint64_t v = 0;
+        BASE_NS::CloneData(&v, sizeof(v), data, info_->any.size);
+        return SetBits(v);
+    }
+    AnyReturnValue RawGetCompat(const TypeId& id, void* data, size_t size) const override
+    {
+        if (data) {
+            for (const auto& c : info_->compat) {
+                if (c.uid == id && c.size == size) {
+                    const uint64_t v = Internal::EnumExtend(bits_, info_->any.size, info_->isUnsigned);
+                    BASE_NS::CloneData(data, size, &v, size);  // low bytes == static_cast to the compat type
+                    return AnyReturn::SUCCESS;
+                }
+            }
+        }
+        return AnyReturn::INVALID_ARGUMENT;
+    }
+    AnyReturnValue RawSetCompat(const TypeId& id, const void* data, size_t size) override
+    {
+        if (data) {
+            for (const auto& c : info_->compat) {
+                if (c.uid == id && c.size == size) {
+                    uint64_t v = 0;
+                    BASE_NS::CloneData(&v, sizeof(v), data, size);
+                    return SetBits(Internal::EnumExtend(v, c.size, c.isUnsigned));
+                }
+            }
+        }
+        return AnyReturn::INVALID_ARGUMENT;
+    }
+    AnyReturnValue RawCopyFrom(const IAny& any) override
+    {
+        if (META_NS::IsCompatible(any, info_->any.typeId, CompatibilityDirection::GET)) {
+            uint64_t v = 0;
+            if (any.GetData(info_->any.typeId, &v, info_->any.size)) {
+                return SetBits(v);
+            }
+        }
+        for (const auto& c : info_->compat) {
+            if (META_NS::IsCompatible(any, c.uid, CompatibilityDirection::GET)) {
+                uint64_t v = 0;
+                if (any.GetData(c.uid, &v, c.size)) {
+                    return SetBits(Internal::EnumExtend(v, c.size, c.isUnsigned));
+                }
+            }
+        }
+        return AnyReturn::FAIL;
+    }
+    AnyReturnValue RawReset() override
+    {
+        return SetBits(0);
+    }
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override
+    {
+        if (options.role == TypeIdRole::ARRAY) {
+            return info_->makeArray(prop_);
+        }
+        return IAny::Ptr(new CoreEnumAnyImpl(info_, prop_, options.value == CloneValueType::COPY_VALUE ? bits_ : 0));
+    }
 
 private:
-    AnyReturnValue InternalSetValue(const Type& value) override
+    uint64_t Mask() const
     {
-        if (type_ == META_NS::EnumType::SINGLE_VALUE && GetValueIndex(value) == -1) {
+        return Internal::EnumBitMask(info_->any.size);
+    }
+    size_t IndexOfBits(uint64_t bits) const
+    {
+        const uint64_t m = Mask();
+        bits &= m;
+        for (size_t i = 0; i != prop_.metaData.enumMetaData.size(); ++i) {
+            if ((uint64_t(prop_.metaData.enumMetaData[i].value) & m) == bits) {
+                return i;
+            }
+        }
+        return size_t(-1);
+    }
+    // Truncate to the underlying size, validate single-value membership, store. Mirrors the per-type
+    // InternalSetValue: SINGLE_VALUE rejects non-member values; equal values are NOTHING_TO_DO.
+    AnyReturnValue SetBits(uint64_t v)
+    {
+        v &= Mask();
+        if (type_ == META_NS::EnumType::SINGLE_VALUE && IndexOfBits(v) == size_t(-1)) {
             return AnyReturn::INVALID_ARGUMENT;
         }
-        if (!DefaultCompare<Type>::Equal(value, value_)) {
-            value_ = value;
+        if (v != bits_) {
+            bits_ = v;
             return AnyReturn::SUCCESS;
         }
         return AnyReturn::NOTHING_TO_DO;
     }
-    const Type& InternalGetValue() const override
+
+    const CoreEnumAnyInfo* info_;
+    const CORE_NS::Property prop_;
+    const META_NS::EnumType type_;
+    uint64_t bits_;
+};
+
+/// Core enum array any: the shared byte-buffer storage (Internal::ByteArrayAnyImpl) + an item/array Clone
+/// that carries the CORE_NS::Property so cloned items keep their live IEnum/IEngineType metadata.
+class ArrayCoreEnumAnyImpl : public Internal::ByteArrayAnyImpl {
+public:
+    ArrayCoreEnumAnyImpl(
+        const ArrayCoreEnumAnyInfo* info, const CORE_NS::Property& p, BASE_NS::vector<uint8_t> bytes = {})
+        : Internal::ByteArrayAnyImpl(
+              &info->array, info->bytesToVector, info->vectorToBytes, info->anyToBytes, BASE_NS::move(bytes)),
+          info_(info),
+          prop_(p)
+    {}
+
+protected:
+    IAny::Ptr RawClone(const AnyCloneOptions& options) const override
     {
-        return value_;
+        if (options.role == TypeIdRole::ITEM) {
+            return IAny::Ptr(new CoreEnumAnyImpl(info_->scalar, prop_));
+        }
+        return IAny::Ptr(new ArrayCoreEnumAnyImpl(
+            info_, prop_, options.value == CloneValueType::COPY_VALUE ? Bytes() : BASE_NS::vector<uint8_t>{}));
     }
 
 private:
-    Type value_{};
+    const ArrayCoreEnumAnyInfo* info_;
     const CORE_NS::Property prop_;
-    const META_NS::EnumType type_;
 };
 
+/**
+ * @brief Thin per-enum facade so CoreEnumAny<EnumT,...> stays a concrete constructible type (sole user is
+ *        ConstructCoreAny) and registration keeps the per-enum class id / name. Adds no virtuals, so its
+ *        vtable is identical to CoreEnumAnyImpl's and folds to a single copy; the only per-enum residue is
+ *        the static descriptor + the compatible-types/compat tables.
+ */
 template<typename Type, typename Conv, typename... CoreType>
-class ArrayCoreEnumAny : public ArrayMultiTypeAnyBase<Type> {
-    using Super = ArrayMultiTypeAnyBase<Type>;
-    using typename Super::ArrayType;
+class CoreEnumAny : public CoreEnumAnyImpl {
+    // The shared impl stores the value as raw integer bits and does integer bit-ops for the IEnum surface,
+    // so a non-enum (e.g. float) access Type would silently produce garbage. Enforce the enum invariant.
+    static_assert(META_NS::is_enum_v<Type>, "CoreEnumAny requires an enum access Type");
+
+    static IAny::Ptr MakeArray(const CORE_NS::Property& p);  // defined after ArrayCoreEnumAny; used by INFO below
 
 public:
-    explicit ArrayCoreEnumAny(const CORE_NS::Property& p, ArrayType v = {}) : Super(BASE_NS::move(v)), prop_(p)
+    using RealType = RealType_t<Type>;
+    static constexpr TypeId TYPE_ID = UidFromType<Type>();
+
+    static constexpr ObjectId StaticGetClassId()
+    {
+        return MakeUid<Type>(MULTI_TYPE_ANY_TAG);
+    }
+    static constexpr BASE_NS::string_view StaticGetTypeIdString()
+    {
+        return MetaType<Type>::name;
+    }
+    static const BASE_NS::array_view<const TypeId> StaticGetCompatibleTypes(CompatibilityDirection)
+    {
+        static constexpr TypeId ids[] = {TYPE_ID, UidFromType<CoreType>()..., UidFromType<int64_t>()};
+        return ids;
+    }
+
+    explicit CoreEnumAny(const CORE_NS::Property& p, const Type& v = {}) : CoreEnumAnyImpl(&INFO, p, ToBits(v))
     {}
 
-    const BASE_NS::array_view<const TypeId> GetItemCompatibleTypes(CompatibilityDirection dir) const override
+    TypeId GetTypeId() const
+    {
+        return TYPE_ID;
+    }
+
+    static uint64_t ToBits(const Type& v)
+    {
+        uint64_t b = 0;
+        BASE_NS::CloneData(&b, sizeof(b), &v, sizeof(Type));
+        return b;
+    }
+
+    static constexpr EnumCompatEntry COMPAT[]{
+        EnumCompatEntry{UidFromType<CoreType>(), sizeof(CoreType), BASE_NS::is_unsigned_v<RealType_t<CoreType>>}...,
+        EnumCompatEntry{UidFromType<int64_t>(), sizeof(int64_t), false},
+    };
+    static constexpr CoreEnumAnyInfo INFO{
+        AnyTypeInfo{
+            StaticGetClassId(),
+            TYPE_ID,
+            ArrayUidFromType<Type>(),
+            ItemUidFromType<Type>(),
+            StaticGetTypeIdString(),
+            sizeof(Type), /*NOLINT(bugprone-sizeof-expression)*/
+            &StaticGetCompatibleTypes,
+        },
+        BASE_NS::is_unsigned_v<RealType>,
+        COMPAT,
+        &MakeArray,
+    };
+};
+
+/// Thin per-enum facade for the array any (see CoreEnumAny for the scalar rationale).
+template<typename Type, typename Conv, typename... CoreType>
+class ArrayCoreEnumAny : public ArrayCoreEnumAnyImpl {
+public:
+    using ArrayType = BASE_NS::vector<Type>;
+    static constexpr TypeId ARRAY_TYPE_ID = ArrayUidFromType<Type>();
+    static constexpr TypeId VECTOR_TYPE_ID = UidFromType<BASE_NS::vector<Type>>();
+
+    static constexpr ObjectId StaticGetClassId()
+    {
+        return MakeUid<Type>(MULTI_TYPE_ARRAY_ANY_TAG);
+    }
+    static constexpr BASE_NS::string_view StaticGetTypeIdString()
+    {
+        return MetaType<ArrayType>::name;
+    }
+    static const BASE_NS::array_view<const TypeId> StaticGetCompatibleTypes(CompatibilityDirection)
+    {
+        static constexpr TypeId ids[] = {ARRAY_TYPE_ID, VECTOR_TYPE_ID};
+        return ids;
+    }
+    static const BASE_NS::array_view<const TypeId> StaticGetItemCompatibleTypes(CompatibilityDirection dir)
     {
         return CoreEnumAny<Type, Conv, CoreType...>::StaticGetCompatibleTypes(dir);
     }
 
-    IAny::Ptr RawClone(const AnyCloneOptions& options) const override
+    explicit ArrayCoreEnumAny(const CORE_NS::Property& p, ArrayType v = {}) : ArrayCoreEnumAnyImpl(&INFO, p, ToBytes(v))
+    {}
+
+    TypeId GetTypeId() const
     {
-        if (options.role == TypeIdRole::ITEM) {
-            return IAny::Ptr(new CoreEnumAny<Type, Conv, CoreType...>(prop_));
-        }
-        return IAny::Ptr(new ArrayCoreEnumAny{
-            prop_, options.value == CloneValueType::COPY_VALUE ? this->value_ : typename Super::ArrayType{}});
+        return ARRAY_TYPE_ID;
     }
 
 private:
-    const CORE_NS::Property prop_;
+    static void BytesToVector(const uint8_t* data, size_t count, void* outVec)
+    {
+        auto* v = static_cast<ArrayType*>(outVec);
+        v->resize(count);
+        if (count) {
+            BASE_NS::CloneData(v->data(), count * sizeof(Type), data, count * sizeof(Type));
+        }
+    }
+    static void VectorToBytes(const void* inVec, BASE_NS::vector<uint8_t>& out)
+    {
+        const auto& v = *static_cast<const ArrayType*>(inVec);
+        out.resize(v.size() * sizeof(Type));
+        if (!v.empty()) {
+            BASE_NS::CloneData(out.data(), out.size(), v.data(), v.size() * sizeof(Type));
+        }
+    }
+    static bool AnyToBytes(const IAny& any, BASE_NS::vector<uint8_t>& out)
+    {
+        ArrayType v;
+        if (any.GetValue(v)) {
+            VectorToBytes(&v, out);
+            return true;
+        }
+        return false;
+    }
+    static BASE_NS::vector<uint8_t> ToBytes(const ArrayType& v)
+    {
+        BASE_NS::vector<uint8_t> out;
+        VectorToBytes(&v, out);
+        return out;
+    }
+
+    static constexpr ArrayCoreEnumAnyInfo INFO{
+        ArrayAnyTypeInfo{
+            StaticGetClassId(),
+            ARRAY_TYPE_ID,
+            ItemUidFromType<Type>(),
+            VECTOR_TYPE_ID,
+            StaticGetTypeIdString(),
+            sizeof(ArrayType),
+            sizeof(Type), /*NOLINT(bugprone-sizeof-expression)*/
+            &StaticGetCompatibleTypes,
+            &StaticGetItemCompatibleTypes,
+        },
+        &CoreEnumAny<Type, Conv, CoreType...>::INFO,
+        &BytesToVector,
+        &VectorToBytes,
+        &AnyToBytes,
+    };
 };
 
 template<typename Type, typename Conv, typename... CoreType>
-IAny::Ptr CoreEnumAny<Type, Conv, CoreType...>::RawClone(const AnyCloneOptions& options) const
+IAny::Ptr CoreEnumAny<Type, Conv, CoreType...>::MakeArray(const CORE_NS::Property& p)
 {
-    if (options.role == TypeIdRole::ARRAY) {
-        return IAny::Ptr(new ArrayCoreEnumAny<Type, Conv, CoreType...>(prop_));
-    }
-    return IAny::Ptr(new CoreEnumAny{prop_, options.value == CloneValueType::COPY_VALUE ? this->value_ : Type{}});
+    return IAny::Ptr(new ArrayCoreEnumAny<Type, Conv, CoreType...>(p));
 }
 
 META_END_NAMESPACE()
