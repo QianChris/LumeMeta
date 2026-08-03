@@ -33,17 +33,20 @@ template<typename AnimationType>
 Animation CreateAnimation(const IProperty::WeakPtr& property);
 
 template<>
+Animation CreateAnimation<KeyframeAnimation<float>>(const IProperty::WeakPtr& property);
+
+template<>
 Animation CreateAnimation<SequentialAnimation>(const IProperty::WeakPtr& property)
 {
     return SequentialAnimation(CreateInstance(ClassId::SequentialAnimation))
-        .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation)));
+        .Add(CreateAnimation<KeyframeAnimation<float>>(property));
 }
 
 template<>
 Animation CreateAnimation<ParallelAnimation>(const IProperty::WeakPtr& property)
 {
     return ParallelAnimation(CreateInstance(ClassId::ParallelAnimation))
-        .Add(KeyframeAnimation<float>(CreateInstance(ClassId::KeyframeAnimation)));
+        .Add(CreateAnimation<KeyframeAnimation<float>>(property));
 }
 
 template<>

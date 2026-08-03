@@ -242,10 +242,10 @@ void ParallelAnimationState::ChildrenChanged()
     for (auto&& segment : GetChildren()) {
         segment.startProgress_ = 0;
         segment.endProgress_ = 1.f;
-        if (containerDuration.IsFinite()) {
+        if (containerDuration.IsFinite() && containerDuration != TimeSpan::Zero()) {
             const auto duration = segment.animation_ ? GetValue(segment.animation_->TotalDuration()) : TimeSpan::Zero();
             segment.endProgress_ =
-                static_cast<float>(duration.ToMilliseconds()) / static_cast<float>(containerDuration.ToMilliseconds());
+                static_cast<float>(duration.ToMicroseconds()) / static_cast<float>(containerDuration.ToMicroseconds());
         }
     }
 }
@@ -297,12 +297,12 @@ void SequentialAnimationState::ChildrenChanged()
     for (auto&& segment : GetChildren()) {
         segment.startProgress_ = startProgress;
         segment.endProgress_ = 1.f;
-        if (containerDuration.IsFinite()) {
+        if (containerDuration.IsFinite() && containerDuration != TimeSpan::Zero()) {
             const auto duration = segment.animation_ ? GetValue(segment.animation_->TotalDuration()) : TimeSpan::Zero();
-            segment.endProgress_ = startProgress + static_cast<float>(duration.ToMilliseconds()) /
-                                                       static_cast<float>(containerDuration.ToMilliseconds());
+            segment.endProgress_ = startProgress + static_cast<float>(duration.ToMicroseconds()) /
+                                                       static_cast<float>(containerDuration.ToMicroseconds());
             startProgress = segment.endProgress_;
-        } else {
+        } else if (!containerDuration.IsFinite()) {
             CORE_LOG_E("Infinite animation in a sequential animation");
             startProgress = 1.f;
         }

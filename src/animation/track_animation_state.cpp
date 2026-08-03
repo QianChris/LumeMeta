@@ -113,6 +113,10 @@ bool TrackAnimationState::ValidateValues()
         if (auto size = keyframeArray_->GetSize()) {
             if (trackStart_ = keyframeArray_->Clone({CloneValueType::DEFAULT_VALUE, TypeIdRole::ITEM}); trackStart_) {
                 trackEnd_ = trackStart_->Clone(false);
+                if (!trackEnd_) {
+                    Reset();
+                    return false;
+                }
                 keyframeArray_->GetAnyAt(0, *trackStart_);
                 keyframeArray_->GetAnyAt(size - 1, *trackEnd_);
                 currentValue_ = trackStart_->Clone(true);
@@ -208,7 +212,7 @@ void TrackAnimationState::SetPrePostFrameValues(float progress)
 {
     auto& timestamps = GetTimeStamps();
     auto size = keyframeArray_ ? keyframeArray_->GetSize() : 0;
-    if (size && timestamps && timestamps->GetSize() == size) {
+    if (size && timestamps && timestamps->GetSize() == size && trackStart_ && trackEnd_) {
         if (progress < timestamps->GetValueAt(0)) {
             keyframeArray_->GetAnyAt(0, *trackEnd_);
             keyframeArray_->GetAnyAt(0, *trackStart_);

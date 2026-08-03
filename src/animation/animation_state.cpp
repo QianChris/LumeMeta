@@ -115,8 +115,11 @@ AnimationState::StepStatus AnimationState::Step(const IClock::ConstPtr& clock)
     }
 
     const auto time = clock ? clock->GetTime() : TimeSpan::Zero();
-    float progress = static_cast<float>(state_.Tick(time).ToMilliseconds()) /
-                     static_cast<float>(state_.GetBaseDuration().ToMilliseconds());
+    const auto currentTime = state_.Tick(time);
+    const auto baseDuration = state_.GetBaseDuration();
+    float progress = baseDuration == TimeSpan::Zero() ? 1.f
+                                                      : static_cast<float>(currentTime.ToMicroseconds()) /
+                                                            static_cast<float>(baseDuration.ToMicroseconds());
 
     return Move(IAnimationInternal::MoveParams::FromProgress(progress));
 }
