@@ -20,7 +20,7 @@ find_package(AGPEngine REQUIRED)
 
 # Google benchmark
 if(NOT TARGET benchmark)
-    add_subdirectory(${LUMEBASE_PATH}/test/3rdparty/benchmark test/3rdparty/benchmark EXCLUDE_FROM_ALL)
+    add_subdirectory(${BASE_ROOT_DIRECTORY}/test/3rdparty/benchmark test/3rdparty/benchmark EXCLUDE_FROM_ALL)
 endif()
 
 #

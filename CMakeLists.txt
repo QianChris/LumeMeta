@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.19)
 
 project (LumeMeta LANGUAGES CXX)
 
-set(LUMEBASE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeBase CACHE PATH "Path to lume base sources")
-set(LUMEENGINE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeEngine CACHE PATH "Path to lume engine sources")
+set(BASE_ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeBase CACHE PATH "Path to lume base sources")
+set(CORE_ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/submodules/LumeEngine CACHE PATH "Path to lume engine sources")
 set(CORE_UNPACKED_LIB_DIR ${CMAKE_BINARY_DIR}/unpacked CACHE PATH "Path where to extract 3rd party library sources.")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -44,17 +44,17 @@ endif()
 option(META_BENCHMARK_TESTS_ENABLED "Build ${PROJECT_NAME} benchmark tests" OFF)
 option(META_CLANG_FORMAT_CHECK "Build clang-format check" OFF)
 if(META_CLANG_FORMAT_CHECK)
-    include("${LUMEBASE_PATH}/cmake/clang_format_check.cmake")
+    include("${BASE_ROOT_DIRECTORY}/cmake/clang_format_check.cmake")
 endif()
 
 #
 # Lib config.
 #
 if (${BUILD_DEPS})
-    if (EXISTS ${LUMEBASE_PATH}/CMakeLists.txt AND
-        EXISTS ${LUMEENGINE_PATH}/CMakeLists.txt)
-        list(APPEND CMAKE_MODULE_PATH "${LUMEBASE_PATH}/cmake")
-        list(APPEND CMAKE_MODULE_PATH "${LUMEENGINE_PATH}/cmake")
+    if (EXISTS ${BASE_ROOT_DIRECTORY}/CMakeLists.txt AND
+        EXISTS ${CORE_ROOT_DIRECTORY}/CMakeLists.txt)
+        list(APPEND CMAKE_MODULE_PATH "${BASE_ROOT_DIRECTORY}/cmake")
+        list(APPEND CMAKE_MODULE_PATH "${CORE_ROOT_DIRECTORY}/cmake")
     else()
         message(FATAL_ERROR "Requested to build Lume Core library, but sources not found!")
     endif()
@@ -110,27 +110,35 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif()
 
-if (BUILD_DEPS AND NOT META_SUBMODULE_ENABLED)
-    # Find_package macro will workaround the findpackage issues (ie. if the target exists, then do nothing)
-    # do this and that, since well.. typos.
-    # (core libs have their cmake paths, but there is no configs/modules for source builds for all modules..)
-    macro(find_package)
-        if (NOT TARGET ${ARGV0})
-            #message("find_package from ${CMAKE_CURRENT_LIST_FILE} ${ARGV} (does not exist yet)")
-            _find_package(${ARGV})
-        endif()
-    endmacro()
-    set(CMAKE_FOLDER "CoreLibraries")
-    message("Found LumeBase Source, Building ${LUMEBASE_PATH}")
-    set(BASE_ROOT_DIRECTORY ${LUMEBASE_PATH} CACHE PATH "" FORCE)
-    add_subdirectory(${LUMEBASE_PATH} 3rdParty/LumeBase EXCLUDE_FROM_ALL)
+# Find_package macro will workaround the findpackage issues (ie. if the target exists, then do nothing)
+# do this and that, since well.. typos.
+# (core libs have their cmake paths, but there is no configs/modules for source builds for all modules..)
+macro(find_package)
+    if (NOT TARGET ${ARGV0})
+        #message("find_package from ${CMAKE_CURRENT_LIST_FILE} ${ARGV} (does not exist yet)")
+        _find_package(${ARGV})
+    endif()
+endmacro()
 
-    message("Found LumeEngine Source, Building ${LUMEENGINE_PATH}")
-    set(CORE_BUILD_BASE OFF)
-    set(CORE_ROOT_DIRECTORY ${LUMEENGINE_PATH} CACHE PATH "" FORCE)
-    add_subdirectory(${LUMEENGINE_PATH}/api/ 3rdParty/LumeEngine/api EXCLUDE_FROM_ALL)
-    add_subdirectory(${LUMEENGINE_PATH} 3rdParty/LumeEngine EXCLUDE_FROM_ALL)
-    set_target_properties(AGPEngineDLL PROPERTIES FOLDER CoreLibraries/DLLs)
+if (BUILD_DEPS AND NOT META_SUBMODULE_ENABLED)
+    set(CMAKE_FOLDER "CoreLibraries")
+    # Each dependency is added only if an enclosing build has not added it already.
+    if (NOT TARGET AGPBase::AGPBaseAPI)
+        message("Found LumeBase Source, Building ${BASE_ROOT_DIRECTORY}")
+        set(BASE_ROOT_DIRECTORY ${BASE_ROOT_DIRECTORY} CACHE PATH "" FORCE)
+        add_subdirectory(${BASE_ROOT_DIRECTORY} 3rdParty/LumeBase EXCLUDE_FROM_ALL)
+    endif()
+
+    if (NOT TARGET AGPEngine::AGPEngineDLL)
+        message("Found LumeEngine Source, Building ${CORE_ROOT_DIRECTORY}")
+        set(CORE_BUILD_BASE OFF)
+        set(CORE_ROOT_DIRECTORY ${CORE_ROOT_DIRECTORY} CACHE PATH "" FORCE)
+        if (NOT TARGET AGPEngine::AGPEngineAPI)
+            add_subdirectory(${CORE_ROOT_DIRECTORY}/api/ 3rdParty/LumeEngine/api EXCLUDE_FROM_ALL)
+        endif()
+        add_subdirectory(${CORE_ROOT_DIRECTORY} 3rdParty/LumeEngine EXCLUDE_FROM_ALL)
+        set_target_properties(AGPEngineDLL PROPERTIES FOLDER CoreLibraries/DLLs)
+    endif()
     unset(CMAKE_FOLDER)
 endif()
 
@@ -161,7 +169,7 @@ if (META_VISUAL_STUDIO_TIDY AND NOT META_SUBMODULE_ENABLED)
     message("Creating VS ExecTidyMeta in ${PROJECT_NAME} cmakelists.txt")
     add_custom_target(ExecTidyMeta DEPENDS thatMetaTidy.txt
         OUTPUT  thatMetaTidy.txt
-        COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DLUMEBASE_PATH=${LUMEBASE_PATH} -DLUMEENGINE_PATH=${LUMEENGINE_PATH} -DMETA_UNIT_TESTS_ENABLED=${META_UNIT_TESTS_ENABLED} -DMETA_BENCHMARK_TESTS_ENABLED=${META_BENCHMARK_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
+        COMMAND ${CMAKE_COMMAND} -DCORE_UNPACKED_LIB_DIR=${CORE_UNPACKED_LIB_DIR} -DPACKAGE_CACHE_PATH=${PACKAGE_CACHE_PATH} -DBASE_ROOT_DIRECTORY=${BASE_ROOT_DIRECTORY} -DCORE_ROOT_DIRECTORY=${CORE_ROOT_DIRECTORY} -DMETA_UNIT_TESTS_ENABLED=${META_UNIT_TESTS_ENABLED} -DMETA_BENCHMARK_TESTS_ENABLED=${META_BENCHMARK_TESTS_ENABLED} -DBUILD_DEPS=${BUILD_DEPS} -DBUILD_LUME_CORE_LIBS=${BUILD_LUME_CORE_LIBS} -DLUME_META_DISABLE_RUNTIME_DEPENDENCIES=true -DLUME_META_OBJECT_PERFORM_CODE_INSPECTION=true -G "Ninja" -DCMAKE_BUILD_TYPE="Release" -S ${CMAKE_CURRENT_SOURCE_DIR} -B ${CMAKE_BINARY_DIR}/TidyMetaTask
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/TidyMetaTask --target TidyMeta_For_CI
         DEPENDS  thisMetaTidy.txt
     )
