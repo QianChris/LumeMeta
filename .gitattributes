@@ -1,0 +1,3 @@
+# Fuzz corpora are exact byte sequences that reproduce past findings - never
+# translate line endings for them, or the inputs differ per platform.
+test/fuzztest/**/corpus/** -text
