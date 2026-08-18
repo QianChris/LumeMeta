@@ -172,10 +172,13 @@ public:
     void AddResources(const BASE_NS::array_view<const ResourceData>, const ResourceContextPtr&) override;
     bool AddResource(ResourceData, const CORE_NS::ResourceContextPtr&) override;
     bool RemoveGroup(BASE_NS::string_view group, const CORE_NS::ResourceContextWeakPtr&) override;
+    size_t PurgeUnused(const CORE_NS::ResourceContextPtr& context) override;
     bool SetResourceName(const ResourceIdContext& id, const BASE_NS::string& name) override;
     CORE_NS::IResource::Ptr GetResourceByName(BASE_NS::string_view name, const ResourceContextPtr& context) override;
 
 private:
+    /// One sweep of PurgeUnused. Returns how many resources it released.
+    size_t PurgeUnusedPass(const CORE_NS::ResourceContextPtr& context);
     CORE_NS::IResource::Ptr ConstructResource(const CORE_NS::ResourceIdContext& id);
     Result SaveResourceData(const ResourceData& r);
     CORE_NS::ResourceIdContext ReadHeader(

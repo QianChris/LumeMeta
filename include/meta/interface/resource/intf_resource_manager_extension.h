@@ -53,6 +53,19 @@ public:
     virtual void AddResources(const BASE_NS::array_view<const ResourceData>, const CORE_NS::ResourceContextPtr&) = 0;
     virtual bool AddResource(ResourceData, const CORE_NS::ResourceContextPtr&) = 0;
     virtual bool RemoveGroup(BASE_NS::string_view group, const CORE_NS::ResourceContextWeakPtr&) = 0;
+    /** Release cached resources belonging to a context that nothing else is using.
+     *
+     * Differs from IResourceManager::PurgeGroup, which drops every cached resource in a group
+     * whether or not it is in use. Dropping one that is still referenced frees nothing -- the
+     * holder keeps it alive -- and makes the next lookup by id construct a second instance
+     * alongside the live one, so a purge can raise memory use rather than lower it. This only
+     * releases resources whose cache entry is the last reference, and repeats until no more can
+     * be released so that clusters referencing each other are collected too.
+     *
+     * @param context Context whose resources to consider; nullptr selects the context-less ones.
+     * @return Number of resources actually released.
+     */
+    virtual size_t PurgeUnused(const CORE_NS::ResourceContextPtr& context) = 0;
 };
 
 META_END_NAMESPACE()

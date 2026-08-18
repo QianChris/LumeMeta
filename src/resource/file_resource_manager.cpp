@@ -524,6 +524,46 @@ size_t FileResourceManager::PurgeGroup(BASE_NS::string_view group, const Resourc
     }
     return count;
 }
+size_t FileResourceManager::PurgeUnusedPass(const ResourceContextPtr& context)
+{
+    // Declared before the lock so the released resources are destroyed after the mutex is
+    // dropped: a resource destructor can call back into the manager (removing the resource of a
+    // torn-down entity, for one) and would deadlock on the unique_lock otherwise.
+    BASE_NS::vector<CORE_NS::IResource::Ptr> objs;
+    size_t count = 0;
+    std::unique_lock lock{mutex_};
+    for (auto&& g : resources_) {
+        if (!IsCorrectContext(g.first, context)) {
+            continue;
+        }
+        for (auto&& v : g.second) {
+            auto& obj = v.second->object;
+            // use_count() == 1 means this cache entry is the only holder, so releasing it really
+            // frees the resource. Any higher count means something else -- the scene, or a load
+            // still in flight -- is using it, and dropping the entry would free nothing while
+            // making the next lookup build a duplicate. Nobody can take a new reference between
+            // this check and the release: reaching `object` requires the lock we hold.
+            if (obj && obj.use_count() == 1) {
+                objs.push_back(BASE_NS::move(obj));
+                obj = nullptr;
+                ++count;
+            }
+        }
+    }
+    return count;
+}
+size_t FileResourceManager::PurgeUnused(const ResourceContextPtr& context)
+{
+    // Repeat until nothing more can be released. One pass only sees resources that are already
+    // unreferenced; freeing them can drop others to their last reference (a material held solely
+    // by a mesh that this pass released, say), and those become collectable on the next sweep.
+    size_t total = 0;
+    for (size_t released = 1; released > 0;) {
+        released = PurgeUnusedPass(context);
+        total += released;
+    }
+    return total;
+}
 bool FileResourceManager::RemoveGroup(BASE_NS::string_view group, const ResourceContextPtr& context)
 {
     return RemoveGroup(group, CORE_NS::ResourceContextWeakPtr(context));
