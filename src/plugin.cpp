@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include <cstdlib>
+
 #include <core/intf_engine.h>
+#include <core/log.h>
 #include <core/plugin/intf_plugin.h>
 #include <core/plugin/intf_plugin_register.h>
 
@@ -28,6 +31,20 @@ static CORE_NS::IPluginRegister* g_pluginRegistry{nullptr};
 CORE_BEGIN_NAMESPACE()
 IPluginRegister& GetPluginRegister()
 {
+    if (g_pluginRegistry == nullptr) {
+        // Reached when something calls into this library before RegisterInterfaces has run, which
+        // is the only thing that sets the registry. Returning *nullptr here does not fail where it
+        // can be read: the caller invokes a virtual on the reference, the vtable pointer is loaded
+        // from address zero, and the process jumps there, so the crash surfaces as an unmapped
+        // instruction address with the actual cause nowhere in sight.
+        //
+        // GetMetaObjectLib already says exactly this when its lookup comes back empty, but it never
+        // gets the chance: the lookup goes through here first. Say it at the point it can still be
+        // said.
+        CORE_LOG_F("Plugin registry used before this library was registered");
+        CORE_ASSERT(false);
+        abort();
+    }
     return *g_pluginRegistry;
 }
 CORE_END_NAMESPACE()
