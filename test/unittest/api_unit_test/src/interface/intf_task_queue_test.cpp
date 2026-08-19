@@ -762,6 +762,49 @@ UNIT_TEST(API_TaskQueueTest, TaskDestructionTask, testing::ext::TestSize.Level1)
     EXPECT_TRUE(done);
 }
 
+/**
+ * @tc.name: SameTimeTasksRunInAdditionOrder
+ * @tc.desc: Tests that two tasks queued with no delay run in the order they were added, including
+ *           when they land on the same clock tick. The queue orders by execute time, and its clock
+ *           has microsecond resolution, so tasks added in quick succession routinely share a
+ *           timestamp -- a barrier task that overtakes the work it was posted after is
+ *           indistinguishable from that work never having been queued at all. The pair is added
+ *           with the queue empty on purpose: that is the state the ordering has to hold in for a
+ *           "post a task and wait for it" barrier, which is what makes it worth its own case.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, SameTimeTasksRunInAdditionOrder, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+    q->ProcessTasks();
+
+    // Repeated because a shared timestamp is a matter of how the two additions fall against the
+    // clock; a single pair would only sometimes exercise the case.
+    constexpr int ROUNDS = 200;
+    for (int i = 0; i < ROUNDS; ++i) {
+        BASE_NS::vector<int> order;
+        q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+            order.push_back(1);
+            return false;
+        }));
+        q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+            order.push_back(2);
+            return false;
+        }));
+        // PollingTaskQueue skips a ProcessTasks that lands on the same tick as the previous one, so
+        // spin until the round has actually been processed rather than assuming one call suffices.
+        constexpr int MAX_SPINS = 1000;
+        for (int spin = 0; (order.size() < 2) && (spin < MAX_SPINS); ++spin) {
+            q->ProcessTasks();
+        }
+
+        ASSERT_EQ(order.size(), 2U) << "round " << i;
+        EXPECT_EQ(order[0], 1) << "round " << i;
+        EXPECT_EQ(order[1], 2) << "round " << i;
+    }
+}
+
 INSTANTIATE_TEST_SUITE_P(
     API_TaskQueueTest, API_TaskQueueTest, ::testing::Values(ClassId::PollingTaskQueue, ClassId::ThreadedTaskQueue));
 

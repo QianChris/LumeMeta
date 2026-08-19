@@ -97,29 +97,21 @@ public:
             i->SetQueueAndToken(self_.lock(), ret);
         }
 
-        // insertion sort the tasks
-        if (tasks_.empty()) {
+        // Insertion sort, execute time descending; ProcessTasks takes from the back. Inserting
+        // before the first task due at or before us keeps tasks that share a timestamp -- routine
+        // at microsecond resolution -- in the order they were added.
+        bool found = false;
+        for (auto it = tasks_.begin(); it != tasks_.end(); ++it) {
+            if (it->executeTime <= excTime) {
+                // task in list should execute after us, so insert there.
+                tasks_.insert(it, {delay, excTime, BASE_NS::move(p)});
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // Nothing runs at or before our time: we are the most due, and the back is next up.
             tasks_.emplace_back(delay, excTime, BASE_NS::move(p));
-        } else if (tasks_.size() == 1) {
-            if (tasks_.front().executeTime >= excTime) {
-                tasks_.emplace_back(delay, excTime, BASE_NS::move(p));
-            } else {
-                tasks_.insert(tasks_.begin(), {delay, excTime, BASE_NS::move(p)});
-            }
-        } else {
-            bool found = false;
-            for (auto it = tasks_.begin(); it != tasks_.end(); ++it) {
-                if (it->executeTime <= excTime) {
-                    // task in list should execute after us, so insert there.
-                    tasks_.insert(it, {delay, excTime, BASE_NS::move(p)});
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                // add last then ..
-                tasks_.emplace_back(delay, excTime, BASE_NS::move(p));
-            }
         }
         return ret;
     }
@@ -175,7 +167,9 @@ public:
 
     void Rearm(TimeSpan curTime)
     {
-        for (auto it = rearm_.rbegin(); it != rearm_.rend(); ++it) {
+        // In the order they ran: recurring tasks that come due together keep that order, because
+        // AddTaskImpl puts equal timestamps back in addition order.
+        for (auto it = rearm_.begin(); it != rearm_.end(); ++it) {
             auto& task = *it;
             if (task.delay > TimeSpan()) {
                 // calculate the next executeTime in phase.. (ie. how many events missed)
