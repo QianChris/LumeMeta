@@ -178,6 +178,13 @@ private:
 
     mutable std::atomic_flag disposalInProgress_ = ATOMIC_FLAG_INIT;
     mutable std::atomic<size_t> purgeCounter_{};
+    /// Smallest registry the growth trigger will sweep. Below this a sweep is cheap but pointless,
+    /// and without a floor a nearly empty registry would sweep on almost every disposal batch.
+    static constexpr size_t MIN_GC_WATERMARK = 128;
+    /// Registry size above which the next disposal batch also sweeps expired entries. Raised to
+    /// 1.5x the live size after each sweep, so sweeping stays amortised constant per registration.
+    /// Guarded by mutex_.
+    mutable size_t gcWatermark_{MIN_GC_WATERMARK};
     mutable BASE_NS::vector<InstanceId> disposals_;
     mutable BASE_NS::vector<InstanceId> disposalsStorage_;
 

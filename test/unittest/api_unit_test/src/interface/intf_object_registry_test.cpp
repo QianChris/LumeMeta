@@ -25,6 +25,8 @@
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/curves/intf_easing_curve.h>
 #include <meta/interface/intf_object_registry.h>
+#include <meta/interface/intf_future.h>
+#include <meta/interface/intf_promise.h>
 #include <meta/interface/intf_proxy_object.h>
 #include <meta/interface/intf_task_queue_registry.h>
 
@@ -929,6 +931,41 @@ UNIT_TEST(API_ObjectRegistryTest, GetInstances, testing::ext::TestSize.Level1)
     EXPECT_FALSE(r.GetObjectInstanceByInstanceId({}));
     EXPECT_TRUE(r.GetObjectInstanceByInstanceId(singletonInstanceId));
     EXPECT_FALSE(r.GetObjectInstanceByInstanceId(invalidInstanceId));
+}
+
+/**
+ * @tc.name: UnregisterableObjectsAreNotTracked
+ * @tc.desc: Tests that an object which cannot report its own destruction is never entered into the
+ *           instance map. Only ILifecycle implementations are told their instance id, and only
+ *           BaseObject::Destroy() removes an entry, so tracking anything else produces a map entry
+ *           that nothing can remove and nothing can look up -- the id was generated during Create()
+ *           and discarded. Promise is the case that was found leaking one entry per rendered frame;
+ *           Property and EngineValue have the same shape and are created far more often.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_ObjectRegistryTest, UnregisterableObjectsAreNotTracked, testing::ext::TestSize.Level1)
+{
+    auto& r = GetObjectRegistry();
+
+    auto promise = r.Create<IPromise>(META_NS::ClassId::Promise);
+    ASSERT_TRUE(promise);
+    // It has no instance id to be found by, so it must not be occupying a slot keyed on one.
+    auto all = r.GetAllObjectInstances();
+    EXPECT_THAT(all, ::testing::Not(::testing::Contains(interface_pointer_cast<IObject>(promise))));
+
+    // A normal object still is tracked -- this is a narrowing of what gets registered, not a
+    // removal of registration.
+    auto object = r.Create(META_NS::ClassId::Object);
+    ASSERT_TRUE(object);
+    EXPECT_THAT(r.GetAllObjectInstances(), ::testing::Contains(object));
+
+    // The leak shape itself: churning these must not grow the registry.
+    const auto before = r.GetAllObjectInstances().size();
+    for (size_t i = 0; i < 2000; ++i) {
+        auto p = r.Create<IPromise>(META_NS::ClassId::Promise);
+        ASSERT_TRUE(p);
+    }
+    EXPECT_EQ(r.GetAllObjectInstances().size(), before);
 }
 
 /**

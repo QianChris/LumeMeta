@@ -285,6 +285,29 @@ IObject::Ptr ObjectRegistry::Create(ObjectId uid, const CreateInfo& createInfo, 
     return nullptr;
 }
 
+// True if this object was told its instance id, which is what SetObjectInstanceIds() hands to
+// ILifecycle implementations and nobody else.
+//
+// An object that was never told its id cannot report its own destruction: DisposeObject() is keyed
+// by that id and the only caller is BaseObject::Destroy(). Registering one produces an entry that
+// nothing can remove -- and nothing can find either, because the id is generated inside Create()
+// and then discarded, so no lookup can ever name it. Every such registration is a tombstone from
+// the moment it is made.
+//
+// This is a heuristic, not a proof: a type could implement ILifecycle without inheriting Destroy()
+// and would still accumulate. It covers what exists today (Promise, Property, EngineValue,
+// AttachmentContainer are all MinimalObject-derived and have no ILifecycle) and it never registers
+// less than the sweep could reclaim.
+static bool CanReportOwnDestruction(const BASE_NS::vector<IObject::Ptr>& classes)
+{
+    for (auto&& c : classes) {
+        if (c->GetInterface<ILifecycle>()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ObjectRegistry::PostCreate(const BASE_NS::Uid& uid, InstanceId instid, const CreateResult& t,
     const CreateInfo& createInfo, const BASE_NS::vector<IObject::Ptr>& classes, const IMetadata::Ptr& data) const
 {
@@ -295,14 +318,20 @@ bool ObjectRegistry::PostCreate(const BASE_NS::Uid& uid, InstanceId instid, cons
         return false;
     }
 
+    const bool trackInstance = CanReportOwnDestruction(classes);
+
     std::unique_lock lock{mutex_};
-    auto& i = instancesByUid_[instid];
-    if (!i.ptr.expired()) {
-        // seems someone beat us to it
-        CORE_LOG_F("Object with instance id %s already exists.", instid.ToString().c_str());
-        return false;
+    if (trackInstance) {
+        auto& i = instancesByUid_[instid];
+        if (!i.ptr.expired()) {
+            // seems someone beat us to it
+            CORE_LOG_F("Object with instance id %s already exists.", instid.ToString().c_str());
+            return false;
+        }
+        i = ObjectInstance{classes.front(), t.category};
+
+        ++purgeCounter_;
     }
-    i = ObjectInstance{classes.front(), t.category};
 
     if (t.singleton) {
         singletons_[uid] = classes.front();  // Store singleton weakref
@@ -354,7 +383,7 @@ BASE_NS::vector<IClassInfo::ConstPtr> ObjectRegistry::GetAllTypes(
 
 void ObjectRegistry::CheckGC() const
 {
-    if (purgeCounter_ > DISPOSAL_THRESHOLD && disposalInProgress_.test_and_set()) {
+    if (purgeCounter_ > DISPOSAL_THRESHOLD && !disposalInProgress_.test_and_set()) {
         {
             std::unique_lock lock{disposalMutex_};
             disposalsStorage_.swap(disposals_);
@@ -362,6 +391,22 @@ void ObjectRegistry::CheckGC() const
         }
         DoDisposal(disposalsStorage_);
         disposalsStorage_.clear();
+        {
+            std::unique_lock lock{mutex_};
+            // The sweep costs O(size), so triggering it on a fixed number of registrations makes
+            // the amortised cost per registration grow with the registry -- a big scene pays more
+            // per object than a small one, for the same benefit. Triggering on growth instead
+            // keeps it amortised constant: between two sweeps the map gains half its size, and
+            // each sweep costs one pass over it.
+            if (instancesByUid_.size() > gcWatermark_) {
+                GC();
+                const auto live = instancesByUid_.size();
+                gcWatermark_ = live + live / 2;
+                if (gcWatermark_ < MIN_GC_WATERMARK) {
+                    gcWatermark_ = MIN_GC_WATERMARK;
+                }
+            }
+        }
         disposalInProgress_.clear();
     }
 }
