@@ -30,7 +30,10 @@
 #include <meta/interface/intf_iterable.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_startable.h>
+#include <meta/base/memfile.h>
+#include <meta/interface/builtin_objects.h>
 #include <meta/interface/serialization/intf_exporter.h>
+#include <meta/interface/serialization/intf_importer.h>
 #include <meta/interface/serialization/intf_ser_output.h>
 #include <meta/interface/serialization/intf_serializable.h>
 
@@ -483,6 +486,59 @@ UNIT_TEST(API_SerializationTest, NonSerializablePropertyInProperty, testing::ext
 
     auto p = obj->GetProperty<int>("p1");
     EXPECT_EQ(p->GetValue(), 3);
+}
+
+namespace {
+// Builds a JSON object chain nested `depth` levels deep: {"a":{"a": ... null ... }}.
+BASE_NS::string MakeNestedObjectJson(size_t depth)
+{
+    constexpr BASE_NS::string_view open = R"({"a":)";
+    BASE_NS::string json;
+    json.reserve(depth * (open.size() + 1U) + 8U);
+    for (size_t index = 0; index < depth; ++index) {
+        json += open;
+    }
+    json += "null";
+    for (size_t index = 0; index < depth; ++index) {
+        json += "}";
+    }
+    return json;
+}
+
+// Runs the JSON importer over the given document and returns the deserialisation tree it produced.
+ISerNode::Ptr ImportTreeFromJson(const BASE_NS::string& json)
+{
+    BASE_NS::vector<uint8_t> bytes;
+    bytes.resize(json.size());
+    for (size_t index = 0; index < json.size(); ++index) {
+        bytes[index] = static_cast<uint8_t>(json[index]);
+    }
+    MemFile file(BASE_NS::move(bytes));
+    auto importer = GetObjectRegistry().Create<IFileImporter>(META_NS::ClassId::JsonImporter);
+    return importer->ImportAsTree(file);
+}
+}  // namespace
+
+/**
+ * @tc.name: DeeplyNestedDocumentRejected
+ * @tc.desc: A serialised document whose JSON nests thousands of levels deep must be rejected instead of
+ *           driving the recursive JsonInput::Import tree walk into stack exhaustion. Two guards are in
+ *           play and both are covered: the parser's own container nesting cap, and JsonInput's MAX_DEPTH.
+ *           Reaching the assertions at all proves the importer returned rather than overflowing the stack.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_SerializationTest, DeeplyNestedDocumentRejected, testing::ext::TestSize.Level1)
+{
+    // Control: a legitimately nested document is still imported into a tree, so the failures below are
+    // the depth guards firing and not a document the importer rejects for some other reason.
+    EXPECT_TRUE(ImportTreeFromJson(MakeNestedObjectJson(64U))) << "moderately nested document must import";
+
+    // 255 containers still parse (the parser's cap allows them), so this arm exercises JsonInput's own
+    // MAX_DEPTH guard on the recursive tree walk.
+    EXPECT_FALSE(ImportTreeFromJson(MakeNestedObjectJson(255U))) << "over-deep tree walk must be rejected";
+
+    // Far past any legitimate depth: rejected by the JSON parser's nesting cap before the walk starts.
+    EXPECT_FALSE(ImportTreeFromJson(MakeNestedObjectJson(5000U))) << "over-deep document must be rejected";
 }
 
 }  // namespace UTest
