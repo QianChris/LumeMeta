@@ -48,6 +48,9 @@ public:
         static constexpr TypeId ids[] = {TYPE_ID, UidFromType<CompatType>()...};
         return ids;
     }
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using AnyBase::GetTypeId;
     TypeId GetTypeId() const
     {
         return TYPE_ID;

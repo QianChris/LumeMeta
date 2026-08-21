@@ -208,6 +208,9 @@ public:
         this->GetData(TYPE_ID, &v, sizeof(Type));
         return v;
     }
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using EnumAnyImpl::GetTypeId;
     TypeId GetTypeId() const
     {
         return TYPE_ID;
@@ -504,6 +507,9 @@ public:
         this->GetData(VECTOR_TYPE_ID, &v, sizeof(v));
         return v;
     }
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using ArrayEnumAnyImpl::GetTypeId;
     TypeId GetTypeId() const
     {
         return ARRAY_TYPE_ID;

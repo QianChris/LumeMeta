@@ -412,6 +412,9 @@ public:
         this->GetData(TYPE_ID, &v, sizeof(Type));
         return v;
     }
+    // Keep IAny::GetTypeId(TypeIdRole) visible: the no-arg fast path declared here would
+    // otherwise hide the virtual overload (-Woverloaded-virtual).
+    using Super::GetTypeId;
     TypeId GetTypeId() const
     {
         return TYPE_ID;
@@ -668,6 +671,9 @@ public:
         this->GetData(VECTOR_TYPE_ID, &v, sizeof(v));
         return v;
     }
+    // Keep IAny::GetTypeId(TypeIdRole) visible: the no-arg fast path declared here would
+    // otherwise hide the virtual overload (-Woverloaded-virtual).
+    using Super::GetTypeId;
     TypeId GetTypeId() const
     {
         return ARRAY_TYPE_ID;

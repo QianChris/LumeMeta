@@ -296,6 +296,9 @@ public:
     explicit CoreEnumAny(const CORE_NS::Property& p, const Type& v = {}) : CoreEnumAnyImpl(&INFO, p, ToBits(v))
     {}
 
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using CoreEnumAnyImpl::GetTypeId;
     TypeId GetTypeId() const
     {
         return TYPE_ID;
@@ -357,6 +360,9 @@ public:
     explicit ArrayCoreEnumAny(const CORE_NS::Property& p, ArrayType v = {}) : ArrayCoreEnumAnyImpl(&INFO, p, ToBytes(v))
     {}
 
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using ArrayCoreEnumAnyImpl::GetTypeId;
     TypeId GetTypeId() const
     {
         return ARRAY_TYPE_ID;

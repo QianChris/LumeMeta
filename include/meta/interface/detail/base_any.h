@@ -156,6 +156,9 @@ public:
         return uids;
     }
 
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using AnyBase::GetTypeId;
     TypeId GetTypeId() const
     {
         return TYPE_ID;
@@ -445,6 +448,9 @@ public:
         static constexpr TypeId uids[] = {ARRAY_TYPE_ID, VECTOR_TYPE_ID};
         return uids;
     }
+    // Keep IAny::GetTypeId(TypeIdRole) visible: this no-arg fast path would
+    // otherwise hide the virtual overload (-Werror=overloaded-virtual).
+    using ArrayAnyBase::GetTypeId;
     TypeId GetTypeId() const
     {
         return TYPE_ID;
