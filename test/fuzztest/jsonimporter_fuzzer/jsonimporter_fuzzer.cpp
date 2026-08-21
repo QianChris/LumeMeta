@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "json_importer_fuzzer.h"
+#include "jsonimporter_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>

@@ -23,7 +23,7 @@ module_output_path = "graphic_3d/graphic_3d"
 # libs linked) -- the same bootstrap the meta unit tests use. Runs on-device only.
 ohos_fuzztest("JsonImporterFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//foundation/graphic/graphic_3d/lume/LumeMeta/test/fuzztest/json_importer_fuzzer"
+  fuzz_config_file = "//foundation/graphic/graphic_3d/lume/LumeMeta/test/fuzztest/jsonimporter_fuzzer"
 
   configs = [
     "${LUME_BASE_PATH}:lume_base_api_config",
@@ -52,7 +52,7 @@ ohos_fuzztest("JsonImporterFuzzTest") {
   ]
 
   sources = [
-    "json_importer_fuzzer.cpp",
+    "jsonimporter_fuzzer.cpp",
     "${LUME_META_PATH}/test/unittest/common/load_lib.cpp",
   ]
 

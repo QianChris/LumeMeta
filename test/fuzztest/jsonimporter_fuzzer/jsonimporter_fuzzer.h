@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef JSON_IMPORTER_FUZZER_H
-#define JSON_IMPORTER_FUZZER_H
+#ifndef JSONIMPORTER_FUZZER_H
+#define JSONIMPORTER_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "json_importer_fuzzer"
+#define FUZZ_PROJECT_NAME "jsonimporter_fuzzer"
 
-#endif  // JSON_IMPORTER_FUZZER_H
+#endif  // JSONIMPORTER_FUZZER_H
