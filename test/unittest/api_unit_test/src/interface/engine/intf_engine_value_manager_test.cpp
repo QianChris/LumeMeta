@@ -22,6 +22,7 @@
 #include <core/property/property_handle_util.h>
 
 #include <meta/api/engine/util.h>
+#include <meta/api/make_callback.h>
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/engine/intf_engine_value_manager.h>
 #include <meta/interface/intf_object_registry.h>
@@ -54,6 +55,55 @@ public:
 private:
     CORE_NS::IEngine* engine_;
 };
+
+/**
+ * @tc.name: SyncSchedulerKeepsPendingWritesAlive
+ * @tc.desc: Tests that the scheduler set via SetSyncScheduler is handed the manager itself, and that
+ *           what it is handed is enough to keep the pending writes alive: the value is written, every
+ *           other reference to the manager is dropped, and the sync still reaches the engine. This is
+ *           the guarantee the hook exists to provide -- a bare notifier leaves the receiver to find
+ *           the manager for itself, and the only way to do that without a reference cycle is a weak
+ *           reference, which is exactly what loses the write.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, SyncSchedulerKeepsPendingWritesAlive, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop1::EngineTestProp> cman{prop1::ENGINE_TESTPROP_METADATA};
+
+    IEngineValueManager::Ptr scheduled;
+    IEngineValueManager::WeakPtr weak;
+    Property<int32_t> p;
+    {
+        auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
+        ASSERT_TRUE(manager);
+        weak = manager;
+
+        manager->SetSyncScheduler(META_NS::MakeCallback<META_NS::IOnEngineSyncNeeded>(
+            [&scheduled](const IEngineValueManager::Ptr& values) { scheduled = values; }));
+
+        ASSERT_TRUE(manager->ConstructValues(EnginePropertyHandle{&cman, cman.entityRef}));
+        p = manager->ConstructProperty<int32_t>("value");
+        ASSERT_TRUE(p);
+
+        EXPECT_FALSE(manager->HasPendingSync());
+        p->SetValue(42);
+        EXPECT_TRUE(manager->HasPendingSync());
+        // The scheduler ran and was given this very manager, not something it had to look up.
+        EXPECT_EQ(scheduled, manager);
+    }
+
+    // Nothing but the scheduler holds the manager now. Asserted so the test cannot pass by the
+    // manager happening to stay alive for some other reason.
+    ASSERT_TRUE(scheduled);
+    EXPECT_FALSE(weak.expired());
+
+    EXPECT_TRUE(scheduled->Sync(EngineSyncDirection::TO_ENGINE));
+    EXPECT_FALSE(scheduled->HasPendingSync());
+    EXPECT_EQ(CORE_NS::GetPropertyValue<int32_t>(*cman.GetData(0), "value"), 42);
+
+    scheduled.reset();
+    EXPECT_TRUE(weak.expired());
+}
 
 /**
  * @tc.name: Values

@@ -34,7 +34,8 @@ namespace Internal {
  *        EngineValueManager steals the list during Sync(TO_ENGINE) to sync only dirty values.
  */
 struct EngineDirtyList {
-    std::mutex mutex;
+    /// Mutable so that the list can be inspected from a const query (HasPendingSync).
+    mutable std::mutex mutex;
     BASE_NS::vector<IEngineValue*> values;
     IEngineValueManager* owner{};
 };

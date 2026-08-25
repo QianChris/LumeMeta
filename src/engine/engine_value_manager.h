@@ -40,6 +40,8 @@ public:
 
     void SetNotificationQueue(const ITaskQueue::WeakPtr&) override;
     void SetDirtyNotifier(const IOnChanged::InterfaceTypePtr& notifier) override;
+    void SetSyncScheduler(const IOnEngineSyncNeeded::InterfaceTypePtr& scheduler) override;
+    bool HasPendingSync() const override;
     void NotifyDirty() override;
     bool ConstructValues(EnginePropertyHandle handle, EngineValueOptions) override;
     bool ConstructValues(CORE_NS::IPropertyHandle* handle, EngineValueOptions) override;
@@ -96,6 +98,7 @@ private:
     ValueList values_;
     ITaskQueue::Token task_token_{};
     IOnChanged::InterfaceTypePtr dirtyNotifier_;
+    IOnEngineSyncNeeded::InterfaceTypePtr syncScheduler_;
     EngineDirtyList dirtyList_;
 };
 

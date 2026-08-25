@@ -67,10 +67,29 @@ void EngineValueManager::SetDirtyNotifier(const IOnChanged::InterfaceTypePtr& no
     dirtyNotifier_ = notifier;
 }
 
+void EngineValueManager::SetSyncScheduler(const IOnEngineSyncNeeded::InterfaceTypePtr& scheduler)
+{
+    syncScheduler_ = scheduler;
+}
+
+bool EngineValueManager::HasPendingSync() const
+{
+    std::lock_guard lock{dirtyList_.mutex};
+    return !dirtyList_.values.empty();
+}
+
 void EngineValueManager::NotifyDirty()
 {
     if (dirtyNotifier_) {
         dirtyNotifier_->Invoke();
+    }
+    if (syncScheduler_) {
+        // Handing over a strong reference is the point of this hook: what the scheduler keeps is
+        // enough to guarantee the pending writes outlive whoever made them. GetSelf can be null
+        // while the manager is still being constructed, and there is nothing to schedule yet then.
+        if (auto self = GetSelf<IEngineValueManager>()) {
+            syncScheduler_->Invoke(self);
+        }
     }
 }
 

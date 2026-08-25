@@ -21,10 +21,23 @@
 #include <meta/interface/property/array_property.h>
 #include <meta/interface/property/property.h>
 #include <meta/interface/property/property_events.h>
+#include <meta/interface/simple_event.h>
 
 META_BEGIN_NAMESPACE()
 
 META_REGISTER_INTERFACE(IEngineValueManager, "542b7e13-21bd-4c9c-8d3f-a9527732216c")
+
+class IEngineValueManager;
+
+/**
+ * @brief Callable invoked when a manager acquires values written but not yet synced to the engine.
+ *        Receives the manager itself. @see IEngineValueManager::SetSyncScheduler.
+ */
+struct IOnEngineSyncNeededInfo {
+    constexpr static BASE_NS::Uid UID{"ccf028a8-2970-4e6c-a7de-518c9bd52a3a"};
+    constexpr static char const* NAME{"OnEngineSyncNeeded"};
+};
+using IOnEngineSyncNeeded = SimpleEvent<IOnEngineSyncNeededInfo, void(const BASE_NS::shared_ptr<IEngineValueManager>&)>;
 
 /**
  * @brief Options for constructing engine values
@@ -109,6 +122,24 @@ public:
     virtual BASE_NS::vector<IEngineValue::Ptr> GetAllEngineValues() const = 0;
     /// Check if any engine values exist
     virtual bool HasValues() const = 0;
+
+    /**
+     * @brief Set a callable invoked when this manager acquires values written but not yet synced to
+     *        the engine. Preferred over SetDirtyNotifier.
+     *
+     * Writes are batched, and the batch is settled later by whoever is notified here. The callable
+     * is handed the manager rather than left to find it, so that holding on to what it is given is
+     * enough to guarantee the batch survives: a value written just before its owner is dropped is
+     * still there to be synced. Keeping that reference until the sync has run is the receiver's
+     * side of the contract -- dropping it immediately loses the writes, exactly as a bare notifier
+     * that scheduled a weakly held owner would.
+     *
+     * The manager holds the callable, so the callable must not hold the manager.
+     */
+    virtual void SetSyncScheduler(const IOnEngineSyncNeeded::InterfaceTypePtr& scheduler) = 0;
+
+    /// True when values have been written but not yet synced to the engine.
+    virtual bool HasPendingSync() const = 0;
     /// Construct property from engine value with given name
     template<typename Type>
     Property<Type> ConstructProperty(BASE_NS::string_view name)
