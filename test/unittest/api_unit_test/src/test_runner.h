@@ -88,7 +88,7 @@ public:
             nullptr,
             ::Test::g_ohosApp->GetRsManager(),
             ::Test::g_ohosApp->GetNativeLibDir()};
-        const BASE_NS::string appAssetPath = "";
+        const BASE_NS::string appAssetPath = ::Test::g_ohosApp->GetAssetDir();
 #elif defined(_WIN32)
         const CORE_NS::PlatformCreateInfo info{::Test::g_windowsApp->GetEngineDir(),
             ::Test::g_windowsApp->GetAppDir(),

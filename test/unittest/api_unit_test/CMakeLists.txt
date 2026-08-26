@@ -168,21 +168,16 @@ source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/../ FILES ${common_test_sources})
 #
 # Test runner exe/library.
 #
-if(OHOS)
-    set(executableName entry)
-else()
-    set(executableName LumeMetaAPITestRunner)
-endif()
-
+set(executableName LumeMetaAPITestRunner)
 if(ANDROID)
     find_library(android_lib android)
     find_library(log_lib log)
     add_library(${executableName} SHARED ${common_test_sources} ${test_sources} "${CMAKE_ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
     target_include_directories(${executableName} PRIVATE "${CMAKE_ANDROID_NDK}/sources/android/native_app_glue")
     target_link_libraries(${executableName} ${android_lib} ${log_lib})
-elseif(OHOS) 
-    add_library(${executableName} SHARED ${common_test_sources} ${test_sources})
-    target_link_libraries(${executableName} libace_napi.z.so libace_ndk.z.so libhilog_ndk.z.so libbundle_ndk.z.so librawfile.z.so)
+elseif(OHOS)
+    add_executable(${executableName} ${common_test_sources} ${test_sources})
+    target_link_libraries(${executableName} libhilog_ndk.z.so)
 else()
     add_executable(${executableName} ${common_test_sources} ${test_sources})
     target_compile_definitions(${executableName} PRIVATE WIN32_LEAN_AND_MEAN=1 NOMINMAX)
@@ -233,24 +228,15 @@ endif()
 
 # Required copies -- uses a custom target so rebuilt plugins are always copied,
 # even when the test runner itself does not need re-linking.
-if(OHOS)
-    add_custom_target(${executableName}_CopyDeps ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AGPEngine::AGPEngineDLL> $<TARGET_FILE_DIR:${executableName}>
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../../../res/default/resources/rawfile/
-        COMMENT "Copying dependencies for ${executableName}"
-    )
-else()
-    add_custom_target(${executableName}_CopyDeps ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AGPEngine::AGPEngineDLL> $<TARGET_FILE_DIR:${executableName}>
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/plugins/
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LumeMeta::Plugin> $<TARGET_FILE_DIR:${executableName}>/plugins/
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/../../assets/
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../assets/
-        COMMENT "Copying dependencies for ${executableName}"
-    )
-endif()
+add_custom_target(${executableName}_CopyDeps ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:AGPEngine::AGPEngineDLL> $<TARGET_FILE_DIR:${executableName}>
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/plugins/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:LumeMeta::Plugin> $<TARGET_FILE_DIR:${executableName}>/plugins/
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${executableName}>/../../assets/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../assets/ $<TARGET_FILE_DIR:${executableName}>/../../assets/
+    COMMENT "Copying dependencies for ${executableName}"
+)
 add_dependencies(${executableName}_CopyDeps AGPEngine::AGPEngineDLL LumeMeta::Plugin)
 add_dependencies(${executableName} ${executableName}_CopyDeps)
 set_target_properties(${executableName}_CopyDeps PROPERTIES FOLDER Testing)

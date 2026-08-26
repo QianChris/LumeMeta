@@ -53,8 +53,7 @@ void RegisterPaths(CORE_NS::IFileManager& fileManager, CORE_NS::IEngine& engine)
     const BASE_NS::string applicationDirectory = "file://" + ::Test::g_ohosApp->GetFilesDir() + '/';
     const BASE_NS::string cacheDirectory = "file://" + ::Test::g_ohosApp->GetCacheDir() + '/';
 
-    // register hap protocol (to access files inside hap)
-    engine.GetPlatform().RegisterRawFilesystem(fileManager, "hap");
+    // No HAP: assets live on the filesystem, reached over file:// below.
 
     // LOGD("applicationDirectory='%{public}s'", applicationDirectory.c_str());
     // LOGD("cacheDirectory='%{public}s'", cacheDirectory.c_str());
@@ -85,7 +84,8 @@ void RegisterTestFileProtocol(CORE_NS::IFileManager& fileManager)
     constexpr BASE_NS::string_view applicationTestAssetsDirectory = "apk://test_data/";
 
 #elif defined(__OHOS__)
-    constexpr BASE_NS::string_view applicationTestAssetsDirectory = "hap://test_data/";
+    // The test data is pushed to the device alongside the binary.
+    const BASE_NS::string applicationTestAssetsDirectory = "file://" + ::Test::g_ohosApp->GetAssetDir();
 
 #else
     const BASE_NS::string applicationTestAssetsDirectory = "file://" + GetTestEnv()->appAssetPath;
