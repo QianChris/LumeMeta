@@ -186,6 +186,10 @@ private:
     bool ReadHeaders(CORE_NS::IFile& file, const ResourceContextPtr& context,
         BASE_NS::vector<CORE_NS::ResourceIdContext>& result, BASE_NS::vector<CORE_NS::IResource::Ptr>& destroy);
     BASE_NS::shared_ptr<ResourceData> FindResource(const ResourceIdContext& id);
+    /// Resource type of `r`, or null if it is not registered. Takes mutex_, and so do its callers
+    /// UpdateOptions and SaveResourceData: both call the type, which may re-enter the manager,
+    /// so neither may be called with the lock held.
+    CORE_NS::IResourceType::Ptr FindType(const ResourceData& r) const;
     bool UpdateOptions(ResourceData& r, CORE_NS::ResourceContextPtr context = nullptr) const;
     void CollectMatching(const BASE_NS::unordered_map<BASE_NS::string, BASE_NS::shared_ptr<ResourceData>>& group,
         const BASE_NS::array_view<const CORE_NS::MatchingResourceId>& selection,
