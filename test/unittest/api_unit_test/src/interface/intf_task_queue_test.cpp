@@ -24,6 +24,7 @@
 #include <meta/api/task_queue.h>
 #include <meta/ext/task_queue.h>
 #include <meta/interface/intf_task_queue.h>
+#include <meta/interface/intf_task_queue_extend.h>
 #include <meta/interface/intf_task_queue_registry.h>
 #include <meta/interface/object_macros.h>
 
@@ -302,6 +303,113 @@ UNIT_TEST(API_TaskQueueTest, AddWaitableTaskAbandoned, testing::ext::TestSize.Le
     EXPECT_EQ(f->WaitFor(10_ms), IFuture::ABANDONED);
     EXPECT_EQ(f->Wait(), IFuture::ABANDONED);
     EXPECT_FALSE(f->GetResult());
+}
+
+/**
+ * @tc.name: AddTaskAfterShutdownIsRejected
+ * @tc.desc: Tests that a shut down queue refuses new tasks. Nothing processes the queue any more --
+ *           a threaded queue has already joined its worker -- so a task accepted here would sit in
+ *           the queue forever rather than run.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_TaskQueueTest, AddTaskAfterShutdownIsRejected, testing::ext::TestSize.Level1)
+{
+    auto extend = interface_cast<ITaskQueueExtend>(this->queue);
+    ASSERT_TRUE(extend);
+    extend->Shutdown();
+
+    std::atomic<int> count = 0;
+    auto token = this->AddTask([&] {
+        ++count;
+        return false;
+    });
+    EXPECT_EQ(token, nullptr);
+
+    this->Wait(20);
+    EXPECT_EQ(count, 0);
+}
+
+/**
+ * @tc.name: AddWaitableTaskAfterShutdownIsAbandoned
+ * @tc.desc: Tests that a waitable task posted to a shut down queue comes back as an abandoned future
+ *           instead of one that waits forever. This is the deadlock shape seen in the field: an
+ *           object outliving its queue posts its teardown work from the destructor and blocks in
+ *           Future::Wait() with no thread left to complete the promise.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_P(API_TaskQueueTest, AddWaitableTaskAfterShutdownIsAbandoned, testing::ext::TestSize.Level1)
+{
+    auto extend = interface_cast<ITaskQueueExtend>(this->queue);
+    ASSERT_TRUE(extend);
+    extend->Shutdown();
+
+    std::atomic<int> count = 0;
+    auto f = this->queue->AddWaitableTask(CreateWaitableTask([&] {
+        ++count;
+        return 1;
+    }));
+    ASSERT_TRUE(f);
+    EXPECT_EQ(f->GetState(), IFuture::ABANDONED);
+    // make sure the waits return rather than block on a task that will never run
+    EXPECT_EQ(f->WaitFor(10_ms), IFuture::ABANDONED);
+    EXPECT_EQ(f->Wait(), IFuture::ABANDONED);
+    EXPECT_FALSE(f->GetResult());
+    EXPECT_EQ(f->GetResultOr<int>(0), 0);
+    EXPECT_EQ(count, 0);
+}
+
+/**
+ * @tc.name: RunDirectlyOrInTaskAfterShutdownDoesNotBlock
+ * @tc.desc: Tests the caller side of the same case: posting from a thread that is not the queue's
+ *           execution thread takes the "add a task and wait" path, which must return on a shut down
+ *           queue instead of hanging the calling thread.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, RunDirectlyOrInTaskAfterShutdownDoesNotBlock, testing::ext::TestSize.Level1)
+{
+    auto queue = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
+    ASSERT_TRUE(queue);
+    auto extend = interface_cast<ITaskQueueExtend>(queue);
+    ASSERT_TRUE(extend);
+    extend->Shutdown();
+
+    std::atomic<bool> ran{};
+    auto f = AddFutureTaskOrRunDirectly(queue, [&] { ran = true; });
+    EXPECT_EQ(f.WaitFor(10_ms), IFuture::ABANDONED);
+    EXPECT_EQ(f.Wait(), IFuture::ABANDONED);
+    EXPECT_FALSE(ran);
+}
+
+/**
+ * @tc.name: ThenOnShutdownQueueIsAbandoned
+ * @tc.desc: Tests that a continuation targeted at a queue that shut down before the future completed
+ *           is abandoned. The continuation is posted at completion time, so it hits the closed queue
+ *           long after Then() returned, and its own future must not be left waiting.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, ThenOnShutdownQueueIsAbandoned, testing::ext::TestSize.Level1)
+{
+    auto queue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    auto continuationQueue = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(queue);
+    ASSERT_TRUE(continuationQueue);
+    auto extend = interface_cast<ITaskQueueExtend>(continuationQueue);
+    ASSERT_TRUE(extend);
+
+    std::atomic<bool> ran{};
+    auto f = queue->AddWaitableTask(CreateWaitableTask([] { return 1; }))
+                 ->Then(CreateContinuation([&](IAny::Ptr) { ran = true; }), continuationQueue);
+    ASSERT_TRUE(f);
+    EXPECT_EQ(f->GetState(), IFuture::WAITING);
+
+    extend->Shutdown();
+    // completes the first future, which then tries to post the continuation to the closed queue
+    queue->ProcessTasks();
+
+    EXPECT_EQ(f->GetState(), IFuture::ABANDONED);
+    EXPECT_EQ(f->WaitFor(10_ms), IFuture::ABANDONED);
+    EXPECT_EQ(f->Wait(), IFuture::ABANDONED);
+    EXPECT_FALSE(ran);
 }
 
 /**

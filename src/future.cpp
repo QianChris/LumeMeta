@@ -106,7 +106,15 @@ void Future::ActivateContinuation(ContinuationData d, const IAny::Ptr& result)
     if (auto q = d.queue.lock()) {
         d.continuation->SetParam(result);
         auto fut = interface_pointer_cast<IFutureSetInfo>(d.continuation->GetFuture());
+        // Keep the continuation alive over the AddTask: a shut-down queue rejects the task, and then it
+        // is on us to abandon the continuation's future rather than leave it waiting for a task no
+        // thread will ever run.
+        auto continuation = d.continuation;
         auto token = q->AddTask(BASE_NS::move(d.continuation));
+        if (!token) {
+            continuation->SetAbandoned();
+            return;
+        }
         if (fut) {
             fut->SetQueueInfo(q, token);
         }

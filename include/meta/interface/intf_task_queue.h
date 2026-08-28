@@ -103,6 +103,8 @@ public:
      * @brief Add a task to the task queue and execute the task as soon as possible.
      * @param p The task to execute.
      * @return Queue token for the task. The token can be used to cancel the task.
+     *         Null if the queue did not accept the task, which is the case when the queue has been
+     *         shut down: it no longer runs anything, so the task is discarded rather than queued.
      */
     virtual Token AddTask(ITaskQueueTask::Ptr p) = 0;
     /**
@@ -113,13 +115,17 @@ public:
      * @param p The task to execute.
      * @param delay Do not run the task earlier than this delay.
      * @return Queue token for the task. The token can be used to cancel the task.
+     *         Null if the queue did not accept the task, which is the case when the queue has been
+     *         shut down: it no longer runs anything, so the task is discarded rather than queued.
      */
     virtual Token AddTask(ITaskQueueTask::Ptr p, const TimeSpan& delay) = 0;
     /**
      * @brief Add a task to the task queue and return an object which can be
      *        used to wait for the task to complete.
      * @param p The task to execute.
-     * @return A future object which can be waited on.
+     * @return A future object which can be waited on. If the queue has been shut down it does not
+     *         accept the task, and the returned future is already abandoned, so waiting on it
+     *         returns immediately instead of blocking on a task that will never run.
      */
     virtual IFuture::Ptr AddWaitableTask(ITaskQueueWaitableTask::Ptr p) = 0;
     /**

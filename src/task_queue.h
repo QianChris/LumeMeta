@@ -22,6 +22,7 @@
 #include <thread>
 
 #include <base/containers/vector.h>
+#include <core/log.h>
 
 #include <meta/interface/intf_clock.h>
 #include <meta/interface/intf_task_queue.h>
@@ -120,6 +121,15 @@ public:
     {
         if (p) {
             std::unique_lock lock{mutex_};
+            if (terminate_) {
+                // The queue is closed: nothing processes tasks_ any more (a threaded queue has already
+                // joined its worker). A task accepted here would sit in the queue forever, and anything
+                // waiting on its future -- AddWaitableTask, RunDirectlyOrInTask -- would block forever
+                // with no thread left to wake it. Reject so the caller can abandon the future instead.
+                lock.unlock();
+                CORE_LOG_W("Task added to a task queue that is shut down, discarding it");
+                return nullptr;
+            }
             return AddTaskImpl(BASE_NS::move(p), delay, excTime);
         }
         return nullptr;

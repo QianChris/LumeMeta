@@ -130,7 +130,11 @@ public:
         IPromise::Ptr promise(new Promise);
         BASE_NS::shared_ptr<PromisedQueueTask> task(new PromisedQueueTask(BASE_NS::move(p), promise));
         auto f = task->GetFuture();
-        AddTask(BASE_NS::move(task));
+        if (!AddTask(BASE_NS::move(task))) {
+            // The queue refused the task (it is shut down), so nothing will ever complete the promise.
+            // Abandon it here, otherwise a caller waiting on the future would wait forever.
+            promise->SetAbandoned();
+        }
         return f;
     }
 
