@@ -127,7 +127,7 @@ public:
                 // waiting on its future -- AddWaitableTask, RunDirectlyOrInTask -- would block forever
                 // with no thread left to wake it. Reject so the caller can abandon the future instead.
                 lock.unlock();
-                CORE_LOG_W("Task added to a task queue that is shut down, discarding it");
+                CORE_LOG_D("Task added to a task queue that is shut down, discarding it");
                 return nullptr;
             }
             return AddTaskImpl(BASE_NS::move(p), delay, excTime);

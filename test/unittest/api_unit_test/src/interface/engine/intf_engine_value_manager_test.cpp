@@ -22,11 +22,14 @@
 #include <core/property/property_handle_util.h>
 
 #include <meta/api/engine/util.h>
+#include <meta/api/function.h>
 #include <meta/api/make_callback.h>
 #include <meta/interface/builtin_objects.h>
 #include <meta/interface/engine/intf_engine_value_manager.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_task_queue_registry.h>
+#include <meta/interface/property/construct_property.h>
+#include <meta/interface/property/intf_bind.h>
 
 #include "helpers/testing_objects.h"
 #include "helpers/util.h"
@@ -838,6 +841,49 @@ UNIT_TEST_F(API_EngineManagerTest, PendingLocalWriteNotOverwrittenByEngineSync, 
     EXPECT_TRUE(CORE_NS::SetPropertyValue(*cman.GetData(0), "value", 5));
     EXPECT_TRUE(manager->Sync(EngineSyncDirection::FROM_ENGINE));
     EXPECT_EQ(p->GetValue(), 5);
+}
+
+/**
+ * @tc.name: EvaluatePropertyToEngine
+ * @tc.desc: Evaluate a bound property and push the result into its engine value.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, EvaluatePropertyToEngine, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop1::EngineTestProp> cman{prop1::ENGINE_TESTPROP_METADATA};
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+    EXPECT_TRUE(manager->ConstructValues(EnginePropertyHandle{&cman, cman.entityRef}));
+
+    // Stack is [engine value]; put a bind on top so it becomes [engine value, bind].
+    auto p = manager->ConstructProperty("value");
+    ASSERT_TRUE(p);
+    Property<int32_t> typed{p};
+    ASSERT_TRUE(typed);
+    ASSERT_TRUE(typed->SetBind(CreateBindFunction([] { return 42; })));
+    EXPECT_EQ(typed->GetValue(), 42);
+
+    // The bind's value has not reached the engine value yet.
+    EXPECT_EQ(CORE_NS::GetPropertyValue<int32_t>(*cman.GetData(0), "value"), 0);
+
+    // Evaluate the property and push the result into the top-most engine value.
+    EXPECT_TRUE(EvaluatePropertyToEngine(p));
+
+    // The pushed value is flushed to the ECS component on the next sync.
+    EXPECT_TRUE(manager->Sync(EngineSyncDirection::TO_ENGINE));
+    EXPECT_EQ(CORE_NS::GetPropertyValue<int32_t>(*cman.GetData(0), "value"), 42);
+
+    // The bind is preserved (not popped) and still governs reads.
+    auto stack = interface_cast<IStackProperty>(p);
+    ASSERT_TRUE(stack);
+    const TypeId bindIds[] = {IBind::UID};
+    EXPECT_FALSE(stack->GetValues(bindIds, false).empty());
+    EXPECT_EQ(typed->GetValue(), 42);
+
+    // A property without an engine value in its stack returns false and does nothing.
+    auto plain = ConstructProperty<int32_t>("plain", 7);
+    EXPECT_FALSE(EvaluatePropertyToEngine(plain.GetProperty()));
 }
 
 }  // namespace UTest

@@ -178,6 +178,45 @@ inline IEngineValue::Ptr GetEngineValueFromProperty(const IProperty::ConstPtr& p
     return GetFirstValueFromProperty<IEngineValue>(p);
 }
 
+/// Return the top-most engine value in a stack property, or nullptr if none.
+inline IEngineValue::Ptr TopEngineValue(IStackProperty& stack)
+{
+    const TypeId ids[] = {IEngineValue::UID};
+    auto values = stack.GetValues(ids, false);
+    return values.empty() ? nullptr : interface_pointer_cast<IEngineValue>(values.back());
+}
+
+/// Push an already evaluated value into an engine value, marking it dirty for ECS sync.
+inline bool PushToEngineValue(const IEngineValue::Ptr& ev, const IAny& value)
+{
+    if (!ev || !value.GetTypeId().IsValid()) {
+        return false;
+    }
+    InterfaceUniqueLock lock{ev};
+    return static_cast<bool>(ev->SetValue(value));
+}
+
+/**
+ * @brief Evaluate a property and push the result into the top-most engine value in its stack.
+ *
+ * Evaluates the property's current value (running the top-most stack value, e.g. a bind) and
+ * writes it directly into the top-most engine value below, marking it dirty so it is flushed to
+ * the engine on the next EngineValueManager Sync(TO_ENGINE)/AUTO. The stack write path is
+ * bypassed, so a bind on top of the engine value is preserved (not popped).
+ *
+ * @param p Property to evaluate and push
+ * @return True if an engine value was found and the evaluated value was pushed to it
+ */
+inline bool EvaluatePropertyToEngine(const IProperty::Ptr& p)
+{
+    auto stack = interface_cast<IStackProperty>(p);
+    if (!stack) {
+        return false;
+    }
+    PropertyLock lock{p};
+    return PushToEngineValue(TopEngineValue(*stack), p->GetValue());
+}
+
 /**
  * @brief Create property from engine value with matching type
  * @param name Name of the property
