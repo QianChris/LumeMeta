@@ -900,16 +900,42 @@ UNIT_TEST(API_TaskQueueTest, SameTimeTasksRunInAdditionOrder, testing::ext::Test
             order.push_back(2);
             return false;
         }));
-        // PollingTaskQueue skips a ProcessTasks that lands on the same tick as the previous one, so
-        // spin until the round has actually been processed rather than assuming one call suffices.
-        constexpr int MAX_SPINS = 1000;
-        for (int spin = 0; (order.size() < 2) && (spin < MAX_SPINS); ++spin) {
-            q->ProcessTasks();
-        }
+        // Both tasks are due immediately, so a single pump runs them both.
+        q->ProcessTasks();
 
         ASSERT_EQ(order.size(), 2U) << "round " << i;
         EXPECT_EQ(order[0], 1) << "round " << i;
         EXPECT_EQ(order[1], 2) << "round " << i;
+    }
+}
+
+/**
+ * @tc.name: TaskRunsOnTheNextProcessTasks
+ * @tc.desc: Tests that a task added with no delay is run by the very next ProcessTasks call. A
+ *           polling queue only runs work when its owner pumps it, so "add a task, pump once" is
+ *           the whole contract, and a pump that silently runs nothing is indistinguishable to the
+ *           caller from an empty queue.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, TaskRunsOnTheNextProcessTasks, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+    q->ProcessTasks();
+
+    // Repeated because whether the pump under test lands on the same clock tick as the one before
+    // it is a matter of timing; a single round would only sometimes exercise that.
+    constexpr int ROUNDS = 200;
+    bool run = false;
+    for (int i = 0; i < ROUNDS; ++i) {
+        run = false;
+        q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+            run = true;
+            return false;
+        }));
+        q->ProcessTasks();
+
+        ASSERT_TRUE(run) << "round " << i;
     }
 }
 

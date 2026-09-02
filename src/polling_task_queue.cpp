@@ -103,22 +103,15 @@ public:
         }
         TimeSpan ctime = Time();
         std::unique_lock lock{mutex_};
-        if (ctime != lastTime_) {
-            lastTime_ = ctime;
-            execThread_ = std::this_thread::get_id();
-            TaskQueueImpl::ProcessTasks(lock, ctime);
-            execThread_ = std::thread::id();
-        } else {
-            // non issue. but.
-            CORE_LOG_V("Double call to ProcessTasks.");
-        }
+        execThread_ = std::this_thread::get_id();
+        TaskQueueImpl::ProcessTasks(lock, ctime);
+        execThread_ = std::thread::id();
     }
 
 private:
     // clang-format off
     uint64_t threadId_{0};
     // clang-format on
-    TimeSpan lastTime_;
 };
 // Internal api for engine task queue
 namespace Internal {
