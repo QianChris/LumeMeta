@@ -182,9 +182,19 @@ public:
             execToken_ = nullptr;
         }
 
-        // rearm the tasks.. (if we are not shutting down)
         if (!terminate_) {
+            // rearm the tasks..
             Rearm(curTime);
+        } else {
+            // Shutting down, so the repeats set aside for Rearm are dropped instead of returned.
+            // Close cannot do it: it runs while the task is still executing, and the task only
+            // reaches rearm_ after that. They are released with the lock dropped, because a
+            // callback can re-enter the queue as it dies, CancelTask included, and that would
+            // take this same mutex.
+            auto abandoned = BASE_NS::move(rearm_);
+            lock.unlock();
+            abandoned.clear();
+            lock.lock();
         }
     }
 

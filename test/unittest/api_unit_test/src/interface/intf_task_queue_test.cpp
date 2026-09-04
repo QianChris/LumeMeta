@@ -1150,6 +1150,78 @@ UNIT_TEST(API_TaskQueueTest, ThreadedQueueStillRunsWorkQueuedByARunningTask, tes
     EXPECT_EQ(innerRuns.load(), 1) << "work queued by a running task has to reach the worker's next turn";
 }
 
+/**
+ * @tc.name: ShutdownWhileATaskRunsDropsItsRepeatRequest
+ * @tc.desc: Tests that a task which asks to repeat, while the queue is being shut down underneath
+ *           it, is let go rather than held. A repeating task is set aside as it finishes and put
+ *           back afterwards, and a pass that stops because the queue terminated never gets to that
+ *           second step, so the task is left in a queue that will never run it again. It keeps
+ *           whatever its callback captured alive with it, which for a callback that holds the
+ *           object owning the queue is a cycle that outlives the shutdown meant to break it.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, ShutdownWhileATaskRunsDropsItsRepeatRequest, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+    auto extend = interface_cast<ITaskQueueExtend>(q);
+    ASSERT_TRUE(extend);
+
+    BASE_NS::weak_ptr<ITaskQueueTask> watch;
+    {
+        ITaskQueueTask::Ptr task = MakeCallback<ITaskQueueTask>([&] {
+            // What a teardown from another thread looks like from inside a running task.
+            extend->Shutdown();
+            // And it still asks to run again. The queue has just been told to drop its work, so
+            // this request has to go with it.
+            return true;
+        });
+        watch = task;
+        q->AddTask(task);
+    }
+
+    q->ProcessTasks();
+
+    EXPECT_TRUE(watch.expired()) << "a queue that has been shut down must not keep hold of a task "
+                                    "that asked to repeat";
+}
+
+/**
+ * @tc.name: ShutdownDropsARepeatThatWasAlreadySetAside
+ * @tc.desc: Tests the same release from the other side. In ShutdownWhileATaskRunsDropsItsRepeat-
+ *           Request the shutdown lands before anything has been set aside, so the queue is holding
+ *           nothing at that moment. Here an earlier task in the pass has already asked to repeat
+ *           and is waiting to be put back when the shutdown arrives, so the queue is holding it
+ *           when it is told to drop its work. Both have to end with the task released, and they
+ *           reach that through the same single point at the end of the pass.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, ShutdownDropsARepeatThatWasAlreadySetAside, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+    auto extend = interface_cast<ITaskQueueExtend>(q);
+    ASSERT_TRUE(extend);
+
+    BASE_NS::weak_ptr<ITaskQueueTask> watch;
+    {
+        // Queued first, so it runs first and is set aside for the end of the pass.
+        ITaskQueueTask::Ptr repeating = MakeCallback<ITaskQueueTask>([] { return true; });
+        watch = repeating;
+        q->AddTask(repeating);
+    }
+    // Queued second, so the shutdown lands while the queue is holding the task above.
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        extend->Shutdown();
+        return false;
+    }));
+
+    q->ProcessTasks();
+
+    EXPECT_TRUE(watch.expired()) << "a task set aside to repeat has to be released when the queue "
+                                    "is shut down out from under the pass holding it";
+}
+
 INSTANTIATE_TEST_SUITE_P(
     API_TaskQueueTest, API_TaskQueueTest, ::testing::Values(ClassId::PollingTaskQueue, ClassId::ThreadedTaskQueue));
 
