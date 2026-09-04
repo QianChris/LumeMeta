@@ -923,20 +923,231 @@ UNIT_TEST(API_TaskQueueTest, TaskRunsOnTheNextProcessTasks, testing::ext::TestSi
     ASSERT_TRUE(q);
     q->ProcessTasks();
 
-    // Repeated because whether the pump under test lands on the same clock tick as the one before
-    // it is a matter of timing; a single round would only sometimes exercise that.
+    // Repeated so that anything a round leaves behind would run again in the next one.
     constexpr int ROUNDS = 200;
-    bool run = false;
     for (int i = 0; i < ROUNDS; ++i) {
-        run = false;
+        int runs = 0;
         q->AddTask(MakeCallback<ITaskQueueTask>([&] {
-            run = true;
+            ++runs;
             return false;
         }));
         q->ProcessTasks();
 
-        ASSERT_TRUE(run) << "round " << i;
+        ASSERT_EQ(runs, 1) << "round " << i;
+
+        // And the queue is empty again. Counting rather than latching a flag, and pumping once
+        // more, is what stops a queue that never removes a finished task from passing this: its
+        // leftovers would satisfy a flag on every later round while writing through a reference
+        // to a round that has already returned.
+        q->ProcessTasks();
+        ASSERT_EQ(runs, 1) << "round " << i;
     }
+}
+
+/**
+ * @tc.name: TaskAddedWhileProcessingRunsOnTheNextProcessTasks
+ * @tc.desc: Tests that a task added while ProcessTasks runs is left for the next call rather than
+ *           picked up by the pass that is already under way. The pass fixes what is due when it
+ *           starts, so the amount of work one pump does is bounded by what the caller had queued.
+ *           Without that a task that re-posts itself would keep a single pump going forever, and a
+ *           per frame pump would stall the frame it is driving.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, TaskAddedWhileProcessingRunsOnTheNextProcessTasks, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+
+    // Repeated so that a task left behind by one round would show up in the next.
+    constexpr int ROUNDS = 200;
+    for (int i = 0; i < ROUNDS; ++i) {
+        int innerRuns = 0;
+        q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+            // Dated in the past, so it is unmistakably due the moment it is queued. A task queued
+            // with no delay is due only from the next microsecond, which a pass that took work as
+            // it went would usually miss anyway, and then this would be pinning the clock rather
+            // than the rule.
+            q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+                ++innerRuns;
+                return false;
+            }),
+                TimeSpan::Milliseconds(-10));
+            return false;
+        }));
+
+        q->ProcessTasks();
+        ASSERT_EQ(innerRuns, 0) << "round " << i;
+
+        q->ProcessTasks();
+        ASSERT_EQ(innerRuns, 1) << "round " << i;
+
+        // Drained, so nothing from this round can run again and write into the next one, which
+        // reuses these stack slots.
+        q->ProcessTasks();
+        ASSERT_EQ(innerRuns, 1) << "round " << i;
+    }
+}
+
+/**
+ * @tc.name: ProcessTasksIgnoresAReentrantCall
+ * @tc.desc: Tests that a task pumping the queue it is running on does not start a nested pass. A
+ *           task body that spins a nested event loop can let its owner pump the queue again while
+ *           the first pass is still on the stack. The queue keeps one set of members describing
+ *           the task in flight, so a nested pass would clear them under the outer one and leave
+ *           CancelTask waiting on a task that has already finished. The queued work still runs,
+ *           the outer pass takes it.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, ProcessTasksIgnoresAReentrantCall, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+
+    bool firstRan = false;
+    int secondRuns = 0;
+    // Deliberately not a bool. It has to be able to say "the nested pump never happened at all",
+    // which a flag starting false cannot tell apart from "the nested pump ran nothing".
+    int secondRunsSeenByNestedPump = -1;
+
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        firstRan = true;
+        // Pumping from inside a task must not run the rest of the queue here.
+        q->ProcessTasks();
+        secondRunsSeenByNestedPump = secondRuns;
+        return false;
+    }));
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        ++secondRuns;
+        return false;
+    }));
+
+    q->ProcessTasks();
+
+    // The reentrant call has to have actually been made, or the rest proves nothing.
+    ASSERT_TRUE(firstRan);
+    EXPECT_EQ(secondRunsSeenByNestedPump, 0) << "the nested pump must not run the queued work";
+    // The second task belongs to this pass, so it still runs, just not from inside the first one.
+    EXPECT_EQ(secondRuns, 1);
+}
+
+/**
+ * @tc.name: TaskAddedMidPassDoesNotStrandWorkThatWasAlreadyDue
+ * @tc.desc: Tests that a task queued while a pass runs is stepped over rather than treated as the
+ *           end of that pass. Such a task normally sorts ahead of everything already due, so the
+ *           most due end of the queue looks like a safe place to stop, but not always: a negative
+ *           delay puts it at that end instead. Stopping there would abandon work that was queued
+ *           and due before the pass even began, and report success while doing it.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, TaskAddedMidPassDoesNotStrandWorkThatWasAlreadyDue, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+
+    int firstRuns = 0;
+    int secondRuns = 0;
+    int backdatedRuns = 0;
+
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        ++firstRuns;
+        q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+            ++backdatedRuns;
+            return false;
+        }),
+            TimeSpan::Milliseconds(-10));
+        return false;
+    }));
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        ++secondRuns;
+        return false;
+    }));
+
+    q->ProcessTasks();
+
+    EXPECT_EQ(firstRuns, 1);
+    EXPECT_EQ(secondRuns, 1) << "work queued before the pass must run even when a task queued "
+                                "during it is more due than everything else";
+    EXPECT_EQ(backdatedRuns, 0) << "and the task queued during the pass still waits for the next call";
+
+    q->ProcessTasks();
+    EXPECT_EQ(backdatedRuns, 1);
+}
+
+/**
+ * @tc.name: CancelFromInsideATaskStopsAnotherTaskInTheSamePass
+ * @tc.desc: Tests that a task which is due, and which the running pass is going to reach, can
+ *           still be cancelled from inside an earlier task in that same pass. This is the ordinary
+ *           shape of a task that decides its follow-up work is no longer wanted, so a cancel that
+ *           silently does nothing here would let work run that the caller had already called off.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, CancelFromInsideATaskStopsAnotherTaskInTheSamePass, testing::ext::TestSize.Level1)
+{
+    auto q = GetObjectRegistry().Create<IPollingTaskQueue>(ClassId::PollingTaskQueue);
+    ASSERT_TRUE(q);
+
+    int firstRuns = 0;
+    int secondRuns = 0;
+
+    ITaskQueue::Token second{};
+
+    // Queued first, so it runs first. The cancel then lands while its target is still waiting its
+    // turn inside the same pass, which is the case worth pinning.
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        ++firstRuns;
+        q->CancelTask(second);
+        return false;
+    }));
+    second = q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        ++secondRuns;
+        return false;
+    }));
+    ASSERT_TRUE(second);
+
+    q->ProcessTasks();
+
+    EXPECT_EQ(firstRuns, 1);
+    EXPECT_EQ(secondRuns, 0) << "a task cancelled while the pass was under way must not run";
+
+    q->ProcessTasks();
+    EXPECT_EQ(secondRuns, 0) << "and must not resurface on a later pass either";
+}
+
+/**
+ * @tc.name: ThreadedQueueStillRunsWorkQueuedByARunningTask
+ * @tc.desc: Tests that the threaded queue keeps making progress when a task queues more work. It
+ *           shares the pass logic with the polling queue, which deliberately holds work queued
+ *           mid-pass back for the next call. The threaded worker has no caller to hand that back
+ *           to, it only loops, so the point here is that holding the work back defers it by one
+ *           turn of that loop and not indefinitely.
+ * @tc.type: FUNC
+ */
+UNIT_TEST(API_TaskQueueTest, ThreadedQueueStillRunsWorkQueuedByARunningTask, testing::ext::TestSize.Level1)
+{
+    // Declared before the queue so that the queue, and the thread it owns, is torn down first and
+    // no task can be left writing into these after they have gone.
+    std::atomic<int> innerRuns{0};
+    std::atomic<int> outerRuns{0};
+
+    auto q = GetObjectRegistry().Create<ITaskQueue>(ClassId::ThreadedTaskQueue);
+    ASSERT_TRUE(q);
+
+    q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+        ++outerRuns;
+        q->AddTask(MakeCallback<ITaskQueueTask>([&] {
+            ++innerRuns;
+            return false;
+        }));
+        return false;
+    }));
+
+    constexpr int WAIT_MS = 2000;
+    for (int i = 0; (i < WAIT_MS) && (innerRuns.load() == 0); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    EXPECT_EQ(outerRuns.load(), 1);
+    EXPECT_EQ(innerRuns.load(), 1) << "work queued by a running task has to reach the worker's next turn";
 }
 
 INSTANTIATE_TEST_SUITE_P(

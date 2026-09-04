@@ -44,8 +44,10 @@ public:
 
     void CancelTask(Token token)
     {
-        // destroy task when mutex is not locked
-        ITaskQueueTask::Ptr removed;
+        // destroy tasks when mutex is not locked. A token can match more than once, the same
+        // task can be queued several times and can sit in a batch and in the queue at once, so
+        // this collects every match rather than holding one at a time.
+        BASE_NS::vector<ITaskQueueTask::Ptr> removed;
         if (token != nullptr) {
             std::unique_lock lock{mutex_};
             if (token == execToken_) {
@@ -65,28 +67,27 @@ public:
                 }
             }
 
-            // Remove all tasks from the queue, with the same token. (if any)
+            // Remove all tasks with the same token. (if any)
             // One can push the same task to the queue multiple times currently.
             // (i.e. you "can" schedule the same task with different "delays")
             // So we remove all scheduled tasks with same token.
-            // Also redo/rearm might have add the task back while we were waiting/yielding.
-            for (auto it = tasks_.begin(); it != tasks_.end();) {
-                if (it->operation.get() == token) {
-                    removed = BASE_NS::move(it->operation);
-                    it = tasks_.erase(it);
-                } else {
-                    ++it;
+            auto eraseToken = [token, &removed](auto& container) {
+                for (auto it = container.begin(); it != container.end();) {
+                    if (it->operation.get() == token) {
+                        removed.push_back(BASE_NS::move(it->operation));
+                        it = container.erase(it);
+                    } else {
+                        ++it;
+                    }
                 }
-            }
-            // see if it's in the rearm_ queue
-            for (auto it = rearm_.begin(); it != rearm_.end();) {
-                if (it->operation.get() == token) {
-                    removed = BASE_NS::move(it->operation);
-                    it = rearm_.erase(it);
-                } else {
-                    ++it;
-                }
-            }
+            };
+            // A task can be waiting in any of the three: scheduled, held for the pass that is
+            // running it, or on its way back after asking to repeat, which it can reach while we
+            // yield above waiting for it to stop. Miss one and the cancel quietly does nothing,
+            // so all three are swept.
+            eraseToken(tasks_);
+            eraseToken(running_);
+            eraseToken(rearm_);
         }
     }
 
@@ -142,12 +143,24 @@ public:
             duration_cast<microseconds>(high_resolution_clock::now().time_since_epoch()).count());
     }
 
+    // Runs the tasks that are due at curTime, oldest first.
     void ProcessTasks(std::unique_lock<std::mutex>& lock, TimeSpan curTime)
     {
-        // Must only be called while having the lock
-        while (!terminate_ && !tasks_.empty() && curTime >= tasks_.back().executeTime) {
-            auto task = BASE_NS::move(tasks_.back());
+        // Must only be called while having the lock.
+        // Take what is due out of the queue before running any of it. That fixes the work this
+        // call will do, so a task that queues more, itself included, cannot extend the pass.
+        // Anything queued while we run goes to tasks_ and waits for the next call.
+        //
+        // tasks_ is ordered by executeTime descending, so the due tasks are the block at the back
+        // and taking from the back gives running_ the oldest first.
+        while (!terminate_ && !tasks_.empty() && (curTime >= tasks_.back().executeTime)) {
+            running_.push_back(BASE_NS::move(tasks_.back()));
             tasks_.pop_back();
+        }
+
+        while (!terminate_ && !running_.empty()) {
+            auto task = BASE_NS::move(running_.front());
+            running_.pop_front();
             execToken_ = task.operation.get();
             currentlyExecutingRemoved = false;
             lock.unlock();
@@ -209,6 +222,9 @@ public:
         std::unique_lock lock{mutex_};
         terminate_ = true;
         tasks_.clear();
+        // A pass interrupted by the shutdown leaves its batch here, so this has to go as well or
+        // the work outlives the queue that was told to drop it.
+        running_.clear();
     }
 
     struct Task {
@@ -230,6 +246,9 @@ protected:
     // currently running task..
     Token execToken_{nullptr};
     std::deque<Task> tasks_;
+    // The batch the running pass took out of tasks_, oldest first. Separate so that work queued
+    // while the pass runs cannot join it.
+    std::deque<Task> running_;
     BASE_NS::vector<Task> rearm_;
     ITaskQueue::WeakPtr self_;
     bool currentlyExecutingRemoved{};

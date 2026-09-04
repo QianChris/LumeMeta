@@ -103,15 +103,34 @@ public:
         }
         TimeSpan ctime = Time();
         std::unique_lock lock{mutex_};
+        if (processing_) {
+            // A task is pumping the queue it runs on, which a nested event loop makes possible.
+            // TaskQueueImpl drops the lock around a task, so this recurses rather than deadlocks,
+            // and execThread_, execToken_ and currentlyExecutingRemoved are one set of members
+            // shared by every pass. A nested pass clears them under the outer one, and the outer
+            // pass then runs on believing no task is executing, which breaks CancelTask both ways:
+            // a cancel aimed at the outer task matches nothing and returns without cancelling or
+            // waiting, and a task that cancels itself waits for itself forever. Running nothing is
+            // the deliberate cost, see IPollingTaskQueue::ProcessTasks for the way out.
+            CORE_LOG_V("Reentrant call to ProcessTasks, ignored.");
+            return;
+        }
+        // Keep this straight-line. Nothing between the two assignments returns, so the reset is
+        // always reached. An early exit added here later would leave processing_ set, and that
+        // turns every later pump into a silent no-op for the life of the queue.
+        processing_ = true;
         execThread_ = std::this_thread::get_id();
         TaskQueueImpl::ProcessTasks(lock, ctime);
         execThread_ = std::thread::id();
+        processing_ = false;
     }
 
 private:
     // clang-format off
     uint64_t threadId_{0};
     // clang-format on
+    // Guards against a task pumping the queue it runs on. Only read and written under mutex_.
+    bool processing_{false};
 };
 // Internal api for engine task queue
 namespace Internal {

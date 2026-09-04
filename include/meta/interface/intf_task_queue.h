@@ -147,10 +147,15 @@ class IPollingTaskQueue : public ITaskQueue {
 
 public:
     /**
-     * @brief Execute all queued tasks. The function returns once all of the tests
-     *        have been executed.
-     * @note  If a task reschedules itself while being run, it will not be run a second
-     *        time until ProcessTasks() is called again.
+     * @brief Execute the tasks that were queued when the call began, and return once they have
+     *        all run.
+     * @note  Work added while the call is running is left for the next call. That covers a task
+     *        rescheduling itself and equally a task queueing any other task, so a chain of tasks
+     *        that each queue the next needs one ProcessTasks() call per link.
+     * @note  Calling this from inside a task running on this queue does nothing and returns. A
+     *        task must therefore not queue work and then pump until it runs, because it never
+     *        will. Use AddFutureTaskOrRunDirectly() (meta/api/task_queue.h), which runs the work
+     *        inline when the caller is already on the queue's execution thread.
      */
     virtual void ProcessTasks() = 0;
 };
