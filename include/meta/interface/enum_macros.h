@@ -60,8 +60,11 @@ META_END_NAMESPACE()
 
 #define META_ENUM_VALUE(Value, Name, Desc) {Value, {Name, Desc}},
 
+// META_TYPE_IMPL with #MyEnum, not META_TYPE(MyEnum): as a plain argument MyEnum would be
+// macro-expanded before being stringized, so a namespace-macro-qualified name would register
+// under a different string than META_TYPE gives it - a different type name is a different uid.
 #define META_ENUM_TYPE(MyEnum)                                                  \
-    META_TYPE(MyEnum)                                                           \
+    META_TYPE_IMPL(MyEnum, #MyEnum)                                             \
     template<>                                                                  \
     struct ::META_NS::MapAnyType<MyEnum, ::META_NS::EnableSpecialisationType> { \
         using AnyType = ::META_NS::Enum<MyEnum##Metadata>;                      \
