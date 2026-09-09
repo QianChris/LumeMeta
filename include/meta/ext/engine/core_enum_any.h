@@ -270,8 +270,11 @@ private:
 template<typename Type, typename Conv, typename... CoreType>
 class CoreEnumAny : public CoreEnumAnyImpl {
     // The shared impl stores the value as raw integer bits and does integer bit-ops for the IEnum surface,
-    // so a non-enum (e.g. float) access Type would silently produce garbage. Enforce the enum invariant.
-    static_assert(META_NS::is_enum_v<Type>, "CoreEnumAny requires an enum access Type");
+    // so a non-integral (e.g. float) access Type would silently produce garbage. An unsigned integer is
+    // allowed because a bit-field component property is declared as one (e.g. LayerComponent's uint64_t
+    // layerMask) while carrying the bit names in its metadata.
+    static_assert(META_NS::is_enum_v<Type> || (BASE_NS::is_unsigned_v<Type> && !BASE_NS::is_same_v<Type, bool>),
+        "CoreEnumAny requires an enum or unsigned integer access Type");
 
     static IAny::Ptr MakeArray(const CORE_NS::Property& p);  // defined after ArrayCoreEnumAny; used by INFO below
 
@@ -281,7 +284,13 @@ public:
 
     static constexpr ObjectId StaticGetClassId()
     {
-        return MakeUid<Type>(MULTI_TYPE_ANY_TAG);
+        if constexpr (META_NS::is_enum_v<Type>) {
+            return MakeUid<Type>(MULTI_TYPE_ANY_TAG);
+        } else {
+            // An integer bit field keeps the class id its plain Any already has: that is the one
+            // registered for the type, and the one already written into serialised scenes.
+            return MakeUid<Type>(BUILTIN_ANY_TAG);
+        }
     }
     static constexpr BASE_NS::string_view StaticGetTypeIdString()
     {

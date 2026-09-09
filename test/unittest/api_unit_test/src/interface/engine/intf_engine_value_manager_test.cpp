@@ -589,6 +589,34 @@ UNIT_TEST_F(API_EngineManagerTest, BitField, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: BitFieldPropertyAny
+ * @tc.desc: A property built from an engine value takes the value's enum-aware any, not the plain
+ *           serialisable one, so the names the component declares are reachable from the property
+ *           itself rather than only from the engine value behind it.
+ * @tc.type: FUNC
+ */
+UNIT_TEST_F(API_EngineManagerTest, BitFieldPropertyAny, testing::ext::TestSize.Level1)
+{
+    TestComponentManager<prop3::EngineTestProp> cman{prop3::ENGINE_TESTPROP_METADATA};
+
+    auto manager = GetObjectRegistry().Create<IEngineValueManager>(META_NS::ClassId::EngineValueManager);
+    ASSERT_TRUE(manager);
+    manager->ConstructValues(EnginePropertyHandle{&cman, cman.entityRef});
+
+    auto p = manager->ConstructProperty<EngineTestBitField>("enum2");
+    ASSERT_TRUE(p);
+
+    auto any = GetInternalAny(p);
+    ASSERT_TRUE(any);
+    auto ei = interface_cast<IEnum>(any.get());
+    ASSERT_TRUE(ei);
+    EXPECT_EQ(ei->GetEnumType(), EnumType::BIT_FIELD);
+    auto view = ei->GetValues();
+    ASSERT_EQ(view.size(), 4);
+    EXPECT_EQ(view[0].name, "MY_VALUE_1");
+}
+
+/**
  * @tc.name: ContainerSubscription
  * @tc.desc: Tests for Container Subscription. [AUTO-GENERATED]
  * @tc.type: FUNC

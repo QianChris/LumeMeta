@@ -146,6 +146,53 @@ inline void AddEngineValuesRecursively(
 }
 
 /**
+ * @brief Any to back a property bound to an engine value.
+ *
+ * IEngineValueInternal::CreateAny() hands out the serialisable any, which carries no metadata. The
+ * access builds one bound to the component's CORE_NS::Property, so it can expose what the property
+ * declares - the enum/bit-field member names in particular. Prefer that one when it actually adds an
+ * enum surface and is the same type; otherwise keep the plain any, so nothing else changes shape.
+ */
+inline IAny::Ptr CreateEngineValueAny(const IEngineValueInternal& internal)
+{
+    auto plain = internal.CreateAny();
+    auto access = internal.GetInternalAccess();
+    if (!plain || !access) {
+        return plain;
+    }
+    auto live = access->CreateAny(internal.GetPropertyParams().property);
+    if (live && interface_cast<IEnum>(live.get()) && live->GetTypeId() == plain->GetTypeId()) {
+        return live;
+    }
+    return plain;
+}
+
+/**
+ * @brief Swap in the engine value's any on a property that was built from its own type.
+ *
+ * A typed property is constructed before anything engine-related happens, so it holds a plain any
+ * even when the engine value behind it can name its values. Only replaces it when the enum surface
+ * is gained and the type id is identical, so the type and the serialised form stay put.
+ */
+inline void AdoptEngineValueAny(const IProperty::Ptr& p, const IEngineValue::Ptr& value)
+{
+    auto internal = interface_cast<IEngineValueInternal>(value);
+    auto target = interface_cast<IPropertyInternalAny>(p);
+    if (!internal || !target) {
+        return;
+    }
+    auto current = target->GetInternalAny();
+    if (!current || interface_cast<IEnum>(current.get())) {
+        return;
+    }
+    auto any = CreateEngineValueAny(*internal);
+    if (any && interface_cast<IEnum>(any.get()) && any->GetTypeId() == current->GetTypeId()) {
+        any->CopyFrom(*current);
+        target->SetInternalAny(BASE_NS::move(any));
+    }
+}
+
+/**
  * @brief Add engine value to stack property
  * @param p Property where the value is added
  * @param value The engine value to be added
@@ -156,6 +203,7 @@ inline bool SetEngineValueToProperty(const IProperty::Ptr& p, const IEngineValue
     if (p && value && value->IsCompatible(p->GetTypeId())) {
         if (auto i = interface_cast<IStackProperty>(p)) {
             PropertyLock lock{p};
+            AdoptEngineValueAny(p, value);
             TypeId ids[] = {IEngineValue::UID};
             for (auto&& v : i->GetValues(ids, false)) {
                 i->RemoveValue(v);
@@ -229,7 +277,7 @@ inline IProperty::Ptr PropertyFromEngineValue(BASE_NS::string_view name, const I
     if (auto internal = interface_cast<IEngineValueInternal>(value)) {
         ret = GetObjectRegistry().GetPropertyRegister().Create(META_NS::ClassId::StackProperty, name);
         if (auto i = interface_cast<IPropertyInternalAny>(ret)) {
-            i->SetInternalAny(internal->CreateAny());
+            i->SetInternalAny(CreateEngineValueAny(*internal));
         }
         if (auto i = interface_cast<IStackProperty>(ret)) {
             i->PushValue(value);

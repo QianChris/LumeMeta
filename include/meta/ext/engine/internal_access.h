@@ -51,6 +51,13 @@ IAny::Ptr ConstructCoreAny(const CORE_NS::Property& p)
     } else {
         if constexpr ((is_enum_v<Type> || ... || is_enum_v<CompatType>)) {
             return IAny::Ptr(new CoreEnumAny<Type, StaticCastConv, CompatType...>(p));
+        } else if constexpr (BASE_NS::is_unsigned_v<Type> && !BASE_NS::is_same_v<Type, bool>) {
+            // A bit field declared as a plain integer still names its bits in the property metadata,
+            // so give it the enum-aware any too. IS_BITFIELD is a runtime flag, not a type trait, so
+            // this is a runtime branch and both arms have to compile.
+            if (p.flags & static_cast<uint32_t>(CORE_NS::PropertyFlags::IS_BITFIELD)) {
+                return IAny::Ptr(new CoreEnumAny<Type, StaticCastConv, CompatType...>(p));
+            }
         }
         return IAny::Ptr(new CoreAny<Type, StaticCastConv, CompatType...>(p));
     }
