@@ -33,6 +33,24 @@ namespace UTest {
 
 using namespace TimeSpanLiterals;
 
+// Generous on purpose. A wait ends as soon as its condition holds, so this bounds a hang and
+// nothing else. A short budget would instead fail whenever a loaded machine was slow to
+// schedule the thread being waited on.
+constexpr auto DEFAULT_TIMEOUT = std::chrono::seconds(30);
+
+template<typename Func>
+bool WaitFor(Func done, std::chrono::milliseconds timeout = DEFAULT_TIMEOUT)
+{
+    const auto end = std::chrono::steady_clock::now() + timeout;
+    while (!done()) {
+        if (std::chrono::steady_clock::now() >= end) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    return true;
+}
+
 namespace {
 
 template<typename Func>
@@ -78,16 +96,17 @@ public:
         return this->queue->AddTask(ITaskQueueTask::Ptr(new Task<Func>(func)), span);
     }
 
+    // As WaitFor, but pumps the queue as it goes, which the polling instantiation needs since
+    // nothing else will run its tasks.
     template<typename Func>
-    bool TimedWait(size_t timeout, Func func)
+    bool TimedWait(Func func, std::chrono::milliseconds timeout = DEFAULT_TIMEOUT)
     {
-        bool ret = false;
-        auto end = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeout);
-        while (!(ret = func()) && std::chrono::steady_clock::now() < end) {
-            Process();
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-        return ret;
+        return WaitFor(
+            [&] {
+                Process();
+                return func();
+            },
+            timeout);
     }
 
     void Wait(size_t timeout)
@@ -102,7 +121,7 @@ public:
     ITaskQueue::Ptr queue;
 };
 
-#define EXPECT_TRUE_TIMED(millis, arg) EXPECT_TRUE(this->TimedWait(millis, [&] { return (arg); }));
+#define EXPECT_TRUE_WAITED(arg) EXPECT_TRUE(this->TimedWait([&] { return (arg); }));
 
 /**
  * @tc.name: SingleShot
@@ -118,7 +137,7 @@ UNIT_TEST_P(API_TaskQueueTest, SingleShot, testing::ext::TestSize.Level1)
             return false;
         });
 
-        EXPECT_TRUE_TIMED(50, count == 1);
+        EXPECT_TRUE_WAITED(count == 1);
     }
     {
         std::atomic<int> count = 0;
@@ -129,7 +148,7 @@ UNIT_TEST_P(API_TaskQueueTest, SingleShot, testing::ext::TestSize.Level1)
             },
             150_ms);
 
-        EXPECT_TRUE_TIMED(200, count == 1);
+        EXPECT_TRUE_WAITED(count == 1);
     }
 }
 
@@ -148,7 +167,7 @@ UNIT_TEST_P(API_TaskQueueTest, CurrentQueue, testing::ext::TestSize.Level1)
             return false;
         });
 
-        EXPECT_TRUE_TIMED(50, count == 1);
+        EXPECT_TRUE_WAITED(count == 1);
 
         EXPECT_TRUE(!GetTaskQueueRegistry().GetCurrentTaskQueue());
     }
@@ -171,7 +190,7 @@ UNIT_TEST_P(API_TaskQueueTest, Recurring, testing::ext::TestSize.Level1)
         },
         75_ms);
 
-    EXPECT_TRUE_TIMED(200, count == 2);
+    EXPECT_TRUE_WAITED(count == 2);
 
     auto end = std::chrono::steady_clock::now();
     EXPECT_TRUE((end - start) >= std::chrono::milliseconds(150));
@@ -195,7 +214,10 @@ UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level
         },
         20_ms);
 
-    Wait(200);
+    // Wait for the task to cancel itself rather than guessing how long two ticks take, then
+    // leave it room to tick again, which the cancel has to prevent.
+    EXPECT_TRUE_WAITED(count == 2);
+    Wait(100);
     this->queue->CancelTask(token);  // no-op as the task is already cancelled.
     EXPECT_TRUE(count == 2);
 
@@ -209,7 +231,8 @@ UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level
             return true;
         },
         20_ms);
-    Wait(200);
+    EXPECT_TRUE_WAITED(count == 3);
+    Wait(100);
     this->queue->CancelTask(token);  // no-op as the task is already cancelled.
     EXPECT_TRUE(count == 3);
 
@@ -220,7 +243,7 @@ UNIT_TEST_P(API_TaskQueueTest, RecurringWithCancel, testing::ext::TestSize.Level
             return true;
         },
         20_ms);
-    Wait(200);
+    EXPECT_TRUE_WAITED(count > 2);
     this->queue->CancelTask(token);  // actually cancels the task now.
     EXPECT_TRUE(count > 2);
     int curCount = count;
@@ -793,7 +816,9 @@ UNIT_TEST(API_TaskQueueTest, CancelRunningTask, testing::ext::TestSize.Level1)
         done = true;
         return false;
     }));
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    // Wait for the task to actually be running rather than guessing how long that takes,
+    // so the cancel below always lands on a running task however loaded the machine is.
+    ASSERT_TRUE(WaitFor([&] { return start.load(); }));
     queue->CancelTask(h);
     EXPECT_TRUE(start);
     EXPECT_TRUE(done);
@@ -818,8 +843,7 @@ UNIT_TEST(API_TaskQueueTest, NestedTaskQueues, testing::ext::TestSize.Level1)
 
         return false;
     }));
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    EXPECT_TRUE(done);
+    EXPECT_TRUE(WaitFor([&] { return done.load(); }));
 }
 
 /**
