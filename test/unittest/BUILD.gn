@@ -157,7 +157,10 @@ ohos_unittest("lume_meta_api_test") {
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "googletest:gmock",
-    "googletest:gtest"
+    "googletest:gtest",
+    "napi:ace_napi",
+    "resource_management:librawfile",
+    "hilog:libhilog",
   ]
 
   # Test data

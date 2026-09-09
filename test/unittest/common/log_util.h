@@ -34,9 +34,12 @@
 #include <fcntl.h>  // O_* constants
 #include <hilog/log.h>
 #include <unistd.h>
+// hilog/log.h defines both; redefining without #undef is -Wmacro-redefined.
+#undef LOG_DOMAIN
 #define LOG_DOMAIN 0x0000
 #endif  // defined(__OHOS__)
 
+#undef LOG_TAG
 #define LOG_TAG "meta_unit_test"
 
 namespace Test {

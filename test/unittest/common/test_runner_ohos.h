@@ -40,7 +40,13 @@
 // is missing the load fails loudly instead.
 
 #include <napi/native_api.h>
+// The NDK ships the header as rawfile/raw_file_manager.h, the OpenHarmony source
+// tree (librawfile) as raw_file_manager.h; the test builds in both.
+#if __has_include(<rawfile/raw_file_manager.h>)
 #include <rawfile/raw_file_manager.h>
+#else
+#include <raw_file_manager.h>
+#endif
 #include <unistd.h>
 
 #include <cstdlib>
