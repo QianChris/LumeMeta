@@ -63,6 +63,10 @@ ohos_source_set("lume_metaobject_src") {
   ]
 
   sources = [
+    "src/alias/alias_group.cpp",
+    "src/alias/alias_group.h",
+    "src/alias/alias_registry.cpp",
+    "src/alias/alias_registry.h",
     "src/animation/animation.h",
     "src/animation/animation_controller.cpp",
     "src/animation/animation_controller.h",
@@ -92,6 +96,8 @@ ohos_source_set("lume_metaobject_src") {
     "src/animation/track_animation.h",
     "src/animation/track_animation_state.cpp",
     "src/animation/track_animation_state.h",
+    "src/animation/transition_driver.cpp",
+    "src/animation/transition_driver.h",
     "src/attachment_container.cpp",
     "src/attachment_container.h",
     "src/base_object.h",
