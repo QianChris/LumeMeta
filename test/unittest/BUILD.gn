@@ -105,6 +105,10 @@ ohos_unittest("lume_meta_api_test") {
     "api_unit_test/src/helpers/test_utils.cpp",
     "api_unit_test/src/helpers/testing_objects.cpp",
 
+    # Interface - Alias
+    "api_unit_test/src/interface/alias/alias_engine_binding_test.cpp",
+    "api_unit_test/src/interface/alias/alias_registry_test.cpp",
+
     # Interface - Animation
     "api_unit_test/src/interface/animation/animation_controller_test.cpp",
     "api_unit_test/src/interface/animation/animation_seeking_test.cpp",

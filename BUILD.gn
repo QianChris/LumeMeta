@@ -177,6 +177,7 @@ ohos_source_set("lume_metaobject_src") {
     "src/resource/object_resource.h",
     "src/resource/object_template.cpp",
     "src/resource/object_template.h",
+    "src/run_on_queue.h",
     "src/serialization/backend/debug_output.cpp",
     "src/serialization/backend/debug_output.h",
     "src/serialization/backend/json_input.cpp",
