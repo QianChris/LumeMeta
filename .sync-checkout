@@ -1,3 +1,7 @@
+# The allowlist itself: the sync prunes graphic_graphic_3d to the downstream
+# copy of this file, so that copy has to follow this one.
+.sync-checkout
+
 include/meta/**
 src/**
 benchmark/**
