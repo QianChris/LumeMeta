@@ -30,6 +30,7 @@
 #include <meta/interface/intf_attach.h>
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_startable.h>
+#include <meta/interface/resource/intf_object_template.h>
 
 META_BEGIN_NAMESPACE()
 
@@ -100,7 +101,8 @@ using ObjectTypes = TypeList<
     IFunction::Ptr,
     IFunction::ConstPtr,
     IFunction::WeakPtr,
-    IFunction::ConstWeakPtr
+    IFunction::ConstWeakPtr,
+    IObjectTemplate::Ptr
     >;
 // clang-format on
 

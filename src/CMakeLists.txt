@@ -12,6 +12,10 @@ add_library(${PLUGIN_NAME} SHARED)
 add_library(${PLUGIN_NAME}::Plugin ALIAS ${PLUGIN_NAME})
 
 target_sources(${PLUGIN_NAME} PRIVATE
+    alias/alias_group.cpp
+    alias/alias_group.h
+    alias/alias_registry.cpp
+    alias/alias_registry.h
     animation/animation.h
     animation/animation_controller.cpp
     animation/animation_controller.h
@@ -41,6 +45,8 @@ target_sources(${PLUGIN_NAME} PRIVATE
     animation/track_animation.h
     animation/track_animation_state.cpp
     animation/track_animation_state.h
+    animation/transition_driver.cpp
+    animation/transition_driver.h
     attachment_container.cpp
     attachment_container.h
     base_object.h

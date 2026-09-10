@@ -17,6 +17,8 @@
 #include <meta/interface/intf_object_registry.h>
 #include <meta/interface/intf_task_queue.h>
 
+#include "alias/alias_registry.h"
+#include "animation/transition_driver.h"
 #include "attachment_container.h"
 #include "base_object.h"
 #include "connector.h"
@@ -128,10 +130,14 @@ void RegisterBuiltInObjects(IObjectRegistry& registry)
     registry.RegisterObjectType<Serialization::RefNode>();
     registry.RegisterObjectType<Serialization::MetaMigrateV1>();
     registry.RegisterObjectType<Bind>();
+    registry.RegisterObjectType<AliasRegistry>();
+    registry.RegisterObjectType<TransitionDriver>();
 }
 
 void UnRegisterBuiltInObjects(IObjectRegistry& registry)
 {
+    registry.UnregisterObjectType<TransitionDriver>();
+    registry.UnregisterObjectType<AliasRegistry>();
     registry.UnregisterObjectType<Bind>();
     registry.UnregisterObjectType<Serialization::MetaMigrateV1>();
     registry.UnregisterObjectType<Serialization::NilNode>();

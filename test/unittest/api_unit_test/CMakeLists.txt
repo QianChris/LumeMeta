@@ -118,6 +118,8 @@ set(test_sources
     src/ext/interface_helpers_test.cpp
     
     # Interface
+    src/interface/alias/alias_engine_binding_test.cpp
+    src/interface/alias/alias_registry_test.cpp
     src/interface/animation/animation_controller_test.cpp
     src/interface/animation/animation_seeking_test.cpp
     src/interface/animation/bezier_curve_test.cpp

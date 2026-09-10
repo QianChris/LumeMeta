@@ -110,10 +110,18 @@ protected:
     void InternalOnChanged()
     {
         requiresEvaluation_ = true;
+        PushThroughBind();
         if (auto p = onChangedAtomic_.load()) {
             p->Invoke();
         }
     }
+
+    // A bind is read-time only: nothing in a stack writes downward. That is invisible for a value that
+    // owns what it holds, and wrong for one that stands for storage elsewhere — an engine value, or a
+    // scene's converting value forwarding to one — which would keep whatever it had while the property
+    // reported something else. So when a bind decides this property, hand what it decided to the value
+    // underneath that speaks for that storage.
+    void PushThroughBind() const;
 
 private:
     mutable std::atomic<bool> requiresEvaluation_{};
@@ -123,6 +131,8 @@ private:
     BASE_NS::vector<IModifier::Ptr> modifiers_;
     ICallable::Ptr onChangedCallback_;
     mutable bool evaluating_{};
+    // Writing through a bind notifies the value written, which notifies us back.
+    mutable bool pushing_{};
 };
 
 }  // namespace Internal

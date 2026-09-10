@@ -281,6 +281,9 @@ ReturnError StackProperty::PushValue(const IValue::Ptr& value)
     }
     SubscribeOnChanged(value, *this, onChangedCallback_);
     NotifyChange();
+    // The only place a bind can become the top of the stack, and so the only place an arriving bind can
+    // carry what it decides down to the storage this property stands for.
+    PushThroughBind();
     return GenericError::SUCCESS;
 }
 ReturnError StackProperty::PopValue()
@@ -413,6 +416,37 @@ AnyReturnValue StackProperty::SetInternalAny(IAny::Ptr any)
     }
     return res;
 }
+void StackProperty::PushThroughBind() const
+{
+    // Cheap first: only a stack a bind decides has anywhere to push to, and the two flags keep the write
+    // below from coming back round through the notification it raises.
+    if (pushing_ || evaluating_ || values_.empty() || !interface_cast<IBind>(values_.back())) {
+        return;
+    }
+    // Past the binds, and no further than an any: an any owns what it holds and is what this property
+    // reads, so writing under it would leave the two disagreeing.
+    IValue::Ptr target;
+    for (size_t i = values_.size(); i > 0 && !target; --i) {
+        const auto& v = values_[i - 1];
+        if (interface_cast<IBind>(v)) {
+            continue;
+        }
+        if (interface_cast<IAny>(v)) {
+            return;
+        }
+        target = v;
+    }
+    if (!target) {
+        return;
+    }
+    pushing_ = true;
+    if (const IAny& value = RawGetValue(); value.GetTypeId().IsValid()) {
+        InterfaceUniqueLock lock{target};
+        target->SetValue(value);
+    }
+    pushing_ = false;
+}
+
 void StackProperty::NotifyChange() const
 {
     requiresEvaluation_ = true;
