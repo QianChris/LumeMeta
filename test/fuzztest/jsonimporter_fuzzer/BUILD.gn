@@ -35,8 +35,9 @@ ohos_fuzztest("JsonImporterFuzzTest") {
   ]
 
   include_dirs = [
-    # Test::DynamicLibrary (the dlopen wrapper) + its header, reused from the unit tests.
-    "//foundation/graphic/graphic_3d/lume/LumeMeta/test/unittest/common",
+    # Test::DynamicLibrary (the dlopen wrapper) + its header, reused from the unit tests. It
+    # lives in LumeEngine since the test-code consolidation, not in a copy under this repository.
+    "${LUME_CORE_PATH}/test/unittest/common",
   ]
 
   defines = [
@@ -53,7 +54,7 @@ ohos_fuzztest("JsonImporterFuzzTest") {
 
   sources = [
     "jsonimporter_fuzzer.cpp",
-    "${LUME_META_PATH}/test/unittest/common/load_lib.cpp",
+    "${LUME_CORE_PATH}/test/unittest/common/load_lib.cpp",
   ]
 
   external_deps = [
