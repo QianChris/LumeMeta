@@ -11,8 +11,6 @@ BUILD.gn
 # tests
 test/unittest/BUILD.gn
 test/unittest/assets/**
-test/unittest/common/load_lib.*
-test/unittest/common/test_framework.h
 test/unittest/common/test_runner_ohos_system.*
 test/unittest/api_unit_test/src/**
 !test/unittest/api_unit_test/src/test_runner.*
