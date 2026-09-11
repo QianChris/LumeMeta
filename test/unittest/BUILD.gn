@@ -66,13 +66,15 @@ ohos_unittest("lume_meta_api_test") {
   # Includes
   include_dirs = [
     "common",
+      "${LUME_CORE_PATH}/test/unittest/common",
+      "${LUME_BASE_PATH}/test/unittest/common",
     "api_unit_test/src",
   ]
 
   # Src
   sources = [
     "common/test_runner_ohos_system.cpp",
-    "common/load_lib.cpp",
+    "${LUME_CORE_PATH}/test/unittest/common/load_lib.cpp",
 
     # API
     "api_unit_test/src/api/property/array_property_event_handler_test.cpp",

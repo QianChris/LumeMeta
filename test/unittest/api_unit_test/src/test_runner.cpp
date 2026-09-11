@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "log_util.h"
+#include <core/log.h>
 #include "test_runner.h"
 
 #include <core/engine_info.h>

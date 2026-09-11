@@ -22,55 +22,22 @@ if(NOT TARGET gtest)
 endif()
 
 # Platform interface
-set(common_test_sources
-    ../common/log_util.cpp
-    ../common/log_util.h
-    ../common/load_lib.h
-    ../common/load_lib.cpp
-    ../common/test_runner_common.h
-    ../common/test_framework.h
+set(ENGINE_COMMON_DIR ${CORE_ROOT_DIRECTORY}/test/unittest/common)
+set(BASE_COMMON_DIR ${BASE_ROOT_DIRECTORY}/test/unittest/common)
+include(${BASE_ROOT_DIRECTORY}/test/unittest/cmake/AgpTestCommon.cmake)
+agp_collect_test_common_sources(
+    ENGINE_DIR ${ENGINE_COMMON_DIR}
+    BASE_DIR ${BASE_COMMON_DIR}
+    COMPILE_LOAD_LIB
+    LOCAL_DIR ${CMAKE_CURRENT_LIST_DIR}/../common
 )
+
 if(ANDROID)
-list(APPEND common_test_sources
-    ../common/test_runner_android.cpp
-    ../common/test_runner_android.h
-)
-elseif(OHOS)
-list(APPEND common_test_sources
-    ../common/test_runner_ohos.cpp
-    ../common/test_runner_ohos.h
-)
-elseif(WIN32)
-list(APPEND common_test_sources
-    ../common/test_runner_windows.cpp
-    ../common/test_runner_windows.h
-)
-else() #Unix
-list(APPEND common_test_sources
-    ../common/test_runner_linux.cpp
-    ../common/test_runner_linux.h
-)
+    list(APPEND common_test_sources src/test_runner_android_entry.cpp)
 endif()
 
 # For Clang format
-set(all_common_test_sources
-    ../common/log_util.cpp
-    ../common/log_util.h
-    ../common/load_lib.h
-    ../common/load_lib.cpp
-    ../common/test_framework.h
-    ../common/test_runner_ohos_system.h
-    ../common/test_runner_ohos_system.cpp
-    ../common/test_runner_android.cpp
-    ../common/test_runner_android.h
-    ../common/test_runner_common.h
-    ../common/test_runner_linux.cpp
-    ../common/test_runner_linux.h
-    ../common/test_runner_ohos.cpp
-    ../common/test_runner_ohos.h
-    ../common/test_runner_windows.cpp
-    ../common/test_runner_windows.h
-)
+# all_common_test_sources comes from agp_collect_test_common_sources above.
 
 # using hash(#) marks for additional information
 ## testing category
@@ -165,7 +132,7 @@ set(test_sources
 set_source_files_properties(src/interface/serialization/serialization_test.cpp PROPERTIES COMPILE_FLAGS $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/bigobj>)
 
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${test_sources})
-source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/../ FILES ${common_test_sources})
+# common sources are grouped by agp_collect_test_common_sources.
 
 #
 # Test runner exe/library.
@@ -185,11 +152,13 @@ else()
     target_compile_definitions(${executableName} PRIVATE WIN32_LEAN_AND_MEAN=1 NOMINMAX)
 endif()
 
-target_compile_definitions(${executableName} PRIVATE CORE_DYNAMIC=1)
+target_compile_definitions(${executableName} PRIVATE CORE_DYNAMIC=1 TEST_RUNNER_NAME="MetaTestRunner" TEST_LOG_TAG="meta_unit_test")
 
 target_include_directories(${executableName} PRIVATE 
     ${CMAKE_CURRENT_LIST_DIR}/src
     ${CMAKE_CURRENT_LIST_DIR}/../common
+    ${ENGINE_COMMON_DIR}
+    ${BASE_COMMON_DIR}
 )
 
 if(MSVC)
