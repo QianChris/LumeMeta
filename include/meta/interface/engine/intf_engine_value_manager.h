@@ -72,14 +72,8 @@ public:
     virtual void SetNotificationQueue(const ITaskQueue::WeakPtr&) = 0;
 
     /**
-     * @brief Set a callable that is invoked when an engine value becomes dirty.
-     *        This allows the owner to schedule a TO_ENGINE sync without per-property OnChanged handlers.
-     */
-    virtual void SetDirtyNotifier(const IOnChanged::InterfaceTypePtr& notifier) = 0;
-
-    /**
      * @brief Called internally by engine values when they become dirty.
-     *        Invokes the notifier set via SetDirtyNotifier.
+     *        Invokes the callable set via SetSyncScheduler.
      */
     virtual void NotifyDirty() = 0;
 
@@ -125,7 +119,7 @@ public:
 
     /**
      * @brief Set a callable invoked when this manager acquires values written but not yet synced to
-     *        the engine. Preferred over SetDirtyNotifier.
+     *        the engine.
      *
      * Writes are batched, and the batch is settled later by whoever is notified here. The callable
      * is handed the manager rather than left to find it, so that holding on to what it is given is
@@ -157,15 +151,6 @@ public:
     {
         return ConstructValues(handle, {});
     }
-};
-
-/**
- * @brief An interface which can be implemented by classes that want to schedule their properties for synchronization.
- */
-class IEnginePropertySync : public CORE_NS::IInterface {
-    META_INTERFACE(CORE_NS::IInterface, IEnginePropertySync, "6463f550-81ce-4c01-92cb-e15944a25549")
-public:
-    virtual void SyncProperties() = 0;
 };
 
 META_END_NAMESPACE()
