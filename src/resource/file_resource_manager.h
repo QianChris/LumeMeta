@@ -174,6 +174,7 @@ public:
     bool RemoveGroup(BASE_NS::string_view group, const CORE_NS::ResourceContextWeakPtr&) override;
     size_t PurgeUnused(const CORE_NS::ResourceContextPtr& context) override;
     bool SetResourceName(const ResourceIdContext& id, const BASE_NS::string& name) override;
+    bool SetResourcePath(const ResourceIdContext& id, const BASE_NS::string& path) override;
     CORE_NS::IResource::Ptr GetResourceByName(BASE_NS::string_view name, const ResourceContextPtr& context) override;
 
 private:

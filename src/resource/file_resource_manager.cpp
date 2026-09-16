@@ -1070,6 +1070,16 @@ void FileResourceManager::AddResources(
     Notify(ids, IResourceListener::EventType::ADDED);
 }
 
+bool FileResourceManager::SetResourcePath(const ResourceIdContext& id, const BASE_NS::string& path)
+{
+    std::unique_lock lock{mutex_};
+    auto res = FindResource(id);
+    if (res) {
+        res->path = path;
+    }
+    return res != nullptr;
+}
+
 bool FileResourceManager::SetResourceName(const ResourceIdContext& id, const BASE_NS::string& name)
 {
     std::unique_lock lock{mutex_};
